@@ -1,11 +1,13 @@
-use std::collections::BTreeMap;
+use crate::internal::actix::METHODS;
+use crate::path_item_definition::PathItemDefinition;
 use actix_service::ServiceFactory;
 use actix_web::dev::ServiceRequest;
-use actix_web::{Error, FromRequest, Handler, Responder};
 use actix_web::guard::Guard;
 use actix_web::http::Method;
-use utoipa::openapi::{Components, PathItem};
-use crate::path_item_definition::PathItemDefinition;
+use actix_web::{Error, FromRequest, Handler, Responder};
+use std::collections::BTreeMap;
+use utoipa::openapi::path::Operation;
+use utoipa::openapi::{Components, PathItem, PathItemType};
 
 /// Wrapper for [`actix_web::web::method`](https://docs.rs/actix-web/*/actix_web/web/fn.method.html).
 pub fn method(method: Method) -> Route {
@@ -48,8 +50,9 @@ pub fn head() -> Route {
 }
 
 pub struct Route {
-  path_item: Option<PathItem>,
-  components: BTreeMap<String, Components>,
+  operation: Option<Operation>,
+  path_item_type: Option<PathItemType>,
+  components: Vec<Components>,
   inner: actix_web::Route,
 }
 
@@ -60,9 +63,7 @@ impl ServiceFactory<ServiceRequest> for Route {
   type Service = <actix_web::Route as ServiceFactory<ServiceRequest>>::Service;
   type Future = <actix_web::Route as ServiceFactory<ServiceRequest>>::Future;
   type Response =
-  <<actix_web::Route as ServiceFactory<ServiceRequest>>::Service as actix_service::Service<
-    ServiceRequest,
-  >>::Response;
+    <<actix_web::Route as ServiceFactory<ServiceRequest>>::Service as actix_service::Service<ServiceRequest>>::Response;
 
   #[allow(clippy::unit_arg)]
   fn new_service(&self, cfg: Self::Config) -> Self::Future {
@@ -75,7 +76,8 @@ impl Route {
   #[allow(clippy::new_without_default)]
   pub fn new() -> Route {
     Route {
-      path_item: None,
+      operation: None,
+      path_item_type: None,
       components: Default::default(),
       inner: actix_web::Route::new(),
     }
@@ -83,6 +85,16 @@ impl Route {
 
   /// Wrapper for [`actix_web::Route::method`](https://docs.rs/actix-web/*/actix_web/struct.Route.html#method.method)
   pub fn method(mut self, method: Method) -> Self {
+    let path_item_type = match method.as_str() {
+      "PUT" => PathItemType::Put,
+      "POST" => PathItemType::Post,
+      "DELETE" => PathItemType::Delete,
+      "OPTIONS" => PathItemType::Options,
+      "HEAD" => PathItemType::Head,
+      "PATCH" => PathItemType::Patch,
+      _ => PathItemType::Get,
+    };
+    self.path_item_type = Some(path_item_type);
     self.inner = self.inner.method(method);
     self
   }
@@ -97,14 +109,14 @@ impl Route {
 
   /// Wrapper for [`actix_web::Route::to`](https://docs.rs/actix-web/*/actix_web/struct.Route.html#method.to)
   pub fn to<F, Args>(mut self, handler: F) -> Self
-    where
-      F: Handler<Args>,
-      Args: FromRequest + 'static,
-      F::Output: Responder + 'static,
-      F::Future: PathItemDefinition,
+  where
+    F: Handler<Args>,
+    Args: FromRequest + 'static,
+    F::Output: Responder + 'static,
+    F::Future: PathItemDefinition,
   {
     if F::Future::is_visible() {
-      self.path_item = Some(F::Future::path_item(None));
+      self.operation = Some(F::Future::operation());
       self.components = F::Future::components();
     }
     self.inner = self.inner.to(handler);
@@ -119,17 +131,30 @@ pub(crate) struct PathDefinition {
 
 pub(crate) struct RouteWrapper {
   pub(crate) def: PathDefinition,
-  pub(crate) component: BTreeMap<String, Components>,
+  pub(crate) component: Vec<Components>,
   pub(crate) inner: actix_web::Route,
 }
 
-impl RouteWrapper
-{
+impl RouteWrapper {
   pub(crate) fn new<S: Into<String>>(path: S, route: Route) -> Self {
+    let mut operations: BTreeMap<PathItemType, Operation> = Default::default();
+    let mut path_item = PathItem::default();
+    if let Some(operation) = route.operation {
+      //@todo set_parameter_names_from_path_template
+      if let Some(path_item_type) = route.path_item_type {
+        operations.insert(path_item_type, operation);
+      } else {
+        for path_item_type in METHODS {
+          operations.insert(path_item_type.clone(), operation.clone());
+        }
+      }
+    }
+    path_item.operations = operations;
+
     Self {
       def: PathDefinition {
         path: path.into(),
-        item: route.path_item.unwrap_or_else(|| PathItem::default()),
+        item: path_item,
       },
       component: route.components,
       inner: route.inner,

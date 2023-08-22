@@ -1,19 +1,20 @@
-use std::collections::BTreeMap;
-use std::fmt::Debug;
-use std::future::Future;
+use crate::internal::actix::route::{PathDefinition, Route, RouteWrapper};
+use crate::internal::actix::METHODS;
+use crate::path_item_definition::PathItemDefinition;
 use actix_service::{ServiceFactory, Transform};
 use actix_web::body::MessageBody;
 use actix_web::dev::{AppService, HttpServiceFactory, ServiceRequest, ServiceResponse};
-use actix_web::{Error, FromRequest, Handler, Responder};
 use actix_web::guard::Guard;
-use utoipa::openapi::{Components, PathItem};
-use crate::path_item_definition::PathItemDefinition;
-use crate::internal::actix::route::{Route, RouteWrapper, PathDefinition};
+use actix_web::{Error, FromRequest, Handler, Responder};
+use std::collections::BTreeMap;
+use std::fmt::Debug;
+use std::future::Future;
+use utoipa::openapi::{Components, PathItem, PathItemType};
 
 pub struct Resource<R = actix_web::Resource> {
   pub(crate) path: String,
   pub(crate) item_definition: Option<PathItem>,
-  pub(crate) components: BTreeMap<String, Components>,
+  pub(crate) components: Vec<Components>,
   inner: R,
 }
 
@@ -30,15 +31,10 @@ impl Resource {
 }
 
 impl<T, B> HttpServiceFactory for Resource<actix_web::Resource<T>>
-  where
-    T: ServiceFactory<
-      ServiceRequest,
-      Config = (),
-      Response = ServiceResponse<B>,
-      Error = Error,
-      InitError = (),
-    > + 'static,
-    B: MessageBody + 'static,
+where
+  T:
+    ServiceFactory<ServiceRequest, Config = (), Response = ServiceResponse<B>, Error = Error, InitError = ()> + 'static,
+  B: MessageBody + 'static,
 {
   fn register(self, config: &mut AppService) {
     self.inner.register(config)
@@ -46,8 +42,8 @@ impl<T, B> HttpServiceFactory for Resource<actix_web::Resource<T>>
 }
 
 impl<T> Resource<actix_web::Resource<T>>
-  where
-    T: ServiceFactory<ServiceRequest, Config = (), Error = Error, InitError = ()>,
+where
+  T: ServiceFactory<ServiceRequest, Config = (), Error = Error, InitError = ()>,
 {
   /// Proxy for [`actix_web::Resource::name`](https://docs.rs/actix-web/*/actix_web/struct.Resource.html#method.name).
   ///
@@ -88,17 +84,19 @@ impl<T> Resource<actix_web::Resource<T>>
 
   /// Wrapper for [`actix_web::Resource::to`](https://docs.rs/actix-web/*/actix_web/struct.Resource.html#method.to).
   pub fn to<F, Args>(mut self, handler: F) -> Self
-    where
-      F: Handler<Args>,
-      Args: FromRequest + 'static,
-      F::Output: Responder + 'static,
-      F::Future: PathItemDefinition,
+  where
+    F: Handler<Args>,
+    Args: FromRequest + 'static,
+    F::Output: Responder + 'static,
+    F::Future: PathItemDefinition,
   {
     if F::Future::is_visible() {
-      let mut item = F::Future::path_item(None);
-      // @todo op.set_parameter_names_from_path_template(&self.path);
+      let mut operation = F::Future::operation();
       let mut item_definition = self.item_definition.unwrap_or_default();
-      item_definition.operations.extend(item.operations.into_iter());
+      for method in METHODS {
+        item_definition.operations.insert(method.clone(), operation.clone());
+      }
+      // @todo op.set_parameter_names_from_path_template(&self.path);
       self.item_definition = Some(item_definition);
       self.components.extend(F::Future::components().into_iter());
       //@todo security ?
@@ -115,24 +113,12 @@ impl<T> Resource<actix_web::Resource<T>>
     mw: M,
   ) -> Resource<
     actix_web::Resource<
-      impl ServiceFactory<
-        ServiceRequest,
-        Config = (),
-        Response = ServiceResponse<B>,
-        Error = Error,
-        InitError = (),
-      >,
+      impl ServiceFactory<ServiceRequest, Config = (), Response = ServiceResponse<B>, Error = Error, InitError = ()>,
     >,
   >
-    where
-      B: MessageBody,
-      M: Transform<
-        T::Service,
-        ServiceRequest,
-        Response = ServiceResponse<B>,
-        Error = Error,
-        InitError = (),
-      > + 'static,
+  where
+    B: MessageBody,
+    M: Transform<T::Service, ServiceRequest, Response = ServiceResponse<B>, Error = Error, InitError = ()> + 'static,
   {
     Resource {
       path: self.path,
@@ -150,19 +136,13 @@ impl<T> Resource<actix_web::Resource<T>>
     mw: F,
   ) -> Resource<
     actix_web::Resource<
-      impl ServiceFactory<
-        ServiceRequest,
-        Config = (),
-        Response = ServiceResponse<B>,
-        Error = Error,
-        InitError = (),
-      >,
+      impl ServiceFactory<ServiceRequest, Config = (), Response = ServiceResponse<B>, Error = Error, InitError = ()>,
     >,
   >
-    where
-      B: MessageBody,
-      F: Fn(ServiceRequest, &T::Service) -> R + Clone + 'static,
-      R: Future<Output = Result<ServiceResponse<B>, Error>>,
+  where
+    B: MessageBody,
+    F: Fn(ServiceRequest, &T::Service) -> R + Clone + 'static,
+    R: Future<Output = Result<ServiceResponse<B>, Error>>,
   {
     Resource {
       path: self.path,
@@ -176,16 +156,10 @@ impl<T> Resource<actix_web::Resource<T>>
   ///
   /// **NOTE:** This doesn't affect spec generation.
   pub fn default_service<F, U>(mut self, f: F) -> Self
-    where
-      F: actix_service::IntoServiceFactory<U, ServiceRequest>,
-      U: ServiceFactory<
-        ServiceRequest,
-        Config = (),
-        Response = ServiceResponse,
-        Error = Error,
-        InitError = (),
-      > + 'static,
-      U::InitError: Debug,
+  where
+    F: actix_service::IntoServiceFactory<U, ServiceRequest>,
+    U: ServiceFactory<ServiceRequest, Config = (), Response = ServiceResponse, Error = Error, InitError = ()> + 'static,
+    U::InitError: Debug,
   {
     self.inner = self.inner.default_service(f);
     self

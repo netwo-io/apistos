@@ -15,4 +15,11 @@ rust-version = "1.71"
 actix-service = "2"
 actix-web = "4"
 pin-project = "1"
+proc-macro2 = "1.0"
+proc-macro-error = "1.0"
+quote = "1.0"
+syn = "2.0"
 utoipa = { version = "3", features = ["actix_extras"] }
+utoipa-gen = { version = "3" }
+
+bytes = { version = "1" }

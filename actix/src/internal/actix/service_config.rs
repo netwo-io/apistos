@@ -1,12 +1,12 @@
-use std::collections::BTreeMap;
-use actix_web::dev::HttpServiceFactory;
-use utoipa::openapi::{Components, PathItem};
 use crate::internal::actix::route::{Route, RouteWrapper};
 use crate::internal::definition_holder::DefinitionHolder;
+use actix_web::dev::HttpServiceFactory;
+use std::collections::BTreeMap;
+use utoipa::openapi::{Components, PathItem};
 
 pub struct ServiceConfig<'a> {
   pub(crate) item_map: BTreeMap<String, PathItem>,
-  pub(crate) components: BTreeMap<String, Components>,
+  pub(crate) components: Vec<Components>,
   inner: &'a mut actix_web::web::ServiceConfig,
 }
 
@@ -33,8 +33,8 @@ impl<'a> ServiceConfig<'a> {
 
   /// Wrapper for [`actix_web::web::ServiceConfig::service`](https://docs.rs/actix-web/*/actix_web/web/struct.ServiceConfig.html#method.service).
   pub fn service<F>(&mut self, mut factory: F) -> &mut Self
-    where
-      F: DefinitionHolder + HttpServiceFactory + 'static,
+  where
+    F: DefinitionHolder + HttpServiceFactory + 'static,
   {
     factory.update_path_items(&mut self.item_map);
     //@todo security ?
@@ -47,9 +47,9 @@ impl<'a> ServiceConfig<'a> {
   ///
   /// **NOTE:** This doesn't affect spec generation.
   pub fn external_resource<N, U>(&mut self, name: N, url: U) -> &mut Self
-    where
-      N: AsRef<str>,
-      U: AsRef<str>,
+  where
+    N: AsRef<str>,
+    U: AsRef<str>,
   {
     self.inner.external_resource(name, url);
     self

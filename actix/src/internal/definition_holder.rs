@@ -1,16 +1,16 @@
-use std::collections::BTreeMap;
-use std::mem;
-use utoipa::openapi::{Components, PathItem, PathItemType};
-use utoipa::openapi::path::Operation;
 use crate::internal::actix::resource::Resource;
 use crate::internal::actix::route::RouteWrapper;
 use crate::internal::actix::scope::Scope;
 use crate::internal::actix::service_config::ServiceConfig;
+use std::collections::BTreeMap;
+use std::mem;
+use utoipa::openapi::path::Operation;
+use utoipa::openapi::{Components, PathItem, PathItemType};
 
 pub trait DefinitionHolder {
   fn path(&self) -> &str;
   fn operations(&mut self) -> BTreeMap<PathItemType, Operation>;
-  fn components(&mut self) -> BTreeMap<String, Components>;
+  fn components(&mut self) -> Vec<Components>;
   fn update_path_items(&mut self, path_op_map: &mut BTreeMap<String, PathItem>) -> () {
     let ops = self.operations();
     if !ops.is_empty() {
@@ -29,7 +29,7 @@ impl DefinitionHolder for RouteWrapper {
     mem::take(&mut self.def.item.operations)
   }
 
-  fn components(&mut self) -> BTreeMap<String, Components> {
+  fn components(&mut self) -> Vec<Components> {
     mem::take(&mut self.component)
   }
 }
@@ -43,7 +43,7 @@ impl DefinitionHolder for Resource {
     mem::take(&mut self.item_definition).unwrap_or_default().operations
   }
 
-  fn components(&mut self) -> BTreeMap<String, Components> {
+  fn components(&mut self) -> Vec<Components> {
     mem::take(&mut self.components)
   }
 }
@@ -57,7 +57,7 @@ impl DefinitionHolder for Scope {
     unimplemented!("Scope has multiple operation maps");
   }
 
-  fn components(&mut self) -> BTreeMap<String, Components> {
+  fn components(&mut self) -> Vec<Components> {
     mem::take(&mut self.components)
   }
 
@@ -79,7 +79,7 @@ impl<'a> DefinitionHolder for ServiceConfig<'a> {
     unimplemented!("ServiceConfig has multiple operation maps.")
   }
 
-  fn components(&mut self) -> BTreeMap<String, Components> {
+  fn components(&mut self) -> Vec<Components> {
     mem::take(&mut self.components)
   }
 

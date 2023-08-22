@@ -1,17 +1,18 @@
+use crate::path_item_definition::PathItemDefinition;
+use actix_web::{HttpRequest, HttpResponse, Responder};
+use pin_project::pin_project;
 use std::collections::BTreeMap;
 use std::future::Future;
 use std::pin::Pin;
 use std::task::{Context, Poll};
-use actix_web::{HttpRequest, HttpResponse, Responder};
-use pin_project::pin_project;
+use utoipa::openapi::path::Operation;
 use utoipa::openapi::{Components, PathItem};
-use crate::path_item_definition::PathItemDefinition;
 
 #[pin_project]
 pub struct ResponderWrapper<R, P> {
   #[pin]
   pub inner: R,
-  pub path_item: P
+  pub path_item: P,
 }
 
 impl<R: Responder, P> Responder for ResponderWrapper<R, P> {
@@ -23,10 +24,10 @@ impl<R: Responder, P> Responder for ResponderWrapper<R, P> {
 }
 
 impl<F, R, P> Future for ResponderWrapper<F, P>
-  where
-    F: Future<Output = R>,
-    R: Responder,
-    P: PathItemDefinition,
+where
+  F: Future<Output = R>,
+  R: Responder,
+  P: PathItemDefinition,
 {
   type Output = R;
 
@@ -36,20 +37,20 @@ impl<F, R, P> Future for ResponderWrapper<F, P>
 }
 
 impl<F, R, P> PathItemDefinition for ResponderWrapper<F, P>
-  where
-    F: Future<Output = R>,
-    R: Responder,
-    P: PathItemDefinition,
+where
+  F: Future<Output = R>,
+  R: Responder,
+  P: PathItemDefinition,
 {
   fn is_visible() -> bool {
     P::is_visible()
   }
 
-  fn path_item(default_tag: Option<&str>) -> PathItem {
-    P::path_item(default_tag)
+  fn operation() -> Operation {
+    P::operation()
   }
 
-  fn components() -> BTreeMap<String, Components> {
+  fn components() -> Vec<Components> {
     P::components()
   }
 }

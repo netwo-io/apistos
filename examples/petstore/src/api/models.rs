@@ -1,7 +1,8 @@
+use netwopenapi_gen::ApiComponent;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
-#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema, ApiComponent)]
 pub(crate) struct Pet {
   // #[openapi(example = 10)]
   pub(crate) id: Option<i64>,
@@ -16,7 +17,7 @@ pub(crate) struct Pet {
 }
 
 /// A category for a pet
-#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema, ApiComponent)]
 pub(crate) struct Category {
   // #[openapi(example = 1)]
   pub(crate) id: Option<i64>,
@@ -25,7 +26,7 @@ pub(crate) struct Category {
 }
 
 /// pet status in the store
-#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema, ApiComponent)]
 #[serde(rename_all = "snake_case")]
 pub(crate) enum Status {
   Available,
@@ -35,7 +36,7 @@ pub(crate) enum Status {
 
 /// A tag for a pet
 // #[openapi(rename = "Pet tag")]
-#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema, ApiComponent)]
 pub(crate) struct Tag {
   pub(crate) id: Option<i64>,
   pub(crate) name: Option<String>,

@@ -3,18 +3,21 @@ use netwopenapi::web::{delete, get, post, put, resource, scope, Scope};
 
 pub(crate) fn routes() -> Scope {
   scope("").service(
-    scope("/pet").service(resource("")/*.route(post().to(add_pet))*/.route(put().to(update_pet))), // .service(resource("/findByStatus").route(get().to(test)))
-                                                                                               // .service(resource("/findByTags").route(get().to(test)))
-                                                                                               // .service(
-                                                                                               //   scope("/{petId}")
-                                                                                               //     .service(
-                                                                                               //       resource("")
-                                                                                               //         .route(get().to(test))
-                                                                                               //         .route(post().to(test))
-                                                                                               //         .route(delete().to(test))
-                                                                                               //     )
-                                                                                               //     .service(resource("/uploadImage").route(post().to(test)))
-                                                                                               // )
+    scope("/pet").service(
+      resource("") /*.route(post().to(add_pet))*/
+        .route(put().to(update_pet)),
+    ), // .service(resource("/findByStatus").route(get().to(test)))
+       // .service(resource("/findByTags").route(get().to(test)))
+       // .service(
+       //   scope("/{petId}")
+       //     .service(
+       //       resource("")
+       //         .route(get().to(test))
+       //         .route(post().to(test))
+       //         .route(delete().to(test))
+       //     )
+       //     .service(resource("/uploadImage").route(post().to(test)))
+       // )
   )
   // .service(
   //   scope("/store")

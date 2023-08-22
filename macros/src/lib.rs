@@ -1,14 +1,112 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
+use crate::internal::{extract_generics_params, gen_item_ast, gen_open_api_impl};
+use crate::operation::OperationAttr;
+use proc_macro::TokenStream;
+use proc_macro2::{Span, TokenStream as TokenStream2};
+use proc_macro_error::{abort, emit_error, proc_macro_error};
+use quote::quote;
+use syn::punctuated::Punctuated;
+use syn::token::Comma;
+use syn::{
+  Data, DeriveInput, GenericParam, Ident, ImplGenerics, ItemFn, ReturnType, Token, Type, TypeGenerics, TypeTraitObject,
+  WhereClause,
+};
+
+mod internal;
+mod operation;
+mod path;
+
+const OPENAPI_STRUCT_PREFIX: &str = "__openapi_";
+
+#[proc_macro_error]
+#[proc_macro_derive(ApiComponent)]
+pub fn derive_api_component(input: TokenStream) -> TokenStream {
+  let input = syn::parse_macro_input!(input as DeriveInput);
+  let DeriveInput {
+    attrs: _attrs,
+    ident,
+    data,
+    generics,
+    vis: _vis,
+  } = input;
+
+  let childs: Vec<Type> = match data {
+    Data::Struct(s) => s.fields.into_iter().map(|f| f.ty).collect(),
+    Data::Enum(e) => e
+      .variants
+      .into_iter()
+      .map(|v| v.fields.into_iter().map(|f| f.ty))
+      .flatten()
+      .collect(),
+    Data::Union(u) => u.fields.named.into_iter().map(|f| f.ty).collect(),
+  };
+
+  let (_, ty_generics, where_clause) = generics.split_for_impl();
+  quote!(
+    impl #generics netwopenapi::ApiComponent for #ident #ty_generics #where_clause {
+      fn child_schemas() -> Vec<(String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)> {
+        let mut schemas: Vec<Option<(String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)>> = vec![];
+        #(
+          schemas.push(<#childs>::schema());
+        )*
+        let mut schemas = schemas.into_iter().flatten().collect::<Vec<(String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)>>();
+        #(
+          schemas.append(&mut <#childs>::child_schemas());
+        )*
+        schemas
+      }
+
+      fn schema() -> Option<(String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)> {
+        let (name, schema) = <Self as utoipa::ToSchema<'_>>::schema();
+        Some((name.to_string(), schema))
+      }
+    }
+  ).into()
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+/// Todo: doc
+#[proc_macro_error]
+#[proc_macro_attribute]
+pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
+  let operation_attribute = syn::parse_macro_input!(attr as OperationAttr);
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+  let default_span = proc_macro2::Span::call_site();
+  let mut item_ast = match syn::parse::<ItemFn>(item) {
+    Ok(v) => v,
+    Err(e) => abort!(e.span(), format!("{e}")),
+  };
+
+  let s_name = format!("{OPENAPI_STRUCT_PREFIX}{}", item_ast.sig.ident);
+  let openapi_struct = Ident::new(&s_name, default_span);
+
+  let generics = &item_ast.sig.generics.clone();
+  let mut generics_call = quote!();
+  let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+  let mut openapi_struct_def = if !generics.params.is_empty() {
+    let turbofish = ty_generics.as_turbofish();
+    generics_call = quote!(#turbofish { p: std::marker::PhantomData });
+    let generics_params = extract_generics_params(&item_ast);
+    quote!(struct #openapi_struct #ty_generics { p: std::marker::PhantomData<(#generics_params)> } )
+  } else {
+    quote!(struct #openapi_struct;)
+  };
+
+  let open_api_def = gen_open_api_impl(
+    &item_ast,
+    operation_attribute,
+    &openapi_struct,
+    openapi_struct_def,
+    impl_generics,
+    &ty_generics,
+    where_clause,
+  );
+  let item_ast = gen_item_ast(default_span, item_ast, openapi_struct, ty_generics, generics_call);
+
+  let res = quote!(
+    #open_api_def
+
+    #item_ast
+  );
+
+  // eprintln!("{:#}", res.to_string());
+  res.into()
 }

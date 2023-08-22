@@ -1,20 +1,20 @@
-use std::collections::BTreeMap;
-use std::fmt::Debug;
-use std::future::Future;
-use actix_service::{ServiceFactory, Transform};
-use actix_service::boxed::factory;
-use actix_web::body::MessageBody;
-use actix_web::dev::{AppService, HttpServiceFactory, ServiceRequest, ServiceResponse};
-use actix_web::Error;
-use actix_web::guard::Guard;
-use utoipa::openapi::{Components, PathItem};
 use crate::internal::actix::route::{Route, RouteWrapper};
 use crate::internal::actix::service_config::ServiceConfig;
 use crate::internal::definition_holder::DefinitionHolder;
+use actix_service::boxed::factory;
+use actix_service::{ServiceFactory, Transform};
+use actix_web::body::MessageBody;
+use actix_web::dev::{AppService, HttpServiceFactory, ServiceRequest, ServiceResponse};
+use actix_web::guard::Guard;
+use actix_web::Error;
+use std::collections::BTreeMap;
+use std::fmt::Debug;
+use std::future::Future;
+use utoipa::openapi::{Components, PathItem};
 
 pub struct Scope<S = actix_web::Scope> {
   pub(crate) item_map: BTreeMap<String, PathItem>,
-  pub(crate) components: BTreeMap<String, Components>,
+  pub(crate) components: Vec<Components>,
   path: String,
   inner: Option<S>,
 }
@@ -32,15 +32,10 @@ impl Scope {
 }
 
 impl<T, B> HttpServiceFactory for Scope<actix_web::Scope<T>>
-  where
-    T: ServiceFactory<
-      ServiceRequest,
-      Config = (),
-      Response = ServiceResponse<B>,
-      Error = Error,
-      InitError = (),
-    > + 'static,
-    B: MessageBody + 'static,
+where
+  T:
+    ServiceFactory<ServiceRequest, Config = (), Response = ServiceResponse<B>, Error = Error, InitError = ()> + 'static,
+  B: MessageBody + 'static,
 {
   fn register(self, config: &mut AppService) {
     if let Some(s) = self.inner {
@@ -50,8 +45,8 @@ impl<T, B> HttpServiceFactory for Scope<actix_web::Scope<T>>
 }
 
 impl<T> Scope<actix_web::Scope<T>>
-  where
-    T: ServiceFactory<ServiceRequest, Config = (), Error = Error, InitError = ()>,
+where
+  T: ServiceFactory<ServiceRequest, Config = (), Error = Error, InitError = ()>,
 {
   /// Proxy for [`actix_web::Scope::guard`](https://docs.rs/actix-web/*/actix_web/struct.Scope.html#method.guard).
   ///
@@ -71,8 +66,8 @@ impl<T> Scope<actix_web::Scope<T>>
 
   /// Wrapper for [`actix_web::Scope::configure`](https://docs.rs/actix-web/*/actix_web/struct.Scope.html#method.configure).
   pub fn configure<F>(mut self, f: F) -> Self
-    where
-      F: FnOnce(&mut ServiceConfig),
+  where
+    F: FnOnce(&mut ServiceConfig),
   {
     self.inner = self.inner.take().map(|s| {
       s.configure(|c| {
@@ -86,8 +81,8 @@ impl<T> Scope<actix_web::Scope<T>>
 
   /// Wrapper for [`actix_web::Scope::service`](https://docs.rs/actix-web/*/actix_web/struct.Scope.html#method.service).
   pub fn service<F>(mut self, mut factory: F) -> Self
-    where
-      F: DefinitionHolder + HttpServiceFactory + 'static,
+  where
+    F: DefinitionHolder + HttpServiceFactory + 'static,
   {
     self.update_from_def_holder(&mut factory);
     self.inner = self.inner.take().map(|s| s.service(factory));
@@ -106,16 +101,10 @@ impl<T> Scope<actix_web::Scope<T>>
   ///
   /// **NOTE:** This doesn't affect spec generation.
   pub fn default_service<F, U>(mut self, f: F) -> Self
-    where
-      F: actix_service::IntoServiceFactory<U, ServiceRequest>,
-      U: ServiceFactory<
-        ServiceRequest,
-        Config = (),
-        Response = ServiceResponse,
-        Error = Error,
-        InitError = (),
-      > + 'static,
-      U::InitError: Debug,
+  where
+    F: actix_service::IntoServiceFactory<U, ServiceRequest>,
+    U: ServiceFactory<ServiceRequest, Config = (), Response = ServiceResponse, Error = Error, InitError = ()> + 'static,
+    U::InitError: Debug,
   {
     self.inner = self.inner.map(|s| s.default_service(f));
     self
@@ -129,24 +118,12 @@ impl<T> Scope<actix_web::Scope<T>>
     mw: M,
   ) -> Scope<
     actix_web::Scope<
-      impl ServiceFactory<
-        ServiceRequest,
-        Config = (),
-        Response = ServiceResponse<B>,
-        Error = Error,
-        InitError = (),
-      >,
+      impl ServiceFactory<ServiceRequest, Config = (), Response = ServiceResponse<B>, Error = Error, InitError = ()>,
     >,
   >
-    where
-      M: Transform<
-        T::Service,
-        ServiceRequest,
-        Response = ServiceResponse<B>,
-        Error = Error,
-        InitError = (),
-      > + 'static,
-      B: MessageBody,
+  where
+    M: Transform<T::Service, ServiceRequest, Response = ServiceResponse<B>, Error = Error, InitError = ()> + 'static,
+    B: MessageBody,
   {
     Scope {
       item_map: self.item_map,
@@ -164,18 +141,12 @@ impl<T> Scope<actix_web::Scope<T>>
     mw: F,
   ) -> Scope<
     actix_web::Scope<
-      impl ServiceFactory<
-        ServiceRequest,
-        Config = (),
-        Response = ServiceResponse,
-        Error = Error,
-        InitError = (),
-      >,
+      impl ServiceFactory<ServiceRequest, Config = (), Response = ServiceResponse, Error = Error, InitError = ()>,
     >,
   >
-    where
-      F: Fn(ServiceRequest, &T::Service) -> R + Clone + 'static,
-      R: Future<Output = Result<ServiceResponse, Error>>,
+  where
+    F: Fn(ServiceRequest, &T::Service) -> R + Clone + 'static,
+    R: Future<Output = Result<ServiceResponse, Error>>,
   {
     Scope {
       item_map: self.item_map,

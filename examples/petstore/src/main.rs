@@ -2,10 +2,10 @@ use crate::api::routes::routes;
 use actix_web::middleware::Logger;
 use actix_web::{App, HttpServer};
 use netwopenapi::app::OpenApiWrapper;
-use std::error::Error;
-use std::net::Ipv4Addr;
 use netwopenapi::spec::Spec;
 use netwopenapi::web::scope;
+use std::error::Error;
+use std::net::Ipv4Addr;
 
 mod api;
 
