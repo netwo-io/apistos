@@ -1,6 +1,12 @@
+use crate::actix::ResponseWrapper;
+use crate::path_item_definition::PathItemDefinition;
 use actix_web::web::{Data, ReqData};
+use actix_web::Responder;
+use std::future::Future;
 use utoipa::openapi::request_body::{RequestBody, RequestBodyBuilder};
-use utoipa::openapi::{ContentBuilder, Ref, RefOr, Required, Schema};
+use utoipa::openapi::{
+  response, ContentBuilder, Ref, RefOr, Required, ResponseBuilder, Responses, ResponsesBuilder, Schema,
+};
 use utoipa::ToSchema;
 
 pub mod empty;
@@ -26,12 +32,16 @@ pub trait ApiComponent {
     Self::schema().map(|(name, _)| {
       RequestBodyBuilder::new()
         .content(
-          "application/json",
+          "application/json", //@todo how to infer it
           ContentBuilder::new().schema(Ref::from_schema_name(name)).build(),
         )
         .required(Some(required))
         .build()
     })
+  }
+
+  fn responses() -> Option<Responses> {
+    None
   }
 }
 
@@ -96,6 +106,7 @@ impl<T> ApiComponent for Data<T> {
     None
   }
 }
+
 impl<T: Clone> ApiComponent for ReqData<T> {
   fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
     vec![]
@@ -103,5 +114,41 @@ impl<T: Clone> ApiComponent for ReqData<T> {
 
   fn schema() -> Option<(String, RefOr<Schema>)> {
     None
+  }
+}
+
+impl<F, R, P> ApiComponent for ResponseWrapper<F, P>
+where
+  F: Future<Output = R>,
+  R: Responder + ApiComponent,
+  P: PathItemDefinition,
+{
+  fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
+    R::child_schemas()
+  }
+
+  fn schema() -> Option<(String, RefOr<Schema>)> {
+    R::schema()
+  }
+
+  fn responses() -> Option<Responses> {
+    //@todo handle error
+    Self::schema().map(|(name, schema)| {
+      let _ref = match schema {
+        RefOr::Ref(r) => r,
+        RefOr::T(_) => Ref::from_schema_name(name),
+      };
+      let mut responses = ResponsesBuilder::new();
+      responses = responses.response(
+        "200",
+        ResponseBuilder::new()
+          .content(
+            "application/json", //@todo how to infer it
+            ContentBuilder::new().schema(_ref).build(),
+          )
+          .build(),
+      );
+      responses.build()
+    })
   }
 }

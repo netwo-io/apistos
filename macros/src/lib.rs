@@ -90,21 +90,27 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
     quote!(struct #openapi_struct;)
   };
 
+  let (responder_wrapper, generated_item_ast) =
+    gen_item_ast(default_span, item_ast, &openapi_struct, &ty_generics, generics_call);
+  let generated_item_fn = match syn::parse::<ItemFn>(generated_item_ast.clone().into()) {
+    Ok(v) => v,
+    Err(e) => abort!(e.span(), format!("{e}")),
+  };
   let open_api_def = gen_open_api_impl(
-    &item_ast,
+    &generated_item_fn,
     operation_attribute,
     &openapi_struct,
     openapi_struct_def,
     impl_generics,
     &ty_generics,
     where_clause,
+    responder_wrapper,
   );
-  let item_ast = gen_item_ast(default_span, item_ast, openapi_struct, ty_generics, generics_call);
 
   let res = quote!(
     #open_api_def
 
-    #item_ast
+    #generated_item_ast
   );
 
   // eprintln!("{:#}", res.to_string());

@@ -23,6 +23,7 @@ pub(crate) fn gen_open_api_impl(
   impl_generics: ImplGenerics,
   ty_generics: &TypeGenerics,
   where_clause: Option<&WhereClause>,
+  responder_wrapper: TokenStream2,
 ) -> TokenStream2 {
   let path_item_def_impl = if operation_attribute.skip {
     quote!(
@@ -32,8 +33,17 @@ pub(crate) fn gen_open_api_impl(
     )
   } else {
     let args = extract_fn_arguments_types(item_ast);
-    let operation = Operation { args: &args }.to_token_stream();
-    let components = Components { args: &args }.to_token_stream();
+
+    let operation = Operation {
+      args: &args,
+      responder_wrapper: &responder_wrapper,
+    }
+    .to_token_stream();
+    let components = Components {
+      args: &args,
+      responder_wrapper: &responder_wrapper,
+    }
+    .to_token_stream();
 
     quote!(
       fn is_visible() -> bool {
@@ -57,23 +67,23 @@ pub(crate) fn gen_open_api_impl(
 pub(crate) fn gen_item_ast(
   default_span: Span,
   mut item_ast: ItemFn,
-  openapi_struct: Ident,
-  ty_generics: TypeGenerics,
+  openapi_struct: &Ident,
+  ty_generics: &TypeGenerics,
   generics_call: TokenStream2,
-) -> TokenStream2 {
+) -> (proc_macro2::TokenStream, proc_macro2::TokenStream) {
   // Remove async prefix if any. This macro generate an impl Future
   if item_ast.sig.asyncness.is_some() {
     item_ast.sig.asyncness = None;
   } else {
     // @todo should we really fail here as the macro doesn't really care about it ?
     emit_error!(default_span, "Operation must be an async function.");
-    return quote!().into();
+    return (quote!().into(), quote!().into());
   }
 
   let mut is_impl_trait = false;
   let mut is_responder = false;
   let mut responder_wrapper =
-    quote!(netwopenapi::actix::ResponderWrapper<actix_web::HttpResponse, #openapi_struct #ty_generics>);
+    quote!(netwopenapi::actix::ResponseWrapper<actix_web::HttpResponse, #openapi_struct #ty_generics>);
   match &mut item_ast.sig.output {
     ReturnType::Default => {}
     ReturnType::Type(_, _type) => {
@@ -86,7 +96,7 @@ pub(crate) fn gen_item_ast(
 
           *_type = Box::new(
             syn::parse2(quote!(
-              impl std::future::Future<Output=netwopenapi::actix::ResponderWrapper<#_type>>
+              impl std::future::Future<Output=netwopenapi::actix::ResponseWrapper<#_type>>
             ))
             .expect("parsing impl trait"),
           );
@@ -109,7 +119,7 @@ pub(crate) fn gen_item_ast(
 
         if !is_responder {
           responder_wrapper =
-            quote!(netwopenapi::actix::ResponderWrapper<Box<#obj + std::marker::Unpin>, #openapi_struct #ty_generics>);
+            quote!(netwopenapi::actix::ResponseWrapper<Box<#obj + std::marker::Unpin>, #openapi_struct #ty_generics>);
         }
       }
     }
@@ -117,7 +127,7 @@ pub(crate) fn gen_item_ast(
 
   let block = item_ast.block;
   let inner_handler = if is_responder {
-    quote!(core::future::ready::ready(netwopenapi::actix::ResponderWrapper((move || #block)())))
+    quote!(core::future::ready::ready(netwopenapi::actix::ResponseWrapper((move || #block)())))
   } else if is_impl_trait {
     quote!((move || #block)())
   } else {
@@ -128,7 +138,7 @@ pub(crate) fn gen_item_ast(
     syn::parse2(quote!(
         {
             let inner = #inner_handler;
-            netwopenapi::actix::ResponderWrapper {
+            netwopenapi::actix::ResponseWrapper {
                 inner,
                 path_item: #openapi_struct #generics_call,
             }
@@ -137,7 +147,12 @@ pub(crate) fn gen_item_ast(
     .expect("parsing wrapped block"),
   );
 
-  quote!(#item_ast)
+  let responder_wrapper = if is_responder {
+    quote! { netwopenapi::actix::ResponderWrapper::<actix_web::HttpResponse> }
+  } else {
+    quote! { #responder_wrapper }
+  };
+  (responder_wrapper, quote!(#item_ast))
 }
 
 pub(crate) fn extract_generics_params(item_ast: &ItemFn) -> Punctuated<GenericParam, Comma> {

@@ -4,11 +4,13 @@ use syn::Type;
 
 pub struct Operation<'a> {
   pub args: &'a [Type],
+  pub responder_wrapper: &'a proc_macro2::TokenStream,
 }
 
 impl<'a> ToTokens for Operation<'a> {
   fn to_tokens(&self, tokens: &mut TokenStream) {
     let args = self.args;
+    let responder_wrapper = self.responder_wrapper;
     tokens.extend(quote!(
       fn operation() -> utoipa::openapi::path::Operation {
         use netwopenapi::ApiComponent;
@@ -22,7 +24,10 @@ impl<'a> ToTokens for Operation<'a> {
         for body_request in body_requests {
           operation_builder = operation_builder.request_body(Some(body_request));
         }
-          // .responses(utoipa::openapi::ResponsesBuilder::new().build())
+
+        if let Some(responses) = <#responder_wrapper>::responses() {
+          operation_builder = operation_builder.responses(responses);
+        }
           // .operation_id(None)
           // .summary(None)
           // .description(None)

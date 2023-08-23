@@ -5,11 +5,13 @@ use syn::Type;
 
 pub struct Components<'a> {
   pub args: &'a [Type],
+  pub responder_wrapper: &'a proc_macro2::TokenStream,
 }
 
 impl<'a> ToTokens for Components<'a> {
   fn to_tokens(&self, tokens: &mut TokenStream) {
     let args = self.args;
+    let responder_wrapper = self.responder_wrapper;
     tokens.extend(quote!(
       fn components() -> Vec<utoipa::openapi::Components> {
         use netwopenapi::ApiComponent;
@@ -19,11 +21,12 @@ impl<'a> ToTokens for Components<'a> {
         #(
           schemas.push(<#args>::schema());
         )*
-        //@todo for each property of each modifiers also fetch schema()
+        schemas.push(<#responder_wrapper>::schema());
         let mut schemas = schemas.into_iter().flatten().collect::<Vec<(String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)>>();
         #(
           schemas.append(&mut <#args>::child_schemas());
         )*
+        schemas.append(&mut <#responder_wrapper>::child_schemas());
         for (name, schema) in schemas {
           component_builder = component_builder.schema(name, schema);
         }
