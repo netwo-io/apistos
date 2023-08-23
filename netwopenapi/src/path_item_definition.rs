@@ -1,6 +1,5 @@
-use std::collections::BTreeMap;
 use utoipa::openapi::path::Operation;
-use utoipa::openapi::{Components, PathItem};
+use utoipa::openapi::Components;
 
 pub trait PathItemDefinition {
   fn is_visible() -> bool {

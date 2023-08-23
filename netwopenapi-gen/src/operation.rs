@@ -1,7 +1,6 @@
 use proc_macro2::Ident;
-use proc_macro_error::{abort, ResultExt};
+use proc_macro_error::abort;
 use syn::parse::{Parse, ParseStream};
-use syn::token::Token;
 use syn::{Expr, Token};
 
 #[derive(Default)]

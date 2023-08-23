@@ -1,9 +1,8 @@
 use crate::internal::components::Components;
 use crate::internal::operation::Operation;
 use crate::operation::OperationAttr;
-use proc_macro::TokenStream;
 use proc_macro2::{Span, TokenStream as TokenStream2};
-use proc_macro_error::{abort, emit_error, proc_macro_error};
+use proc_macro_error::emit_error;
 use quote::quote;
 use quote::ToTokens;
 use syn::punctuated::Punctuated;

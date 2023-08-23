@@ -1,7 +1,7 @@
 [workspace]
 members = [
-    "actix",
-    "macros"
+    "netwopenapi",
+    "netwopenapi-gen"
 ]
 
 [workspace.package]

@@ -5,15 +5,12 @@ use actix_web::http::StatusCode;
 use actix_web::{HttpRequest, HttpResponse, Responder, ResponseError};
 use pin_project::pin_project;
 use serde::Serialize;
-use std::collections::BTreeMap;
 use std::fmt::Debug;
 use std::future::Future;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 use utoipa::openapi::path::Operation;
-use utoipa::openapi::{
-  Components, ContentBuilder, PathItem, Ref, RefOr, ResponseBuilder, Responses, ResponsesBuilder, Schema,
-};
+use utoipa::openapi::{Components, ContentBuilder, Ref, RefOr, ResponseBuilder, Responses, ResponsesBuilder, Schema};
 
 #[pin_project]
 pub struct ResponseWrapper<R, P> {

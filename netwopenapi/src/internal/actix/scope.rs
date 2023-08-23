@@ -1,7 +1,6 @@
 use crate::internal::actix::route::{Route, RouteWrapper};
 use crate::internal::actix::service_config::ServiceConfig;
 use crate::internal::definition_holder::DefinitionHolder;
-use actix_service::boxed::factory;
 use actix_service::{ServiceFactory, Transform};
 use actix_web::body::MessageBody;
 use actix_web::dev::{AppService, HttpServiceFactory, ServiceRequest, ServiceResponse};
@@ -160,7 +159,7 @@ where
     self.components.extend(dh.components().into_iter());
     let mut item_map = BTreeMap::new();
     dh.update_path_items(&mut item_map);
-    for (path, mut path_item) in item_map {
+    for (path, path_item) in item_map {
       let p = vec![self.path.clone(), path]
         .iter()
         .map(|p| p.trim_matches('/'))

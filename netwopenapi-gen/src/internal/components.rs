@@ -1,11 +1,10 @@
 use proc_macro2::TokenStream;
-use proc_macro_error::__export::ToTokensAsSpanRange;
 use quote::{quote, ToTokens};
 use syn::Type;
 
 pub struct Components<'a> {
   pub args: &'a [Type],
-  pub responder_wrapper: &'a proc_macro2::TokenStream,
+  pub responder_wrapper: &'a TokenStream,
 }
 
 impl<'a> ToTokens for Components<'a> {

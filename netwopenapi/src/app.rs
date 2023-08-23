@@ -1,5 +1,5 @@
 use crate::internal::actix::handler::OASHandler;
-use crate::internal::actix::route::{PathDefinition, Route, RouteWrapper};
+use crate::internal::actix::route::{Route, RouteWrapper};
 use crate::internal::definition_holder::DefinitionHolder;
 use crate::spec::Spec;
 use crate::web::ServiceConfig;
@@ -12,7 +12,7 @@ use std::collections::BTreeMap;
 use std::future::Future;
 use std::sync::{Arc, RwLock};
 use std::{fmt, mem};
-use utoipa::openapi::{Components, Info, OpenApi, PathItemType, Paths, PathsBuilder};
+use utoipa::openapi::OpenApi;
 
 pub trait OpenApiWrapper<T> {
   type Wrapper;

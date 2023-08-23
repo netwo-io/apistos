@@ -1,4 +1,4 @@
-use crate::internal::actix::route::{PathDefinition, Route, RouteWrapper};
+use crate::internal::actix::route::{Route, RouteWrapper};
 use crate::internal::actix::METHODS;
 use crate::path_item_definition::PathItemDefinition;
 use actix_service::{ServiceFactory, Transform};
@@ -6,10 +6,9 @@ use actix_web::body::MessageBody;
 use actix_web::dev::{AppService, HttpServiceFactory, ServiceRequest, ServiceResponse};
 use actix_web::guard::Guard;
 use actix_web::{Error, FromRequest, Handler, Responder};
-use std::collections::BTreeMap;
 use std::fmt::Debug;
 use std::future::Future;
-use utoipa::openapi::{Components, PathItem, PathItemType};
+use utoipa::openapi::{Components, PathItem};
 
 pub struct Resource<R = actix_web::Resource> {
   pub(crate) path: String,
@@ -63,7 +62,7 @@ where
 
   /// Wrapper for [`actix_web::Resource::route`](https://docs.rs/actix-web/*/actix_web/struct.Resource.html#method.route).
   pub fn route(mut self, route: Route) -> Self {
-    let mut w = RouteWrapper::new(&self.path, route);
+    let w = RouteWrapper::new(&self.path, route);
     let mut item_definition = self.item_definition.unwrap_or_default();
     item_definition.operations.extend(w.def.item.operations.into_iter());
     self.item_definition = Some(item_definition);
@@ -91,7 +90,7 @@ where
     F::Future: PathItemDefinition,
   {
     if F::Future::is_visible() {
-      let mut operation = F::Future::operation();
+      let operation = F::Future::operation();
       let mut item_definition = self.item_definition.unwrap_or_default();
       for method in METHODS {
         item_definition.operations.insert(method.clone(), operation.clone());

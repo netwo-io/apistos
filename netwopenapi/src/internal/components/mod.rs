@@ -4,10 +4,7 @@ use actix_web::web::{Data, ReqData};
 use actix_web::Responder;
 use std::future::Future;
 use utoipa::openapi::request_body::{RequestBody, RequestBodyBuilder};
-use utoipa::openapi::{
-  response, ContentBuilder, Ref, RefOr, Required, ResponseBuilder, Responses, ResponsesBuilder, Schema,
-};
-use utoipa::ToSchema;
+use utoipa::openapi::{ContentBuilder, Ref, RefOr, Required, ResponseBuilder, Responses, ResponsesBuilder, Schema};
 
 pub mod empty;
 pub mod json;

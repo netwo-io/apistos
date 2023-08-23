@@ -1,7 +1,6 @@
 use crate::internal::components::ApiComponent;
 use actix_web::web::Json;
-use utoipa::openapi::request_body::{RequestBody, RequestBodyBuilder};
-use utoipa::openapi::{ContentBuilder, Ref, RefOr, Schema};
+use utoipa::openapi::{RefOr, Schema};
 
 impl<T> ApiComponent for Json<T>
 where

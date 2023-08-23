@@ -1,15 +1,9 @@
 use crate::internal::{extract_generics_params, gen_item_ast, gen_open_api_impl};
 use crate::operation::OperationAttr;
 use proc_macro::TokenStream;
-use proc_macro2::{Span, TokenStream as TokenStream2};
-use proc_macro_error::{abort, emit_error, proc_macro_error};
+use proc_macro_error::{abort, proc_macro_error};
 use quote::quote;
-use syn::punctuated::Punctuated;
-use syn::token::Comma;
-use syn::{
-  Data, DeriveInput, GenericParam, Ident, ImplGenerics, ItemFn, ReturnType, Token, Type, TypeGenerics, TypeTraitObject,
-  WhereClause,
-};
+use syn::{Data, DeriveInput, Ident, ItemFn, Type};
 
 mod internal;
 mod operation;
@@ -70,7 +64,7 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
   let operation_attribute = syn::parse_macro_input!(attr as OperationAttr);
 
   let default_span = proc_macro2::Span::call_site();
-  let mut item_ast = match syn::parse::<ItemFn>(item) {
+  let item_ast = match syn::parse::<ItemFn>(item) {
     Ok(v) => v,
     Err(e) => abort!(e.span(), format!("{e}")),
   };
@@ -81,7 +75,7 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
   let generics = &item_ast.sig.generics.clone();
   let mut generics_call = quote!();
   let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
-  let mut openapi_struct_def = if !generics.params.is_empty() {
+  let openapi_struct_def = if !generics.params.is_empty() {
     let turbofish = ty_generics.as_turbofish();
     generics_call = quote!(#turbofish { p: std::marker::PhantomData });
     let generics_params = extract_generics_params(&item_ast);

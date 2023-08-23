@@ -1,5 +1,4 @@
 use actix_web::ResponseError;
-use futures::AsyncWriteExt;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Debug, Display, Formatter};
 use utoipa::ToSchema;

@@ -20,7 +20,7 @@ futures = "0.3"
 utoipa = { version = "3", features = ["actix_extras", "debug"] }
 utoipa-swagger-ui = { version = "3", features = ["actix-web"] }
 
-netwopenapi = { path = "../../actix" }
-netwopenapi-gen = { path = "../../macros" }
+netwopenapi = { path = "../../netwopenapi" }
+netwopenapi-gen = { path = "../../netwopenapi-gen" }
 
 [workspace]
