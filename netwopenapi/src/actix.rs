@@ -154,6 +154,10 @@ where
     T::schema()
   }
 
+  fn raw_schema() -> Option<RefOr<Schema>> {
+    T::raw_schema()
+  }
+
   fn responses() -> Option<Responses> {
     let status = StatusCode::ACCEPTED;
     Self::schema().map(|(name, schema)| {
@@ -204,6 +208,10 @@ where
 
   fn schema() -> Option<(String, RefOr<Schema>)> {
     T::schema()
+  }
+
+  fn raw_schema() -> Option<RefOr<Schema>> {
+    T::raw_schema()
   }
 
   fn responses() -> Option<Responses> {

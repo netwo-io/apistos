@@ -703,10 +703,13 @@ dependencies = [
  "actix-web",
  "bytes",
  "netwopenapi-gen",
+ "once_cell",
  "pin-project",
+ "regex",
  "serde",
  "serde_json",
  "utoipa",
+ "uuid",
 ]
 
 [[package]]
@@ -1242,6 +1245,16 @@ dependencies = [
  "quote",
  "regex",
  "syn 2.0.29",
+ "uuid",
+]
+
+[[package]]
+name = "uuid"
+version = "1.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "79daa5ed5740825c40b389c5e50312b9c86df53fccd33f281df655642b43869d"
+dependencies = [
+ "serde",
 ]
 
 [[package]]

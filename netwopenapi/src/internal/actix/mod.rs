@@ -6,6 +6,8 @@ pub mod route;
 pub mod scope;
 pub mod service_config;
 
+mod utils;
+
 const METHODS: &[PathItemType] = &[
   PathItemType::Get,
   PathItemType::Put,

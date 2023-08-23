@@ -25,9 +25,18 @@ impl<'a> ToTokens for Operation<'a> {
           operation_builder = operation_builder.request_body(Some(body_request));
         }
 
+        let mut parameters = vec![];
+        #(
+          parameters.append(&mut <#args>::parameters());
+        )*
+        if !parameters.is_empty() {
+          operation_builder = operation_builder.parameters(Some(parameters));
+        }
+
         if let Some(responses) = <#responder_wrapper>::responses() {
           operation_builder = operation_builder.responses(responses);
         }
+
           // .operation_id(None)
           // .summary(None)
           // .description(None)

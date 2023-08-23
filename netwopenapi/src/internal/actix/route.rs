@@ -1,3 +1,4 @@
+use crate::internal::actix::utils::OperationUpdater;
 use crate::internal::actix::METHODS;
 use crate::path_item_definition::PathItemDefinition;
 use actix_service::ServiceFactory;
@@ -139,8 +140,10 @@ impl RouteWrapper {
   pub(crate) fn new<S: Into<String>>(path: S, route: Route) -> Self {
     let mut operations: BTreeMap<PathItemType, Operation> = Default::default();
     let mut path_item = PathItem::default();
-    if let Some(operation) = route.operation {
-      //@todo set_parameter_names_from_path_template
+    let path: String = path.into();
+    if let Some(mut operation) = route.operation {
+      operation.update_path_parameter_name_from_path(&path);
+
       if let Some(path_item_type) = route.path_item_type {
         operations.insert(path_item_type, operation);
       } else {
@@ -152,10 +155,7 @@ impl RouteWrapper {
     path_item.operations = operations;
 
     Self {
-      def: PathDefinition {
-        path: path.into(),
-        item: path_item,
-      },
+      def: PathDefinition { path, item: path_item },
       component: route.components,
       inner: route.inner,
     }

@@ -1,4 +1,5 @@
 use crate::internal::actix::route::{Route, RouteWrapper};
+use crate::internal::actix::utils::OperationUpdater;
 use crate::internal::actix::METHODS;
 use crate::path_item_definition::PathItemDefinition;
 use actix_service::{ServiceFactory, Transform};
@@ -90,12 +91,12 @@ where
     F::Future: PathItemDefinition,
   {
     if F::Future::is_visible() {
-      let operation = F::Future::operation();
+      let mut operation = F::Future::operation();
       let mut item_definition = self.item_definition.unwrap_or_default();
       for method in METHODS {
         item_definition.operations.insert(method.clone(), operation.clone());
       }
-      // @todo op.set_parameter_names_from_path_template(&self.path);
+      operation.update_path_parameter_name_from_path(&self.path);
       self.item_definition = Some(item_definition);
       self.components.extend(F::Future::components().into_iter());
       //@todo security ?

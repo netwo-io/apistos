@@ -3,6 +3,7 @@ use crate::path_item_definition::PathItemDefinition;
 use actix_web::web::{Data, ReqData};
 use actix_web::Responder;
 use std::future::Future;
+use utoipa::openapi::path::Parameter;
 use utoipa::openapi::request_body::{RequestBody, RequestBodyBuilder};
 use utoipa::openapi::{ContentBuilder, Ref, RefOr, Required, ResponseBuilder, Responses, ResponsesBuilder, Schema};
 
@@ -12,27 +13,27 @@ pub mod parameters;
 pub mod simple;
 
 pub trait ApiComponent {
-  fn required() -> bool {
-    true
+  fn required() -> Required {
+    Required::True
   }
 
   /// contains childs schemas recursively for this operation
   fn child_schemas() -> Vec<(String, RefOr<Schema>)>;
 
+  fn raw_schema() -> Option<RefOr<Schema>> {
+    None
+  }
+
   fn schema() -> Option<(String, RefOr<Schema>)>;
 
   fn request_body() -> Option<RequestBody> {
-    let required = match Self::required() {
-      true => Required::True,
-      false => Required::False,
-    };
     Self::schema().map(|(name, _)| {
       RequestBodyBuilder::new()
         .content(
           "application/json", //@todo how to infer it
           ContentBuilder::new().schema(Ref::from_schema_name(name)).build(),
         )
-        .required(Some(required))
+        .required(Some(Self::required()))
         .build()
     })
   }
@@ -40,14 +41,18 @@ pub trait ApiComponent {
   fn responses() -> Option<Responses> {
     None
   }
+
+  fn parameters() -> Vec<Parameter> {
+    vec![]
+  }
 }
 
 impl<T> ApiComponent for Option<T>
 where
   T: ApiComponent,
 {
-  fn required() -> bool {
-    false
+  fn required() -> Required {
+    Required::False
   }
 
   fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
@@ -57,6 +62,10 @@ where
   fn schema() -> Option<(String, RefOr<Schema>)> {
     T::schema()
   }
+
+  fn raw_schema() -> Option<RefOr<Schema>> {
+    T::raw_schema()
+  }
 }
 
 impl<T> ApiComponent for Vec<T>
@@ -64,8 +73,12 @@ where
   T: ApiComponent,
 {
   //@todo sure about this one ?
-  fn required() -> bool {
-    true
+  fn required() -> Required {
+    Required::True
+  }
+
+  fn raw_schema() -> Option<RefOr<Schema>> {
+    T::raw_schema()
   }
 
   fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
@@ -81,8 +94,12 @@ impl<T, E> ApiComponent for Result<T, E>
 where
   T: ApiComponent,
 {
-  fn required() -> bool {
+  fn required() -> Required {
     T::required()
+  }
+
+  fn raw_schema() -> Option<RefOr<Schema>> {
+    T::raw_schema()
   }
 
   fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
@@ -126,6 +143,10 @@ where
 
   fn schema() -> Option<(String, RefOr<Schema>)> {
     R::schema()
+  }
+
+  fn raw_schema() -> Option<RefOr<Schema>> {
+    R::raw_schema()
   }
 
   fn responses() -> Option<Responses> {

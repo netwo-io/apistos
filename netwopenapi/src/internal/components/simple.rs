@@ -1,10 +1,35 @@
 use crate::internal::components::ApiComponent;
 
+#[cfg(any(feature = "bytes", feature = "extras"))]
+use bytes::Bytes;
+#[cfg(any(feature = "uuid", feature = "extras"))]
+use uuid::Uuid;
+
 macro_rules! simple_modifier {
   ($ty:ty) => {
     impl ApiComponent for $ty {
       fn child_schemas() -> Vec<(String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)> {
         vec![]
+      }
+      // fn raw_schema() -> Option<utoipa::openapi::RefOr<utoipa::openapi::Schema>> {
+      //   #[derive(utoipa::ToSchema)]
+      //   struct tmp_api_component {
+      //     tmp: $ty,
+      //   }
+      //   let schema: utoipa::openapi::RefOr<utoipa::openapi::Schema> = utoipa::schema!(
+      //     #[inline]
+      //     tmp_api_component
+      //   )
+      //   .into();
+      //   Some(schema)
+      // }
+      fn raw_schema() -> Option<utoipa::openapi::RefOr<utoipa::openapi::Schema>> {
+        let schema: utoipa::openapi::RefOr<utoipa::openapi::Schema> = utoipa::schema!(
+          #[inline]
+          $ty
+        )
+        .into();
+        Some(schema)
       }
       fn schema() -> Option<(String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)> {
         None
@@ -40,3 +65,8 @@ simple_modifier!(usize);
 // impl_simple!(uuid0_dep::Uuid);
 // #[cfg(feature = "uuid1")]
 // impl_simple!(uuid1_dep::Uuid);
+
+// #[cfg(any(feature = "bytes", feature = "extras"))]
+// simple_modifier!(Bytes);
+#[cfg(any(feature = "uuid", feature = "extras"))]
+simple_modifier!(Uuid);
