@@ -5,12 +5,13 @@ use syn::parse::{Parse, ParseStream};
 use syn::{Expr, Token};
 
 #[derive(Default)]
-pub(crate) struct OperationAttr {
-  pub(crate) skip: bool,
-  pub(crate) deprecated: bool,
-  pub(crate) operation_id: Option<Expr>,
-  pub(crate) summary: Option<String>,
-  pub(crate) description: Option<String>,
+pub struct OperationAttr {
+  pub skip: bool,
+  pub deprecated: bool,
+  pub operation_id: Option<Expr>,
+  pub summary: Option<String>,
+  pub description: Option<String>,
+  pub tags: Vec<String>,
 }
 
 impl Parse for OperationAttr {
@@ -45,6 +46,14 @@ impl Parse for OperationAttr {
           .trim_start_matches(|c| c == '"');
         operation_attr.description = Some(description.to_owned());
       } else if attribute_name == "summary" {
+        match input.parse::<Token![=]>() {
+          Ok(_) => (),
+          Err(e) => abort!(e.span(), "Missing = before value assignment"),
+        };
+        let summary = Expr::parse(input)?.to_token_stream().to_string();
+        let summary = summary.trim_end_matches(|c| c == '"').trim_start_matches(|c| c == '"');
+        operation_attr.summary = Some(summary.to_owned());
+      } else if attribute_name == "tags" {
         match input.parse::<Token![=]>() {
           Ok(_) => (),
           Err(e) => abort!(e.span(), "Missing = before value assignment"),
