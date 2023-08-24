@@ -2,7 +2,6 @@ use crate::ApiComponent;
 use actix_web::web::Path;
 use utoipa::openapi::path::{Parameter, ParameterBuilder, ParameterIn};
 use utoipa::openapi::{Object, RefOr, Required, Schema};
-use utoipa::PartialSchema;
 
 impl<T> ApiComponent for Path<T>
 where
@@ -42,7 +41,7 @@ where
             parameters = gen_simple_path_parameter(schema, Self::required());
           }
           Schema::Array(_) | Schema::AllOf(_) | Schema::AnyOf(_) | _ => {
-            // these case should never exist
+            // these case should never exist right ?
           }
         },
       }

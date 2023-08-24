@@ -2,7 +2,6 @@ use once_cell::sync::Lazy;
 use regex::{Captures, Regex};
 use std::borrow::Cow;
 use utoipa::openapi::path::{Operation, ParameterIn};
-use utoipa::openapi::{RefOr, Schema};
 
 /// Regex that can be used for fetching templated path parameters.
 static PATH_TEMPLATE_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"\{(.*?)\}").expect("path template regex"));
