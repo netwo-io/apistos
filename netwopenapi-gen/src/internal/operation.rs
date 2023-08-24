@@ -8,6 +8,7 @@ pub struct Operation<'a> {
   pub responder_wrapper: &'a proc_macro2::TokenStream,
   pub fn_name: &'a str,
   pub operation_id: Option<Expr>,
+  pub deprecated: Option<bool>,
 }
 
 impl<'a> ToTokens for Operation<'a> {
@@ -31,6 +32,13 @@ impl<'a> ToTokens for Operation<'a> {
             help = "Did you define the #[netwopenapi::api_operation(...)] over function?"
         }
       });
+    let deprecated = self
+      .deprecated
+      .map(|deprecated| match deprecated {
+        true => quote!(Some(utoipa::openapi::Deprecated::True)),
+        false => quote!(Some(utoipa::openapi::Deprecated::False)),
+      })
+      .unwrap_or_else(|| quote!(None));
 
     tokens.extend(quote!(
       fn operation() -> utoipa::openapi::path::Operation {
@@ -60,6 +68,9 @@ impl<'a> ToTokens for Operation<'a> {
 
         operation_builder = operation_builder.operation_id(Some(#operation_id));
 
+        operation_builder = operation_builder.deprecated(#deprecated);
+
+          // .securities(None)
           // .summary(None)
           // .description(None)
           // .tag("")

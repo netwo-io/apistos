@@ -33,11 +33,19 @@ pub(crate) fn gen_open_api_impl(
   } else {
     let args = extract_fn_arguments_types(item_ast);
 
+    let deprecated = item_ast.attrs.iter().find_map(|attr| {
+      if !matches!(attr.path().get_ident(), Some(ident) if &*ident.to_string() == "deprecated") {
+        None
+      } else {
+        Some(true)
+      }
+    });
     let operation = Operation {
       args: &args,
       responder_wrapper: &responder_wrapper,
       fn_name: &*item_ast.sig.ident.to_string(),
       operation_id: operation_attribute.operation_id,
+      deprecated,
     }
     .to_token_stream();
     let components = Components {
