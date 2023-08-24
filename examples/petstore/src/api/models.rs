@@ -1,4 +1,4 @@
-use netwopenapi_gen::ApiComponent;
+use netwopenapi::ApiComponent;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 

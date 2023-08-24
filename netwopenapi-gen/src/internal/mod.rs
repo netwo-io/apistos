@@ -36,6 +36,8 @@ pub(crate) fn gen_open_api_impl(
     let operation = Operation {
       args: &args,
       responder_wrapper: &responder_wrapper,
+      fn_name: &*item_ast.sig.ident.to_string(),
+      operation_id: operation_attribute.operation_id,
     }
     .to_token_stream();
     let components = Components {
