@@ -2,7 +2,6 @@ use crate::ApiComponent;
 use actix_web::web::Query;
 use utoipa::openapi::path::{Parameter, ParameterBuilder, ParameterIn};
 use utoipa::openapi::{RefOr, Required, Schema};
-use utoipa::PartialSchema;
 
 impl<T> ApiComponent for Query<T>
 where

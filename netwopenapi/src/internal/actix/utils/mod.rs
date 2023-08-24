@@ -12,7 +12,7 @@ pub trait OperationUpdater {
 
 impl OperationUpdater for Operation {
   fn update_path_parameter_name_from_path(&mut self, path: &str) {
-    self.parameters.as_mut().map(|mut params| {
+    self.parameters.as_mut().map(|params| {
       let mut param_names = vec![];
       PATH_TEMPLATE_REGEX.replace_all(path, |c: &Captures| {
         param_names.push(c[1].to_owned());
@@ -21,7 +21,7 @@ impl OperationUpdater for Operation {
 
       for param in params.iter_mut().filter(|p| p.parameter_in == ParameterIn::Path) {
         if let Some(n) = param_names.pop() {
-          if let Some((name, pattern)) = n.split_once(':') {
+          if let Some((name, _pattern)) = n.split_once(':') {
             param.name = name.to_string();
             //@todo done for type format to handle regex. we need to thing about that one
             // match param.schema {

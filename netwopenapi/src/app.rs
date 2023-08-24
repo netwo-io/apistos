@@ -23,6 +23,7 @@ pub trait OpenApiWrapper<T> {
 pub struct App<T> {
   open_api_spec: Arc<RwLock<OpenApi>>,
   inner: Option<actix_web::App<T>>, //an option juste to be able to replace it with a default in memory
+  default_tags: Vec<String>,
 }
 
 impl<T> OpenApiWrapper<T> for actix_web::App<T> {
@@ -34,6 +35,7 @@ impl<T> OpenApiWrapper<T> for actix_web::App<T> {
     App {
       open_api_spec: Arc::new(RwLock::new(open_api_spec)),
       inner: Some(self),
+      default_tags: spec.default_tags,
     }
   }
 }
@@ -118,6 +120,7 @@ where
     App {
       open_api_spec: self.open_api_spec,
       inner: self.inner.take().map(|app| app.wrap(mw)),
+      default_tags: self.default_tags,
     }
   }
 
@@ -133,6 +136,7 @@ where
     App {
       open_api_spec: self.open_api_spec,
       inner: self.inner.take().map(|app| app.wrap_fn(mw)),
+      default_tags: self.default_tags,
     }
   }
 
@@ -166,6 +170,17 @@ where
     }
     open_api_spec.paths.paths = paths;
     open_api_spec.components = components;
+
+    if !self.default_tags.is_empty() {
+      for pi in open_api_spec.paths.paths.values_mut() {
+        for op in pi.operations.values_mut() {
+          match &mut op.tags {
+            None => op.tags = Some(self.default_tags.clone()),
+            Some(tags) => tags.append(&mut self.default_tags),
+          }
+        }
+      }
+    }
     //@todo security ?
   }
 }

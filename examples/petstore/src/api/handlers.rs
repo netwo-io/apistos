@@ -34,7 +34,7 @@ pub(crate) async fn add_pet(
 
 /// Find pet by ID
 /// Returns a single pet
-#[api_operation]
+#[api_operation(tags = ["pet", "test"])]
 pub(crate) async fn get_pet(
   // Create a new pet in the store
   pet_id: Path<Uuid>,

@@ -1,6 +1,6 @@
 use crate::internal::components::Components;
 use crate::internal::operation::Operation;
-use crate::operation::OperationAttr;
+use crate::operation_attr::OperationAttr;
 use proc_macro2::{Span, TokenStream as TokenStream2};
 use proc_macro_error::emit_error;
 use quote::quote;
@@ -84,6 +84,7 @@ pub(crate) fn gen_open_api_impl(
           Some(&description)
         }
       }),
+      tags: &operation_attribute.tags,
     }
     .to_token_stream();
     let components = Components {

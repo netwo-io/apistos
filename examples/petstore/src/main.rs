@@ -14,8 +14,13 @@ async fn main() -> Result<(), impl Error> {
   env_logger::init();
 
   HttpServer::new(move || {
+    let spec = Spec {
+      default_tags: vec!["api".to_owned()],
+      ..Default::default()
+    };
+
     App::new()
-      .document(Spec::default())
+      .document(spec)
       .wrap(Logger::default())
       .service(scope("/test").service(routes()))
       .build("/openapi.json")

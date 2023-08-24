@@ -1,13 +1,12 @@
 use crate::internal::{extract_generics_params, gen_item_ast, gen_open_api_impl};
-use crate::operation::OperationAttr;
+use crate::operation_attr::OperationAttr;
 use proc_macro::TokenStream;
 use proc_macro_error::{abort, proc_macro_error};
 use quote::quote;
 use syn::{Data, DeriveInput, Ident, ItemFn, Type};
 
 mod internal;
-mod operation;
-mod path;
+mod operation_attr;
 
 const OPENAPI_STRUCT_PREFIX: &str = "__openapi_";
 

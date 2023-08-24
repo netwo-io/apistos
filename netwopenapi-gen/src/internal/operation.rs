@@ -11,6 +11,7 @@ pub struct Operation<'a> {
   pub deprecated: Option<bool>,
   pub summary: Option<&'a String>,
   pub description: Option<&'a str>,
+  pub tags: &'a [String],
 }
 
 impl<'a> ToTokens for Operation<'a> {
@@ -53,6 +54,17 @@ impl<'a> ToTokens for Operation<'a> {
         quote!(operation_builder = operation_builder.description(Some(#d));)
       }
     };
+    let tags = if self.tags.is_empty() {
+      quote!()
+    } else {
+      let tags = self.tags;
+      quote! {
+        let tags = vec![
+          #(#tags.to_owned(),)*
+        ];
+        operation_builder = operation_builder.tags(Some(tags));
+      }
+    };
 
     tokens.extend(quote!(
       fn operation() -> utoipa::openapi::path::Operation {
@@ -87,8 +99,9 @@ impl<'a> ToTokens for Operation<'a> {
         #summary
         #description
 
+        #tags
+
           // .securities(None)
-          // .tag("")
 
         operation_builder.build()
       }
