@@ -20,10 +20,11 @@ pub(crate) async fn update_pet(
   Ok(body)
 }
 
-// summary Add a new pet to the store
-// description Add a new pet to the store
-// operationId addPet
-#[api_operation]
+#[api_operation(
+  summary = "Add a new pet to the store",
+  description = "Add a new pet to the store\
+  Plop"
+)]
 pub(crate) async fn add_pet(
   // Create a new pet in the store
   body: Json<Pet>,
@@ -31,9 +32,8 @@ pub(crate) async fn add_pet(
   Ok(body)
 }
 
-// summary Find pet by ID
-// description Returns a single pet
-// operationId getPet
+/// Find pet by ID
+/// Returns a single pet
 #[api_operation]
 pub(crate) async fn get_pet(
   // Create a new pet in the store

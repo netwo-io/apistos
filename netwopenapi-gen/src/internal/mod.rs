@@ -8,7 +8,8 @@ use quote::ToTokens;
 use syn::punctuated::Punctuated;
 use syn::token::Comma;
 use syn::{
-  FnArg, GenericParam, Ident, ImplGenerics, ItemFn, ReturnType, Token, Type, TypeGenerics, TypeTraitObject, WhereClause,
+  Expr, FnArg, GenericParam, Ident, ImplGenerics, ItemFn, Lit, Meta, ReturnType, Token, Type, TypeGenerics,
+  TypeTraitObject, WhereClause,
 };
 
 mod components;
@@ -40,12 +41,49 @@ pub(crate) fn gen_open_api_impl(
         Some(true)
       }
     });
+
+    let doc_comments: Vec<String> = item_ast
+      .attrs
+      .iter()
+      .filter(|attr| match attr.path().get_ident() {
+        None => false,
+        Some(attr) => attr == "doc",
+      })
+      .into_iter()
+      .filter_map(|attr| match &attr.meta {
+        Meta::NameValue(nv) => {
+          if let Expr::Lit(ref doc_comment) = nv.value {
+            if let Lit::Str(ref comment) = doc_comment.lit {
+              Some(comment.value().trim().to_string())
+            } else {
+              None
+            }
+          } else {
+            None
+          }
+        }
+        Meta::Path(_) | Meta::List(_) => None,
+      })
+      .collect();
+    let description = &*doc_comments.join("\\\n");
+
     let operation = Operation {
       args: &args,
       responder_wrapper: &responder_wrapper,
       fn_name: &*item_ast.sig.ident.to_string(),
       operation_id: operation_attribute.operation_id,
       deprecated,
+      summary: operation_attribute
+        .summary
+        .as_ref()
+        .or_else(|| doc_comments.iter().next()),
+      description: operation_attribute.description.as_deref().or_else(|| {
+        if description.is_empty() {
+          None
+        } else {
+          Some(&description)
+        }
+      }),
     }
     .to_token_stream();
     let components = Components {

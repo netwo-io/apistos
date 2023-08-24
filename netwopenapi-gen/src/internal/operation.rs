@@ -9,6 +9,8 @@ pub struct Operation<'a> {
   pub fn_name: &'a str,
   pub operation_id: Option<Expr>,
   pub deprecated: Option<bool>,
+  pub summary: Option<&'a String>,
+  pub description: Option<&'a str>,
 }
 
 impl<'a> ToTokens for Operation<'a> {
@@ -39,6 +41,18 @@ impl<'a> ToTokens for Operation<'a> {
         false => quote!(Some(utoipa::openapi::Deprecated::False)),
       })
       .unwrap_or_else(|| quote!(None));
+    let summary = match self.summary {
+      None => quote!(),
+      Some(s) => {
+        quote!(operation_builder = operation_builder.summary(Some(#s));)
+      }
+    };
+    let description = match self.description {
+      None => quote!(),
+      Some(d) => {
+        quote!(operation_builder = operation_builder.description(Some(#d));)
+      }
+    };
 
     tokens.extend(quote!(
       fn operation() -> utoipa::openapi::path::Operation {
@@ -70,10 +84,12 @@ impl<'a> ToTokens for Operation<'a> {
 
         operation_builder = operation_builder.deprecated(#deprecated);
 
+        #summary
+        #description
+
           // .securities(None)
-          // .summary(None)
-          // .description(None)
           // .tag("")
+
         operation_builder.build()
       }
     ))
