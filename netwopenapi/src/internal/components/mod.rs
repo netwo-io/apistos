@@ -2,10 +2,14 @@ use crate::actix::ResponseWrapper;
 use crate::path_item_definition::PathItemDefinition;
 use actix_web::web::{Data, ReqData};
 use actix_web::Responder;
+use std::collections::BTreeMap;
 use std::future::Future;
 use utoipa::openapi::path::Parameter;
 use utoipa::openapi::request_body::{RequestBody, RequestBodyBuilder};
-use utoipa::openapi::{ContentBuilder, Ref, RefOr, Required, ResponseBuilder, Responses, ResponsesBuilder, Schema};
+use utoipa::openapi::security::SecurityScheme;
+use utoipa::openapi::{
+  ContentBuilder, Ref, RefOr, Required, ResponseBuilder, Responses, ResponsesBuilder, Schema, SecurityRequirement,
+};
 
 pub mod empty;
 pub mod json;
@@ -25,6 +29,14 @@ pub trait ApiComponent {
   }
 
   fn schema() -> Option<(String, RefOr<Schema>)>;
+
+  fn securities() -> BTreeMap<String, SecurityScheme> {
+    Default::default()
+  }
+
+  fn security_requirement_name() -> Option<String> {
+    None
+  }
 
   fn request_body() -> Option<RequestBody> {
     Self::schema().map(|(name, _)| {
@@ -65,6 +77,14 @@ where
 
   fn raw_schema() -> Option<RefOr<Schema>> {
     T::raw_schema()
+  }
+
+  fn security_requirement_name() -> Option<String> {
+    T::security_requirement_name()
+  }
+
+  fn securities() -> BTreeMap<String, SecurityScheme> {
+    T::securities()
   }
 }
 

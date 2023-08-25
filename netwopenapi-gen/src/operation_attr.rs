@@ -1,8 +1,10 @@
-use proc_macro2::Ident;
+use proc_macro2::{Group, Ident};
 use proc_macro_error::abort;
-use quote::ToTokens;
+use std::collections::BTreeMap;
 use syn::parse::{Parse, ParseStream};
-use syn::{Expr, Token};
+use syn::punctuated::Punctuated;
+use syn::token::Comma;
+use syn::{bracketed, Expr, LitStr, Token};
 
 #[derive(Default)]
 pub struct OperationAttr {
@@ -12,6 +14,7 @@ pub struct OperationAttr {
   pub summary: Option<String>,
   pub description: Option<String>,
   pub tags: Vec<String>,
+  pub scopes: BTreeMap<String, Vec<String>>,
 }
 
 impl Parse for OperationAttr {
@@ -44,48 +47,54 @@ impl Parse for OperationAttr {
             Ok(_) => (),
             Err(e) => abort!(e.span(), "Missing = before value assignment"),
           };
-          let description = Expr::parse(input)?.to_token_stream().to_string();
-          let description = description
-            .trim_end_matches(|c| c == '"')
-            .trim_start_matches(|c| c == '"');
-          operation_attr.description = Some(description.to_owned());
+          let description = input.parse::<LitStr>()?.value().replace('\n', "\\\n");
+          operation_attr.description = Some(description);
         }
         "summary" => {
           match input.parse::<Token![=]>() {
             Ok(_) => (),
             Err(e) => abort!(e.span(), "Missing = before value assignment"),
           };
-          let summary = Expr::parse(input)?.to_token_stream().to_string();
-          let summary = summary.trim_end_matches(|c| c == '"').trim_start_matches(|c| c == '"');
-          operation_attr.summary = Some(summary.to_owned());
+          let summary = input.parse::<LitStr>()?.value();
+          operation_attr.summary = Some(summary);
         }
         "tags" => {
           match input.parse::<Token![=]>() {
             Ok(_) => (),
             Err(e) => abort!(e.span(), "Missing = before value assignment"),
           };
-          let tags = Expr::parse(input)?;
-          match tags {
-            Expr::Array(arr) => {
-              operation_attr.tags = arr
-                .elems
-                .iter()
-                .map(|expr| {
-                  let tag = expr.to_token_stream().to_string();
-                  tag
-                    .trim_end_matches(|c| c == '"')
-                    .trim_start_matches(|c| c == '"')
-                    .to_string()
-                })
-                .collect()
-            }
-            _ => {
-              return Err(syn::Error::new(
-                ident.span(),
-                "unexpected value, expect an array for tags",
-              ));
-            }
-          }
+          let tags;
+          bracketed!(tags in input);
+          let tags = Punctuated::<LitStr, Comma>::parse_terminated(&tags)?
+            .iter()
+            .map(LitStr::value)
+            .collect::<Vec<_>>();
+          operation_attr.tags = tags;
+        }
+        "scopes" => {
+          match input.parse::<Token![=]>() {
+            Ok(_) => (),
+            Err(e) => abort!(e.span(), "Missing = before value assignment"),
+          };
+          let scope_groups;
+          bracketed!(scope_groups in input);
+          let scope_groups: Vec<(String, Vec<String>)> = Punctuated::<Group, Comma>::parse_terminated(&scope_groups)?
+            .into_iter()
+            .map(|group| {
+              let input = group.stream();
+              if input.is_empty() {
+                return Ok(None);
+              }
+              syn::parse2::<SecurityScopes>(input)
+                .map(|SecurityScopes { name, scopes }| (name.clone(), scopes.clone()))
+                .map(Some)
+            })
+            .collect::<syn::Result<Vec<Option<_>>>>()?
+            .into_iter()
+            .flatten()
+            .collect();
+          let scopes = BTreeMap::from_iter(scope_groups);
+          operation_attr.scopes = scopes;
         }
         _ => {
           //@todo fix message
@@ -99,5 +108,24 @@ impl Parse for OperationAttr {
     }
 
     Ok(operation_attr)
+  }
+}
+
+pub struct SecurityScopes {
+  name: String,
+  scopes: Vec<String>,
+}
+
+impl Parse for SecurityScopes {
+  fn parse(input: ParseStream) -> syn::Result<Self> {
+    let name = input.parse::<LitStr>()?.value();
+    input.parse::<Token![=]>()?;
+    let scopes;
+    bracketed!(scopes in input);
+    let scopes = Punctuated::<LitStr, Comma>::parse_terminated(&scopes)?
+      .iter()
+      .map(LitStr::value)
+      .collect::<Vec<_>>();
+    Ok(Self { name, scopes })
   }
 }

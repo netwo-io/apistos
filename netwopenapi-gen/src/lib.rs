@@ -1,11 +1,14 @@
 use crate::internal::{extract_generics_params, gen_item_ast, gen_open_api_impl};
+use crate::openapi_security_attr::parse_openapi_security_attrs;
 use crate::operation_attr::OperationAttr;
+use convert_case::{Case, Casing};
 use proc_macro::TokenStream;
-use proc_macro_error::{abort, proc_macro_error};
+use proc_macro_error::{abort, proc_macro_error, OptionExt};
 use quote::quote;
 use syn::{Data, DeriveInput, Ident, ItemFn, Type};
 
 mod internal;
+mod openapi_security_attr;
 mod operation_attr;
 
 const OPENAPI_STRUCT_PREFIX: &str = "__openapi_";
@@ -56,6 +59,51 @@ pub fn derive_api_component(input: TokenStream) -> TokenStream {
   ).into()
 }
 
+#[proc_macro_error]
+#[proc_macro_derive(ApiSecurity, attributes(openapi_security))]
+pub fn derive_api_security(input: TokenStream) -> TokenStream {
+  let input = syn::parse_macro_input!(input as DeriveInput);
+  let DeriveInput {
+    attrs,
+    ident,
+    data: _data,
+    generics,
+    vis: _vis,
+  } = input;
+
+  let openapi_security_attributes = parse_openapi_security_attrs(&attrs).expect_or_abort(
+    "expected #[openapi_security(...)] attribute to be present when used with ApiSecurity derive trait",
+  );
+  let security_name: String = ident.to_string().to_case(Case::Snake);
+
+  let (_, ty_generics, where_clause) = generics.split_for_impl();
+  let res = quote!(
+    impl #generics netwopenapi::ApiComponent for #ident #ty_generics #where_clause {
+      fn child_schemas() -> Vec<(String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)> {
+        vec![]
+      }
+
+      fn schema() -> Option<(String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)> {
+        None
+      }
+
+      fn securities() -> std::collections::BTreeMap<String, utoipa::openapi::security::SecurityScheme> {
+        std::collections::BTreeMap::from_iter(
+          vec![(
+            #security_name.to_string(),
+            #openapi_security_attributes
+          )]
+        )
+      }
+
+      fn security_requirement_name() -> Option<String> {
+        Some(#security_name.to_string())
+      }
+    }
+  );
+  res.into()
+}
+
 /// Todo: doc
 #[proc_macro_error]
 #[proc_macro_attribute]
@@ -100,12 +148,10 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
     responder_wrapper,
   );
 
-  let res = quote!(
+  quote!(
     #open_api_def
 
     #generated_item_ast
-  );
-
-  // eprintln!("{:#}", res.to_string());
-  res.into()
+  )
+  .into()
 }

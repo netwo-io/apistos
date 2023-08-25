@@ -1,6 +1,8 @@
+use crate::internal::security::Security;
 use proc_macro2::{Span, TokenStream};
 use proc_macro_error::abort;
 use quote::{quote, ToTokens};
+use std::collections::BTreeMap;
 use syn::{Expr, ExprLit, Lit, LitStr, Type};
 
 pub struct Operation<'a> {
@@ -12,6 +14,7 @@ pub struct Operation<'a> {
   pub summary: Option<&'a String>,
   pub description: Option<&'a str>,
   pub tags: &'a [String],
+  pub scopes: BTreeMap<String, Vec<String>>,
 }
 
 impl<'a> ToTokens for Operation<'a> {
@@ -65,6 +68,10 @@ impl<'a> ToTokens for Operation<'a> {
         operation_builder = operation_builder.tags(Some(tags));
       }
     };
+    let security = Security {
+      args,
+      scopes: &self.scopes,
+    };
 
     tokens.extend(quote!(
       fn operation() -> utoipa::openapi::path::Operation {
@@ -92,6 +99,13 @@ impl<'a> ToTokens for Operation<'a> {
           operation_builder = operation_builder.responses(responses);
         }
 
+        let securities = {
+          #security
+        };
+        if !securities.is_empty() {
+          operation_builder = operation_builder.securities(Some(securities));
+        }
+
         operation_builder = operation_builder.operation_id(Some(#operation_id));
 
         operation_builder = operation_builder.deprecated(#deprecated);
@@ -100,8 +114,6 @@ impl<'a> ToTokens for Operation<'a> {
         #description
 
         #tags
-
-          // .securities(None)
 
         operation_builder.build()
       }

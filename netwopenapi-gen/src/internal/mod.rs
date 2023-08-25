@@ -14,6 +14,7 @@ use syn::{
 
 mod components;
 mod operation;
+pub(crate) mod security;
 
 pub(crate) fn gen_open_api_impl(
   item_ast: &ItemFn,
@@ -85,6 +86,7 @@ pub(crate) fn gen_open_api_impl(
         }
       }),
       tags: &operation_attribute.tags,
+      scopes: operation_attribute.scopes,
     }
     .to_token_stream();
     let components = Components {

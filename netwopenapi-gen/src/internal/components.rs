@@ -16,6 +16,12 @@ impl<'a> ToTokens for Components<'a> {
         use netwopenapi::ApiComponent;
         let mut component_builder = utoipa::openapi::ComponentsBuilder::new();
 
+        #(
+          for (name, security) in <#args>::securities() {
+            component_builder = component_builder.security_scheme(name, security);
+          }
+        )*
+
         let mut schemas = vec![];
         #(
           schemas.push(<#args>::schema());
