@@ -66,7 +66,12 @@ pub(crate) fn gen_open_api_impl(
         Meta::Path(_) | Meta::List(_) => None,
       })
       .collect();
-    let description = &*doc_comments.join("\\\n");
+    let description = &*doc_comments
+      .clone()
+      .into_iter()
+      .skip(1)
+      .collect::<Vec<String>>()
+      .join("\\\n");
 
     let operation = Operation {
       args: &args,

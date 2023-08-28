@@ -1,5 +1,5 @@
 use crate::api::error::ErrorResponse;
-use crate::api::models::{Pet, QueryStatus, QueryTag, Status, Tag};
+use crate::api::models::{Pet, PetUpdatesQuery, QueryStatus, QueryTag, Status, Tag};
 use crate::api::security::ApiKey;
 use actix_web::web::{Json, Path, Query};
 use actix_web::Error;
@@ -17,6 +17,7 @@ pub(crate) async fn update_pet(
   Ok(body)
 }
 
+//@todo use multipart form instead
 #[api_operation(
   tags = ["pet"],
   summary = "Add a new pet to the store",
@@ -34,7 +35,7 @@ pub(crate) async fn add_pet(
 
 /// Find pet by ID
 /// Returns a single pet
-#[api_operation(tags = ["pet"], scopes = [("api_key" = ["pet:read"])])]
+#[api_operation(tags = ["pet"], scopes = [("api_key" = ["read:pets"])])]
 pub(crate) async fn get_pet(
   // Create a new pet in the store
   pet_id: Path<Uuid>,
@@ -46,7 +47,7 @@ pub(crate) async fn get_pet(
 
 /// Find pet by ID
 /// Returns a single pet
-#[api_operation(tags = ["pet"], scopes = [("api_key" = ["pet:read"])])]
+#[api_operation(tags = ["pet"], scopes = [("api_key" = ["read:pets"])])]
 pub(crate) async fn find_by_status(
   // Create a new pet in the store
   status: Query<QueryStatus>,
@@ -58,11 +59,21 @@ pub(crate) async fn find_by_status(
 /// Find pet by ID
 /// Returns a single pet
 #[deprecated]
-#[api_operation(tags = ["pet"], scopes = [("api_key" = ["pet:read"])])]
+#[api_operation(tags = ["pet"], scopes = [("api_key" = ["read:pets"])])]
 pub(crate) async fn find_by_tags(
   // Create a new pet in the store
   tags: Query<QueryTag>, //@todo add serde_qs
   key: Option<ApiKey>,
+) -> Result<Option<Json<Pet>>, ErrorResponse> {
+  todo!()
+}
+
+/// Updates a pet in the store with form data
+#[api_operation(tags = ["pet"], scopes = [("api_key" = ["write:pets", "read:pets"])])]
+pub(crate) async fn update_pet_with_form(
+  // ID of pet that needs to be updated
+  pet_id: Path<Uuid>,
+  query: Query<PetUpdatesQuery>,
 ) -> Result<Option<Json<Pet>>, ErrorResponse> {
   todo!()
 }

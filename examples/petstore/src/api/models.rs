@@ -51,3 +51,9 @@ pub(crate) struct QueryStatus {
 pub(crate) struct QueryTag {
   pub(crate) tags: Vec<String>,
 }
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema, ApiComponent)]
+pub(crate) struct PetUpdatesQuery {
+  pub(crate) name: String,
+  pub(crate) status: String,
+}
