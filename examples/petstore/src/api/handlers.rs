@@ -8,7 +8,7 @@ use netwopenapi::api_operation;
 use netwopenapi::ApiComponent;
 use uuid::Uuid;
 
-#[api_operation]
+#[api_operation(tags = ["pet"])]
 pub(crate) async fn update_pet(
   // Create a new pet in the store
   body: Json<Pet>,
@@ -18,6 +18,7 @@ pub(crate) async fn update_pet(
 }
 
 #[api_operation(
+  tags = ["pet"],
   summary = "Add a new pet to the store",
   description = r###"Add a new pet to the store
   Plop"###,
@@ -33,7 +34,7 @@ pub(crate) async fn add_pet(
 
 /// Find pet by ID
 /// Returns a single pet
-#[api_operation(tags = ["pet", "test"], scopes = [("api_key" = ["pet:read"])])]
+#[api_operation(tags = ["pet"], scopes = [("api_key" = ["pet:read"])])]
 pub(crate) async fn get_pet(
   // Create a new pet in the store
   pet_id: Path<Uuid>,
@@ -45,7 +46,7 @@ pub(crate) async fn get_pet(
 
 /// Find pet by ID
 /// Returns a single pet
-#[api_operation(tags = ["pet", "test"], scopes = [("api_key" = ["pet:read"])])]
+#[api_operation(tags = ["pet"], scopes = [("api_key" = ["pet:read"])])]
 pub(crate) async fn find_by_status(
   // Create a new pet in the store
   status: Query<QueryStatus>,
@@ -57,7 +58,7 @@ pub(crate) async fn find_by_status(
 /// Find pet by ID
 /// Returns a single pet
 #[deprecated]
-#[api_operation(tags = ["pet", "test"], scopes = [("api_key" = ["pet:read"])])]
+#[api_operation(tags = ["pet"], scopes = [("api_key" = ["pet:read"])])]
 pub(crate) async fn find_by_tags(
   // Create a new pet in the store
   tags: Query<QueryTag>, //@todo add serde_qs

@@ -32,6 +32,13 @@ impl<T> OpenApiWrapper<T> for actix_web::App<T> {
   fn document(self, spec: Spec) -> Self::Wrapper {
     let mut open_api_spec = OpenApi::default();
     open_api_spec.info = spec.info;
+    if !spec.tags.is_empty() {
+      open_api_spec.tags = Some(spec.tags);
+    }
+    open_api_spec.external_docs = spec.external_docs;
+    if !spec.servers.is_empty() {
+      open_api_spec.servers = Some(spec.servers);
+    }
     App {
       open_api_spec: Arc::new(RwLock::new(open_api_spec)),
       inner: Some(self),
@@ -175,7 +182,7 @@ where
         for op in pi.operations.values_mut() {
           match &mut op.tags {
             None => op.tags = Some(self.default_tags.clone()),
-            Some(tags) => tags.append(&mut self.default_tags),
+            Some(tags) => tags.append(&mut self.default_tags.clone()),
           }
         }
       }
