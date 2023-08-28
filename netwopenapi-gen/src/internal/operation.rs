@@ -15,6 +15,7 @@ pub struct Operation<'a> {
   pub description: Option<&'a str>,
   pub tags: &'a [String],
   pub scopes: BTreeMap<String, Vec<String>>,
+  pub error_codes: &'a [u16],
 }
 
 impl<'a> ToTokens for Operation<'a> {
@@ -72,6 +73,28 @@ impl<'a> ToTokens for Operation<'a> {
       args,
       scopes: &self.scopes,
     };
+    let error_codes_filter = if self.error_codes.is_empty() {
+      quote!()
+    } else {
+      let error_codes = self.error_codes;
+      quote! {
+        let available_error_codes = vec![#(#error_codes)*,];
+        let responses = responses.responses
+          .into_iter()
+          .filter(|(status, _)| {
+            use std::str::FromStr;
+            let status = status.parse::<u16>();
+            if let Ok(status) = status {
+              if status >= 400 {
+                return available_error_codes.contains(&status);
+              }
+            }
+            true
+          })
+          .collect::<std::collections::BTreeMap<String, utoipa::openapi::RefOr<utoipa::openapi::Response>>>();
+       let responses = utoipa::openapi::ResponsesBuilder::new().responses_from_iter(responses).build();
+      }
+    };
 
     tokens.extend(quote!(
       fn operation() -> utoipa::openapi::path::Operation {
@@ -96,6 +119,7 @@ impl<'a> ToTokens for Operation<'a> {
         }
 
         if let Some(responses) = <#responder_wrapper>::responses() {
+          #error_codes_filter
           operation_builder = operation_builder.responses(responses);
         }
 

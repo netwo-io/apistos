@@ -9,7 +9,7 @@ use utoipa::openapi::path::Parameter;
 use utoipa::openapi::request_body::{RequestBody, RequestBodyBuilder};
 use utoipa::openapi::security::SecurityScheme;
 use utoipa::openapi::{
-  schema, ContentBuilder, Ref, RefOr, Required, Response, ResponseBuilder, Responses, ResponsesBuilder, Schema,
+  ContentBuilder, Ref, RefOr, Required, Response, ResponseBuilder, Responses, ResponsesBuilder, Schema,
 };
 
 pub mod empty;
@@ -56,8 +56,8 @@ pub trait ApiComponent {
     vec![]
   }
 
-  fn error_schemas() -> Vec<(String, RefOr<Schema>)> {
-    vec![]
+  fn error_schemas() -> BTreeMap<String, (String, RefOr<Schema>)> {
+    BTreeMap::default()
   }
 
   fn responses() -> Option<Responses> {
@@ -147,8 +147,8 @@ where
   }
 
   // We expect error to be present only for response part
-  fn error_schemas() -> Vec<(String, RefOr<Schema>)> {
-    E::schemas()
+  fn error_schemas() -> BTreeMap<String, (String, RefOr<Schema>)> {
+    E::schemas_by_status_code()
   }
 }
 
@@ -179,9 +179,7 @@ where
   P: PathItemDefinition,
 {
   fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
-    let mut schemas = R::child_schemas();
-    schemas.append(&mut R::error_schemas());
-    schemas
+    R::child_schemas()
   }
 
   fn schema() -> Option<(String, RefOr<Schema>)> {
@@ -194,6 +192,10 @@ where
 
   fn error_responses() -> Vec<(String, Response)> {
     R::error_responses()
+  }
+
+  fn error_schemas() -> BTreeMap<String, (String, RefOr<Schema>)> {
+    R::error_schemas()
   }
 
   fn responses() -> Option<Responses> {

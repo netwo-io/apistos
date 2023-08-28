@@ -87,13 +87,13 @@ pub(crate) fn gen_open_api_impl(
       }),
       tags: &operation_attribute.tags,
       scopes: operation_attribute.scopes,
-    }
-    .to_token_stream();
+      error_codes: &operation_attribute.error_codes,
+    };
     let components = Components {
       args: &args,
       responder_wrapper: &responder_wrapper,
-    }
-    .to_token_stream();
+      error_codes: &operation_attribute.error_codes,
+    };
 
     quote!(
       fn is_visible() -> bool {

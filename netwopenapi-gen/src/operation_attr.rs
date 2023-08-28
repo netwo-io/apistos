@@ -4,7 +4,7 @@ use std::collections::BTreeMap;
 use syn::parse::{Parse, ParseStream};
 use syn::punctuated::Punctuated;
 use syn::token::Comma;
-use syn::{bracketed, Expr, LitStr, Token};
+use syn::{bracketed, Expr, LitInt, LitStr, Token};
 
 #[derive(Default)]
 pub struct OperationAttr {
@@ -15,6 +15,7 @@ pub struct OperationAttr {
   pub description: Option<String>,
   pub tags: Vec<String>,
   pub scopes: BTreeMap<String, Vec<String>>,
+  pub error_codes: Vec<u16>,
 }
 
 impl Parse for OperationAttr {
@@ -95,6 +96,23 @@ impl Parse for OperationAttr {
             .collect();
           let scopes = BTreeMap::from_iter(scope_groups);
           operation_attr.scopes = scopes;
+        }
+        "error_codes" => {
+          match input.parse::<Token![=]>() {
+            Ok(_) => (),
+            Err(e) => abort!(e.span(), "Missing = before value assignment"),
+          };
+          let error_codes;
+          bracketed!(error_codes in input);
+          let error_codes = Punctuated::<LitInt, Comma>::parse_terminated(&error_codes)?
+            .iter()
+            .map(LitInt::base10_parse)
+            .collect::<syn::Result<Vec<u16>>>();
+          let error_codes = match error_codes {
+            Ok(error_codes) => error_codes,
+            Err(e) => abort!(e.span(), "Expected u16 status code"),
+          };
+          operation_attr.error_codes = error_codes;
         }
         _ => {
           //@todo fix message

@@ -37,9 +37,14 @@ impl ToTokens for OpenapiErrorAttribute {
         responses.into_iter().map(|v| v.0).collect()
       }
 
-      fn schemas() -> Vec<(String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)> {
-        let mut schemas = vec![#(#defs.1,)*];
-        schemas.into_iter().flatten().collect::<Vec<(String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)>>()
+      fn schemas_by_status_code() -> std::collections::BTreeMap<String, (String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)> {
+        let mut schemas = std::collections::BTreeMap::default();
+        for ((status_code, _), schema) in [#(#defs,)*] {
+          if let Some(schema) = schema {
+            schemas.insert(status_code, schema);
+          }
+        }
+        schemas
       }
     })
   }
