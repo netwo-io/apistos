@@ -141,7 +141,6 @@ where
   }
 
   pub fn build(self, openapi_path: &str) -> actix_web::App<T> {
-    //@todo handle default tag instead
     let open_api_spec = self.open_api_spec.read().unwrap().clone();
     self
       .inner
@@ -181,6 +180,5 @@ where
         }
       }
     }
-    //@todo security ?
   }
 }

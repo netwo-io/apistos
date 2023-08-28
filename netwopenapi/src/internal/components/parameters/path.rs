@@ -14,7 +14,7 @@ where
   }
 
   fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
-    None
+    vec![]
   }
 
   fn raw_schema() -> Option<RefOr<Schema>> {

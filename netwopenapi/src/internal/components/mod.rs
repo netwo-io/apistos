@@ -1,4 +1,5 @@
 use crate::actix::ResponseWrapper;
+use crate::internal::components::error::ApiErrorComponent;
 use crate::path_item_definition::PathItemDefinition;
 use actix_web::web::{Data, ReqData};
 use actix_web::Responder;
@@ -7,9 +8,12 @@ use std::future::Future;
 use utoipa::openapi::path::Parameter;
 use utoipa::openapi::request_body::{RequestBody, RequestBodyBuilder};
 use utoipa::openapi::security::SecurityScheme;
-use utoipa::openapi::{ContentBuilder, Ref, RefOr, Required, ResponseBuilder, Responses, ResponsesBuilder, Schema};
+use utoipa::openapi::{
+  schema, ContentBuilder, Ref, RefOr, Required, Response, ResponseBuilder, Responses, ResponsesBuilder, Schema,
+};
 
 pub mod empty;
+pub mod error;
 pub mod json;
 pub mod parameters;
 pub mod simple;
@@ -46,6 +50,14 @@ pub trait ApiComponent {
         .required(Some(Self::required()))
         .build()
     })
+  }
+
+  fn error_responses() -> Vec<(String, Response)> {
+    vec![]
+  }
+
+  fn error_schemas() -> Vec<(String, RefOr<Schema>)> {
+    vec![]
   }
 
   fn responses() -> Option<Responses> {
@@ -111,6 +123,7 @@ where
 impl<T, E> ApiComponent for Result<T, E>
 where
   T: ApiComponent,
+  E: ApiErrorComponent,
 {
   fn required() -> Required {
     T::required()
@@ -126,6 +139,16 @@ where
 
   fn schema() -> Option<(String, RefOr<Schema>)> {
     T::schema()
+  }
+
+  // We expect error to be present only for response part
+  fn error_responses() -> Vec<(String, Response)> {
+    E::error_responses()
+  }
+
+  // We expect error to be present only for response part
+  fn error_schemas() -> Vec<(String, RefOr<Schema>)> {
+    E::schemas()
   }
 }
 
@@ -156,7 +179,9 @@ where
   P: PathItemDefinition,
 {
   fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
-    R::child_schemas()
+    let mut schemas = R::child_schemas();
+    schemas.append(&mut R::error_schemas());
+    schemas
   }
 
   fn schema() -> Option<(String, RefOr<Schema>)> {
@@ -167,24 +192,28 @@ where
     R::raw_schema()
   }
 
+  fn error_responses() -> Vec<(String, Response)> {
+    R::error_responses()
+  }
+
   fn responses() -> Option<Responses> {
-    //@todo handle error
     Self::schema().map(|(name, schema)| {
       let _ref = match schema {
         RefOr::Ref(r) => r,
         RefOr::T(_) => Ref::from_schema_name(name),
       };
-      let mut responses = ResponsesBuilder::new();
-      responses = responses.response(
-        "200",
+      let mut responses = vec![];
+      responses.push((
+        "200".to_owned(),
         ResponseBuilder::new()
           .content(
             "application/json", //@todo how to infer it
             ContentBuilder::new().schema(_ref).build(),
           )
           .build(),
-      );
-      responses.build()
+      ));
+      responses.append(&mut Self::error_responses());
+      ResponsesBuilder::new().responses_from_iter(responses).build()
     })
   }
 }

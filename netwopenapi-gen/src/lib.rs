@@ -1,4 +1,5 @@
 use crate::internal::{extract_generics_params, gen_item_ast, gen_open_api_impl};
+use crate::openapi_error_attr::parse_openapi_error_attrs;
 use crate::openapi_security_attr::parse_openapi_security_attrs;
 use crate::operation_attr::OperationAttr;
 use convert_case::{Case, Casing};
@@ -8,6 +9,7 @@ use quote::quote;
 use syn::{Data, DeriveInput, Ident, ItemFn, Type};
 
 mod internal;
+mod openapi_error_attr;
 mod openapi_security_attr;
 mod operation_attr;
 
@@ -104,6 +106,32 @@ pub fn derive_api_security(input: TokenStream) -> TokenStream {
   res.into()
 }
 
+#[proc_macro_error]
+#[proc_macro_derive(ApiErrorComponent, attributes(openapi_error))]
+pub fn derive_api_error(input: TokenStream) -> TokenStream {
+  let input = syn::parse_macro_input!(input as DeriveInput);
+  let DeriveInput {
+    attrs,
+    ident,
+    data: _data,
+    generics,
+    vis: _vis,
+  } = input;
+
+  let openapi_error_attributes = parse_openapi_error_attrs(&attrs).expect_or_abort(
+    "expected #[openapi_error(...)] attribute to be present when used with ApiErrorComponent derive trait",
+  );
+
+  let (_, ty_generics, where_clause) = generics.split_for_impl();
+  let res = quote!(
+    impl #generics netwopenapi::ApiErrorComponent for #ident #ty_generics #where_clause {
+      #openapi_error_attributes
+    }
+  );
+  // eprintln!("{:#}", res);
+  res.into()
+}
+
 /// Todo: doc
 #[proc_macro_error]
 #[proc_macro_attribute]
@@ -148,10 +176,11 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
     responder_wrapper,
   );
 
-  quote!(
+  let res = quote!(
     #open_api_def
 
     #generated_item_ast
-  )
-  .into()
+  );
+  // eprintln!("{:#}", res);
+  res.into()
 }

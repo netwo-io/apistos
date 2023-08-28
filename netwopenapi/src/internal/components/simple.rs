@@ -11,18 +11,6 @@ macro_rules! simple_modifier {
       fn child_schemas() -> Vec<(String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)> {
         vec![]
       }
-      // fn raw_schema() -> Option<utoipa::openapi::RefOr<utoipa::openapi::Schema>> {
-      //   #[derive(utoipa::ToSchema)]
-      //   struct tmp_api_component {
-      //     tmp: $ty,
-      //   }
-      //   let schema: utoipa::openapi::RefOr<utoipa::openapi::Schema> = utoipa::schema!(
-      //     #[inline]
-      //     tmp_api_component
-      //   )
-      //   .into();
-      //   Some(schema)
-      // }
       fn raw_schema() -> Option<utoipa::openapi::RefOr<utoipa::openapi::Schema>> {
         let schema: utoipa::openapi::RefOr<utoipa::openapi::Schema> = utoipa::schema!(
           #[inline]
