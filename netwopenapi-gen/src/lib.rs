@@ -42,7 +42,7 @@ pub fn derive_api_component(input: TokenStream) -> TokenStream {
       fn child_schemas() -> Vec<(String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)> {
         let mut schemas: Vec<Option<(String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)>> = vec![];
         #(
-          schemas.push(<#childs>::schema());
+          schemas.push(<#childs as ApiComponent>::schema());
         )*
         let mut schemas = schemas.into_iter().flatten().collect::<Vec<(String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)>>();
         #(

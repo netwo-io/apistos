@@ -1,6 +1,7 @@
 use crate::ApiComponent;
 use actix_web::web::Query;
 use utoipa::openapi::path::{Parameter, ParameterBuilder, ParameterIn};
+use utoipa::openapi::request_body::RequestBody;
 use utoipa::openapi::{RefOr, Required, Schema};
 
 impl<T> ApiComponent for Query<T>
@@ -12,7 +13,7 @@ where
   }
 
   fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
-    T::child_schemas()
+    vec![]
   }
 
   fn raw_schema() -> Option<RefOr<Schema>> {
@@ -20,13 +21,16 @@ where
   }
 
   fn schema() -> Option<(String, RefOr<Schema>)> {
-    T::schema()
+    None
+  }
+
+  fn request_body() -> Option<RequestBody> {
+    None
   }
 
   fn parameters() -> Vec<Parameter> {
     let mut parameters = vec![];
-    let schema = Self::schema().map(|(_, sch)| sch).or_else(|| Self::raw_schema());
-
+    let schema = T::schema().map(|(_, sch)| sch).or_else(|| Self::raw_schema());
     if let Some(schema) = schema {
       match schema {
         RefOr::Ref(_ref) => {

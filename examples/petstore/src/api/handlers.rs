@@ -1,16 +1,10 @@
-use crate::api::error::ErrorResponse;
-use crate::api::models::{Category, Pet, Status, Tag};
+use crate::api::models::{Pet, QueryStatus, QueryTag, Status, Tag};
 use crate::api::security::ApiKey;
-use actix_web::web::{Json, Path};
+use actix_web::web::{Json, Path, Query};
 use actix_web::Error;
-use netwopenapi::actix::{CreatedJson, ResponseWrapper};
+use netwopenapi::actix::CreatedJson;
 use netwopenapi::api_operation;
-use netwopenapi::path_item_definition::PathItemDefinition;
 use netwopenapi::ApiComponent;
-use std::collections::BTreeMap;
-use std::sync::Arc;
-use utoipa::openapi::path::Operation;
-use utoipa::openapi::{Components, ComponentsBuilder, PathItem};
 use uuid::Uuid;
 
 #[api_operation]
@@ -44,4 +38,27 @@ pub(crate) async fn get_pet(
   key: Option<ApiKey>,
 ) -> Result<Option<Json<Pet>>, Error> {
   Ok(None)
+}
+
+/// Find pet by ID
+/// Returns a single pet
+#[api_operation(tags = ["pet", "test"], scopes = [("api_key" = ["pet:read"])])]
+pub(crate) async fn find_by_status(
+  // Create a new pet in the store
+  status: Query<QueryStatus>,
+  key: Option<ApiKey>,
+) -> Result<Option<Json<Pet>>, Error> {
+  todo!()
+}
+
+/// Find pet by ID
+/// Returns a single pet
+#[deprecated]
+#[api_operation(tags = ["pet", "test"], scopes = [("api_key" = ["pet:read"])])]
+pub(crate) async fn find_by_tags(
+  // Create a new pet in the store
+  tags: Query<QueryTag>, //@todo add serde_qs
+  key: Option<ApiKey>,
+) -> Result<Option<Json<Pet>>, Error> {
+  todo!()
 }

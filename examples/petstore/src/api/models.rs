@@ -41,3 +41,13 @@ pub(crate) struct Tag {
   pub(crate) id: Option<i64>,
   pub(crate) name: Option<String>,
 }
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema, ApiComponent)]
+pub(crate) struct QueryStatus {
+  pub(crate) status: Status,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema, ApiComponent)]
+pub(crate) struct QueryTag {
+  pub(crate) tags: Vec<String>,
+}

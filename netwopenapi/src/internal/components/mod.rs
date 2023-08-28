@@ -7,9 +7,7 @@ use std::future::Future;
 use utoipa::openapi::path::Parameter;
 use utoipa::openapi::request_body::{RequestBody, RequestBodyBuilder};
 use utoipa::openapi::security::SecurityScheme;
-use utoipa::openapi::{
-  ContentBuilder, Ref, RefOr, Required, ResponseBuilder, Responses, ResponsesBuilder, Schema, SecurityRequirement,
-};
+use utoipa::openapi::{ContentBuilder, Ref, RefOr, Required, ResponseBuilder, Responses, ResponsesBuilder, Schema};
 
 pub mod empty;
 pub mod json;
