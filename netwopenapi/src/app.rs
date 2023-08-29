@@ -13,6 +13,12 @@ use std::future::Future;
 use std::sync::{Arc, RwLock};
 use std::{fmt, mem};
 use utoipa::openapi::OpenApi;
+#[cfg(feature = "rapidoc")]
+use utoipa_rapidoc::RapiDoc;
+#[cfg(feature = "redoc")]
+use utoipa_redoc::{Redoc, Servable};
+#[cfg(feature = "swagger-ui")]
+use utoipa_swagger_ui::SwaggerUi;
 
 pub trait OpenApiWrapper<T> {
   type Wrapper;
@@ -153,6 +159,33 @@ where
       .inner
       .expect("Missing app")
       .service(resource(openapi_path).route(get().to(OASHandler::new(open_api_spec))))
+  }
+
+  #[cfg(feature = "rapidoc")]
+  pub fn build_with_rapidoc(self, ui_path: &'static str, openapi_path: &'static str) -> actix_web::App<T> {
+    let open_api_spec = self.open_api_spec.read().unwrap().clone();
+    self
+      .inner
+      .expect("Missing app")
+      .service(RapiDoc::with_openapi(openapi_path, open_api_spec).path(ui_path))
+  }
+
+  #[cfg(feature = "redoc")]
+  pub fn build_with_redoc(self, openapi_path: &'static str) -> actix_web::App<T> {
+    let open_api_spec = self.open_api_spec.read().unwrap().clone();
+    self
+      .inner
+      .expect("Missing app")
+      .service(Redoc::with_url(openapi_path, open_api_spec))
+  }
+
+  #[cfg(feature = "swagger-ui")]
+  pub fn build_with_swagger(self, ui_path: &'static str, openapi_path: &'static str) -> actix_web::App<T> {
+    let open_api_spec = self.open_api_spec.read().unwrap().clone();
+    self
+      .inner
+      .expect("Missing app")
+      .service(SwaggerUi::new(format!("{ui_path}/{{_:.*}}")).url(openapi_path, open_api_spec))
   }
 
   /// Updates the underlying spec with definitions and operations from the given factory.

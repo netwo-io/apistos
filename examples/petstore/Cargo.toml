@@ -19,9 +19,8 @@ future-utils = "0.12"
 log = "0.4"
 futures = "0.3"
 utoipa = { version = "3", features = ["actix_extras", "debug"] }
-utoipa-swagger-ui = { version = "3", features = ["actix-web"] }
 uuid = { version = "1", features = ["serde", "v4"] }
 
-netwopenapi = { path = "../../netwopenapi", features = ["extras"] }
+netwopenapi = { path = "../../netwopenapi", features = ["extras", "swagger-ui", "rapidoc", "redoc"] }
 
 [workspace]

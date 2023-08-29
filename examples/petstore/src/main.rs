@@ -54,7 +54,9 @@ async fn main() -> Result<(), impl Error> {
       .document(spec)
       .wrap(Logger::default())
       .service(scope("/test").service(routes()))
-      .build("/openapi.json")
+      .build_with_swagger("swagger", "/openapi.json")
+      // .build_with_rapidoc("rapidoc", "/openapi.json")
+      // .build_with_redoc("/openapi.json")
   })
     .workers(1)
     .bind((Ipv4Addr::UNSPECIFIED, 8080))?
