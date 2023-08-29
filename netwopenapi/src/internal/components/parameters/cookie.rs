@@ -1,5 +1,6 @@
 use crate::ApiComponent;
 use utoipa::openapi::path::{Parameter, ParameterBuilder, ParameterIn};
+use utoipa::openapi::request_body::RequestBody;
 use utoipa::openapi::{Deprecated, RefOr, Required, Schema};
 
 pub trait ApiCookie {
@@ -27,6 +28,10 @@ where
 
   fn schema() -> Option<(String, RefOr<Schema>)> {
     <T as ApiCookie>::schema()
+  }
+
+  fn request_body() -> Option<RequestBody> {
+    None
   }
 
   fn parameters() -> Vec<Parameter> {

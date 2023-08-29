@@ -49,10 +49,6 @@ simple_modifier!(usize);
 // impl_simple!(rust_decimal::Decimal);
 // #[cfg(feature = "url")]
 // impl_simple!(url::Url);
-// #[cfg(feature = "uuid0")]
-// impl_simple!(uuid0_dep::Uuid);
-// #[cfg(feature = "uuid1")]
-// impl_simple!(uuid1_dep::Uuid);
 
 // #[cfg(any(feature = "bytes", feature = "extras"))]
 // simple_modifier!(Bytes);

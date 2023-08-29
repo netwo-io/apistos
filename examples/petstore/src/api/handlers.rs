@@ -6,6 +6,7 @@ use actix_web::Error;
 use netwopenapi::actix::CreatedJson;
 use netwopenapi::api_operation;
 use netwopenapi::ApiComponent;
+use serde_qs::actix::QsQuery;
 use std::collections::HashMap;
 use uuid::Uuid;
 
@@ -63,7 +64,7 @@ pub(crate) async fn find_by_status(
 #[api_operation(tags = ["pet"], scopes = [("api_key" = ["read:pets"])])]
 pub(crate) async fn find_by_tags(
   // Create a new pet in the store
-  tags: Query<QueryTag>, //@todo add serde_qs
+  tags: QsQuery<QueryTag>,
   key: ApiKey,
 ) -> Result<Option<Json<Pet>>, ErrorResponse> {
   todo!()

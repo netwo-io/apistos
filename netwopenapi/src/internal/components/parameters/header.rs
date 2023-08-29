@@ -1,6 +1,7 @@
 use crate::ApiComponent;
 use actix_web::web::Header;
 use utoipa::openapi::path::{Parameter, ParameterBuilder, ParameterIn, ParameterStyle};
+use utoipa::openapi::request_body::RequestBody;
 use utoipa::openapi::{Deprecated, RefOr, Required, Schema};
 
 pub trait ApiHeader {
@@ -30,6 +31,10 @@ where
 
   fn schema() -> Option<(String, RefOr<Schema>)> {
     T::schema()
+  }
+
+  fn request_body() -> Option<RequestBody> {
+    None
   }
 
   fn parameters() -> Vec<Parameter> {

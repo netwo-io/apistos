@@ -3,7 +3,6 @@ use darling::FromMeta;
 use proc_macro2::{Span, TokenStream};
 use proc_macro_error::abort;
 use quote::{quote, ToTokens};
-use syn::parse::{Parse, ParseStream};
 use syn::{Attribute, Type};
 
 pub fn parse_openapi_cookie_attrs(

@@ -2,7 +2,6 @@ use darling::FromMeta;
 use proc_macro2::{Span, TokenStream};
 use proc_macro_error::abort;
 use quote::{quote, ToTokens};
-use syn::parse::Parse;
 use syn::Attribute;
 
 pub const RESERVED_HEADERS: &[&str] = &["Accept", "Content-Type", "Authorization"];

@@ -10,7 +10,7 @@ use convert_case::{Case, Casing};
 use proc_macro::TokenStream;
 use proc_macro_error::{abort, proc_macro_error, OptionExt};
 use quote::quote;
-use syn::{Data, DeriveInput, Ident, ItemFn, Type};
+use syn::{DeriveInput, Ident, ItemFn, Type};
 
 mod internal;
 mod openapi_cookie_attr;

@@ -4,7 +4,6 @@ use crate::operation_attr::OperationAttr;
 use proc_macro2::{Span, TokenStream as TokenStream2};
 use proc_macro_error::emit_error;
 use quote::quote;
-use quote::ToTokens;
 use syn::punctuated::Punctuated;
 use syn::token::Comma;
 use syn::{

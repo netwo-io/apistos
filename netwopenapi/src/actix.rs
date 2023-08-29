@@ -10,6 +10,7 @@ use std::future::Future;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 use utoipa::openapi::path::Operation;
+use utoipa::openapi::request_body::RequestBody;
 use utoipa::openapi::{Components, ContentBuilder, Ref, RefOr, ResponseBuilder, Responses, ResponsesBuilder, Schema};
 
 #[pin_project]
@@ -156,6 +157,10 @@ where
 
   fn schema() -> Option<(String, RefOr<Schema>)> {
     T::schema()
+  }
+
+  fn request_body() -> Option<RequestBody> {
+    None
   }
 
   fn responses() -> Option<Responses> {
