@@ -7,17 +7,17 @@ use syn::parse::{Parse, ParseStream};
 use syn::Attribute;
 
 pub fn parse_openapi_error_attrs(attrs: &[Attribute]) -> Option<OpenapiErrorAttribute> {
-  let security_schemes_res = attrs
+  let error_attribute = attrs
     .iter()
     .filter(|attribute| attribute.path().is_ident("openapi_error"))
     .map(|attribute| OpenapiErrorAttribute::from_meta(&attribute.meta))
     .collect::<darling::Result<Vec<OpenapiErrorAttribute>>>();
 
-  match security_schemes_res {
-    Ok(security_schemes) if security_schemes.len() > 1 => {
+  match error_attribute {
+    Ok(error_attributes) if error_attributes.len() > 1 => {
       abort!(Span::call_site(), "Expected only one #[openapi_error] attribute")
     }
-    Ok(security_schemes) => security_schemes.first().cloned(),
+    Ok(error_attributes) => error_attributes.first().cloned(),
     Err(e) => abort!(e.span(), "Unable to parse #[openapi_error] attribute: {:?}", e),
   }
 }

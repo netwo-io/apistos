@@ -1,4 +1,7 @@
-use netwopenapi::ApiComponent;
+use actix_web::error::ParseError;
+use actix_web::http::header::{Header, HeaderName, HeaderValue, InvalidHeaderValue, TryIntoHeaderValue};
+use actix_web::{FromRequest, HttpMessage};
+use netwopenapi::{ApiComponent, ApiHeader};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
@@ -56,4 +59,33 @@ pub(crate) struct QueryTag {
 pub(crate) struct PetUpdatesQuery {
   pub(crate) name: String,
   pub(crate) status: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema, ApiComponent, ApiHeader)]
+#[openapi_header(name = "X-Organization-Slug", description = "Organization of the current caller")]
+pub(crate) struct OrganizationSlug(String);
+
+impl TryIntoHeaderValue for OrganizationSlug {
+  type Error = InvalidHeaderValue;
+
+  fn try_into_value(self) -> Result<HeaderValue, Self::Error> {
+    HeaderValue::from_str(&self.0)
+  }
+}
+
+impl Header for OrganizationSlug {
+  fn name() -> HeaderName {
+    HeaderName::from_static("X-Organization-Slug")
+  }
+
+  fn parse<M: HttpMessage>(msg: &M) -> Result<Self, ParseError> {
+    msg
+      .headers()
+      .get(<Self as Header>::name())
+      .map(|value| value.to_str())
+      .transpose()
+      .map_err(|e| ParseError::Header)?
+      .map(|value| OrganizationSlug(value.to_string()))
+      .ok_or_else(|| ParseError::Header)
+  }
 }

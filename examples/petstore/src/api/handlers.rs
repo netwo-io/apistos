@@ -1,7 +1,7 @@
 use crate::api::error::ErrorResponse;
-use crate::api::models::{Pet, PetUpdatesQuery, QueryStatus, QueryTag, Status, Tag};
+use crate::api::models::{OrganizationSlug, Pet, PetUpdatesQuery, QueryStatus, QueryTag, Status, Tag};
 use crate::api::security::ApiKey;
-use actix_web::web::{Json, Path, Query};
+use actix_web::web::{Header, Json, Path, Query};
 use actix_web::Error;
 use netwopenapi::actix::CreatedJson;
 use netwopenapi::api_operation;
@@ -52,7 +52,7 @@ pub(crate) async fn get_pet(
 pub(crate) async fn find_by_status(
   // Create a new pet in the store
   status: Query<QueryStatus>,
-  key: Option<ApiKey>,
+  key: ApiKey,
 ) -> Result<Option<Json<Pet>>, ErrorResponse> {
   todo!()
 }
@@ -64,7 +64,7 @@ pub(crate) async fn find_by_status(
 pub(crate) async fn find_by_tags(
   // Create a new pet in the store
   tags: Query<QueryTag>, //@todo add serde_qs
-  key: Option<ApiKey>,
+  key: ApiKey,
 ) -> Result<Option<Json<Pet>>, ErrorResponse> {
   todo!()
 }
@@ -76,6 +76,8 @@ pub(crate) async fn update_pet_with_form(
   pet_id: Path<Uuid>,
   // query: Query<PetUpdatesQuery>,
   query: Query<HashMap<String, String>>,
+  slug: Header<OrganizationSlug>,
+  key: ApiKey,
 ) -> Result<Option<Json<Pet>>, ErrorResponse> {
   todo!()
 }

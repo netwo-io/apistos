@@ -14,11 +14,11 @@ where
     T::child_schemas()
   }
 
-  fn schema() -> Option<(String, RefOr<Schema>)> {
-    T::schema()
-  }
-
   fn raw_schema() -> Option<RefOr<Schema>> {
     T::raw_schema()
+  }
+
+  fn schema() -> Option<(String, RefOr<Schema>)> {
+    T::schema()
   }
 }

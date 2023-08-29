@@ -58,13 +58,13 @@ pub struct Route {
 }
 
 impl ServiceFactory<ServiceRequest> for Route {
-  type Config = ();
-  type Error = Error;
-  type InitError = ();
-  type Service = <actix_web::Route as ServiceFactory<ServiceRequest>>::Service;
-  type Future = <actix_web::Route as ServiceFactory<ServiceRequest>>::Future;
   type Response =
     <<actix_web::Route as ServiceFactory<ServiceRequest>>::Service as actix_service::Service<ServiceRequest>>::Response;
+  type Error = Error;
+  type Config = ();
+  type Service = <actix_web::Route as ServiceFactory<ServiceRequest>>::Service;
+  type InitError = ();
+  type Future = <actix_web::Route as ServiceFactory<ServiceRequest>>::Future;
 
   #[allow(clippy::unit_arg)]
   fn new_service(&self, cfg: Self::Config) -> Self::Future {

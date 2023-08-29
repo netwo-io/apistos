@@ -1,5 +1,6 @@
 use crate::internal::{extract_generics_params, gen_item_ast, gen_open_api_impl};
 use crate::openapi_error_attr::parse_openapi_error_attrs;
+use crate::openapi_header_attr::parse_openapi_header_attrs;
 use crate::openapi_security_attr::parse_openapi_security_attrs;
 use crate::operation_attr::OperationAttr;
 use convert_case::{Case, Casing};
@@ -10,6 +11,7 @@ use syn::{Data, DeriveInput, Ident, ItemFn, Type};
 
 mod internal;
 mod openapi_error_attr;
+mod openapi_header_attr;
 mod openapi_security_attr;
 mod operation_attr;
 
@@ -103,6 +105,31 @@ pub fn derive_api_security(input: TokenStream) -> TokenStream {
       }
     }
   );
+  res.into()
+}
+
+#[proc_macro_error]
+#[proc_macro_derive(ApiHeader, attributes(openapi_header))]
+pub fn derive_api_header(input: TokenStream) -> TokenStream {
+  let input = syn::parse_macro_input!(input as DeriveInput);
+  let DeriveInput {
+    attrs,
+    ident,
+    data: _data,
+    generics,
+    vis: _vis,
+  } = input;
+
+  let openapi_header_attributes = parse_openapi_header_attrs(&attrs)
+    .expect_or_abort("expected #[openapi_header(...)] attribute to be present when used with ApiHeader derive trait");
+
+  let (_, ty_generics, where_clause) = generics.split_for_impl();
+  let res = quote!(
+    impl #generics netwopenapi::ApiHeader for #ident #ty_generics #where_clause {
+      #openapi_header_attributes
+    }
+  );
+  // eprintln!("{:#}", res);
   res.into()
 }
 

@@ -185,7 +185,7 @@ where
     self
       .inner
       .expect("Missing app")
-      .service(SwaggerUi::new(format!("{ui_path}/{{_:.*}}")).url(openapi_path, open_api_spec))
+      .service(SwaggerUi::new(format!("/{ui_path}/{{_:.*}}")).url(openapi_path, open_api_spec))
   }
 
   /// Updates the underlying spec with definitions and operations from the given factory.

@@ -81,20 +81,20 @@ where
     T::child_schemas()
   }
 
-  fn schema() -> Option<(String, RefOr<Schema>)> {
-    T::schema()
-  }
-
   fn raw_schema() -> Option<RefOr<Schema>> {
     T::raw_schema()
   }
 
-  fn security_requirement_name() -> Option<String> {
-    T::security_requirement_name()
+  fn schema() -> Option<(String, RefOr<Schema>)> {
+    T::schema()
   }
 
   fn securities() -> BTreeMap<String, SecurityScheme> {
     T::securities()
+  }
+
+  fn security_requirement_name() -> Option<String> {
+    T::security_requirement_name()
   }
 }
 
@@ -107,12 +107,12 @@ where
     Required::True
   }
 
-  fn raw_schema() -> Option<RefOr<Schema>> {
-    T::raw_schema()
-  }
-
   fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
     T::child_schemas()
+  }
+
+  fn raw_schema() -> Option<RefOr<Schema>> {
+    T::raw_schema()
   }
 
   fn schema() -> Option<(String, RefOr<Schema>)> {
@@ -129,12 +129,12 @@ where
     T::required()
   }
 
-  fn raw_schema() -> Option<RefOr<Schema>> {
-    T::raw_schema()
-  }
-
   fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
     T::child_schemas()
+  }
+
+  fn raw_schema() -> Option<RefOr<Schema>> {
+    T::raw_schema()
   }
 
   fn schema() -> Option<(String, RefOr<Schema>)> {
@@ -182,12 +182,12 @@ where
     R::child_schemas()
   }
 
-  fn schema() -> Option<(String, RefOr<Schema>)> {
-    R::schema()
-  }
-
   fn raw_schema() -> Option<RefOr<Schema>> {
     R::raw_schema()
+  }
+
+  fn schema() -> Option<(String, RefOr<Schema>)> {
+    R::schema()
   }
 
   fn error_responses() -> Vec<(String, Response)> {
