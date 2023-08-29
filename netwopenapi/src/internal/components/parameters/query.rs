@@ -1,8 +1,9 @@
 use crate::ApiComponent;
 use actix_web::web::Query;
+use std::collections::HashMap;
 use utoipa::openapi::path::{Parameter, ParameterBuilder, ParameterIn};
 use utoipa::openapi::request_body::RequestBody;
-use utoipa::openapi::{RefOr, Required, Schema};
+use utoipa::openapi::{Object, ObjectBuilder, RefOr, Required, Schema};
 
 impl<T> ApiComponent for Query<T>
 where
@@ -13,7 +14,7 @@ where
   }
 
   fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
-    vec![]
+    T::child_schemas()
   }
 
   fn raw_schema() -> Option<RefOr<Schema>> {
@@ -57,6 +58,51 @@ where
           }
         },
       }
+    }
+
+    parameters
+  }
+}
+
+impl<K, V> ApiComponent for Query<HashMap<K, V>>
+where
+  V: ApiComponent,
+{
+  fn required() -> Required {
+    Required::False
+  }
+
+  fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
+    V::child_schemas()
+  }
+
+  fn raw_schema() -> Option<RefOr<Schema>> {
+    V::raw_schema()
+  }
+
+  fn schema() -> Option<(String, RefOr<Schema>)> {
+    None
+  }
+
+  fn request_body() -> Option<RequestBody> {
+    None
+  }
+
+  fn parameters() -> Vec<Parameter> {
+    let mut parameters = vec![];
+    let schema = V::schema().map(|(_, sch)| sch).or_else(|| Self::raw_schema());
+    if let Some(schema) = schema {
+      parameters = vec![ParameterBuilder::new()
+        .name("params")
+        .parameter_in(ParameterIn::Query)
+        .schema(Some(ObjectBuilder::new().additional_properties(Some(schema)).build()))
+        .build()];
+    } else {
+      parameters = vec![ParameterBuilder::new()
+        .name("params")
+        .parameter_in(ParameterIn::Query)
+        .schema(Some(Object::default()))
+        .build()];
     }
 
     parameters

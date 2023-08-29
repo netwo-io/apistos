@@ -6,6 +6,7 @@ use actix_web::Error;
 use netwopenapi::actix::CreatedJson;
 use netwopenapi::api_operation;
 use netwopenapi::ApiComponent;
+use std::collections::HashMap;
 use uuid::Uuid;
 
 #[api_operation(tags = ["pet"])]
@@ -73,7 +74,8 @@ pub(crate) async fn find_by_tags(
 pub(crate) async fn update_pet_with_form(
   // ID of pet that needs to be updated
   pet_id: Path<Uuid>,
-  query: Query<PetUpdatesQuery>,
+  // query: Query<PetUpdatesQuery>,
+  query: Query<HashMap<String, String>>,
 ) -> Result<Option<Json<Pet>>, ErrorResponse> {
   todo!()
 }
