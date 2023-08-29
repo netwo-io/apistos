@@ -25,7 +25,7 @@ pub fn parse_openapi_cookie_attrs(
       cookie_attribute.map(|attr| OpenapiCookieAttributeExtended {
         name: attr.name,
         description: attr.description,
-        required: attr.deprecated,
+        required: attr.required,
         deprecated: attr.deprecated.or(deprecated),
         childs,
       })

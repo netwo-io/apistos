@@ -30,13 +30,16 @@ uuid = { workspace = true, optional = true }
 serde_qs = { workspace = true, features = ["actix4"], optional = true }
 
 [features]
+# query related features
 query = []
 qs_query = ["serde_qs"]
 
+# extra types related features
 bytes = ["dep:bytes"]
 uuid = ["dep:uuid", "utoipa/uuid"]
 extras = ["bytes", "uuid"]
 
+# UI related features
 rapidoc = ["utoipa-rapidoc"]
 redoc = ["utoipa-redoc"]
 swagger-ui = ["utoipa-swagger-ui"]
