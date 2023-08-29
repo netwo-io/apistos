@@ -1,3 +1,5 @@
+use crate::internal::schemas::Schemas;
+use crate::internal::utils::{child_types_from_data, extract_deprecated_from_attr};
 use crate::internal::{extract_generics_params, gen_item_ast, gen_open_api_impl};
 use crate::openapi_cookie_attr::parse_openapi_cookie_attrs;
 use crate::openapi_error_attr::parse_openapi_error_attrs;
@@ -31,38 +33,16 @@ pub fn derive_api_component(input: TokenStream) -> TokenStream {
     vis: _vis,
   } = input;
 
-  let childs: Vec<Type> = match data {
-    Data::Struct(s) => s.fields.into_iter().map(|f| f.ty).collect(),
-    Data::Enum(e) => e
-      .variants
-      .into_iter()
-      .map(|v| v.fields.into_iter().map(|f| f.ty))
-      .flatten()
-      .collect(),
-    Data::Union(u) => u.fields.named.into_iter().map(|f| f.ty).collect(),
-  };
+  let childs: Vec<Type> = child_types_from_data(data);
 
   let (_, ty_generics, where_clause) = generics.split_for_impl();
+  let schema_impl = Schemas { childs: &childs };
   quote!(
     impl #generics netwopenapi::ApiComponent for #ident #ty_generics #where_clause {
-      fn child_schemas() -> Vec<(String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)> {
-        let mut schemas: Vec<Option<(String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)>> = vec![];
-        #(
-          schemas.push(<#childs as ApiComponent>::schema());
-        )*
-        let mut schemas = schemas.into_iter().flatten().collect::<Vec<(String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)>>();
-        #(
-          schemas.append(&mut <#childs>::child_schemas());
-        )*
-        schemas
-      }
-
-      fn schema() -> Option<(String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)> {
-        let (name, schema) = <Self as utoipa::ToSchema<'_>>::schema();
-        Some((name.to_string(), schema))
-      }
+      #schema_impl
     }
-  ).into()
+  )
+  .into()
 }
 
 #[proc_macro_error]
@@ -122,13 +102,7 @@ pub fn derive_api_header(input: TokenStream) -> TokenStream {
     vis: _vis,
   } = input;
 
-  let deprecated = attrs.iter().find_map(|attr| {
-    if !matches!(attr.path().get_ident(), Some(ident) if &*ident.to_string() == "deprecated") {
-      None
-    } else {
-      Some(true)
-    }
-  });
+  let deprecated = extract_deprecated_from_attr(&attrs);
 
   let openapi_header_attributes = parse_openapi_header_attrs(&attrs, deprecated)
     .expect_or_abort("expected #[openapi_header(...)] attribute to be present when used with ApiHeader derive trait");
@@ -155,24 +129,8 @@ pub fn derive_api_cookie(input: TokenStream) -> TokenStream {
     vis: _vis,
   } = input;
 
-  let childs: Vec<Type> = match data {
-    Data::Struct(s) => s.fields.into_iter().map(|f| f.ty).collect(),
-    Data::Enum(e) => e
-      .variants
-      .into_iter()
-      .map(|v| v.fields.into_iter().map(|f| f.ty))
-      .flatten()
-      .collect(),
-    Data::Union(u) => u.fields.named.into_iter().map(|f| f.ty).collect(),
-  };
-
-  let deprecated = attrs.iter().find_map(|attr| {
-    if !matches!(attr.path().get_ident(), Some(ident) if &*ident.to_string() == "deprecated") {
-      None
-    } else {
-      Some(true)
-    }
-  });
+  let childs: Vec<Type> = child_types_from_data(data);
+  let deprecated = extract_deprecated_from_attr(&attrs);
 
   let openapi_cookie_attributes = parse_openapi_cookie_attrs(&attrs, deprecated, childs)
     .expect_or_abort("expected #[openapi_cookie(...)] attribute to be present when used with ApiCookie derive trait");

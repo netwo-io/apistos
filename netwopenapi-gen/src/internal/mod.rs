@@ -14,7 +14,10 @@ use syn::{
 
 mod components;
 mod operation;
+
+pub(crate) mod schemas;
 pub(crate) mod security;
+pub(crate) mod utils;
 
 pub(crate) fn gen_open_api_impl(
   item_ast: &ItemFn,

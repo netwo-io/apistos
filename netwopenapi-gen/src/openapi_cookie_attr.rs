@@ -1,3 +1,4 @@
+use crate::internal::schemas::Schemas;
 use darling::FromMeta;
 use proc_macro2::{Span, TokenStream};
 use proc_macro_error::abort;
@@ -69,25 +70,9 @@ impl ToTokens for OpenapiCookieAttributeExtended {
       quote!(utoipa::openapi::Deprecated::False)
     };
 
-    let childs = &self.childs;
+    let schema_impl = Schemas { childs: &self.childs };
     tokens.extend(quote! {
-      fn child_schemas() -> Vec<(String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)> {
-        let mut schemas: Vec<Option<(String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)>> = vec![];
-        #(
-          schemas.push(<#childs as ApiComponent>::schema());
-        )*
-        let mut schemas = schemas.into_iter().flatten().collect::<Vec<(String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)>>();
-        #(
-          schemas.append(&mut <#childs>::child_schemas());
-        )*
-        schemas
-      }
-
-      fn schema() -> Option<(String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)> {
-        let (name, schema) = <Self as utoipa::ToSchema<'_>>::schema();
-        Some((name.to_string(), schema))
-      }
-
+      #schema_impl
       fn name() -> String {
         #name.to_string()
       }
