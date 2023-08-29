@@ -1,8 +1,10 @@
+use actix_web::dev::Payload;
 use actix_web::error::ParseError;
 use actix_web::http::header::{Header, HeaderName, HeaderValue, InvalidHeaderValue, TryIntoHeaderValue};
-use actix_web::{FromRequest, HttpMessage};
-use netwopenapi::{ApiComponent, ApiHeader};
+use actix_web::{Error, FromRequest, HttpMessage, HttpRequest};
+use netwopenapi::{ApiComponent, ApiCookie, ApiHeader};
 use serde::{Deserialize, Serialize};
+use std::future::Ready;
 use utoipa::ToSchema;
 
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema, ApiComponent)]
@@ -62,7 +64,11 @@ pub(crate) struct PetUpdatesQuery {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema, ApiComponent, ApiHeader)]
-#[openapi_header(name = "X-Organization-Slug", description = "Organization of the current caller")]
+#[openapi_header(
+  name = "X-Organization-Slug",
+  description = "Organization of the current caller",
+  required = true
+)]
 pub(crate) struct OrganizationSlug(String);
 
 impl TryIntoHeaderValue for OrganizationSlug {
@@ -87,5 +93,18 @@ impl Header for OrganizationSlug {
       .map_err(|e| ParseError::Header)?
       .map(|value| OrganizationSlug(value.to_string()))
       .ok_or_else(|| ParseError::Header)
+  }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema, ApiCookie)]
+#[openapi_cookie(name = "X-Realm", description = "Realm of the current caller", deprecated = true)]
+pub(crate) struct Realm(String);
+
+impl FromRequest for Realm {
+  type Error = Error;
+  type Future = Ready<Result<Self, Self::Error>>;
+
+  fn from_request(req: &HttpRequest, payload: &mut Payload) -> Self::Future {
+    todo!()
   }
 }

@@ -1,12 +1,18 @@
 use crate::ApiComponent;
 use actix_web::web::Header;
 use utoipa::openapi::path::{Parameter, ParameterBuilder, ParameterIn, ParameterStyle};
-use utoipa::openapi::{RefOr, Schema};
+use utoipa::openapi::{Deprecated, RefOr, Required, Schema};
 
 pub trait ApiHeader {
   fn name() -> String;
   fn description() -> Option<String> {
     None
+  }
+  fn required() -> Required {
+    Default::default()
+  }
+  fn deprecated() -> Deprecated {
+    Default::default()
   }
 }
 
@@ -31,6 +37,8 @@ where
       .parameter_in(ParameterIn::Header)
       .name(T::name())
       .description(T::description())
+      .required(<T as ApiHeader>::required())
+      .deprecated(Some(<T as ApiHeader>::deprecated()))
       .schema(Self::schema().map(|(_, schema)| schema).or_else(|| Self::raw_schema()))
       .style(Some(ParameterStyle::Simple))
       .build()]

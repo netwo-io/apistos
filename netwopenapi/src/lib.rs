@@ -8,6 +8,7 @@ pub mod spec;
 pub mod web;
 
 pub use internal::components::error::ApiErrorComponent;
+pub use internal::components::parameters::cookie::ApiCookie;
 pub use internal::components::parameters::header::ApiHeader;
 pub use internal::components::ApiComponent;
-pub use netwopenapi_gen::{api_operation, ApiComponent, ApiErrorComponent, ApiHeader, ApiSecurity};
+pub use netwopenapi_gen::{api_operation, ApiComponent, ApiCookie, ApiErrorComponent, ApiHeader, ApiSecurity};

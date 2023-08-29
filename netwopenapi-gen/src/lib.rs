@@ -1,4 +1,5 @@
 use crate::internal::{extract_generics_params, gen_item_ast, gen_open_api_impl};
+use crate::openapi_cookie_attr::parse_openapi_cookie_attrs;
 use crate::openapi_error_attr::parse_openapi_error_attrs;
 use crate::openapi_header_attr::parse_openapi_header_attrs;
 use crate::openapi_security_attr::parse_openapi_security_attrs;
@@ -10,6 +11,7 @@ use quote::quote;
 use syn::{Data, DeriveInput, Ident, ItemFn, Type};
 
 mod internal;
+mod openapi_cookie_attr;
 mod openapi_error_attr;
 mod openapi_header_attr;
 mod openapi_security_attr;
@@ -120,13 +122,65 @@ pub fn derive_api_header(input: TokenStream) -> TokenStream {
     vis: _vis,
   } = input;
 
-  let openapi_header_attributes = parse_openapi_header_attrs(&attrs)
+  let deprecated = attrs.iter().find_map(|attr| {
+    if !matches!(attr.path().get_ident(), Some(ident) if &*ident.to_string() == "deprecated") {
+      None
+    } else {
+      Some(true)
+    }
+  });
+
+  let openapi_header_attributes = parse_openapi_header_attrs(&attrs, deprecated)
     .expect_or_abort("expected #[openapi_header(...)] attribute to be present when used with ApiHeader derive trait");
 
   let (_, ty_generics, where_clause) = generics.split_for_impl();
   let res = quote!(
     impl #generics netwopenapi::ApiHeader for #ident #ty_generics #where_clause {
       #openapi_header_attributes
+    }
+  );
+  // eprintln!("{:#}", res);
+  res.into()
+}
+
+#[proc_macro_error]
+#[proc_macro_derive(ApiCookie, attributes(openapi_cookie))]
+pub fn derive_api_cookie(input: TokenStream) -> TokenStream {
+  let input = syn::parse_macro_input!(input as DeriveInput);
+  let DeriveInput {
+    attrs,
+    ident,
+    data,
+    generics,
+    vis: _vis,
+  } = input;
+
+  let childs: Vec<Type> = match data {
+    Data::Struct(s) => s.fields.into_iter().map(|f| f.ty).collect(),
+    Data::Enum(e) => e
+      .variants
+      .into_iter()
+      .map(|v| v.fields.into_iter().map(|f| f.ty))
+      .flatten()
+      .collect(),
+    Data::Union(u) => u.fields.named.into_iter().map(|f| f.ty).collect(),
+  };
+
+  let deprecated = attrs.iter().find_map(|attr| {
+    if !matches!(attr.path().get_ident(), Some(ident) if &*ident.to_string() == "deprecated") {
+      None
+    } else {
+      Some(true)
+    }
+  });
+
+  let openapi_cookie_attributes = parse_openapi_cookie_attrs(&attrs, deprecated, childs)
+    .expect_or_abort("expected #[openapi_cookie(...)] attribute to be present when used with ApiCookie derive trait");
+
+  let (_, ty_generics, where_clause) = generics.split_for_impl();
+  let res = quote!(
+    impl #generics netwopenapi::ApiCookie for #ident #ty_generics #where_clause {
+      #openapi_cookie_attributes
     }
   );
   // eprintln!("{:#}", res);

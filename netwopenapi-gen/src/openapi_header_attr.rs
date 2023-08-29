@@ -2,12 +2,12 @@ use darling::FromMeta;
 use proc_macro2::{Span, TokenStream};
 use proc_macro_error::abort;
 use quote::{quote, ToTokens};
-use syn::parse::{Parse, ParseStream};
+use syn::parse::Parse;
 use syn::Attribute;
 
 pub const RESERVED_HEADERS: &[&str] = &["Accept", "Content-Type", "Authorization"];
 
-pub fn parse_openapi_header_attrs(attrs: &[Attribute]) -> Option<OpenapiHeaderAttribute> {
+pub fn parse_openapi_header_attrs(attrs: &[Attribute], deprecated: Option<bool>) -> Option<OpenapiHeaderAttribute> {
   let header_attribute = attrs
     .iter()
     .filter(|attribute| attribute.path().is_ident("openapi_header"))
@@ -18,7 +18,13 @@ pub fn parse_openapi_header_attrs(attrs: &[Attribute]) -> Option<OpenapiHeaderAt
     Ok(header_attributes) if header_attributes.len() > 1 => {
       abort!(Span::call_site(), "Expected only one #[openapi_header] attribute")
     }
-    Ok(header_attributes) => header_attributes.first().cloned(),
+    Ok(header_attributes) => {
+      let mut header_attribute = header_attributes.first().cloned();
+      if let Some(header_attribute) = &mut header_attribute {
+        header_attribute.deprecated = header_attribute.deprecated.or_else(|| deprecated)
+      }
+      header_attribute
+    }
     Err(e) => abort!(e.span(), "Unable to parse #[openapi_header] attribute: {:?}", e),
   }
 }
@@ -27,6 +33,8 @@ pub fn parse_openapi_header_attrs(attrs: &[Attribute]) -> Option<OpenapiHeaderAt
 pub struct OpenapiHeaderAttribute {
   pub name: String,
   pub description: Option<String>,
+  pub required: Option<bool>,
+  pub deprecated: Option<bool>,
 }
 
 impl ToTokens for OpenapiHeaderAttribute {
@@ -42,6 +50,16 @@ impl ToTokens for OpenapiHeaderAttribute {
       None => quote!(None),
       Some(desc) => quote!(Some(#desc.to_string())),
     };
+    let required = if self.required.unwrap_or_default() {
+      quote!(utoipa::openapi::Required::True)
+    } else {
+      quote!(utoipa::openapi::Required::False)
+    };
+    let deprecated = if self.deprecated.unwrap_or_default() {
+      quote!(utoipa::openapi::Deprecated::True)
+    } else {
+      quote!(utoipa::openapi::Deprecated::False)
+    };
 
     tokens.extend(quote! {
       fn name() -> String {
@@ -50,6 +68,14 @@ impl ToTokens for OpenapiHeaderAttribute {
 
       fn description() -> Option<String> {
         #description
+      }
+
+      fn required() -> utoipa::openapi::Required {
+        #required
+      }
+
+      fn deprecated() -> utoipa::openapi::Deprecated {
+        #deprecated
       }
     })
   }

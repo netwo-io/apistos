@@ -1,5 +1,5 @@
 use crate::api::error::ErrorResponse;
-use crate::api::models::{OrganizationSlug, Pet, PetUpdatesQuery, QueryStatus, QueryTag, Status, Tag};
+use crate::api::models::{OrganizationSlug, Pet, PetUpdatesQuery, QueryStatus, QueryTag, Realm, Status, Tag};
 use crate::api::security::ApiKey;
 use actix_web::web::{Header, Json, Path, Query};
 use actix_web::Error;
@@ -77,6 +77,7 @@ pub(crate) async fn update_pet_with_form(
   // query: Query<PetUpdatesQuery>,
   query: Query<HashMap<String, String>>,
   slug: Header<OrganizationSlug>,
+  realm: Realm,
   key: ApiKey,
 ) -> Result<Option<Json<Pet>>, ErrorResponse> {
   todo!()
