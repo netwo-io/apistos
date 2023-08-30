@@ -1,7 +1,5 @@
 use crate::internal::components::ApiComponent;
 
-#[cfg(any(feature = "bytes", feature = "extras"))]
-use bytes::Bytes;
 #[cfg(any(feature = "uuid", feature = "extras"))]
 use uuid::Uuid;
 
@@ -45,12 +43,10 @@ simple_modifier!(u128);
 simple_modifier!(usize);
 // #[cfg(feature = "chrono")]
 // impl_simple!(chrono::NaiveDateTime);
-// #[cfg(feature = "rust_decimal")]
-// impl_simple!(rust_decimal::Decimal);
 // #[cfg(feature = "url")]
 // impl_simple!(url::Url);
 
-// #[cfg(any(feature = "bytes", feature = "extras"))]
-// simple_modifier!(Bytes);
+#[cfg(any(feature = "rust_decimal", feature = "extras"))]
+simple_modifier!(rust_decimal::Decimal);
 #[cfg(any(feature = "uuid", feature = "extras"))]
 simple_modifier!(Uuid);

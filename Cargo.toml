@@ -25,12 +25,12 @@ quote = "1.0"
 regex = "1"
 serde = "1"
 serde_json = "1"
-serde_qs = "0.12"
 syn = "2.0"
 utoipa = { version = "3", features = ["actix_extras"] }
 utoipa-rapidoc = { version = "0", features = ["actix-web"] }
 utoipa-redoc = { version = "0", features = ["actix-web"] }
 utoipa-swagger-ui = { version = "3", features = ["actix-web"] }
 
-bytes = { version = "1" }
-uuid = { version = "1" }
+serde_qs = "0.12"
+rust_decimal = "1"
+uuid = "1"

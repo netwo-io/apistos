@@ -3,6 +3,7 @@ use actix_web::error::ParseError;
 use actix_web::http::header::{Header, HeaderName, HeaderValue, InvalidHeaderValue, TryIntoHeaderValue};
 use actix_web::{Error, FromRequest, HttpMessage, HttpRequest};
 use netwopenapi::{ApiComponent, ApiCookie, ApiHeader};
+use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use std::future::Ready;
 use utoipa::ToSchema;
@@ -43,7 +44,8 @@ pub(crate) enum Status {
 // #[openapi(rename = "Pet tag")]
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema, ApiComponent)]
 pub(crate) struct Tag {
-  pub(crate) id: Option<i64>,
+  #[schema(value_type = f64)]
+  pub(crate) id: Option<Decimal>,
   pub(crate) name: Option<String>,
 }
 

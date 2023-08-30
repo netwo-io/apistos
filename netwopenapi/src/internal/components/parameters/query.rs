@@ -203,7 +203,7 @@ where
   }
 
   fn parameters() -> Vec<Parameter> {
-    let mut parameters = vec![];
+    let parameters;
     let schema = V::schema().map(|(_, sch)| sch).or_else(|| Self::raw_schema());
     if let Some(schema) = schema {
       parameters = vec![ParameterBuilder::new()
