@@ -15,10 +15,16 @@ use utoipa::openapi::{
 pub mod empty;
 pub mod error;
 pub mod json;
+#[cfg(any(feature = "multipart", feature = "extras"))]
+pub mod multipart;
 pub mod parameters;
 pub mod simple;
 
 pub trait ApiComponent {
+  fn content_type() -> String {
+    "application/json".to_string()
+  }
+
   fn required() -> Required {
     Required::True
   }
@@ -44,7 +50,7 @@ pub trait ApiComponent {
     Self::schema().map(|(name, _)| {
       RequestBodyBuilder::new()
         .content(
-          "application/json", //@todo how to infer it
+          Self::content_type(),
           ContentBuilder::new().schema(Ref::from_schema_name(name)).build(),
         )
         .required(Some(Self::required()))
@@ -208,10 +214,7 @@ where
       responses.push((
         "200".to_owned(),
         ResponseBuilder::new()
-          .content(
-            "application/json", //@todo how to infer it
-            ContentBuilder::new().schema(_ref).build(),
-          )
+          .content(Self::content_type(), ContentBuilder::new().schema(_ref).build())
           .build(),
       ));
       responses.append(&mut Self::error_responses());
