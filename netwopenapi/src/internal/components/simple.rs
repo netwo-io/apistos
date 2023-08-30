@@ -1,7 +1,6 @@
 use crate::internal::components::ApiComponent;
-
-#[cfg(any(feature = "uuid", feature = "extras"))]
-use uuid::Uuid;
+use chrono::TimeZone;
+use utoipa::openapi::{RefOr, Schema};
 
 macro_rules! simple_modifier {
   ($ty:ty) => {
@@ -41,12 +40,58 @@ simple_modifier!(isize);
 simple_modifier!(u64);
 simple_modifier!(u128);
 simple_modifier!(usize);
-// #[cfg(feature = "chrono")]
-// impl_simple!(chrono::NaiveDateTime);
 // #[cfg(feature = "url")]
 // impl_simple!(url::Url);
 
+#[cfg(any(feature = "chrono", feature = "extras"))]
+simple_modifier!(chrono::NaiveDate);
+#[cfg(any(feature = "chrono", feature = "extras"))]
+simple_modifier!(chrono::NaiveTime);
+#[cfg(any(feature = "chrono", feature = "extras"))]
+simple_modifier!(chrono::NaiveDateTime);
+#[cfg(any(feature = "chrono", feature = "extras"))]
+simple_modifier!(chrono::Duration);
 #[cfg(any(feature = "rust_decimal", feature = "extras"))]
 simple_modifier!(rust_decimal::Decimal);
 #[cfg(any(feature = "uuid", feature = "extras"))]
-simple_modifier!(Uuid);
+simple_modifier!(uuid::Uuid);
+
+#[cfg(any(feature = "chrono", feature = "extras"))]
+impl<T: TimeZone> ApiComponent for chrono::DateTime<T> {
+  fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
+    vec![]
+  }
+
+  fn raw_schema() -> Option<RefOr<Schema>> {
+    let schema: RefOr<Schema> = utoipa::schema!(
+      #[inline]
+      chrono::DateTime
+    )
+    .into();
+    Some(schema)
+  }
+
+  fn schema() -> Option<(String, RefOr<Schema>)> {
+    None
+  }
+}
+
+#[cfg(any(feature = "chrono", feature = "extras"))]
+impl<T: TimeZone> ApiComponent for chrono::Date<T> {
+  fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
+    vec![]
+  }
+
+  fn raw_schema() -> Option<RefOr<Schema>> {
+    let schema: RefOr<Schema> = utoipa::schema!(
+      #[inline]
+      chrono::Date
+    )
+    .into();
+    Some(schema)
+  }
+
+  fn schema() -> Option<(String, RefOr<Schema>)> {
+    None
+  }
+}

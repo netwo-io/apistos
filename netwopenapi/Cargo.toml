@@ -25,6 +25,7 @@ utoipa-swagger-ui = { workspace = true, optional = true }
 
 netwopenapi-gen = { path = "../netwopenapi-gen" }
 
+chrono = { workspace = true, optional = true }
 rust_decimal = { workspace = true, optional = true }
 uuid = { workspace = true, optional = true }
 serde_qs = { workspace = true, features = ["actix4"], optional = true }
@@ -35,9 +36,10 @@ query = []
 qs_query = ["serde_qs"]
 
 # extra types related features
+chrono = ["dep:chrono", "utoipa/chrono"]
 rust_decimal = ["dep:rust_decimal", "utoipa/decimal"]
 uuid = ["dep:uuid", "utoipa/uuid"]
-extras = ["uuid", "rust_decimal"]
+extras = ["chrono", "uuid", "rust_decimal"]
 
 # UI related features
 rapidoc = ["utoipa-rapidoc"]
