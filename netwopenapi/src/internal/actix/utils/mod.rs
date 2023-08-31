@@ -23,12 +23,6 @@ impl OperationUpdater for Operation {
         if let Some(n) = param_names.pop() {
           if let Some((name, _pattern)) = n.split_once(':') {
             param.name = name.to_string();
-            //@todo done for type format to handle regex. we need to thing about that one
-            // match param.schema {
-            //   None => {}
-            //   Some(RefOr::T(t)) if matches!(t,) => t,
-            // }
-            // param.pattern = Some(pattern.to_string());
           } else {
             param.name = n;
           }

@@ -173,7 +173,6 @@ where
 
       self.item_map.insert(p, path_item);
     }
-    //@todo security ?
   }
 }
 

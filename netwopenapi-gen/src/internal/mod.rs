@@ -132,7 +132,6 @@ pub(crate) fn gen_item_ast(
   if item_ast.sig.asyncness.is_some() {
     item_ast.sig.asyncness = None;
   } else {
-    // @todo should we really fail here as the macro doesn't really care about it ?
     emit_error!(default_span, "Operation must be an async function.");
     return (quote!().into(), quote!().into());
   }

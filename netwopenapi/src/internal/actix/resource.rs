@@ -67,7 +67,6 @@ where
     let mut item_definition = self.item_definition.unwrap_or_default();
     item_definition.operations.extend(w.def.item.operations.into_iter());
     self.item_definition = Some(item_definition);
-    //@todo security ?
     self.components.extend(w.component.into_iter());
     self.inner = self.inner.route(w.inner);
     self
@@ -99,7 +98,6 @@ where
       operation.update_path_parameter_name_from_path(&self.path);
       self.item_definition = Some(item_definition);
       self.components.extend(F::Future::components().into_iter());
-      //@todo security ?
     }
     self.inner = self.inner.to(handler);
     self

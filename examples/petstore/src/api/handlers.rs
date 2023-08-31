@@ -19,7 +19,6 @@ pub(crate) async fn update_pet(
   Ok(body)
 }
 
-//@todo use multipart form instead
 #[api_operation(
   tag = "pet",
   summary = "Add a new pet to the store",

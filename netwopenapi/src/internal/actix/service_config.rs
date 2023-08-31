@@ -25,7 +25,6 @@ impl<'a> ServiceConfig<'a> {
   pub fn route(&mut self, path: &str, route: Route) -> &mut Self {
     let mut w = RouteWrapper::new(path, route);
     w.update_path_items(&mut self.item_map);
-    //@todo security ?
     self.components.extend(w.components().into_iter());
     self.inner.route(path, w.inner);
     self

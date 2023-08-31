@@ -109,7 +109,6 @@ impl<T> ApiComponent for Vec<T>
 where
   T: ApiComponent,
 {
-  //@todo sure about this one ?
   fn required() -> Required {
     Required::True
   }
