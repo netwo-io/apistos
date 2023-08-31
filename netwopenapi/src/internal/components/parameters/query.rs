@@ -224,3 +224,218 @@ where
     parameters
   }
 }
+
+#[cfg(all(feature = "query", feature = "garde"))]
+impl<T> ApiComponent for actix_web_garde::web::Query<T>
+where
+  T: ApiComponent,
+{
+  fn required() -> Required {
+    T::required()
+  }
+
+  fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
+    T::child_schemas()
+  }
+
+  fn raw_schema() -> Option<RefOr<Schema>> {
+    T::raw_schema()
+  }
+
+  fn schema() -> Option<(String, RefOr<Schema>)> {
+    None
+  }
+
+  fn request_body() -> Option<RequestBody> {
+    None
+  }
+
+  fn parameters() -> Vec<Parameter> {
+    let mut parameters = vec![];
+    let schema = T::schema().map(|(_, sch)| sch).or_else(|| Self::raw_schema());
+    if let Some(schema) = schema {
+      match schema {
+        RefOr::Ref(_ref) => {
+          // don't know what to do with it
+        }
+        RefOr::T(schema) => match &schema {
+          Schema::Object(obj) => {
+            parameters = obj
+              .properties
+              .clone()
+              .into_iter()
+              .map(|(name, schema)| {
+                ParameterBuilder::new()
+                  .name(name)
+                  .parameter_in(ParameterIn::Query)
+                  .schema(Some(schema))
+                  .required(Self::required().clone())
+                  .build()
+              })
+              .collect()
+          }
+          Schema::OneOf(_) | Schema::Array(_) | Schema::AllOf(_) | Schema::AnyOf(_) | _ => {
+            // these case should never exist right ? (no key names)
+          }
+        },
+      }
+    }
+
+    parameters
+  }
+}
+
+#[cfg(all(feature = "query", feature = "garde"))]
+impl<K, V> ApiComponent for actix_web_garde::web::Query<HashMap<K, V>>
+where
+  V: ApiComponent,
+{
+  fn required() -> Required {
+    Required::False
+  }
+
+  fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
+    V::child_schemas()
+  }
+
+  fn raw_schema() -> Option<RefOr<Schema>> {
+    V::raw_schema()
+  }
+
+  fn schema() -> Option<(String, RefOr<Schema>)> {
+    None
+  }
+
+  fn request_body() -> Option<RequestBody> {
+    None
+  }
+
+  fn parameters() -> Vec<Parameter> {
+    let parameters;
+    let schema = V::schema().map(|(_, sch)| sch).or_else(|| Self::raw_schema());
+    if let Some(schema) = schema {
+      parameters = vec![ParameterBuilder::new()
+        .name("params")
+        .parameter_in(ParameterIn::Query)
+        .schema(Some(ObjectBuilder::new().additional_properties(Some(schema)).build()))
+        .build()];
+    } else {
+      parameters = vec![ParameterBuilder::new()
+        .name("params")
+        .parameter_in(ParameterIn::Query)
+        .schema(Some(Object::default()))
+        .build()];
+    }
+
+    parameters
+  }
+}
+
+#[cfg(all(feature = "qs_query", feature = "garde"))]
+impl<T> ApiComponent for actix_web_garde::web::QsQuery<T>
+where
+  T: ApiComponent,
+{
+  fn required() -> Required {
+    T::required()
+  }
+
+  fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
+    T::child_schemas()
+  }
+
+  fn raw_schema() -> Option<RefOr<Schema>> {
+    T::raw_schema()
+  }
+
+  fn schema() -> Option<(String, RefOr<Schema>)> {
+    None
+  }
+
+  fn request_body() -> Option<RequestBody> {
+    None
+  }
+
+  fn parameters() -> Vec<Parameter> {
+    let mut parameters = vec![];
+    let schema = T::schema().map(|(_, sch)| sch).or_else(|| Self::raw_schema());
+    if let Some(schema) = schema {
+      match schema {
+        RefOr::Ref(_ref) => {
+          // don't know what to do with it
+        }
+        RefOr::T(schema) => match &schema {
+          Schema::Object(obj) => {
+            parameters = obj
+              .properties
+              .clone()
+              .into_iter()
+              .map(|(name, schema)| {
+                ParameterBuilder::new()
+                  .name(name)
+                  .parameter_in(ParameterIn::Query)
+                  .schema(Some(schema))
+                  .required(Self::required().clone())
+                  .style(Some(ParameterStyle::DeepObject))
+                  .build()
+              })
+              .collect()
+          }
+          Schema::OneOf(_) | Schema::Array(_) | Schema::AllOf(_) | Schema::AnyOf(_) | _ => {
+            // these case should never exist right ? (no key names)
+          }
+        },
+      }
+    }
+
+    parameters
+  }
+}
+
+#[cfg(all(feature = "qs_query", feature = "garde"))]
+impl<K, V> ApiComponent for actix_web_garde::web::QsQuery<HashMap<K, V>>
+where
+  V: ApiComponent,
+{
+  fn required() -> Required {
+    Required::False
+  }
+
+  fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
+    V::child_schemas()
+  }
+
+  fn raw_schema() -> Option<RefOr<Schema>> {
+    V::raw_schema()
+  }
+
+  fn schema() -> Option<(String, RefOr<Schema>)> {
+    None
+  }
+
+  fn request_body() -> Option<RequestBody> {
+    None
+  }
+
+  fn parameters() -> Vec<Parameter> {
+    let parameters;
+    let schema = V::schema().map(|(_, sch)| sch).or_else(|| Self::raw_schema());
+    if let Some(schema) = schema {
+      parameters = vec![ParameterBuilder::new()
+        .name("params")
+        .parameter_in(ParameterIn::Query)
+        .style(Some(ParameterStyle::DeepObject))
+        .schema(Some(ObjectBuilder::new().additional_properties(Some(schema)).build()))
+        .build()];
+    } else {
+      parameters = vec![ParameterBuilder::new()
+        .name("params")
+        .parameter_in(ParameterIn::Query)
+        .style(Some(ParameterStyle::DeepObject))
+        .schema(Some(Object::default()))
+        .build()];
+    }
+
+    parameters
+  }
+}

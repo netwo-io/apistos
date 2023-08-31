@@ -14,6 +14,7 @@ use utoipa::openapi::{
 
 pub mod empty;
 pub mod error;
+pub mod form;
 pub mod json;
 #[cfg(any(feature = "multipart", feature = "extras"))]
 pub mod multipart;

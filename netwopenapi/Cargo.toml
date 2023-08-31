@@ -26,7 +26,9 @@ utoipa-swagger-ui = { workspace = true, optional = true }
 netwopenapi-gen = { path = "../netwopenapi-gen" }
 
 actix-multipart = { workspace = true, optional = true }
+actix-web-garde = { workspace = true, optional = true }
 chrono = { workspace = true, optional = true }
+garde = { workspace = true, optional = true }
 rust_decimal = { workspace = true, optional = true }
 uuid = { workspace = true, optional = true }
 serde_qs = { workspace = true, features = ["actix4"], optional = true }
@@ -34,13 +36,17 @@ serde_qs = { workspace = true, features = ["actix4"], optional = true }
 [features]
 # query related features
 query = []
-qs_query = ["serde_qs"]
+qs_query = ["serde_qs", "actix-web-garde?/serde_qs"]
+
+# actix garde feature
+garde = ["dep:garde", "actix-web-garde"]
 
 # extra types related features
 chrono = ["dep:chrono", "utoipa/chrono"]
 multipart = ["dep:actix-multipart"]
 rust_decimal = ["dep:rust_decimal", "utoipa/decimal"]
 uuid = ["dep:uuid", "utoipa/uuid"]
+# @todo url
 extras = ["chrono", "multipart", "uuid", "rust_decimal"]
 
 # UI related features

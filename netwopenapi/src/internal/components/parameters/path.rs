@@ -56,6 +56,59 @@ where
   }
 }
 
+#[cfg(feature = "garde")]
+impl<T> ApiComponent for actix_web_garde::web::Path<T>
+where
+  T: ApiComponent,
+{
+  // always required in Path
+  fn required() -> Required {
+    Required::True
+  }
+
+  fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
+    vec![]
+  }
+
+  fn raw_schema() -> Option<RefOr<Schema>> {
+    T::raw_schema()
+  }
+
+  fn schema() -> Option<(String, RefOr<Schema>)> {
+    None
+  }
+
+  fn request_body() -> Option<RequestBody> {
+    None
+  }
+
+  fn parameters() -> Vec<Parameter> {
+    let mut parameters = vec![];
+    let schema = T::schema().map(|(_, sch)| sch).or_else(|| Self::raw_schema());
+
+    if let Some(schema) = schema {
+      match schema {
+        RefOr::Ref(_ref) => {
+          parameters = gen_simple_path_parameter(_ref, Self::required());
+        }
+        RefOr::T(schema) => match &schema {
+          Schema::Object(obj) => {
+            parameters = gen_path_parameter_for_object(&schema, obj, Self::required());
+          }
+          Schema::OneOf(_) => {
+            parameters = gen_simple_path_parameter(schema, Self::required());
+          }
+          Schema::Array(_) | Schema::AllOf(_) | Schema::AnyOf(_) | _ => {
+            // these case should never exist right ?
+          }
+        },
+      }
+    }
+
+    parameters
+  }
+}
+
 fn gen_path_parameter_for_object(schema: &Schema, obj: &Object, required: Required) -> Vec<Parameter> {
   if obj.properties.is_empty() {
     gen_simple_path_parameter(schema.clone(), required)

@@ -22,3 +22,25 @@ where
     T::schema()
   }
 }
+
+#[cfg(feature = "garde")]
+impl<T> ApiComponent for actix_web_garde::web::Json<T>
+where
+  T: ApiComponent,
+{
+  fn required() -> Required {
+    T::required()
+  }
+
+  fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
+    T::child_schemas()
+  }
+
+  fn raw_schema() -> Option<RefOr<Schema>> {
+    T::raw_schema()
+  }
+
+  fn schema() -> Option<(String, RefOr<Schema>)> {
+    T::schema()
+  }
+}
