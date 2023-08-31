@@ -10,7 +10,7 @@ use serde_qs::actix::QsQuery;
 use std::collections::HashMap;
 use uuid::Uuid;
 
-#[api_operation(tags = ["pet"])]
+#[api_operation(tag = "pet")]
 pub(crate) async fn update_pet(
   // Create a new pet in the store
   body: Json<Pet>,
@@ -21,11 +21,11 @@ pub(crate) async fn update_pet(
 
 //@todo use multipart form instead
 #[api_operation(
-  tags = ["pet"],
+  tag = "pet",
   summary = "Add a new pet to the store",
   description = r###"Add a new pet to the store
   Plop"###,
-  error_codes = [405]
+  error_code = 405
 )]
 pub(crate) async fn add_pet(
   // Create a new pet in the store
@@ -37,7 +37,7 @@ pub(crate) async fn add_pet(
 
 /// Find pet by ID
 /// Returns a single pet
-#[api_operation(tags = ["pet"], scopes = [("api_key" = ["read:pets"])])]
+#[api_operation(tag = "pet", security_scope(name = "api_key", scope = "read:pets"))]
 pub(crate) async fn get_pet(
   // Create a new pet in the store
   pet_id: Path<Uuid>,
@@ -49,7 +49,7 @@ pub(crate) async fn get_pet(
 
 /// Find pet by ID
 /// Returns a single pet
-#[api_operation(tags = ["pet"], scopes = [("api_key" = ["read:pets"])])]
+#[api_operation(tag = "pet", security_scope(name = "api_key", scope = "read:pets"))]
 pub(crate) async fn find_by_status(
   // Create a new pet in the store
   status: Query<QueryStatus>,
@@ -61,7 +61,7 @@ pub(crate) async fn find_by_status(
 /// Find pet by ID
 /// Returns a single pet
 #[deprecated]
-#[api_operation(tags = ["pet"], scopes = [("api_key" = ["read:pets"])])]
+#[api_operation(tag = "pet", security_scope(name = "api_key", scope = "read:pets"))]
 pub(crate) async fn find_by_tags(
   // Create a new pet in the store
   tags: QsQuery<QueryTag>,
@@ -71,7 +71,10 @@ pub(crate) async fn find_by_tags(
 }
 
 /// Updates a pet in the store with form data
-#[api_operation(tags = ["pet"], scopes = [("api_key" = ["write:pets", "read:pets"])])]
+#[api_operation(
+  tag = "pet",
+  security_scope(name = "api_key", scope = "write:pets", scope = "read:pets")
+)]
 pub(crate) async fn update_pet_with_form(
   // ID of pet that needs to be updated
   pet_id: Path<Uuid>,

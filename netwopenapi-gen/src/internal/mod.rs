@@ -1,6 +1,6 @@
 use crate::internal::components::Components;
 use crate::internal::operation::Operation;
-use crate::operation_attr::OperationAttr;
+use crate::operation_attr::{OperationAttr, OperationAttrInternal};
 use proc_macro2::{Span, TokenStream as TokenStream2};
 use proc_macro_error::emit_error;
 use quote::quote;
@@ -20,7 +20,7 @@ pub(crate) mod utils;
 
 pub(crate) fn gen_open_api_impl(
   item_ast: &ItemFn,
-  operation_attribute: OperationAttr,
+  operation_attribute: OperationAttrInternal,
   openapi_struct: &Ident,
   openapi_struct_def: TokenStream2,
   impl_generics: ImplGenerics,
