@@ -6,6 +6,7 @@ use netwopenapi::{ApiComponent, ApiCookie, ApiHeader};
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use std::future::Ready;
+use url::Url;
 use utoipa::ToSchema;
 
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema, ApiComponent)]
@@ -29,6 +30,7 @@ pub(crate) struct Category {
   pub(crate) id: Option<i64>,
   // #[openapi(example = "Dogs")]
   pub(crate) name: Option<String>,
+  pub(crate) docs: Option<Url>,
 }
 
 /// pet status in the store

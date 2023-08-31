@@ -40,8 +40,6 @@ simple_modifier!(isize);
 simple_modifier!(u64);
 simple_modifier!(u128);
 simple_modifier!(usize);
-// #[cfg(feature = "url")]
-// impl_simple!(url::Url);
 
 #[cfg(any(feature = "chrono", feature = "extras"))]
 simple_modifier!(chrono::NaiveDate);
@@ -55,6 +53,8 @@ simple_modifier!(chrono::Duration);
 simple_modifier!(rust_decimal::Decimal);
 #[cfg(any(feature = "uuid", feature = "extras"))]
 simple_modifier!(uuid::Uuid);
+#[cfg(any(feature = "url", feature = "extras"))]
+simple_modifier!(url::Url);
 
 #[cfg(any(feature = "chrono", feature = "extras"))]
 impl<T: TimeZone> ApiComponent for chrono::DateTime<T> {

@@ -8,8 +8,6 @@ repository.workspace = true
 publish.workspace = true
 rust-version.workspace = true
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 actix-service = { workspace = true }
 actix-web = { workspace = true }
@@ -30,8 +28,9 @@ actix-web-garde = { workspace = true, optional = true }
 chrono = { workspace = true, optional = true }
 garde = { workspace = true, optional = true }
 rust_decimal = { workspace = true, optional = true }
-uuid = { workspace = true, optional = true }
 serde_qs = { workspace = true, features = ["actix4"], optional = true }
+uuid = { workspace = true, optional = true }
+url = { workspace = true, optional = true }
 
 [features]
 # query related features
@@ -46,8 +45,8 @@ chrono = ["dep:chrono", "utoipa/chrono"]
 multipart = ["dep:actix-multipart"]
 rust_decimal = ["dep:rust_decimal", "utoipa/decimal"]
 uuid = ["dep:uuid", "utoipa/uuid"]
-# @todo url
-extras = ["chrono", "multipart", "uuid", "rust_decimal"]
+url = ["dep:url", "utoipa/url"]
+extras = ["chrono", "multipart", "rust_decimal", "uuid", "url"]
 
 # UI related features
 rapidoc = ["utoipa-rapidoc"]
@@ -55,3 +54,8 @@ redoc = ["utoipa-redoc"]
 swagger-ui = ["utoipa-swagger-ui"]
 
 default = ["query"]
+
+#@todo doc
+#[package.metadata.docs.rs]
+#features = ["actix_extras", "non_strict_integers", "openapi_extensions", "uuid", "ulid", "url", "yaml"]
+#rustdoc-args = ["--cfg", "doc_cfg"]
