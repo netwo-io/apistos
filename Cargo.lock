@@ -2103,7 +2103,7 @@ dependencies = [
 [[package]]
 name = "utoipa"
 version = "3.5.0"
-source = "git+https://github.com/rlebran-netwo/utoipa.git?branch=feat-url-type#25ceeddb31d3e6a2f72c5d542ca7a4a73214edd3"
+source = "git+https://github.com/juhaku/utoipa.git#2eecc9a532ed69b0cbb16c2ed6b06aa1e8bdf209"
 dependencies = [
  "indexmap 2.0.0",
  "serde",
@@ -2114,7 +2114,7 @@ dependencies = [
 [[package]]
 name = "utoipa-gen"
 version = "3.5.0"
-source = "git+https://github.com/rlebran-netwo/utoipa.git?branch=feat-url-type#25ceeddb31d3e6a2f72c5d542ca7a4a73214edd3"
+source = "git+https://github.com/juhaku/utoipa.git#2eecc9a532ed69b0cbb16c2ed6b06aa1e8bdf209"
 dependencies = [
  "proc-macro-error",
  "proc-macro2",
@@ -2128,7 +2128,7 @@ dependencies = [
 [[package]]
 name = "utoipa-rapidoc"
 version = "0.1.0"
-source = "git+https://github.com/rlebran-netwo/utoipa.git?branch=feat-url-type#25ceeddb31d3e6a2f72c5d542ca7a4a73214edd3"
+source = "git+https://github.com/juhaku/utoipa.git#2eecc9a532ed69b0cbb16c2ed6b06aa1e8bdf209"
 dependencies = [
  "actix-web",
  "serde",
@@ -2139,7 +2139,7 @@ dependencies = [
 [[package]]
 name = "utoipa-redoc"
 version = "0.1.0"
-source = "git+https://github.com/rlebran-netwo/utoipa.git?branch=feat-url-type#25ceeddb31d3e6a2f72c5d542ca7a4a73214edd3"
+source = "git+https://github.com/juhaku/utoipa.git#2eecc9a532ed69b0cbb16c2ed6b06aa1e8bdf209"
 dependencies = [
  "actix-web",
  "serde",
@@ -2150,7 +2150,7 @@ dependencies = [
 [[package]]
 name = "utoipa-swagger-ui"
 version = "3.1.5"
-source = "git+https://github.com/rlebran-netwo/utoipa.git?branch=feat-url-type#25ceeddb31d3e6a2f72c5d542ca7a4a73214edd3"
+source = "git+https://github.com/juhaku/utoipa.git#2eecc9a532ed69b0cbb16c2ed6b06aa1e8bdf209"
 dependencies = [
  "actix-web",
  "mime_guess",
