@@ -36,7 +36,7 @@ utoipa-redoc = { git = "https://github.com/juhaku/utoipa.git", features = ["acti
 utoipa-swagger-ui = { git = "https://github.com/juhaku/utoipa.git", features = ["actix-web"] }
 
 actix-multipart = "0.6"
-actix-web-garde = { path = "../actix-web-garde" }
+garde-actix-web = "0.1"
 chrono = "0.4"
 garde = "0.14"
 rust_decimal = "1"

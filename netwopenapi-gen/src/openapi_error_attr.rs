@@ -5,7 +5,7 @@ use proc_macro_error::abort;
 use quote::{quote, ToTokens};
 use syn::Attribute;
 
-pub fn parse_openapi_error_attrs(attrs: &[Attribute]) -> Option<OpenapiErrorAttribute> {
+pub(crate) fn parse_openapi_error_attrs(attrs: &[Attribute]) -> Option<OpenapiErrorAttribute> {
   let error_attribute = attrs
     .iter()
     .filter(|attribute| attribute.path().is_ident("openapi_error"))
@@ -22,7 +22,7 @@ pub fn parse_openapi_error_attrs(attrs: &[Attribute]) -> Option<OpenapiErrorAttr
 }
 
 #[derive(FromMeta, Clone)]
-pub struct OpenapiErrorAttribute {
+pub(crate) struct OpenapiErrorAttribute {
   #[darling(multiple)]
   pub status: Vec<ErrorDefinition>,
 }
@@ -50,7 +50,7 @@ impl ToTokens for OpenapiErrorAttribute {
 }
 
 #[derive(FromMeta, Clone)]
-pub struct ErrorDefinition {
+pub(crate) struct ErrorDefinition {
   pub code: u16,
   pub description: Option<String>,
   pub with_schema: Option<bool>,

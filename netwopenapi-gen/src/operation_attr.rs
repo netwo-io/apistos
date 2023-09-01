@@ -2,18 +2,17 @@ use darling::ast::NestedMeta;
 use darling::FromMeta;
 use proc_macro_error::abort;
 use std::collections::BTreeMap;
-use syn::parse::Parse;
 use syn::Expr;
 
-pub fn parse_openapi_operation_attrs(attrs: &[NestedMeta]) -> OperationAttr {
-  match OperationAttr::from_list(attrs) {
-    Ok(operation) => operation,
+pub(crate) fn parse_openapi_operation_attrs(attrs: &[NestedMeta]) -> OperationAttr {
+  match OperationAttrInternal::from_list(attrs) {
+    Ok(operation) => operation.into(),
     Err(e) => abort!(e.span(), "Unable to parse #[api_operation] attribute: {:?}", e),
   }
 }
 
 #[derive(FromMeta, Clone)]
-pub struct OperationAttr {
+struct OperationAttrInternal {
   #[darling(default)]
   pub skip: bool,
   #[darling(default)]
@@ -30,13 +29,13 @@ pub struct OperationAttr {
 }
 
 #[derive(FromMeta, Clone)]
-pub struct SecurityScopes {
+struct SecurityScopes {
   name: String,
   #[darling(multiple, rename = "scope")]
   scopes: Vec<String>,
 }
 
-pub(crate) struct OperationAttrInternal {
+pub(crate) struct OperationAttr {
   pub skip: bool,
   pub deprecated: bool,
   pub operation_id: Option<Expr>,
@@ -47,8 +46,8 @@ pub(crate) struct OperationAttrInternal {
   pub error_codes: Vec<u16>,
 }
 
-impl From<OperationAttr> for OperationAttrInternal {
-  fn from(value: OperationAttr) -> Self {
+impl From<OperationAttrInternal> for OperationAttr {
+  fn from(value: OperationAttrInternal) -> Self {
     Self {
       skip: value.skip,
       deprecated: value.deprecated,

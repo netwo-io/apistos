@@ -5,7 +5,7 @@ use futures::future::{ready, Ready};
 use netwopenapi::ApiSecurity;
 
 #[derive(ApiSecurity)]
-#[openapi_security(api_key(header(name = "api_key")))]
+#[openapi_security(scheme(api_key(header(name = "api_key"))))]
 pub struct ApiKey;
 
 impl FromRequest for ApiKey {

@@ -5,7 +5,7 @@ use proc_macro_error::abort;
 use quote::{quote, ToTokens};
 use syn::{Attribute, Type};
 
-pub fn parse_openapi_cookie_attrs(
+pub(crate) fn parse_openapi_cookie_attrs(
   attrs: &[Attribute],
   deprecated: Option<bool>,
   childs: Vec<Type>,
@@ -35,7 +35,7 @@ pub fn parse_openapi_cookie_attrs(
 }
 
 #[derive(FromMeta, Clone)]
-pub struct OpenapiCookieAttribute {
+struct OpenapiCookieAttribute {
   pub name: String,
   pub description: Option<String>,
   pub required: Option<bool>,
@@ -43,7 +43,7 @@ pub struct OpenapiCookieAttribute {
 }
 
 #[derive(Clone)]
-pub struct OpenapiCookieAttributeExtended {
+pub(crate) struct OpenapiCookieAttributeExtended {
   pub name: String,
   pub description: Option<String>,
   pub required: Option<bool>,

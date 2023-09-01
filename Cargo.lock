@@ -220,25 +220,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "actix-web-garde"
-version = "0.1.0"
-dependencies = [
- "actix-http",
- "actix-router",
- "actix-web",
- "derive_more",
- "futures",
- "garde",
- "log",
- "mime",
- "pin-project-lite",
- "serde",
- "serde_qs",
- "serde_urlencoded",
- "thiserror",
-]
-
-[[package]]
 name = "addr2line"
 version = "0.21.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -884,6 +865,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "garde-actix-web"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "093a2cff5156ff03a12908123d7bb377ea885d0022b914967ccfcac7eb4e86bc"
+dependencies = [
+ "actix-http",
+ "actix-router",
+ "actix-web",
+ "derive_more",
+ "futures",
+ "garde",
+ "log",
+ "mime",
+ "pin-project-lite",
+ "serde",
+ "serde_qs",
+ "serde_urlencoded",
+ "thiserror",
+]
+
+[[package]]
 name = "garde_derive"
 version = "0.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1211,9 +1213,9 @@ dependencies = [
  "actix-multipart",
  "actix-service",
  "actix-web",
- "actix-web-garde",
  "chrono",
  "garde",
+ "garde-actix-web",
  "netwopenapi-gen",
  "once_cell",
  "pin-project",
@@ -2103,7 +2105,7 @@ dependencies = [
 [[package]]
 name = "utoipa"
 version = "3.5.0"
-source = "git+https://github.com/juhaku/utoipa.git#2eecc9a532ed69b0cbb16c2ed6b06aa1e8bdf209"
+source = "git+https://github.com/juhaku/utoipa.git#1443ec45784ebc7cb0daef4aa12cda373b1bcf78"
 dependencies = [
  "indexmap 2.0.0",
  "serde",
@@ -2114,7 +2116,7 @@ dependencies = [
 [[package]]
 name = "utoipa-gen"
 version = "3.5.0"
-source = "git+https://github.com/juhaku/utoipa.git#2eecc9a532ed69b0cbb16c2ed6b06aa1e8bdf209"
+source = "git+https://github.com/juhaku/utoipa.git#1443ec45784ebc7cb0daef4aa12cda373b1bcf78"
 dependencies = [
  "proc-macro-error",
  "proc-macro2",
@@ -2128,7 +2130,7 @@ dependencies = [
 [[package]]
 name = "utoipa-rapidoc"
 version = "0.1.0"
-source = "git+https://github.com/juhaku/utoipa.git#2eecc9a532ed69b0cbb16c2ed6b06aa1e8bdf209"
+source = "git+https://github.com/juhaku/utoipa.git#1443ec45784ebc7cb0daef4aa12cda373b1bcf78"
 dependencies = [
  "actix-web",
  "serde",
@@ -2139,7 +2141,7 @@ dependencies = [
 [[package]]
 name = "utoipa-redoc"
 version = "0.1.0"
-source = "git+https://github.com/juhaku/utoipa.git#2eecc9a532ed69b0cbb16c2ed6b06aa1e8bdf209"
+source = "git+https://github.com/juhaku/utoipa.git#1443ec45784ebc7cb0daef4aa12cda373b1bcf78"
 dependencies = [
  "actix-web",
  "serde",
@@ -2150,7 +2152,7 @@ dependencies = [
 [[package]]
 name = "utoipa-swagger-ui"
 version = "3.1.5"
-source = "git+https://github.com/juhaku/utoipa.git#2eecc9a532ed69b0cbb16c2ed6b06aa1e8bdf209"
+source = "git+https://github.com/juhaku/utoipa.git#1443ec45784ebc7cb0daef4aa12cda373b1bcf78"
 dependencies = [
  "actix-web",
  "mime_guess",

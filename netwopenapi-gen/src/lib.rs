@@ -5,7 +5,7 @@ use crate::openapi_cookie_attr::parse_openapi_cookie_attrs;
 use crate::openapi_error_attr::parse_openapi_error_attrs;
 use crate::openapi_header_attr::parse_openapi_header_attrs;
 use crate::openapi_security_attr::parse_openapi_security_attrs;
-use crate::operation_attr::{parse_openapi_operation_attrs, OperationAttrInternal};
+use crate::operation_attr::{parse_openapi_operation_attrs, OperationAttr};
 use convert_case::{Case, Casing};
 use darling::ast::NestedMeta;
 use darling::Error;
@@ -59,10 +59,11 @@ pub fn derive_api_security(input: TokenStream) -> TokenStream {
     vis: _vis,
   } = input;
 
-  let openapi_security_attributes = parse_openapi_security_attrs(&attrs).expect_or_abort(
+  let security_name: String = ident.to_string().to_case(Case::Snake);
+  let openapi_security_attributes = parse_openapi_security_attrs(&attrs, security_name).expect_or_abort(
     "expected #[openapi_security(...)] attribute to be present when used with ApiSecurity derive trait",
   );
-  let security_name: String = ident.to_string().to_case(Case::Snake);
+  let security_name = &openapi_security_attributes.name;
 
   let (_, ty_generics, where_clause) = generics.split_for_impl();
   let res = quote!(
@@ -76,12 +77,7 @@ pub fn derive_api_security(input: TokenStream) -> TokenStream {
       }
 
       fn securities() -> std::collections::BTreeMap<String, utoipa::openapi::security::SecurityScheme> {
-        std::collections::BTreeMap::from_iter(
-          vec![(
-            #security_name.to_string(),
-            #openapi_security_attributes
-          )]
-        )
+        #openapi_security_attributes
       }
 
       fn security_requirement_name() -> Option<String> {
@@ -184,7 +180,7 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
     }
   };
 
-  let operation_attribute: OperationAttrInternal = parse_openapi_operation_attrs(&attr_args).into();
+  let operation_attribute = parse_openapi_operation_attrs(&attr_args);
 
   let default_span = proc_macro2::Span::call_site();
   let item_ast = match syn::parse::<ItemFn>(item) {

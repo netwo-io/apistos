@@ -4,9 +4,12 @@ use proc_macro_error::abort;
 use quote::{quote, ToTokens};
 use syn::Attribute;
 
-pub const RESERVED_HEADERS: &[&str] = &["Accept", "Content-Type", "Authorization"];
+pub(crate) const RESERVED_HEADERS: &[&str] = &["Accept", "Content-Type", "Authorization"];
 
-pub fn parse_openapi_header_attrs(attrs: &[Attribute], deprecated: Option<bool>) -> Option<OpenapiHeaderAttribute> {
+pub(crate) fn parse_openapi_header_attrs(
+  attrs: &[Attribute],
+  deprecated: Option<bool>,
+) -> Option<OpenapiHeaderAttribute> {
   let header_attribute = attrs
     .iter()
     .filter(|attribute| attribute.path().is_ident("openapi_header"))
@@ -29,7 +32,7 @@ pub fn parse_openapi_header_attrs(attrs: &[Attribute], deprecated: Option<bool>)
 }
 
 #[derive(FromMeta, Clone)]
-pub struct OpenapiHeaderAttribute {
+pub(crate) struct OpenapiHeaderAttribute {
   pub name: String,
   pub description: Option<String>,
   pub required: Option<bool>,

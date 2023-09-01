@@ -24,7 +24,7 @@ utoipa-swagger-ui = { workspace = true, optional = true }
 netwopenapi-gen = { path = "../netwopenapi-gen" }
 
 actix-multipart = { workspace = true, optional = true }
-actix-web-garde = { workspace = true, optional = true }
+garde-actix-web = { workspace = true, optional = true }
 chrono = { workspace = true, optional = true }
 garde = { workspace = true, optional = true }
 rust_decimal = { workspace = true, optional = true }
@@ -35,10 +35,10 @@ url = { workspace = true, optional = true }
 [features]
 # query related features
 query = []
-qs_query = ["serde_qs", "actix-web-garde?/serde_qs"]
+qs_query = ["dep:serde_qs", "garde-actix-web?/serde_qs"]
 
 # actix garde feature
-garde = ["dep:garde", "actix-web-garde"]
+garde = ["dep:garde", "dep:garde-actix-web"]
 
 # extra types related features
 chrono = ["dep:chrono", "utoipa/chrono"]
