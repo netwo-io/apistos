@@ -1243,6 +1243,7 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.29",
+ "url",
 ]
 
 [[package]]

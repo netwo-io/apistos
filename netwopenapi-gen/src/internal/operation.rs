@@ -7,7 +7,7 @@ use syn::{Expr, ExprLit, Lit, LitStr, Type};
 
 pub struct Operation<'a> {
   pub args: &'a [Type],
-  pub responder_wrapper: &'a proc_macro2::TokenStream,
+  pub responder_wrapper: &'a TokenStream,
   pub fn_name: &'a str,
   pub operation_id: Option<Expr>,
   pub deprecated: Option<bool>,
