@@ -36,7 +36,6 @@ impl<'a> ServiceConfig<'a> {
     F: DefinitionHolder + HttpServiceFactory + 'static,
   {
     factory.update_path_items(&mut self.item_map);
-    //@todo security ?
     self.components.extend(factory.components().into_iter());
     self.inner.service(factory);
     self

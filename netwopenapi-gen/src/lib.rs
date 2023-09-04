@@ -5,7 +5,7 @@ use crate::openapi_cookie_attr::parse_openapi_cookie_attrs;
 use crate::openapi_error_attr::parse_openapi_error_attrs;
 use crate::openapi_header_attr::parse_openapi_header_attrs;
 use crate::openapi_security_attr::parse_openapi_security_attrs;
-use crate::operation_attr::{parse_openapi_operation_attrs, OperationAttr};
+use crate::operation_attr::parse_openapi_operation_attrs;
 use convert_case::{Case, Casing};
 use darling::ast::NestedMeta;
 use darling::Error;

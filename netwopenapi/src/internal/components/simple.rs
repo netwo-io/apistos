@@ -1,6 +1,4 @@
 use crate::internal::components::ApiComponent;
-use chrono::TimeZone;
-use utoipa::openapi::{RefOr, Schema};
 
 macro_rules! simple_modifier {
   ($ty:ty) => {
@@ -57,13 +55,13 @@ simple_modifier!(uuid::Uuid);
 simple_modifier!(url::Url);
 
 #[cfg(any(feature = "chrono", feature = "extras"))]
-impl<T: TimeZone> ApiComponent for chrono::DateTime<T> {
-  fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
+impl<T: chrono::TimeZone> ApiComponent for chrono::DateTime<T> {
+  fn child_schemas() -> Vec<(String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)> {
     vec![]
   }
 
-  fn raw_schema() -> Option<RefOr<Schema>> {
-    let schema: RefOr<Schema> = utoipa::schema!(
+  fn raw_schema() -> Option<utoipa::openapi::RefOr<utoipa::openapi::Schema>> {
+    let schema: utoipa::openapi::RefOr<utoipa::openapi::Schema> = utoipa::schema!(
       #[inline]
       chrono::DateTime
     )
@@ -71,19 +69,19 @@ impl<T: TimeZone> ApiComponent for chrono::DateTime<T> {
     Some(schema)
   }
 
-  fn schema() -> Option<(String, RefOr<Schema>)> {
+  fn schema() -> Option<(String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)> {
     None
   }
 }
 
 #[cfg(any(feature = "chrono", feature = "extras"))]
-impl<T: TimeZone> ApiComponent for chrono::Date<T> {
-  fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
+impl<T: chrono::TimeZone> ApiComponent for chrono::Date<T> {
+  fn child_schemas() -> Vec<(String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)> {
     vec![]
   }
 
-  fn raw_schema() -> Option<RefOr<Schema>> {
-    let schema: RefOr<Schema> = utoipa::schema!(
+  fn raw_schema() -> Option<utoipa::openapi::RefOr<utoipa::openapi::Schema>> {
+    let schema: utoipa::openapi::RefOr<utoipa::openapi::Schema> = utoipa::schema!(
       #[inline]
       chrono::Date
     )
@@ -91,7 +89,7 @@ impl<T: TimeZone> ApiComponent for chrono::Date<T> {
     Some(schema)
   }
 
-  fn schema() -> Option<(String, RefOr<Schema>)> {
+  fn schema() -> Option<(String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)> {
     None
   }
 }
