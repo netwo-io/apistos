@@ -72,20 +72,20 @@ impl ToTokens for OpenapiCookieAttributeExtended {
     let schema_impl = Schemas { childs: &self.childs };
     tokens.extend(quote! {
       #schema_impl
-      fn name() -> String {
-        #name.to_string()
+
+      fn request_body() -> Option<utoipa::openapi::request_body::RequestBody> {
+        None
       }
 
-      fn description() -> Option<String> {
-        #description
-      }
-
-      fn required() -> utoipa::openapi::Required {
-        #required
-      }
-
-      fn deprecated() -> utoipa::openapi::Deprecated {
-        #deprecated
+      fn parameters() -> Vec<utoipa::openapi::path::Parameter> {
+        vec![utoipa::openapi::path::ParameterBuilder::new()
+          .parameter_in(utoipa::openapi::path::ParameterIn::Cookie)
+          .name(#name.to_string())
+          .description(#description)
+          .required(#required)
+          .deprecated(Some(#deprecated))
+          .schema(<Self as ApiComponent>::schema().map(|(_, schema)| schema).or_else(|| Self::raw_schema()))
+          .build()]
       }
     })
   }

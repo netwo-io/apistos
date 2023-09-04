@@ -135,7 +135,7 @@ pub fn derive_api_cookie(input: TokenStream) -> TokenStream {
 
   let (_, ty_generics, where_clause) = generics.split_for_impl();
   let res = quote!(
-    impl #generics netwopenapi::ApiCookie for #ident #ty_generics #where_clause {
+    impl #generics netwopenapi::ApiComponent for #ident #ty_generics #where_clause {
       #openapi_cookie_attributes
     }
   );
