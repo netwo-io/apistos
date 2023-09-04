@@ -27,7 +27,10 @@ pub trait TypedSchema {
   fn format() -> Option<SchemaFormat>;
 }
 
-impl<T: TypedSchema> ApiComponent for T {
+impl<T> ApiComponent for T
+where
+  T: TypedSchema,
+{
   fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
     vec![]
   }

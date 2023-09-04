@@ -226,7 +226,7 @@ where
 }
 
 #[cfg(all(feature = "query", feature = "garde"))]
-impl<T> ApiComponent for actix_web_garde::web::Query<T>
+impl<T> ApiComponent for garde_actix_web::web::Query<T>
 where
   T: ApiComponent,
 {
@@ -286,7 +286,7 @@ where
 }
 
 #[cfg(all(feature = "query", feature = "garde"))]
-impl<K, V> ApiComponent for actix_web_garde::web::Query<HashMap<K, V>>
+impl<K, V> ApiComponent for garde_actix_web::web::Query<HashMap<K, V>>
 where
   V: ApiComponent,
 {
@@ -332,7 +332,7 @@ where
 }
 
 #[cfg(all(feature = "qs_query", feature = "garde"))]
-impl<T> ApiComponent for actix_web_garde::web::QsQuery<T>
+impl<T> ApiComponent for garde_actix_web::web::QsQuery<T>
 where
   T: ApiComponent,
 {
@@ -393,7 +393,7 @@ where
 }
 
 #[cfg(all(feature = "qs_query", feature = "garde"))]
-impl<K, V> ApiComponent for actix_web_garde::web::QsQuery<HashMap<K, V>>
+impl<K, V> ApiComponent for garde_actix_web::web::QsQuery<HashMap<K, V>>
 where
   V: ApiComponent,
 {

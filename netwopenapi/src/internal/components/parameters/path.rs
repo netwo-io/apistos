@@ -57,7 +57,7 @@ where
 }
 
 #[cfg(feature = "garde")]
-impl<T> ApiComponent for actix_web_garde::web::Path<T>
+impl<T> ApiComponent for garde_actix_web::web::Path<T>
 where
   T: ApiComponent,
 {

@@ -24,7 +24,7 @@ where
 }
 
 #[cfg(feature = "garde")]
-impl<T> ApiComponent for actix_web_garde::web::Json<T>
+impl<T> ApiComponent for garde_actix_web::web::Json<T>
 where
   T: ApiComponent,
 {

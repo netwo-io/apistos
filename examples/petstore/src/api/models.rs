@@ -2,11 +2,12 @@ use actix_web::dev::Payload;
 use actix_web::error::ParseError;
 use actix_web::http::header::{Header, HeaderName, HeaderValue, InvalidHeaderValue, TryIntoHeaderValue};
 use actix_web::{Error, FromRequest, HttpMessage, HttpRequest};
-use netwopenapi::{ApiComponent, ApiCookie, ApiHeader};
+use netwopenapi::{ApiComponent, ApiCookie, ApiHeader, TypedSchema};
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use std::future::Ready;
 use url::Url;
+use utoipa::openapi::{SchemaFormat, SchemaType};
 use utoipa::ToSchema;
 
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema, ApiComponent)]
@@ -29,8 +30,21 @@ pub(crate) struct Category {
   // #[openapi(example = 1)]
   pub(crate) id: Option<i64>,
   // #[openapi(example = "Dogs")]
-  pub(crate) name: Option<String>,
+  pub(crate) name: Option<Name>,
   pub(crate) docs: Option<Url>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Name(String);
+
+impl TypedSchema for Name {
+  fn schema_type() -> SchemaType {
+    SchemaType::String
+  }
+
+  fn format() -> Option<SchemaFormat> {
+    None
+  }
 }
 
 /// pet status in the store
