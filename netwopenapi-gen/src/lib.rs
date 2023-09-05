@@ -24,6 +24,42 @@ mod operation_attr;
 const OPENAPI_STRUCT_PREFIX: &str = "__openapi_";
 
 #[proc_macro_error]
+#[proc_macro_derive(ApiType)]
+pub fn derive_api_type(input: TokenStream) -> TokenStream {
+  let input = syn::parse_macro_input!(input as DeriveInput);
+  let DeriveInput {
+    attrs: _attrs,
+    ident,
+    data: _data,
+    generics,
+    vis: _vis,
+  } = input;
+
+  let (_, ty_generics, where_clause) = generics.split_for_impl();
+  let component_name = quote!(#ident).to_string();
+  let res = quote!(
+    impl #generics netwopenapi::ApiComponent for #ident #ty_generics #where_clause {
+      fn child_schemas() -> Vec<(String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)> {
+        vec![]
+      }
+
+      fn schema() -> Option<(String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)> {
+        Some((
+          #component_name.to_string(),
+          utoipa::openapi::ObjectBuilder::new()
+            .schema_type(#ident::schema_type())
+            .format(#ident::format())
+            .build()
+            .into(),
+        ))
+      }
+    }
+  );
+  // eprintln!("{:#}", res);
+  res.into()
+}
+
+#[proc_macro_error]
 #[proc_macro_derive(ApiComponent)]
 pub fn derive_api_component(input: TokenStream) -> TokenStream {
   let input = syn::parse_macro_input!(input as DeriveInput);

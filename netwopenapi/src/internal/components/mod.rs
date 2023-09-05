@@ -9,8 +9,8 @@ use utoipa::openapi::path::Parameter;
 use utoipa::openapi::request_body::{RequestBody, RequestBodyBuilder};
 use utoipa::openapi::security::SecurityScheme;
 use utoipa::openapi::{
-  ContentBuilder, ObjectBuilder, Ref, RefOr, Required, Response, ResponseBuilder, Responses, ResponsesBuilder, Schema,
-  SchemaFormat, SchemaType,
+  ContentBuilder, Ref, RefOr, Required, Response, ResponseBuilder, Responses, ResponsesBuilder, Schema, SchemaFormat,
+  SchemaType,
 };
 
 pub mod empty;
@@ -25,29 +25,6 @@ pub mod simple;
 pub trait TypedSchema {
   fn schema_type() -> SchemaType;
   fn format() -> Option<SchemaFormat>;
-}
-
-impl<T> ApiComponent for T
-where
-  T: TypedSchema,
-{
-  fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
-    vec![]
-  }
-
-  fn raw_schema() -> Option<RefOr<Schema>> {
-    Some(
-      ObjectBuilder::new()
-        .schema_type(T::schema_type())
-        .format(T::format())
-        .build()
-        .into(),
-    )
-  }
-
-  fn schema() -> Option<(String, RefOr<Schema>)> {
-    None
-  }
 }
 
 pub trait ApiComponent {

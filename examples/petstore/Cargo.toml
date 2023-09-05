@@ -20,8 +20,8 @@ log = "0.4"
 futures = "0.3"
 rust_decimal = "1"
 serde_qs = { version = "0.12", features = ["actix4"] }
-utoipa = { git = "https://github.com/juhaku/utoipa.git", features = ["actix_extras", "debug"] }
 uuid = { version = "1", features = ["serde", "v4"] }
+utoipa = { git = "https://github.com/juhaku/utoipa.git", features = ["actix_extras", "debug"] }
 url = { version = "2", features = ["serde"] }
 
 netwopenapi = { path = "../../netwopenapi", features = ["extras", "swagger-ui", "rapidoc", "redoc", "qs_query"] }

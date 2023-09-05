@@ -2,7 +2,7 @@ use actix_web::dev::Payload;
 use actix_web::error::ParseError;
 use actix_web::http::header::{Header, HeaderName, HeaderValue, InvalidHeaderValue, TryIntoHeaderValue};
 use actix_web::{Error, FromRequest, HttpMessage, HttpRequest};
-use netwopenapi::{ApiComponent, ApiCookie, ApiHeader, TypedSchema};
+use netwopenapi::{ApiComponent, ApiCookie, ApiHeader, ApiType, TypedSchema};
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use std::future::Ready;
@@ -34,7 +34,7 @@ pub(crate) struct Category {
   pub(crate) docs: Option<Url>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, ApiType)]
 pub struct Name(String);
 
 impl TypedSchema for Name {

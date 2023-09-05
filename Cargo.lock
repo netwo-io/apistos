@@ -2114,7 +2114,7 @@ dependencies = [
 [[package]]
 name = "utoipa"
 version = "3.5.0"
-source = "git+https://github.com/juhaku/utoipa.git#1443ec45784ebc7cb0daef4aa12cda373b1bcf78"
+source = "git+https://github.com/juhaku/utoipa.git#b1ce2d07d3951e5c2ff9ff618f6434b08cfd082b"
 dependencies = [
  "indexmap 2.0.0",
  "serde",
@@ -2125,7 +2125,7 @@ dependencies = [
 [[package]]
 name = "utoipa-gen"
 version = "3.5.0"
-source = "git+https://github.com/juhaku/utoipa.git#1443ec45784ebc7cb0daef4aa12cda373b1bcf78"
+source = "git+https://github.com/juhaku/utoipa.git#b1ce2d07d3951e5c2ff9ff618f6434b08cfd082b"
 dependencies = [
  "proc-macro-error",
  "proc-macro2",
@@ -2139,7 +2139,7 @@ dependencies = [
 [[package]]
 name = "utoipa-rapidoc"
 version = "0.1.0"
-source = "git+https://github.com/juhaku/utoipa.git#1443ec45784ebc7cb0daef4aa12cda373b1bcf78"
+source = "git+https://github.com/juhaku/utoipa.git#b1ce2d07d3951e5c2ff9ff618f6434b08cfd082b"
 dependencies = [
  "actix-web",
  "serde",
@@ -2150,7 +2150,7 @@ dependencies = [
 [[package]]
 name = "utoipa-redoc"
 version = "0.1.0"
-source = "git+https://github.com/juhaku/utoipa.git#1443ec45784ebc7cb0daef4aa12cda373b1bcf78"
+source = "git+https://github.com/juhaku/utoipa.git#b1ce2d07d3951e5c2ff9ff618f6434b08cfd082b"
 dependencies = [
  "actix-web",
  "serde",
@@ -2161,7 +2161,7 @@ dependencies = [
 [[package]]
 name = "utoipa-swagger-ui"
 version = "3.1.5"
-source = "git+https://github.com/juhaku/utoipa.git#1443ec45784ebc7cb0daef4aa12cda373b1bcf78"
+source = "git+https://github.com/juhaku/utoipa.git#b1ce2d07d3951e5c2ff9ff618f6434b08cfd082b"
 dependencies = [
  "actix-web",
  "mime_guess",
