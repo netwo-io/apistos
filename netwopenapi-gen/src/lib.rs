@@ -47,8 +47,8 @@ pub fn derive_api_type(input: TokenStream) -> TokenStream {
         Some((
           #component_name.to_string(),
           utoipa::openapi::ObjectBuilder::new()
-            .schema_type(#ident::schema_type())
-            .format(#ident::format())
+            .schema_type(<#ident #ty_generics>::schema_type())
+            .format(<#ident #ty_generics>::format())
             .build()
             .into(),
         ))
