@@ -122,8 +122,6 @@ impl ApiComponent for NoContent {
   }
 }
 
-impl PathItemDefinition for NoContent {}
-
 pub struct AcceptedJson<T: Serialize + ApiComponent>(pub T);
 
 impl<T> Responder for AcceptedJson<T>
@@ -182,8 +180,6 @@ where
   }
 }
 
-impl<T: Serialize + ApiComponent> PathItemDefinition for AcceptedJson<T> {}
-
 pub struct CreatedJson<T: Serialize + ApiComponent>(pub T);
 
 impl<T> Responder for CreatedJson<T>
@@ -237,5 +233,3 @@ where
     })
   }
 }
-
-impl<T: Serialize + ApiComponent> PathItemDefinition for CreatedJson<T> {}

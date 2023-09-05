@@ -37,13 +37,11 @@ where
 
   fn raw_schema() -> Option<RefOr<Schema>> {
     Some(
-      Schema::Object(
-        ObjectBuilder::new()
-          .schema_type(T::schema_type())
-          .format(T::format())
-          .build(),
-      )
-      .into(),
+      ObjectBuilder::new()
+        .schema_type(T::schema_type())
+        .format(T::format())
+        .build()
+        .into(),
     )
   }
 
@@ -187,6 +185,10 @@ where
   fn error_schemas() -> BTreeMap<String, (String, RefOr<Schema>)> {
     E::schemas_by_status_code()
   }
+
+  fn responses() -> Option<Responses> {
+    T::responses()
+  }
 }
 
 impl<T> ApiComponent for Data<T> {
@@ -242,13 +244,28 @@ where
         RefOr::T(_) => Ref::from_schema_name(name),
       };
       let mut responses = vec![];
-      responses.push((
-        "200".to_owned(),
-        ResponseBuilder::new()
-          .content(Self::content_type(), ContentBuilder::new().schema(_ref).build())
-          .build(),
-      ));
-      responses.append(&mut Self::error_responses());
+      if let Some(response) = R::responses() {
+        responses.append(
+          &mut response
+            .responses
+            .into_iter()
+            .collect::<Vec<(String, RefOr<Response>)>>(),
+        );
+      } else {
+        responses.push((
+          "200".to_owned(),
+          ResponseBuilder::new()
+            .content(Self::content_type(), ContentBuilder::new().schema(_ref).build())
+            .build()
+            .into(),
+        ));
+      }
+      responses.append(
+        &mut Self::error_responses()
+          .into_iter()
+          .map(|(status, schema)| (status, schema.into()))
+          .collect(),
+      );
       ResponsesBuilder::new().responses_from_iter(responses).build()
     })
   }
