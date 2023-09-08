@@ -3,7 +3,7 @@ use crate::api::models::{OrganizationSlug, Pet, PetUpdatesQuery, QueryStatus, Qu
 use crate::api::security::ApiKey;
 use actix_web::web::{Header, Json, Path, Query};
 use actix_web::Error;
-use netwopenapi::actix::CreatedJson;
+use netwopenapi::actix::{CreatedJson, NoContent};
 use netwopenapi::api_operation;
 use netwopenapi::ApiComponent;
 use serde_qs::actix::QsQuery;
@@ -44,6 +44,17 @@ pub(crate) async fn get_pet(
 ) -> Result<Option<Json<Pet>>, Error> // default undocumented error
 {
   Ok(None)
+}
+
+/// Delete pet by ID
+#[api_operation(tag = "pet", security_scope(name = "api_key", scope = "read:pets"))]
+pub(crate) async fn delete_pet(
+  // Create a new pet in the store
+  pet_id: Path<Uuid>,
+  key: Option<ApiKey>,
+) -> Result<NoContent, Error> // default undocumented error
+{
+  Ok(NoContent)
 }
 
 /// Find pet by ID

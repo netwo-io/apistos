@@ -1,29 +1,31 @@
 use proc_macro2::TokenStream;
 use quote::{quote, ToTokens};
-use syn::Type;
 
-pub struct Schemas<'a> {
-  pub childs: &'a [Type],
-}
+pub struct Schemas;
 
-impl<'a> ToTokens for Schemas<'a> {
+impl ToTokens for Schemas {
   fn to_tokens(&self, tokens: &mut TokenStream) {
-    let childs = self.childs;
     tokens.extend(quote! {
       fn child_schemas() -> Vec<(String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)> {
-        let mut schemas: Vec<Option<(String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)>> = vec![];
-        #(
-          schemas.push(<#childs as ApiComponent>::schema());
-        )*
-        let mut schemas = schemas.into_iter().flatten().collect::<Vec<(String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)>>();
-        #(
-          schemas.append(&mut <#childs>::child_schemas());
-        )*
+        let settings = schemars::gen::SchemaSettings::openapi3();
+        let mut gen = settings.into_generator();
+        let schema: schemars::schema::RootSchema = gen.into_root_schema_for::<Self>();
+
+        let mut schemas: Vec<(String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)> = vec![];
+        for (def_name, def) in schema.definitions {
+          schemas.push((def_name, netwopenapi::json_schema_to_schemas(def.into_object())));
+        }
         schemas
       }
 
       fn schema() -> Option<(String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)> {
-        let (name, schema) = <Self as utoipa::ToSchema<'_>>::schema();
+        let (name, schema) = {
+          let schema_name = <Self as schemars::JsonSchema>::schema_name();
+          let settings = schemars::gen::SchemaSettings::openapi3();
+          let mut gen = settings.into_generator();
+          let schema = <Self as schemars::JsonSchema>::json_schema(&mut gen);
+          (schema_name, netwopenapi::json_schema_to_schemas(schema.into_object()))
+        };
         Some((name.to_string(), schema))
       }
     });

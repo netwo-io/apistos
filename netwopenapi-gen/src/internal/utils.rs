@@ -1,4 +1,4 @@
-use syn::{Attribute, Data, Type};
+use syn::Attribute;
 
 pub(crate) fn extract_deprecated_from_attr(attrs: &[Attribute]) -> Option<bool> {
   attrs.iter().find_map(|attr| {
@@ -8,17 +8,4 @@ pub(crate) fn extract_deprecated_from_attr(attrs: &[Attribute]) -> Option<bool> 
       Some(true)
     }
   })
-}
-
-pub(crate) fn child_types_from_data(data: Data) -> Vec<Type> {
-  match data {
-    Data::Struct(s) => s.fields.into_iter().map(|f| f.ty).collect(),
-    Data::Enum(e) => e
-      .variants
-      .into_iter()
-      .map(|v| v.fields.into_iter().map(|f| f.ty))
-      .flatten()
-      .collect(),
-    Data::Union(u) => u.fields.named.into_iter().map(|f| f.ty).collect(),
-  }
 }

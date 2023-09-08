@@ -1,5 +1,5 @@
 use crate::internal::schemas::Schemas;
-use crate::internal::utils::{child_types_from_data, extract_deprecated_from_attr};
+use crate::internal::utils::extract_deprecated_from_attr;
 use crate::internal::{extract_generics_params, gen_item_ast, gen_open_api_impl};
 use crate::openapi_cookie_attr::parse_openapi_cookie_attrs;
 use crate::openapi_error_attr::parse_openapi_error_attrs;
@@ -12,7 +12,7 @@ use darling::Error;
 use proc_macro::TokenStream;
 use proc_macro_error::{abort, proc_macro_error, OptionExt};
 use quote::quote;
-use syn::{DeriveInput, Ident, ItemFn, Type};
+use syn::{DeriveInput, Ident, ItemFn};
 
 mod internal;
 mod openapi_cookie_attr;
@@ -38,6 +38,39 @@ pub fn derive_api_type(input: TokenStream) -> TokenStream {
   let (_, ty_generics, where_clause) = generics.split_for_impl();
   let component_name = quote!(#ident).to_string();
   let res = quote!(
+    #[automatically_derived]
+    impl #generics schemars::JsonSchema for #ident #ty_generics #where_clause {
+       fn is_referenceable() -> bool {
+        false
+      }
+
+      fn schema_name() -> String {
+        #component_name.to_string()
+      }
+
+      fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
+        let schema_type = <Self as TypedSchema>::schema_type();
+        let instance_type = match schema_type {
+          SchemaType::Object => Some(schemars::schema::SingleOrVec::Single(Box::new(schemars::schema::InstanceType::Object))),
+          SchemaType::String => Some(schemars::schema::SingleOrVec::Single(Box::new(schemars::schema::InstanceType::String))),
+          SchemaType::Integer => Some(schemars::schema::SingleOrVec::Single(Box::new(schemars::schema::InstanceType::Integer))),
+          SchemaType::Number => Some(schemars::schema::SingleOrVec::Single(Box::new(schemars::schema::InstanceType::Number))),
+          SchemaType::Boolean => Some(schemars::schema::SingleOrVec::Single(Box::new(schemars::schema::InstanceType::Boolean))),
+          SchemaType::Array => Some(schemars::schema::SingleOrVec::Single(Box::new(schemars::schema::InstanceType::Array))),
+          SchemaType::Value => None,
+        };
+        schemars::schema::Schema::Object(schemars::schema::SchemaObject {
+          instance_type,
+          format: <Self as TypedSchema>::format().map(|f| match f {
+            utoipa::openapi::SchemaFormat::KnownFormat(k) => netwopenapi::plain_string(&k).unwrap_or_default(),
+            utoipa::openapi::SchemaFormat::Custom(v) => v
+          }),
+          ..Default::default()
+        })
+      }
+    }
+
+    #[automatically_derived]
     impl #generics netwopenapi::ApiComponent for #ident #ty_generics #where_clause {
       fn child_schemas() -> Vec<(String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)> {
         vec![]
@@ -66,16 +99,15 @@ pub fn derive_api_component(input: TokenStream) -> TokenStream {
   let DeriveInput {
     attrs: _attrs,
     ident,
-    data,
+    data: _data,
     generics,
     vis: _vis,
   } = input;
 
-  let childs: Vec<Type> = child_types_from_data(data);
-
   let (_, ty_generics, where_clause) = generics.split_for_impl();
-  let schema_impl = Schemas { childs: &childs };
+  let schema_impl = Schemas;
   quote!(
+    #[automatically_derived]
     impl #generics netwopenapi::ApiComponent for #ident #ty_generics #where_clause {
       #schema_impl
     }
@@ -103,6 +135,7 @@ pub fn derive_api_security(input: TokenStream) -> TokenStream {
 
   let (_, ty_generics, where_clause) = generics.split_for_impl();
   let res = quote!(
+    #[automatically_derived]
     impl #generics netwopenapi::ApiComponent for #ident #ty_generics #where_clause {
       fn child_schemas() -> Vec<(String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)> {
         vec![]
@@ -143,6 +176,7 @@ pub fn derive_api_header(input: TokenStream) -> TokenStream {
 
   let (_, ty_generics, where_clause) = generics.split_for_impl();
   let res = quote!(
+    #[automatically_derived]
     impl #generics netwopenapi::ApiHeader for #ident #ty_generics #where_clause {
       #openapi_header_attributes
     }
@@ -158,19 +192,19 @@ pub fn derive_api_cookie(input: TokenStream) -> TokenStream {
   let DeriveInput {
     attrs,
     ident,
-    data,
+    data: _data,
     generics,
     vis: _vis,
   } = input;
 
-  let childs: Vec<Type> = child_types_from_data(data);
   let deprecated = extract_deprecated_from_attr(&attrs);
 
-  let openapi_cookie_attributes = parse_openapi_cookie_attrs(&attrs, deprecated, childs)
+  let openapi_cookie_attributes = parse_openapi_cookie_attrs(&attrs, deprecated)
     .expect_or_abort("expected #[openapi_cookie(...)] attribute to be present when used with ApiCookie derive trait");
 
   let (_, ty_generics, where_clause) = generics.split_for_impl();
   let res = quote!(
+    #[automatically_derived]
     impl #generics netwopenapi::ApiComponent for #ident #ty_generics #where_clause {
       #openapi_cookie_attributes
     }
@@ -197,6 +231,7 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
 
   let (_, ty_generics, where_clause) = generics.split_for_impl();
   let res = quote!(
+    #[automatically_derived]
     impl #generics netwopenapi::ApiErrorComponent for #ident #ty_generics #where_clause {
       #openapi_error_attributes
     }

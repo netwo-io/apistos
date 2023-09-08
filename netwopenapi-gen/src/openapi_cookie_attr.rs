@@ -3,12 +3,11 @@ use darling::FromMeta;
 use proc_macro2::{Span, TokenStream};
 use proc_macro_error::abort;
 use quote::{quote, ToTokens};
-use syn::{Attribute, Type};
+use syn::Attribute;
 
 pub(crate) fn parse_openapi_cookie_attrs(
   attrs: &[Attribute],
   deprecated: Option<bool>,
-  childs: Vec<Type>,
 ) -> Option<OpenapiCookieAttributeExtended> {
   let cookie_attribute = attrs
     .iter()
@@ -27,7 +26,6 @@ pub(crate) fn parse_openapi_cookie_attrs(
         description: attr.description,
         required: attr.required,
         deprecated: attr.deprecated.or(deprecated),
-        childs,
       })
     }
     Err(e) => abort!(e.span(), "Unable to parse #[openapi_cookie] attribute: {:?}", e),
@@ -48,7 +46,6 @@ pub(crate) struct OpenapiCookieAttributeExtended {
   pub description: Option<String>,
   pub required: Option<bool>,
   pub deprecated: Option<bool>,
-  pub childs: Vec<Type>,
 }
 
 impl ToTokens for OpenapiCookieAttributeExtended {
@@ -69,7 +66,7 @@ impl ToTokens for OpenapiCookieAttributeExtended {
       quote!(utoipa::openapi::Deprecated::False)
     };
 
-    let schema_impl = Schemas { childs: &self.childs };
+    let schema_impl = Schemas;
     tokens.extend(quote! {
       #schema_impl
 

@@ -108,15 +108,7 @@ impl ApiComponent for NoContent {
     let status = StatusCode::NO_CONTENT;
     Some(
       ResponsesBuilder::new()
-        .response(
-          status.as_str(),
-          ResponseBuilder::new()
-            .content(
-              "application/json",
-              ContentBuilder::new().schema(Schema::default()).build(),
-            )
-            .build(),
-        )
+        .response(status.as_str(), ResponseBuilder::new().build())
         .build(),
     )
   }

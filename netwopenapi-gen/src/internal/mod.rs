@@ -115,6 +115,7 @@ pub(crate) fn gen_open_api_impl(
     #[allow(non_camel_case_types)]
     #[doc(hidden)]
     #openapi_struct_def
+    #[automatically_derived]
     impl #impl_generics netwopenapi::path_item_definition::PathItemDefinition for #openapi_struct #ty_generics #where_clause {
       #path_item_def_impl
     }

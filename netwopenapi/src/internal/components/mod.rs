@@ -215,35 +215,36 @@ where
   }
 
   fn responses() -> Option<Responses> {
-    Self::schema().map(|(name, schema)| {
+    let mut responses = vec![];
+    if let Some(response) = R::responses() {
+      responses.append(
+        &mut response
+          .responses
+          .into_iter()
+          .collect::<Vec<(String, RefOr<Response>)>>(),
+      );
+    } else if let Some((name, schema)) = Self::schema() {
       let _ref = match schema {
         RefOr::Ref(r) => r,
         RefOr::T(_) => Ref::from_schema_name(name),
       };
-      let mut responses = vec![];
-      if let Some(response) = R::responses() {
-        responses.append(
-          &mut response
-            .responses
-            .into_iter()
-            .collect::<Vec<(String, RefOr<Response>)>>(),
-        );
-      } else {
-        responses.push((
-          "200".to_owned(),
-          ResponseBuilder::new()
-            .content(Self::content_type(), ContentBuilder::new().schema(_ref).build())
-            .build()
-            .into(),
-        ));
-      }
-      responses.append(
-        &mut Self::error_responses()
-          .into_iter()
-          .map(|(status, schema)| (status, schema.into()))
-          .collect(),
-      );
-      ResponsesBuilder::new().responses_from_iter(responses).build()
-    })
+      responses.push((
+        "200".to_owned(),
+        ResponseBuilder::new()
+          .content(Self::content_type(), ContentBuilder::new().schema(_ref).build())
+          .build()
+          .into(),
+      ));
+    } else {
+      responses.push(("200".to_owned(), Response::default().into()));
+    }
+
+    responses.append(
+      &mut Self::error_responses()
+        .into_iter()
+        .map(|(status, schema)| (status, schema.into()))
+        .collect(),
+    );
+    Some(ResponsesBuilder::new().responses_from_iter(responses).build())
   }
 }

@@ -1,4 +1,6 @@
-use crate::api::handlers::{add_pet, find_by_status, find_by_tags, get_pet, update_pet, update_pet_with_form};
+use crate::api::handlers::{
+  add_pet, delete_pet, find_by_status, find_by_tags, get_pet, update_pet, update_pet_with_form,
+};
 use netwopenapi::web::{delete, get, post, put, resource, scope, Scope};
 
 #[rustfmt::skip]
@@ -17,7 +19,7 @@ pub(crate) fn routes() -> Scope {
           resource("")
             .route(get().to(get_pet))
           .route(post().to(update_pet_with_form))
-          // .route(delete().to(test)),
+          .route(delete().to(delete_pet)),
         ), // .service(resource("/uploadImage").route(post().to(test))),
       ),
   )

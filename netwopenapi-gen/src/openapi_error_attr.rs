@@ -68,7 +68,12 @@ impl ToTokens for ErrorDefinition {
       quote!(.content(
         "application/json",
         utoipa::openapi::ContentBuilder::new().schema({
-          let (_, schema) = <Self as utoipa::ToSchema<'_>>::schema();
+          let schema = {
+            let settings = schemars::gen::SchemaSettings::openapi3();
+            let mut gen = settings.into_generator();
+            let schema = <Self as schemars::JsonSchema>::json_schema(&mut gen);
+            netwopenapi::json_schema_to_schemas(schema.into_object())
+          };
           schema
         }).build(),
       ))
@@ -76,7 +81,15 @@ impl ToTokens for ErrorDefinition {
       quote!()
     };
     let schema = if self.with_schema.unwrap_or_default() {
-      quote!(<Self as utoipa::ToSchema<'_>>::schema())
+      quote! {
+        {
+          let schema_name = <Self as schemars::JsonSchema>::schema_name();
+          let settings = schemars::gen::SchemaSettings::openapi3();
+          let mut gen = settings.into_generator();
+          let schema = <Self as schemars::JsonSchema>::json_schema(&mut gen);
+          (schema_name, netwopenapi::json_schema_to_schemas(schema.into_object()))
+        }
+      }
     } else {
       quote!(None)
     };
