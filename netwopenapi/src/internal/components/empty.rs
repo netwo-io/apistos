@@ -16,4 +16,4 @@ macro_rules! empty_component_impl {
   };
 }
 
-empty_component_impl!(HttpRequest, HttpResponse, Payload);
+empty_component_impl!(HttpRequest, HttpResponse, Payload, ());

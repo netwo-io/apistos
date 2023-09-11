@@ -10,26 +10,40 @@ pub fn json_schema_to_schemas(mut sch: SchemaObject) -> RefOr<Schema> {
   if sch.is_ref() {
     return RefOr::Ref(Ref::new(&sch.reference.unwrap_or_default()));
   }
+  let mut schemas: Vec<Schema> = vec![];
+
   if let Some(subschemas) = sch.subschemas.clone() {
     if let Some(all_of) = subschemas.all_of {
-      Schema::AllOf(schema_object_to_all_of(&mut sch, all_of)).into()
-    } else if let Some(any_of) = subschemas.any_of {
-      Schema::AnyOf(schema_object_to_any_of(&mut sch, any_of)).into()
-    } else if let Some(one_of) = subschemas.one_of {
-      Schema::OneOf(schema_object_to_one_of(&mut sch, one_of)).into()
-    } else {
-      unimplemented!("Found invalid subschema type.")
+      schemas.push(Schema::AllOf(schema_object_to_all_of(&mut sch, all_of)))
     }
-  } else if let Some(obj) = sch.object.clone() {
-    Schema::Object(schema_object_to_object(&mut sch, obj)).into()
-  } else if let Some(arr) = sch.array.clone() {
-    Schema::Array(schema_object_to_array(&mut sch, arr)).into()
-  } else if let Some(enum_vals) = sch.enum_values.clone() {
-    Schema::Object(enum_value_to_object(&mut sch, enum_vals)).into()
-  } else if let Some(instance_type) = sch.instance_type.clone() {
-    Schema::Object(type_to_object(&mut sch, instance_type)).into()
+    if let Some(any_of) = subschemas.any_of {
+      schemas.push(Schema::AnyOf(schema_object_to_any_of(&mut sch, any_of)))
+    }
+    if let Some(one_of) = subschemas.one_of {
+      schemas.push(Schema::OneOf(schema_object_to_one_of(&mut sch, one_of)))
+    }
+  }
+  if let Some(obj) = sch.object.clone() {
+    schemas.push(Schema::Object(schema_object_to_object(&mut sch, obj)))
+  }
+  if let Some(arr) = sch.array.clone() {
+    schemas.push(Schema::Array(schema_object_to_array(&mut sch, arr)))
+  }
+  if let Some(enum_vals) = sch.enum_values.clone() {
+    schemas.push(Schema::Object(enum_value_to_object(&mut sch, enum_vals)))
+  }
+  if let Some(instance_type) = sch.instance_type.clone() {
+    if schemas.is_empty() {
+      schemas.push(Schema::Object(type_to_object(&mut sch, instance_type)))
+    }
+  }
+
+  if schemas.len() > 1 {
+    Schema::AllOf(merge_schemas_to_all_of(&mut sch, schemas)).into()
+  } else if let Some(schema) = schemas.first() {
+    schema.clone().into()
   } else {
-    unimplemented!("Found invalid schema type. {:?}", sch);
+    panic!("Unprocessable schema")
   }
 }
 
@@ -179,4 +193,19 @@ fn instance_type_to_schema_type(instance_type: InstanceType) -> SchemaType {
     InstanceType::String => SchemaType::String,
     InstanceType::Integer => SchemaType::Integer,
   }
+}
+
+fn merge_schemas_to_all_of(schema: &mut SchemaObject, schemas: Vec<Schema>) -> AllOf {
+  let schema_metadata = schema.metadata();
+  let mut all_of_builder = AllOfBuilder::new()
+    .title(schema_metadata.title.clone())
+    .description(schema_metadata.description.clone())
+    .default(schema_metadata.default.clone())
+    .example(schema_metadata.examples.first().cloned());
+
+  for s in schemas {
+    all_of_builder = all_of_builder.item(s);
+  }
+
+  all_of_builder.build()
 }

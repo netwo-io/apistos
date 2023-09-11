@@ -48,7 +48,7 @@ impl DefinitionHolder for Resource {
   }
 }
 
-impl DefinitionHolder for Scope {
+impl<T> DefinitionHolder for Scope<T> {
   fn path(&self) -> &str {
     unimplemented!("Scope has multiple paths");
   }
