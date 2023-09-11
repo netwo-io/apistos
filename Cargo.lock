@@ -1264,6 +1264,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "netwopenapi-models"
+version = "0.1.0"
+dependencies = [
+ "indexmap 2.0.0",
+ "schemars",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "nom"
 version = "7.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
