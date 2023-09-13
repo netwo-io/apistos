@@ -7,10 +7,11 @@ members = [
 ]
 
 [workspace.package]
-authors = ["Netwo <tech-team@netwo.com>"]
+authors = ["Netwo <oss@netwo.com>"]
 edition = "2021"
-repository = "https://gitlab.dev-factory.netwo.dev/saas/netwopenapi"
-publish = false
+repository = "https://github.com/netwo-io/netwopenapi"
+documentation = "https://docs.rs/netwopenapib/"
+license = "MIT"
 rust-version = "1.71"
 
 [workspace.dependencies]

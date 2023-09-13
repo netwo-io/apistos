@@ -1,5 +1,9 @@
 [package]
 name = "netwopenapi"
+description = "Actix-web OpenAPI v3.0 documentation generator"
+readme = "README.md"
+keywords = ["actix", "actix-web", "openapi", "oas3", "documentation"]
+categories = ["web-programming"]
 version = "0.1.0"
 
 authors.workspace = true

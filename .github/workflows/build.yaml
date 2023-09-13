@@ -1,4 +1,4 @@
-name: garde-actix-web build
+name: netwopenapi build
 
 on:
   pull_request:
