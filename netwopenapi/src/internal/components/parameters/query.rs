@@ -308,7 +308,7 @@ where
         ReferenceOr::Object(schema) => {
           let sch = schema.into_object();
           if let Some(obj) = sch.object {
-            obj
+            parameters = obj
               .properties
               .clone()
               .into_iter()
@@ -437,7 +437,7 @@ where
         ReferenceOr::Object(schema) => {
           let sch = schema.into_object();
           if let Some(obj) = sch.object {
-            obj
+            parameters = obj
               .properties
               .clone()
               .into_iter()
