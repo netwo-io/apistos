@@ -8,8 +8,6 @@ use netwopenapi::server::Server;
 use netwopenapi::spec::Spec;
 use netwopenapi::tag::Tag;
 use netwopenapi::web::scope;
-use netwopenapi::ApiComponent;
-use schemars::JsonSchema;
 use std::error::Error;
 use std::net::Ipv4Addr;
 

@@ -125,7 +125,7 @@ impl Header for OrganizationSlug {
       .get(<Self as Header>::name())
       .map(|value| value.to_str())
       .transpose()
-      .map_err(|e| ParseError::Header)?
+      .map_err(|_e| ParseError::Header)?
       .map(|value| OrganizationSlug(value.to_string()))
       .ok_or_else(|| ParseError::Header)
   }
@@ -139,7 +139,7 @@ impl FromRequest for Realm {
   type Error = Error;
   type Future = Ready<Result<Self, Self::Error>>;
 
-  fn from_request(req: &HttpRequest, payload: &mut Payload) -> Self::Future {
+  fn from_request(_req: &HttpRequest, _payload: &mut Payload) -> Self::Future {
     todo!()
   }
 }

@@ -20,8 +20,7 @@ impl<'a> ToTokens for Components<'a> {
         let available_error_codes = vec![#(#error_codes)*,];
         error_schemas
           .into_iter()
-          .map(|(status, s)| {
-            use std::str::FromStr;
+          .for_each(|(status, s)| {
             let status = status.parse::<u16>();
             if let Ok(status) = status {
               if status >= 400 &&available_error_codes.contains(&status) {

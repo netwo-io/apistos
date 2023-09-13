@@ -1,11 +1,10 @@
 use crate::api::error::ErrorResponse;
-use crate::api::models::{OrganizationSlug, Pet, PetUpdatesQuery, QueryStatus, QueryTag, Realm};
+use crate::api::models::{OrganizationSlug, Pet, QueryStatus, QueryTag, Realm};
 use crate::api::security::ApiKey;
 use actix_web::web::{Header, Json, Path, Query};
 use actix_web::Error;
 use netwopenapi::actix::{CreatedJson, NoContent};
 use netwopenapi::api_operation;
-use netwopenapi::ApiComponent;
 use serde_qs::actix::QsQuery;
 use std::collections::HashMap;
 use uuid::Uuid;
@@ -14,7 +13,7 @@ use uuid::Uuid;
 pub(crate) async fn update_pet(
   // Create a new pet in the store
   body: Json<Pet>,
-  key: ApiKey,
+  _key: ApiKey,
 ) -> Result<Json<Pet>, ErrorResponse> {
   Ok(body)
 }
@@ -29,7 +28,7 @@ pub(crate) async fn update_pet(
 pub(crate) async fn add_pet(
   // Create a new pet in the store
   body: Json<Pet>,
-  key: ApiKey,
+  _key: ApiKey,
 ) -> Result<CreatedJson<Pet>, ErrorResponse> {
   Ok(CreatedJson(body.0))
 }
@@ -39,8 +38,8 @@ pub(crate) async fn add_pet(
 #[api_operation(tag = "pet", security_scope(name = "api_key", scope = "read:pets"))]
 pub(crate) async fn get_pet(
   // Create a new pet in the store
-  pet_id: Path<Uuid>,
-  key: Option<ApiKey>,
+  _pet_id: Path<Uuid>,
+  _key: Option<ApiKey>,
 ) -> Result<Option<Json<Pet>>, Error> // default undocumented error
 {
   Ok(None)
@@ -50,8 +49,8 @@ pub(crate) async fn get_pet(
 #[api_operation(tag = "pet", security_scope(name = "api_key", scope = "read:pets"))]
 pub(crate) async fn delete_pet(
   // Create a new pet in the store
-  pet_id: Path<Uuid>,
-  key: Option<ApiKey>,
+  _pet_id: Path<Uuid>,
+  _key: Option<ApiKey>,
 ) -> Result<NoContent, Error> // default undocumented error
 {
   Ok(NoContent)
@@ -62,8 +61,8 @@ pub(crate) async fn delete_pet(
 #[api_operation(tag = "pet", security_scope(name = "api_key", scope = "read:pets"))]
 pub(crate) async fn find_by_status(
   // Create a new pet in the store
-  status: Query<QueryStatus>,
-  key: ApiKey,
+  _status: Query<QueryStatus>,
+  _key: ApiKey,
 ) -> Result<Option<Json<Pet>>, ErrorResponse> {
   todo!()
 }
@@ -74,8 +73,8 @@ pub(crate) async fn find_by_status(
 #[api_operation(tag = "pet", security_scope(name = "api_key", scope = "read:pets"))]
 pub(crate) async fn find_by_tags(
   // Create a new pet in the store
-  tags: QsQuery<QueryTag>,
-  key: ApiKey,
+  _tags: QsQuery<QueryTag>,
+  _key: ApiKey,
 ) -> Result<Option<Json<Pet>>, ErrorResponse> {
   todo!()
 }
@@ -87,12 +86,12 @@ pub(crate) async fn find_by_tags(
 )]
 pub(crate) async fn update_pet_with_form(
   // ID of pet that needs to be updated
-  pet_id: Path<Uuid>,
+  _pet_id: Path<Uuid>,
   // query: Query<PetUpdatesQuery>,
-  query: Query<HashMap<String, String>>,
-  slug: Header<OrganizationSlug>,
-  realm: Realm,
-  key: ApiKey,
+  _query: Query<HashMap<String, String>>,
+  _slug: Header<OrganizationSlug>,
+  _realm: Realm,
+  _key: ApiKey,
 ) -> Result<Option<Json<Pet>>, ErrorResponse> {
   todo!()
 }

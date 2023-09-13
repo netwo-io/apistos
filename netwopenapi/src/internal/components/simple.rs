@@ -56,8 +56,6 @@ simple_modifier!(rust_decimal::Decimal);
 simple_modifier!(uuid::Uuid);
 #[cfg(any(feature = "url", feature = "extras"))]
 simple_modifier!(url::Url);
-#[cfg(any(feature = "ipnetwork", feature = "extras"))]
-simple_modifier!(ipnetwork::IpNetwork);
 
 #[cfg(any(feature = "chrono", feature = "extras"))]
 impl<T: chrono::TimeZone> ApiComponent for chrono::DateTime<T> {

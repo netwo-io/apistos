@@ -1032,15 +1032,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ipnetwork"
-version = "0.20.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bf466541e9d546596ee94f9f69590f89473455f88372423e0008fc1a7daf100e"
-dependencies = [
- "serde",
-]
-
-[[package]]
 name = "itertools"
 version = "0.10.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1196,7 +1187,6 @@ dependencies = [
  "garde",
  "garde-actix-web",
  "indexmap 2.0.0",
- "ipnetwork",
  "netwopenapi-gen",
  "netwopenapi-models",
  "once_cell",
@@ -1641,11 +1631,11 @@ checksum = "1ad4cc8da4ef723ed60bced201181d83791ad433213d8c24efffda1eec85d741"
 [[package]]
 name = "schemars"
 version = "0.8.13"
-source = "git+https://github.com/rlebran-netwo/schemars.git#09bd130e40262bc29d178456627eb4e0f4f153d7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "763f8cd0d4c71ed8389c90cb8100cba87e763bd01a8e614d4f0af97bcd50a161"
 dependencies = [
  "chrono",
  "dyn-clone",
- "ipnetwork",
  "rust_decimal",
  "schemars_derive",
  "serde",
@@ -1657,7 +1647,8 @@ dependencies = [
 [[package]]
 name = "schemars_derive"
 version = "0.8.13"
-source = "git+https://github.com/rlebran-netwo/schemars.git#09bd130e40262bc29d178456627eb4e0f4f153d7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ec0f696e21e10fa546b7ffb1c9672c6de8fbc7a81acf59524386d8639bf12737"
 dependencies = [
  "proc-macro2",
  "quote",

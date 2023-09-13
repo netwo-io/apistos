@@ -23,7 +23,6 @@ netwopenapi-gen = { path = "../netwopenapi-gen" }
 netwopenapi-models = { path = "../netwopenapi-models" }
 
 actix-multipart = { workspace = true, optional = true }
-ipnetwork = { workspace = true, optional = true }
 garde-actix-web = { workspace = true, optional = true }
 chrono = { workspace = true, optional = true }
 garde = { workspace = true, optional = true }
@@ -42,12 +41,11 @@ garde = ["dep:garde", "dep:garde-actix-web"]
 
 # extra types related features
 chrono = ["dep:chrono", "schemars/chrono"]
-ipnetwork = ["dep:ipnetwork", "schemars/ipnetwork"]
 multipart = ["dep:actix-multipart"]
 rust_decimal = ["dep:rust_decimal", "schemars/rust_decimal"]
 uuid = ["dep:uuid", "schemars/uuid1"]
 url = ["dep:url", "schemars/url"]
-extras = ["chrono", "multipart", "rust_decimal", "uuid", "url", "ipnetwork"]
+extras = ["chrono", "multipart", "rust_decimal", "uuid", "url"]
 
 default = ["query"]
 
