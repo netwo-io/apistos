@@ -1,0 +1,20 @@
+name: Git log
+description: Mangles git log for change log
+inputs:
+  output-file:
+    description: File path where to place the content of the changed commits
+    required: true
+  crate:
+    description: Name of the crate to get git log for
+    required: true
+outputs:
+  last_release: 
+    description: Last release commit or first commit of history
+    value: ${{ steps.gitlog.outputs.last_release }}
+runs:
+  using: composite
+  steps:
+    - shell: bash 
+      id: gitlog
+      run: |
+        ${{ github.action_path }}/gitlog.sh --output-file ${{ inputs.output-file }} --crate ${{ inputs.crate }}
