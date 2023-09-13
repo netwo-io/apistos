@@ -2,7 +2,7 @@
 /*/target/
 /*/**/target/
 
-/examples/**/Cargo.lock
+/*/**/Cargo.lock
 
 .env
 .idea
