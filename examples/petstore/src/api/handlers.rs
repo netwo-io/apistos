@@ -1,5 +1,5 @@
 use crate::api::error::ErrorResponse;
-use crate::api::models::{OrganizationSlug, Pet, PetUpdatesQuery, QueryStatus, QueryTag, Realm, Status, Tag};
+use crate::api::models::{OrganizationSlug, Pet, PetUpdatesQuery, QueryStatus, QueryTag, Realm};
 use crate::api::security::ApiKey;
 use actix_web::web::{Header, Json, Path, Query};
 use actix_web::Error;

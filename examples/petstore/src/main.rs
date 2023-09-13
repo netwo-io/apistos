@@ -2,13 +2,16 @@ use crate::api::routes::routes;
 use actix_web::middleware::Logger;
 use actix_web::{App, HttpServer};
 use netwopenapi::app::OpenApiWrapper;
+use netwopenapi::info::{Contact, Info, License};
+use netwopenapi::paths::ExternalDocumentation;
+use netwopenapi::server::Server;
 use netwopenapi::spec::Spec;
+use netwopenapi::tag::Tag;
 use netwopenapi::web::scope;
+use netwopenapi::ApiComponent;
+use schemars::JsonSchema;
 use std::error::Error;
 use std::net::Ipv4Addr;
-use utoipa::openapi::external_docs::ExternalDocsBuilder;
-use utoipa::openapi::tag::TagBuilder;
-use utoipa::openapi::{ContactBuilder, Info, InfoBuilder, LicenseBuilder, ServerBuilder};
 
 mod api;
 
@@ -20,33 +23,49 @@ async fn main() -> Result<(), impl Error> {
     let spec = Spec {
       default_tags: vec!["api".to_owned()],
       tags: vec![
-        TagBuilder::new()
-          .name("api")
-          .description(Some("Everything about petstore"))
-          .build(),
-        TagBuilder::new()
-          .name("pet")
-          .description(Some("Everything about your Pets"))
-          .build(),
-        TagBuilder::new()
-          .name("store")
-          .description(Some("Access to Petstore orders"))
-          .build(),
-        TagBuilder::new()
-          .name("user")
-          .description(Some("Operations about user"))
-          .build(),
+        Tag {
+          name: "api".to_string(),
+          description: Some("Everything about petstore".to_string()),
+          ..Default::default()
+        },
+        Tag {
+          name: "pet".to_string(),
+          description: Some("Everything about your Pets".to_string()),
+          ..Default::default()
+        },
+        Tag {
+          name: "store".to_string(),
+          description: Some("Access to Petstore orders".to_string()),
+          ..Default::default()
+        },
+        Tag {
+          name: "user".to_string(),
+          description: Some("Operations about user".to_string()),
+          ..Default::default()
+        },
       ],
-      info: InfoBuilder::new()
-        .title("Swagger Petstore - OpenAPI 3.0")
-        .description(Some("This is a sample Pet Store Server based on the OpenAPI 3.0 specification.  You can find out more about\nSwagger at [http://swagger.io](http://swagger.io). In the third iteration of the pet store, we've switched to the design first approach!\nYou can now help us improve the API whether it's by making changes to the definition itself or to the code.\nThat way, with time, we can improve the API in general, and expose some of the new features in OAS3.\n\nSome useful links:\n- [The Pet Store repository](https://github.com/swagger-api/swagger-petstore)\n- [The source API definition for the Pet Store](https://github.com/swagger-api/swagger-petstore/blob/master/src/main/resources/openapi.yaml)"))
-        .terms_of_service(Some("http://swagger.io/terms/"))
-        .contact(Some(ContactBuilder::new().email(Some("apiteam@swagger.io")).build()))
-        .license(Some(LicenseBuilder::new().name("Apache 2.0").url(Some("http://www.apache.org/licenses/LICENSE-2.0.html")).build()))
-        .version("1.0.17")
-        .build(),
-      external_docs: Some(ExternalDocsBuilder::new().description(Some("Find out more about Swagger")).url("http://swagger.io").build()),
-      servers: vec![ServerBuilder::new().url("/api/v3").build()],
+      info: Info {
+        title: "Swagger Petstore - OpenAPI 3.0".to_string(),
+        description: Some("This is a sample Pet Store Server based on the OpenAPI 3.0 specification.  You can find out more about\nSwagger at [http://swagger.io](http://swagger.io). In the third iteration of the pet store, we've switched to the design first approach!\nYou can now help us improve the API whether it's by making changes to the definition itself or to the code.\nThat way, with time, we can improve the API in general, and expose some of the new features in OAS3.\n\nSome useful links:\n- [The Pet Store repository](https://github.com/swagger-api/swagger-petstore)\n- [The source API definition for the Pet Store](https://github.com/swagger-api/swagger-petstore/blob/master/src/main/resources/openapi.yaml)".to_string()),
+        terms_of_service: Some("http://swagger.io/terms/".to_string()),
+        contact: Some(Contact {
+          email: Some("apiteam@swagger.io".to_string()),
+          ..Default::default()
+        }),
+        license: Some(License {
+          name: "Apache 2.0".to_string(),
+          url: Some("http://www.apache.org/licenses/LICENSE-2.0.html".to_string()),
+          ..Default::default()
+        }),
+        version: "1.0.17".to_string(),
+        ..Default::default()
+      },
+      external_docs: Some(ExternalDocumentation {
+        description: Some("Find out more about Swagger".to_string()),
+        url: "http://swagger.io".to_string(),
+        ..Default::default()
+      }),
+      servers: vec![Server { url: "/api/v3".to_string(), ..Default::default() }],
       ..Default::default()
     };
 
@@ -54,7 +73,8 @@ async fn main() -> Result<(), impl Error> {
       .document(spec)
       .wrap(Logger::default())
       .service(scope("/test").service(routes()))
-      .build_with_swagger("swagger", "/openapi.json")
+      .build("/openapi.json")
+      // .build_with_swagger("swagger", "/openapi.json")
       // .build_with_rapidoc("rapidoc", "/openapi.json")
       // .build_with_redoc("/openapi.json")
   })

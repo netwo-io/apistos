@@ -20,7 +20,8 @@ pub(crate) fn routes() -> Scope {
             .route(get().to(get_pet))
           .route(post().to(update_pet_with_form))
           .route(delete().to(delete_pet)),
-        ), // .service(resource("/uploadImage").route(post().to(test))),
+        )
+        // .service(resource("/uploadImage").route(post().to(test))),
       ),
   )
   // .service(

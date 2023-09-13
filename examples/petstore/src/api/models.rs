@@ -2,6 +2,7 @@ use actix_web::dev::Payload;
 use actix_web::error::ParseError;
 use actix_web::http::header::{Header, HeaderName, HeaderValue, InvalidHeaderValue, TryIntoHeaderValue};
 use actix_web::{Error, FromRequest, HttpMessage, HttpRequest};
+use netwopenapi::InstanceType;
 use netwopenapi::{ApiComponent, ApiCookie, ApiHeader, ApiType, TypedSchema};
 use num_traits::Float;
 use rust_decimal::Decimal;
@@ -9,7 +10,6 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::future::Ready;
 use url::Url;
-use utoipa::openapi::{KnownFormat, SchemaFormat, SchemaType};
 
 #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
 pub(crate) struct Pet {
@@ -43,12 +43,12 @@ pub struct Finite<N: Float> {
 }
 
 impl<N: Float> TypedSchema for Finite<N> {
-  fn schema_type() -> SchemaType {
-    SchemaType::Number
+  fn schema_type() -> InstanceType {
+    InstanceType::Number
   }
 
-  fn format() -> Option<SchemaFormat> {
-    Some(SchemaFormat::KnownFormat(KnownFormat::Float))
+  fn format() -> Option<String> {
+    Some("float".to_string())
   }
 }
 
@@ -56,11 +56,11 @@ impl<N: Float> TypedSchema for Finite<N> {
 pub struct Name(String);
 
 impl TypedSchema for Name {
-  fn schema_type() -> SchemaType {
-    SchemaType::String
+  fn schema_type() -> InstanceType {
+    InstanceType::String
   }
 
-  fn format() -> Option<SchemaFormat> {
+  fn format() -> Option<String> {
     None
   }
 }
