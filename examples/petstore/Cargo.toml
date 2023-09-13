@@ -1,6 +1,6 @@
 [package]
 name = "petstore"
-description = "Simple petstore example api with utoipa and Swagger"
+description = "Simple petstore example api"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"

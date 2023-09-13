@@ -49,11 +49,6 @@ uuid = ["dep:uuid", "schemars/uuid1"]
 url = ["dep:url", "schemars/url"]
 extras = ["chrono", "multipart", "rust_decimal", "uuid", "url", "ipnetwork"]
 
-# UI related features
-#rapidoc = ["utoipa-rapidoc"]
-#redoc = ["utoipa-redoc"]
-#swagger-ui = ["utoipa-swagger-ui"]
-
 default = ["query"]
 
 #@todo doc

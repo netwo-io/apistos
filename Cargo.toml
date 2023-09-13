@@ -31,14 +31,6 @@ schemars = { git = "https://github.com/rlebran-netwo/schemars.git", features = [
 serde = "1"
 serde_json = "1"
 syn = "2.0"
-#utoipa = { version = "3", features = ["actix_extras"] }
-#utoipa-rapidoc = { version = "0", features = ["actix-web"] }
-#utoipa-redoc = { version = "0", features = ["actix-web"] }
-#utoipa-swagger-ui = { version = "3", features = ["actix-web"] }
-#utoipa = { git = "https://github.com/juhaku/utoipa.git", features = ["actix_extras"] }
-#utoipa-rapidoc = { git = "https://github.com/juhaku/utoipa.git", features = ["actix-web"] }
-#utoipa-redoc = { git = "https://github.com/juhaku/utoipa.git", features = ["actix-web"] }
-#utoipa-swagger-ui = { git = "https://github.com/juhaku/utoipa.git", features = ["actix-web"] }
 
 actix-multipart = "0.6"
 garde-actix-web = "0.1"
