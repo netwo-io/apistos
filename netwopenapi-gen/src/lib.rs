@@ -48,23 +48,11 @@ pub fn derive_api_type(input: TokenStream) -> TokenStream {
         #component_name.to_string()
       }
 
-      fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
-        let schema_type = <Self as TypedSchema>::schema_type();
-        let instance_type = match schema_type {
-          SchemaType::Object => Some(schemars::schema::SingleOrVec::Single(Box::new(schemars::schema::InstanceType::Object))),
-          SchemaType::String => Some(schemars::schema::SingleOrVec::Single(Box::new(schemars::schema::InstanceType::String))),
-          SchemaType::Integer => Some(schemars::schema::SingleOrVec::Single(Box::new(schemars::schema::InstanceType::Integer))),
-          SchemaType::Number => Some(schemars::schema::SingleOrVec::Single(Box::new(schemars::schema::InstanceType::Number))),
-          SchemaType::Boolean => Some(schemars::schema::SingleOrVec::Single(Box::new(schemars::schema::InstanceType::Boolean))),
-          SchemaType::Array => Some(schemars::schema::SingleOrVec::Single(Box::new(schemars::schema::InstanceType::Array))),
-          SchemaType::Value => None,
-        };
-        schemars::schema::Schema::Object(schemars::schema::SchemaObject {
-          instance_type,
-          format: <Self as TypedSchema>::format().map(|f| match f {
-            utoipa::openapi::SchemaFormat::KnownFormat(k) => netwopenapi::plain_string(&k).unwrap_or_default(),
-            utoipa::openapi::SchemaFormat::Custom(v) => v
-          }),
+      fn json_schema(_gen: &mut schemars::gen::SchemaGenerator) -> netwopenapi::Schema {
+        let instance_type = <Self as TypedSchema>::schema_type();
+        netwopenapi::Schema::Object(netwopenapi::SchemaObject {
+          instance_type: Some(netwopenapi::SingleOrVec::Single(Box::new(instance_type))),
+          format: <Self as TypedSchema>::format(),
           ..Default::default()
         })
       }
@@ -72,18 +60,18 @@ pub fn derive_api_type(input: TokenStream) -> TokenStream {
 
     #[automatically_derived]
     impl #generics netwopenapi::ApiComponent for #ident #ty_generics #where_clause {
-      fn child_schemas() -> Vec<(String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)> {
+      fn child_schemas() -> Vec<(String, netwopenapi::reference_or::ReferenceOr<netwopenapi::Schema>)> {
         vec![]
       }
 
-      fn schema() -> Option<(String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)> {
+      fn schema() -> Option<(String, netwopenapi::reference_or::ReferenceOr<netwopenapi::Schema>)> {
         Some((
           #component_name.to_string(),
-          utoipa::openapi::ObjectBuilder::new()
-            .schema_type(<#ident #ty_generics>::schema_type())
-            .format(<#ident #ty_generics>::format())
-            .build()
-            .into(),
+          netwopenapi::reference_or::ReferenceOr::Object(netwopenapi::Schema::Object(netwopenapi::SchemaObject {
+            instance_type: Some(netwopenapi::SingleOrVec::Single(Box::new(<#ident #ty_generics>::schema_type()))),
+            format: <#ident #ty_generics>::format(),
+            ..Default::default()
+          }))
         ))
       }
     }
@@ -106,13 +94,14 @@ pub fn derive_api_component(input: TokenStream) -> TokenStream {
 
   let (_, ty_generics, where_clause) = generics.split_for_impl();
   let schema_impl = Schemas;
-  quote!(
+  let res = quote!(
     #[automatically_derived]
     impl #generics netwopenapi::ApiComponent for #ident #ty_generics #where_clause {
       #schema_impl
     }
-  )
-  .into()
+  );
+  // eprintln!("{:#}", res);
+  res.into()
 }
 
 #[proc_macro_error]
@@ -137,15 +126,15 @@ pub fn derive_api_security(input: TokenStream) -> TokenStream {
   let res = quote!(
     #[automatically_derived]
     impl #generics netwopenapi::ApiComponent for #ident #ty_generics #where_clause {
-      fn child_schemas() -> Vec<(String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)> {
+      fn child_schemas() -> Vec<(String, netwopenapi::reference_or::ReferenceOr<netwopenapi::Schema>)> {
         vec![]
       }
 
-      fn schema() -> Option<(String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)> {
+      fn schema() -> Option<(String, netwopenapi::reference_or::ReferenceOr<netwopenapi::Schema>)> {
         None
       }
 
-      fn securities() -> std::collections::BTreeMap<String, utoipa::openapi::security::SecurityScheme> {
+      fn securities() -> std::collections::BTreeMap<String, netwopenapi::security::SecurityScheme> {
         #openapi_security_attributes
       }
 

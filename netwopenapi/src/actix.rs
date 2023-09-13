@@ -3,15 +3,17 @@ use crate::ApiComponent;
 use actix_web::body::BoxBody;
 use actix_web::http::StatusCode;
 use actix_web::{HttpRequest, HttpResponse, Responder, ResponseError};
+use netwopenapi_models::components::Components;
+use netwopenapi_models::paths::{Operation, RequestBody, Response, Responses};
+use netwopenapi_models::reference_or::ReferenceOr;
+use netwopenapi_models::Schema;
 use pin_project::pin_project;
 use serde::Serialize;
+use std::collections::BTreeMap;
 use std::fmt::Debug;
 use std::future::Future;
 use std::pin::Pin;
 use std::task::{Context, Poll};
-use utoipa::openapi::path::Operation;
-use utoipa::openapi::request_body::RequestBody;
-use utoipa::openapi::{Components, ContentBuilder, Ref, RefOr, ResponseBuilder, Responses, ResponsesBuilder, Schema};
 
 #[pin_project]
 pub struct ResponseWrapper<R, P> {
@@ -63,11 +65,11 @@ where
 pub struct ResponderWrapper<T>(pub T);
 
 impl<T: Responder> ApiComponent for ResponderWrapper<T> {
-  fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
+  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
     vec![]
   }
 
-  fn schema() -> Option<(String, RefOr<Schema>)> {
+  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
     None
   }
 }
@@ -96,21 +98,23 @@ impl Responder for NoContent {
 }
 
 impl ApiComponent for NoContent {
-  fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
+  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
     vec![]
   }
 
-  fn schema() -> Option<(String, RefOr<Schema>)> {
+  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
     None
   }
 
   fn responses() -> Option<Responses> {
     let status = StatusCode::NO_CONTENT;
-    Some(
-      ResponsesBuilder::new()
-        .response(status.as_str(), ResponseBuilder::new().build())
-        .build(),
-    )
+    Some(Responses {
+      responses: BTreeMap::from_iter(vec![(
+        status.as_str().to_string(),
+        ReferenceOr::Object(Response::default()),
+      )]),
+      ..Default::default()
+    })
   }
 }
 
@@ -137,15 +141,15 @@ impl<T> ApiComponent for AcceptedJson<T>
 where
   T: Serialize + ApiComponent,
 {
-  fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
+  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
     T::child_schemas()
   }
 
-  fn raw_schema() -> Option<RefOr<Schema>> {
+  fn raw_schema() -> Option<ReferenceOr<Schema>> {
     T::raw_schema()
   }
 
-  fn schema() -> Option<(String, RefOr<Schema>)> {
+  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
     T::schema()
   }
 
@@ -157,17 +161,13 @@ where
     let status = StatusCode::ACCEPTED;
     Self::schema().map(|(name, schema)| {
       let _ref = match schema {
-        RefOr::Ref(r) => r,
-        RefOr::T(_) => Ref::from_schema_name(name),
+        ReferenceOr::Reference { _ref } => _ref,
+        ReferenceOr::Object(_) => format!("#/components/schemas/{}", name),
       };
-      ResponsesBuilder::new()
-        .response(
-          status.as_str(),
-          ResponseBuilder::new()
-            .content("application/json", ContentBuilder::new().schema(_ref).build())
-            .build(),
-        )
-        .build()
+      Responses {
+        responses: BTreeMap::from_iter(vec![(status.as_str().to_string(), ReferenceOr::Reference { _ref })]),
+        ..Default::default()
+      }
     })
   }
 }
@@ -195,15 +195,15 @@ impl<T> ApiComponent for CreatedJson<T>
 where
   T: Serialize + ApiComponent,
 {
-  fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
+  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
     T::child_schemas()
   }
 
-  fn raw_schema() -> Option<RefOr<Schema>> {
+  fn raw_schema() -> Option<ReferenceOr<Schema>> {
     T::raw_schema()
   }
 
-  fn schema() -> Option<(String, RefOr<Schema>)> {
+  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
     T::schema()
   }
 
@@ -211,17 +211,13 @@ where
     let status = StatusCode::CREATED;
     Self::schema().map(|(name, schema)| {
       let _ref = match schema {
-        RefOr::Ref(r) => r,
-        RefOr::T(_) => Ref::from_schema_name(name),
+        ReferenceOr::Reference { _ref } => _ref,
+        ReferenceOr::Object(_) => format!("#/components/schemas/{}", name),
       };
-      ResponsesBuilder::new()
-        .response(
-          status.as_str(),
-          ResponseBuilder::new()
-            .content("application/json", ContentBuilder::new().schema(_ref).build())
-            .build(),
-        )
-        .build()
+      Responses {
+        responses: BTreeMap::from_iter(vec![(status.as_str().to_string(), ReferenceOr::Reference { _ref })]),
+        ..Default::default()
+      }
     })
   }
 }

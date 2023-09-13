@@ -41,21 +41,18 @@ impl<'a> ToTokens for Operation<'a> {
       });
     let deprecated = self
       .deprecated
-      .map(|deprecated| match deprecated {
-        true => quote!(Some(utoipa::openapi::Deprecated::True)),
-        false => quote!(Some(utoipa::openapi::Deprecated::False)),
-      })
+      .map(|deprecated| quote!(Some(#deprecated)))
       .unwrap_or_else(|| quote!(None));
     let summary = match self.summary {
       None => quote!(),
       Some(s) => {
-        quote!(operation_builder = operation_builder.summary(Some(#s));)
+        quote!(operation_builder.summary = Some(#s.to_string());)
       }
     };
     let description = match self.description {
       None => quote!(),
       Some(d) => {
-        quote!(operation_builder = operation_builder.description(Some(#d));)
+        quote!(operation_builder.description = Some(#d.to_string());)
       }
     };
     let tags = if self.tags.is_empty() {
@@ -66,7 +63,7 @@ impl<'a> ToTokens for Operation<'a> {
         let tags = vec![
           #(#tags.to_owned(),)*
         ];
-        operation_builder = operation_builder.tags(Some(tags));
+        operation_builder.tags = tags;
       }
     };
     let security = Security {
@@ -91,23 +88,26 @@ impl<'a> ToTokens for Operation<'a> {
             }
             true
           })
-          .collect::<std::collections::BTreeMap<String, utoipa::openapi::RefOr<utoipa::openapi::Response>>>();
-       let responses = utoipa::openapi::ResponsesBuilder::new().responses_from_iter(responses).build();
+          .collect::<std::collections::BTreeMap<String, netwopenapi::reference_or::ReferenceOr<netwopenapi::paths::Response>>>();
+       let responses = netwopenapi::paths::Responses {
+          responses: std::collections::BTreeMap::from_iter(responses),
+          ..Default::default()
+        };
       }
     };
 
     tokens.extend(quote!(
-      fn operation() -> utoipa::openapi::path::Operation {
+      fn operation() -> netwopenapi::paths::Operation {
         use netwopenapi::ApiComponent;
-        let mut operation_builder = utoipa::openapi::path::OperationBuilder::new();
+        let mut operation_builder = netwopenapi::paths::Operation::default();
 
         let mut body_requests = vec![];
         #(
           body_requests.push(<#args>::request_body());
         )*
-        let body_requests = body_requests.into_iter().flatten().collect::<Vec<utoipa::openapi::request_body::RequestBody>>();
+        let body_requests = body_requests.into_iter().flatten().collect::<Vec<netwopenapi::paths::RequestBody>>();
         for body_request in body_requests {
-          operation_builder = operation_builder.request_body(Some(body_request));
+          operation_builder.request_body = Some(netwopenapi::reference_or::ReferenceOr::Object(body_request));
         }
 
         let mut parameters = vec![];
@@ -115,31 +115,31 @@ impl<'a> ToTokens for Operation<'a> {
           parameters.append(&mut <#args>::parameters());
         )*
         if !parameters.is_empty() {
-          operation_builder = operation_builder.parameters(Some(parameters));
+          operation_builder.parameters = parameters.into_iter().map(netwopenapi::reference_or::ReferenceOr::Object).collect();
         }
 
         if let Some(responses) = <#responder_wrapper>::responses() {
           #error_codes_filter
-          operation_builder = operation_builder.responses(responses);
+          operation_builder.responses = responses;
         }
 
         let securities = {
           #security
         };
         if !securities.is_empty() {
-          operation_builder = operation_builder.securities(Some(securities));
+          operation_builder.security = securities;
         }
 
-        operation_builder = operation_builder.operation_id(Some(#operation_id));
+        operation_builder.operation_id = Some(#operation_id.to_string());
 
-        operation_builder = operation_builder.deprecated(#deprecated);
+        operation_builder.deprecated = #deprecated;
 
         #summary
         #description
 
         #tags
 
-        operation_builder.build()
+        operation_builder
       }
     ))
   }

@@ -1,4 +1,4 @@
-use utoipa::openapi::PathItemType;
+use netwopenapi_models::paths::OperationType;
 
 pub mod handler;
 pub mod resource;
@@ -8,12 +8,12 @@ pub mod service_config;
 
 mod utils;
 
-const METHODS: &[PathItemType] = &[
-  PathItemType::Get,
-  PathItemType::Put,
-  PathItemType::Post,
-  PathItemType::Delete,
-  PathItemType::Options,
-  PathItemType::Head,
-  PathItemType::Patch,
+const METHODS: &[OperationType] = &[
+  OperationType::Get,
+  OperationType::Put,
+  OperationType::Post,
+  OperationType::Delete,
+  OperationType::Options,
+  OperationType::Head,
+  OperationType::Patch,
 ];

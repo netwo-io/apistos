@@ -1,14 +1,14 @@
-use schemars::schema::{ArrayValidation, InstanceType, ObjectValidation, SchemaObject, SingleOrVec};
+use netwopenapi_models::Schema::{AnyOf, AnyOfBuilder};
+use netwopenapi_models::{ArrayValidation, InstanceType, ObjectValidation, SchemaObject, SingleOrVec};
 use serde_json::Value;
-use utoipa::openapi::schema::{AnyOf, AnyOfBuilder};
 use utoipa::openapi::{
-  AllOf, AllOfBuilder, Array, ArrayBuilder, Deprecated, Object, ObjectBuilder, OneOf, OneOfBuilder, Ref, RefOr, Schema,
-  SchemaFormat, SchemaType,
+  AllOf, AllOfBuilder, Array, ArrayBuilder, Deprecated, Object, ObjectBuilder, OneOf, OneOfBuilder, Ref, ReferenceOr,
+  Schema, SchemaFormat, SchemaType,
 };
 
-pub fn json_schema_to_schemas(mut sch: SchemaObject) -> RefOr<Schema> {
+pub fn json_schema_to_schemas(mut sch: SchemaObject) -> ReferenceOr<Schema> {
   if sch.is_ref() {
-    return RefOr::Ref(Ref::new(&sch.reference.unwrap_or_default()));
+    return ReferenceOr::Ref(Ref::new(&sch.reference.unwrap_or_default()));
   }
   let mut schemas: Vec<Schema> = vec![];
 
@@ -81,7 +81,7 @@ fn enum_value_to_object(schema: &mut SchemaObject, enum_vals: Vec<Value>) -> Obj
   obj_builder.build()
 }
 
-fn schema_object_to_one_of(schema: &mut SchemaObject, one_of: Vec<schemars::schema::Schema>) -> OneOf {
+fn schema_object_to_one_of(schema: &mut SchemaObject, one_of: Vec<netwopenapi_models::Schema>) -> OneOf {
   let schema_metadata = schema.metadata();
   let mut one_of_builder = OneOfBuilder::new()
     .title(schema_metadata.title.clone())
@@ -96,7 +96,7 @@ fn schema_object_to_one_of(schema: &mut SchemaObject, one_of: Vec<schemars::sche
   one_of_builder.build()
 }
 
-fn schema_object_to_any_of(schema: &mut SchemaObject, any_of: Vec<schemars::schema::Schema>) -> AnyOf {
+fn schema_object_to_any_of(schema: &mut SchemaObject, any_of: Vec<netwopenapi_models::Schema>) -> AnyOf {
   let schema_metadata = schema.metadata();
   let mut any_of_builder = AnyOfBuilder::new()
     .description(schema_metadata.description.clone())
@@ -110,7 +110,7 @@ fn schema_object_to_any_of(schema: &mut SchemaObject, any_of: Vec<schemars::sche
   any_of_builder.build()
 }
 
-fn schema_object_to_all_of(schema: &mut SchemaObject, all_of: Vec<schemars::schema::Schema>) -> AllOf {
+fn schema_object_to_all_of(schema: &mut SchemaObject, all_of: Vec<netwopenapi_models::Schema>) -> AllOf {
   let schema_metadata = schema.metadata();
   let mut all_of_builder = AllOfBuilder::new()
     .title(schema_metadata.title.clone())

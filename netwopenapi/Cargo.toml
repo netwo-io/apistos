@@ -11,21 +11,19 @@ rust-version.workspace = true
 [dependencies]
 actix-service = { workspace = true }
 actix-web = { workspace = true }
+indexmap = { workspace = true }
 once_cell = { workspace = true }
 pin-project = { workspace = true }
 regex = { workspace = true }
 schemars = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
-serde_plain = { workspace = true }
-utoipa = { workspace = true }
-utoipa-rapidoc = { workspace = true, optional = true }
-utoipa-redoc = { workspace = true, optional = true }
-utoipa-swagger-ui = { workspace = true, optional = true }
 
 netwopenapi-gen = { path = "../netwopenapi-gen" }
+netwopenapi-models = { path = "../netwopenapi-models" }
 
 actix-multipart = { workspace = true, optional = true }
+ipnetwork = { workspace = true, optional = true }
 garde-actix-web = { workspace = true, optional = true }
 chrono = { workspace = true, optional = true }
 garde = { workspace = true, optional = true }
@@ -43,17 +41,18 @@ qs_query = ["dep:serde_qs", "garde-actix-web?/serde_qs"]
 garde = ["dep:garde", "dep:garde-actix-web"]
 
 # extra types related features
-chrono = ["dep:chrono", "utoipa/chrono"]
+chrono = ["dep:chrono", "schemars/chrono"]
+ipnetwork = ["dep:ipnetwork", "schemars/ipnetwork"]
 multipart = ["dep:actix-multipart"]
-rust_decimal = ["dep:rust_decimal", "utoipa/decimal"]
-uuid = ["dep:uuid", "utoipa/uuid"]
-url = ["dep:url", "utoipa/url"]
-extras = ["chrono", "multipart", "rust_decimal", "uuid", "url"]
+rust_decimal = ["dep:rust_decimal", "schemars/rust_decimal"]
+uuid = ["dep:uuid", "schemars/uuid1"]
+url = ["dep:url", "schemars/url"]
+extras = ["chrono", "multipart", "rust_decimal", "uuid", "url", "ipnetwork"]
 
 # UI related features
-rapidoc = ["utoipa-rapidoc"]
-redoc = ["utoipa-redoc"]
-swagger-ui = ["utoipa-swagger-ui"]
+#rapidoc = ["utoipa-rapidoc"]
+#redoc = ["utoipa-redoc"]
+#swagger-ui = ["utoipa-swagger-ui"]
 
 default = ["query"]
 

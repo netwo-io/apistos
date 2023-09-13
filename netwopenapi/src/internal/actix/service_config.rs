@@ -1,11 +1,12 @@
 use crate::internal::actix::route::{Route, RouteWrapper};
 use crate::internal::definition_holder::DefinitionHolder;
 use actix_web::dev::HttpServiceFactory;
-use std::collections::BTreeMap;
-use utoipa::openapi::{Components, PathItem};
+use indexmap::IndexMap;
+use netwopenapi_models::components::Components;
+use netwopenapi_models::paths::PathItem;
 
 pub struct ServiceConfig<'a> {
-  pub(crate) item_map: BTreeMap<String, PathItem>,
+  pub(crate) item_map: IndexMap<String, PathItem>,
   pub(crate) components: Vec<Components>,
   inner: &'a mut actix_web::web::ServiceConfig,
 }

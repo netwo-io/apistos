@@ -2,16 +2,16 @@ use crate::internal::actix::resource::Resource;
 use crate::internal::actix::route::RouteWrapper;
 use crate::internal::actix::scope::Scope;
 use crate::internal::actix::service_config::ServiceConfig;
-use std::collections::BTreeMap;
+use indexmap::IndexMap;
+use netwopenapi_models::components::Components;
+use netwopenapi_models::paths::{Operation, OperationType, PathItem};
 use std::mem;
-use utoipa::openapi::path::Operation;
-use utoipa::openapi::{Components, PathItem, PathItemType};
 
 pub trait DefinitionHolder {
   fn path(&self) -> &str;
-  fn operations(&mut self) -> BTreeMap<PathItemType, Operation>;
+  fn operations(&mut self) -> IndexMap<OperationType, Operation>;
   fn components(&mut self) -> Vec<Components>;
-  fn update_path_items(&mut self, path_op_map: &mut BTreeMap<String, PathItem>) -> () {
+  fn update_path_items(&mut self, path_op_map: &mut IndexMap<String, PathItem>) -> () {
     let ops = self.operations();
     if !ops.is_empty() {
       let op_map = path_op_map.entry(self.path().into()).or_insert_with(Default::default);
@@ -25,7 +25,7 @@ impl DefinitionHolder for RouteWrapper {
     &self.def.path
   }
 
-  fn operations(&mut self) -> BTreeMap<PathItemType, Operation> {
+  fn operations(&mut self) -> IndexMap<OperationType, Operation> {
     mem::take(&mut self.def.item.operations)
   }
 
@@ -39,7 +39,7 @@ impl DefinitionHolder for Resource {
     &self.path
   }
 
-  fn operations(&mut self) -> BTreeMap<PathItemType, Operation> {
+  fn operations(&mut self) -> IndexMap<OperationType, Operation> {
     mem::take(&mut self.item_definition).unwrap_or_default().operations
   }
 
@@ -53,7 +53,7 @@ impl<T> DefinitionHolder for Scope<T> {
     unimplemented!("Scope has multiple paths");
   }
 
-  fn operations(&mut self) -> BTreeMap<PathItemType, Operation> {
+  fn operations(&mut self) -> IndexMap<OperationType, Operation> {
     unimplemented!("Scope has multiple operation maps");
   }
 
@@ -61,7 +61,7 @@ impl<T> DefinitionHolder for Scope<T> {
     mem::take(&mut self.components)
   }
 
-  fn update_path_items(&mut self, path_op_map: &mut BTreeMap<String, PathItem>) -> () {
+  fn update_path_items(&mut self, path_op_map: &mut IndexMap<String, PathItem>) -> () {
     for (path, item) in mem::take(&mut self.item_map) {
       let op_map = path_op_map.entry(path).or_insert_with(Default::default);
       op_map.operations.extend(item.operations.into_iter());
@@ -75,7 +75,7 @@ impl<'a> DefinitionHolder for ServiceConfig<'a> {
     unimplemented!("ServiceConfig has multiple paths.");
   }
 
-  fn operations(&mut self) -> BTreeMap<PathItemType, Operation> {
+  fn operations(&mut self) -> IndexMap<OperationType, Operation> {
     unimplemented!("ServiceConfig has multiple operation maps.")
   }
 
@@ -83,7 +83,7 @@ impl<'a> DefinitionHolder for ServiceConfig<'a> {
     mem::take(&mut self.components)
   }
 
-  fn update_path_items(&mut self, path_op_map: &mut BTreeMap<String, PathItem>) -> () {
+  fn update_path_items(&mut self, path_op_map: &mut IndexMap<String, PathItem>) -> () {
     for (path, item) in mem::take(&mut self.item_map) {
       let op_map = path_op_map.entry(path).or_insert_with(Default::default);
       op_map.operations.extend(item.operations.into_iter());

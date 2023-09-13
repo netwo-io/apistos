@@ -7,9 +7,10 @@ use actix_web::body::MessageBody;
 use actix_web::dev::{AppService, HttpServiceFactory, ServiceRequest, ServiceResponse};
 use actix_web::guard::Guard;
 use actix_web::{Error, FromRequest, Handler, Responder};
+use netwopenapi_models::components::Components;
+use netwopenapi_models::paths::PathItem;
 use std::fmt::Debug;
 use std::future::Future;
-use utoipa::openapi::{Components, PathItem};
 
 pub struct Resource<R = actix_web::Resource> {
   pub(crate) path: String,

@@ -6,9 +6,9 @@ use actix_web::dev::ServiceRequest;
 use actix_web::guard::Guard;
 use actix_web::http::Method;
 use actix_web::{Error, FromRequest, Handler, Responder};
-use std::collections::BTreeMap;
-use utoipa::openapi::path::Operation;
-use utoipa::openapi::{Components, PathItem, PathItemType};
+use indexmap::IndexMap;
+use netwopenapi_models::components::Components;
+use netwopenapi_models::paths::{Operation, OperationType, PathItem};
 
 /// Wrapper for [`actix_web::web::method`](https://docs.rs/actix-web/*/actix_web/web/fn.method.html).
 pub fn method(method: Method) -> Route {
@@ -52,7 +52,7 @@ pub fn head() -> Route {
 
 pub struct Route {
   operation: Option<Operation>,
-  path_item_type: Option<PathItemType>,
+  path_item_type: Option<OperationType>,
   components: Vec<Components>,
   inner: actix_web::Route,
 }
@@ -87,13 +87,14 @@ impl Route {
   /// Wrapper for [`actix_web::Route::method`](https://docs.rs/actix-web/*/actix_web/struct.Route.html#method.method)
   pub fn method(mut self, method: Method) -> Self {
     let path_item_type = match method.as_str() {
-      "PUT" => PathItemType::Put,
-      "POST" => PathItemType::Post,
-      "DELETE" => PathItemType::Delete,
-      "OPTIONS" => PathItemType::Options,
-      "HEAD" => PathItemType::Head,
-      "PATCH" => PathItemType::Patch,
-      _ => PathItemType::Get,
+      "PUT" => OperationType::Put,
+      "POST" => OperationType::Post,
+      "DELETE" => OperationType::Delete,
+      "OPTIONS" => OperationType::Options,
+      "HEAD" => OperationType::Head,
+      "PATCH" => OperationType::Patch,
+      "TRACE" => OperationType::Trace,
+      _ => OperationType::Get,
     };
     self.path_item_type = Some(path_item_type);
     self.inner = self.inner.method(method);
@@ -138,7 +139,7 @@ pub(crate) struct RouteWrapper {
 
 impl RouteWrapper {
   pub(crate) fn new<S: Into<String>>(path: S, route: Route) -> Self {
-    let mut operations: BTreeMap<PathItemType, Operation> = Default::default();
+    let mut operations: IndexMap<OperationType, Operation> = Default::default();
     let mut path_item = PathItem::default();
     let path: String = path.into();
     if let Some(mut operation) = route.operation {

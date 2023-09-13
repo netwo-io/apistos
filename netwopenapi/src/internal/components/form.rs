@@ -1,6 +1,7 @@
 use crate::ApiComponent;
 use actix_web::web::Form;
-use utoipa::openapi::{RefOr, Schema};
+use netwopenapi_models::reference_or::ReferenceOr;
+use netwopenapi_models::Schema;
 
 impl<T> ApiComponent for Form<T>
 where
@@ -10,11 +11,11 @@ where
     "application/x-www-form-urlencoded".to_string()
   }
 
-  fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
+  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
     T::child_schemas()
   }
 
-  fn schema() -> Option<(String, RefOr<Schema>)> {
+  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
     T::schema()
   }
 }
@@ -28,11 +29,11 @@ where
     "application/x-www-form-urlencoded".to_string()
   }
 
-  fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
+  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
     T::child_schemas()
   }
 
-  fn schema() -> Option<(String, RefOr<Schema>)> {
+  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
     T::schema()
   }
 }

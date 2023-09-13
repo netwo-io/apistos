@@ -10,6 +10,7 @@ pub mod web;
 pub use internal::components::error::ApiErrorComponent;
 pub use internal::components::parameters::header::ApiHeader;
 pub use internal::components::{ApiComponent, TypedSchema};
-pub use internal::schema_converter::json_schema_to_schemas;
 pub use netwopenapi_gen::{api_operation, ApiComponent, ApiCookie, ApiErrorComponent, ApiHeader, ApiSecurity, ApiType};
-pub use serde_plain::to_string as plain_string;
+
+pub use indexmap::IndexMap;
+pub use netwopenapi_models::*;

@@ -55,34 +55,34 @@ impl ToTokens for OpenapiCookieAttributeExtended {
       None => quote!(None),
       Some(desc) => quote!(Some(#desc.to_string())),
     };
-    let required = if self.required.unwrap_or_default() {
-      quote!(utoipa::openapi::Required::True)
-    } else {
-      quote!(utoipa::openapi::Required::False)
-    };
-    let deprecated = if self.deprecated.unwrap_or_default() {
-      quote!(utoipa::openapi::Deprecated::True)
-    } else {
-      quote!(utoipa::openapi::Deprecated::False)
-    };
+    let required = self.required.unwrap_or_default();
+    let required = quote!(#required);
+    let deprecated = self.deprecated.unwrap_or_default();
+    let deprecated = quote!(#deprecated);
 
     let schema_impl = Schemas;
     tokens.extend(quote! {
       #schema_impl
 
-      fn request_body() -> Option<utoipa::openapi::request_body::RequestBody> {
+      fn request_body() -> Option<netwopenapi::paths::RequestBody> {
         None
       }
 
-      fn parameters() -> Vec<utoipa::openapi::path::Parameter> {
-        vec![utoipa::openapi::path::ParameterBuilder::new()
-          .parameter_in(utoipa::openapi::path::ParameterIn::Cookie)
-          .name(#name.to_string())
-          .description(#description)
-          .required(#required)
-          .deprecated(Some(#deprecated))
-          .schema(<Self as ApiComponent>::schema().map(|(_, schema)| schema).or_else(|| Self::raw_schema()))
-          .build()]
+      fn parameters() -> Vec<netwopenapi::paths::Parameter> {
+        vec![
+          netwopenapi::paths::Parameter {
+            name: #name.to_string(),
+            description: #description,
+            _in: netwopenapi::paths::ParameterIn::Cookie,
+            required: Some(#required),
+            deprecated: Some(#deprecated),
+            definition: <Self as ApiComponent>::schema()
+              .map(|(_, schema)| schema)
+              .or_else(|| Self::raw_schema())
+              .map(netwopenapi::paths::ParameterDefinition::Schema),
+            ..Default::default()
+          }
+        ]
       }
     })
   }

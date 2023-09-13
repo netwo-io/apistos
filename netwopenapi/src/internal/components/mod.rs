@@ -3,15 +3,13 @@ use crate::internal::components::error::ApiErrorComponent;
 use crate::path_item_definition::PathItemDefinition;
 use actix_web::web::{Data, ReqData};
 use actix_web::Responder;
+use netwopenapi_models::paths::{MediaType, Parameter, RequestBody, Response, Responses};
+use netwopenapi_models::reference_or::ReferenceOr;
+use netwopenapi_models::security::SecurityScheme;
+use netwopenapi_models::InstanceType;
+use netwopenapi_models::Schema;
 use std::collections::BTreeMap;
 use std::future::Future;
-use utoipa::openapi::path::Parameter;
-use utoipa::openapi::request_body::{RequestBody, RequestBodyBuilder};
-use utoipa::openapi::security::SecurityScheme;
-use utoipa::openapi::{
-  ContentBuilder, Ref, RefOr, Required, Response, ResponseBuilder, Responses, ResponsesBuilder, Schema, SchemaFormat,
-  SchemaType,
-};
 
 pub mod empty;
 pub mod error;
@@ -23,8 +21,8 @@ pub mod parameters;
 pub mod simple;
 
 pub trait TypedSchema {
-  fn schema_type() -> SchemaType;
-  fn format() -> Option<SchemaFormat>;
+  fn schema_type() -> InstanceType;
+  fn format() -> Option<String>;
 }
 
 pub trait ApiComponent {
@@ -32,18 +30,18 @@ pub trait ApiComponent {
     "application/json".to_string()
   }
 
-  fn required() -> Required {
-    Required::True
+  fn required() -> bool {
+    true
   }
 
   /// contains childs schemas recursively for this operation
-  fn child_schemas() -> Vec<(String, RefOr<Schema>)>;
+  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)>;
 
-  fn raw_schema() -> Option<RefOr<Schema>> {
+  fn raw_schema() -> Option<ReferenceOr<Schema>> {
     None
   }
 
-  fn schema() -> Option<(String, RefOr<Schema>)>;
+  fn schema() -> Option<(String, ReferenceOr<Schema>)>;
 
   fn securities() -> BTreeMap<String, SecurityScheme> {
     Default::default()
@@ -54,14 +52,18 @@ pub trait ApiComponent {
   }
 
   fn request_body() -> Option<RequestBody> {
-    Self::schema().map(|(name, _)| {
-      RequestBodyBuilder::new()
-        .content(
-          Self::content_type(),
-          ContentBuilder::new().schema(Ref::from_schema_name(name)).build(),
-        )
-        .required(Some(Self::required()))
-        .build()
+    Self::schema().map(|(name, _)| RequestBody {
+      content: BTreeMap::from_iter(vec![(
+        Self::content_type(),
+        MediaType {
+          schema: Some(ReferenceOr::Reference {
+            _ref: format!("#/components/schemas/{}", name),
+          }),
+          ..Default::default()
+        },
+      )]),
+      required: Some(Self::required()),
+      ..Default::default()
     })
   }
 
@@ -69,7 +71,7 @@ pub trait ApiComponent {
     vec![]
   }
 
-  fn error_schemas() -> BTreeMap<String, (String, RefOr<Schema>)> {
+  fn error_schemas() -> BTreeMap<String, (String, ReferenceOr<Schema>)> {
     BTreeMap::default()
   }
 
@@ -86,19 +88,19 @@ impl<T> ApiComponent for Option<T>
 where
   T: ApiComponent,
 {
-  fn required() -> Required {
-    Required::False
+  fn required() -> bool {
+    false
   }
 
-  fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
+  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
     T::child_schemas()
   }
 
-  fn raw_schema() -> Option<RefOr<Schema>> {
+  fn raw_schema() -> Option<ReferenceOr<Schema>> {
     T::raw_schema()
   }
 
-  fn schema() -> Option<(String, RefOr<Schema>)> {
+  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
     T::schema()
   }
 
@@ -115,19 +117,19 @@ impl<T> ApiComponent for Vec<T>
 where
   T: ApiComponent,
 {
-  fn required() -> Required {
-    Required::True
+  fn required() -> bool {
+    true
   }
 
-  fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
+  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
     T::child_schemas()
   }
 
-  fn raw_schema() -> Option<RefOr<Schema>> {
+  fn raw_schema() -> Option<ReferenceOr<Schema>> {
     T::raw_schema()
   }
 
-  fn schema() -> Option<(String, RefOr<Schema>)> {
+  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
     T::schema()
   }
 }
@@ -137,19 +139,19 @@ where
   T: ApiComponent,
   E: ApiErrorComponent,
 {
-  fn required() -> Required {
+  fn required() -> bool {
     T::required()
   }
 
-  fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
+  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
     T::child_schemas()
   }
 
-  fn raw_schema() -> Option<RefOr<Schema>> {
+  fn raw_schema() -> Option<ReferenceOr<Schema>> {
     T::raw_schema()
   }
 
-  fn schema() -> Option<(String, RefOr<Schema>)> {
+  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
     T::schema()
   }
 
@@ -159,7 +161,7 @@ where
   }
 
   // We expect error to be present only for response part
-  fn error_schemas() -> BTreeMap<String, (String, RefOr<Schema>)> {
+  fn error_schemas() -> BTreeMap<String, (String, ReferenceOr<Schema>)> {
     E::schemas_by_status_code()
   }
 
@@ -169,21 +171,21 @@ where
 }
 
 impl<T> ApiComponent for Data<T> {
-  fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
+  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
     vec![]
   }
 
-  fn schema() -> Option<(String, RefOr<Schema>)> {
+  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
     None
   }
 }
 
 impl<T: Clone> ApiComponent for ReqData<T> {
-  fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
+  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
     vec![]
   }
 
-  fn schema() -> Option<(String, RefOr<Schema>)> {
+  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
     None
   }
 }
@@ -194,15 +196,15 @@ where
   R: Responder + ApiComponent,
   P: PathItemDefinition,
 {
-  fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
+  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
     R::child_schemas()
   }
 
-  fn raw_schema() -> Option<RefOr<Schema>> {
+  fn raw_schema() -> Option<ReferenceOr<Schema>> {
     R::raw_schema()
   }
 
-  fn schema() -> Option<(String, RefOr<Schema>)> {
+  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
     R::schema()
   }
 
@@ -210,7 +212,7 @@ where
     R::error_responses()
   }
 
-  fn error_schemas() -> BTreeMap<String, (String, RefOr<Schema>)> {
+  fn error_schemas() -> BTreeMap<String, (String, ReferenceOr<Schema>)> {
     R::error_schemas()
   }
 
@@ -221,30 +223,39 @@ where
         &mut response
           .responses
           .into_iter()
-          .collect::<Vec<(String, RefOr<Response>)>>(),
+          .collect::<Vec<(String, ReferenceOr<Response>)>>(),
       );
     } else if let Some((name, schema)) = Self::schema() {
       let _ref = match schema {
-        RefOr::Ref(r) => r,
-        RefOr::T(_) => Ref::from_schema_name(name),
+        ReferenceOr::Reference { _ref } => _ref,
+        ReferenceOr::Object(_) => format!("#/components/schemas/{}", name),
       };
       responses.push((
         "200".to_owned(),
-        ResponseBuilder::new()
-          .content(Self::content_type(), ContentBuilder::new().schema(_ref).build())
-          .build()
-          .into(),
+        ReferenceOr::Object(Response {
+          content: BTreeMap::from_iter(vec![(
+            Self::content_type(),
+            MediaType {
+              schema: Some(ReferenceOr::Reference { _ref }),
+              ..Default::default()
+            },
+          )]),
+          ..Default::default()
+        }),
       ));
     } else {
-      responses.push(("200".to_owned(), Response::default().into()));
+      responses.push(("200".to_owned(), ReferenceOr::Object(Response::default())));
     }
 
     responses.append(
       &mut Self::error_responses()
         .into_iter()
-        .map(|(status, schema)| (status, schema.into()))
+        .map(|(status, schema)| (status, ReferenceOr::Object(schema)))
         .collect(),
     );
-    Some(ResponsesBuilder::new().responses_from_iter(responses).build())
+    Some(Responses {
+      responses: BTreeMap::from_iter(responses),
+      ..Default::default()
+    })
   }
 }

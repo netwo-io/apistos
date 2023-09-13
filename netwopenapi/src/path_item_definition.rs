@@ -1,5 +1,5 @@
-use utoipa::openapi::path::Operation;
-use utoipa::openapi::Components;
+use netwopenapi_models::components::Components;
+use netwopenapi_models::paths::Operation;
 
 pub trait PathItemDefinition {
   fn is_visible() -> bool {

@@ -52,16 +52,10 @@ impl ToTokens for OpenapiHeaderAttribute {
       None => quote!(None),
       Some(desc) => quote!(Some(#desc.to_string())),
     };
-    let required = if self.required.unwrap_or_default() {
-      quote!(utoipa::openapi::Required::True)
-    } else {
-      quote!(utoipa::openapi::Required::False)
-    };
-    let deprecated = if self.deprecated.unwrap_or_default() {
-      quote!(utoipa::openapi::Deprecated::True)
-    } else {
-      quote!(utoipa::openapi::Deprecated::False)
-    };
+    let required = self.required.unwrap_or_default();
+    let required = quote!(#required);
+    let deprecated = self.deprecated.unwrap_or_default();
+    let deprecated = quote!(#deprecated);
 
     tokens.extend(quote! {
       fn name() -> String {
@@ -72,11 +66,11 @@ impl ToTokens for OpenapiHeaderAttribute {
         #description
       }
 
-      fn required() -> utoipa::openapi::Required {
+      fn required() -> bool {
         #required
       }
 
-      fn deprecated() -> utoipa::openapi::Deprecated {
+      fn deprecated() -> bool {
         #deprecated
       }
     })

@@ -35,8 +35,8 @@ struct SecurityDeclarationInternal {
 
 #[derive(FromMeta, Clone)]
 pub(crate) struct SecurityDeclaration {
-  pub name: String,
-  pub scheme: SecurityScheme,
+  pub(crate) name: String,
+  pub(crate) scheme: SecurityScheme,
 }
 
 impl ToTokens for SecurityDeclaration {
@@ -56,23 +56,49 @@ impl ToTokens for SecurityDeclaration {
 
 #[derive(FromMeta, Clone)]
 #[darling(rename_all = "snake_case")]
-pub(crate) enum SecurityScheme {
+pub(crate) struct SecurityScheme {
+  #[darling(rename = "security_type")]
+  pub(crate) _type: SecurityType,
+  pub(crate) description: Option<String>,
+}
+
+impl ToTokens for SecurityScheme {
+  fn to_tokens(&self, tokens: &mut TokenStream) {
+    let description = self
+      .clone()
+      .description
+      .map(|d| quote!(Some(#d.to_string())))
+      .unwrap_or_else(|| quote!(None));
+    let _type = self._type.clone();
+    tokens.extend(quote! {
+      netwopenapi::security::SecurityScheme {
+        _type: #_type,
+        description: #description,
+        extensions: netwopenapi::IndexMap::default()
+      }
+    });
+  }
+}
+
+#[derive(FromMeta, Clone)]
+#[darling(rename_all = "snake_case")]
+pub(crate) enum SecurityType {
   OAuth2(OAuth2),
   ApiKey(ApiKey),
   Http(Http),
   OpenIdConnect(OpenIdConnect),
 }
 
-impl ToTokens for SecurityScheme {
+impl ToTokens for SecurityType {
   fn to_tokens(&self, tokens: &mut TokenStream) {
     let scheme_tokens = match self {
-      SecurityScheme::OAuth2(v) => quote!(OAuth2(#v)),
-      SecurityScheme::ApiKey(v) => quote!(ApiKey(#v)),
-      SecurityScheme::Http(v) => quote!(Http(#v)),
-      SecurityScheme::OpenIdConnect(v) => quote!(OpenIdConnect(#v)),
+      SecurityType::OAuth2(v) => quote!(OAuth2(#v)),
+      SecurityType::ApiKey(v) => quote!(ApiKey(#v)),
+      SecurityType::Http(v) => quote!(Http(#v)),
+      SecurityType::OpenIdConnect(v) => quote!(OpenIdConnect(#v)),
     };
     tokens.extend(quote! {
-      utoipa::openapi::security::SecurityScheme::#scheme_tokens
+      netwopenapi::security::SecurityType::#scheme_tokens
     });
   }
 }

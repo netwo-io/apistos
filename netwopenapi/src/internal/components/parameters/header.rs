@@ -1,18 +1,18 @@
 use crate::ApiComponent;
 use actix_web::web::Header;
-use utoipa::openapi::path::{Parameter, ParameterBuilder, ParameterIn, ParameterStyle};
-use utoipa::openapi::request_body::RequestBody;
-use utoipa::openapi::{Deprecated, RefOr, Required, Schema};
+use netwopenapi_models::paths::{Parameter, ParameterDefinition, ParameterIn, ParameterStyle, RequestBody};
+use netwopenapi_models::reference_or::ReferenceOr;
+use netwopenapi_models::Schema;
 
 pub trait ApiHeader {
   fn name() -> String;
   fn description() -> Option<String> {
     None
   }
-  fn required() -> Required {
+  fn required() -> bool {
     Default::default()
   }
-  fn deprecated() -> Deprecated {
+  fn deprecated() -> bool {
     Default::default()
   }
 }
@@ -21,15 +21,15 @@ impl<T> ApiComponent for Header<T>
 where
   T: ApiComponent + ApiHeader,
 {
-  fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
+  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
     T::child_schemas()
   }
 
-  fn raw_schema() -> Option<RefOr<Schema>> {
+  fn raw_schema() -> Option<ReferenceOr<Schema>> {
     T::raw_schema()
   }
 
-  fn schema() -> Option<(String, RefOr<Schema>)> {
+  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
     T::schema()
   }
 
@@ -38,15 +38,19 @@ where
   }
 
   fn parameters() -> Vec<Parameter> {
-    vec![ParameterBuilder::new()
-      .parameter_in(ParameterIn::Header)
-      .name(T::name())
-      .description(T::description())
-      .required(<T as ApiHeader>::required())
-      .deprecated(Some(<T as ApiHeader>::deprecated()))
-      .schema(Self::schema().map(|(_, schema)| schema).or_else(|| Self::raw_schema()))
-      .style(Some(ParameterStyle::Simple))
-      .build()]
+    vec![Parameter {
+      name: T::name(),
+      _in: ParameterIn::Header,
+      description: T::description(),
+      required: Some(<T as ApiHeader>::required()),
+      deprecated: Some(<T as ApiHeader>::deprecated()),
+      style: Some(ParameterStyle::Simple),
+      definition: Self::schema()
+        .map(|(_, schema)| schema)
+        .or_else(|| Self::raw_schema())
+        .map(ParameterDefinition::Schema),
+      ..Default::default()
+    }]
   }
 }
 
@@ -55,15 +59,15 @@ impl<T> ApiComponent for garde_actix_web::web::Header<T>
 where
   T: ApiComponent + ApiHeader,
 {
-  fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
+  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
     T::child_schemas()
   }
 
-  fn raw_schema() -> Option<RefOr<Schema>> {
+  fn raw_schema() -> Option<ReferenceOr<Schema>> {
     T::raw_schema()
   }
 
-  fn schema() -> Option<(String, RefOr<Schema>)> {
+  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
     T::schema()
   }
 
@@ -72,14 +76,18 @@ where
   }
 
   fn parameters() -> Vec<Parameter> {
-    vec![ParameterBuilder::new()
-      .parameter_in(ParameterIn::Header)
-      .name(T::name())
-      .description(T::description())
-      .required(<T as ApiHeader>::required())
-      .deprecated(Some(<T as ApiHeader>::deprecated()))
-      .schema(Self::schema().map(|(_, schema)| schema).or_else(|| Self::raw_schema()))
-      .style(Some(ParameterStyle::Simple))
-      .build()]
+    vec![Parameter {
+      name: T::name(),
+      _in: ParameterIn::Header,
+      description: T::description(),
+      required: Some(<T as ApiHeader>::required()),
+      deprecated: Some(<T as ApiHeader>::deprecated()),
+      style: Some(ParameterStyle::Simple),
+      definition: Self::schema()
+        .map(|(_, schema)| schema)
+        .or_else(|| Self::raw_schema())
+        .map(ParameterDefinition::Schema),
+      ..Default::default()
+    }]
   }
 }

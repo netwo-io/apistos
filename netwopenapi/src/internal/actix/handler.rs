@@ -1,6 +1,6 @@
-use std::future::{Ready, ready};
 use actix_web::{Error, HttpResponse};
-use utoipa::openapi::OpenApi;
+use netwopenapi_models::OpenApi;
+use std::future::{ready, Ready};
 
 #[derive(Clone)]
 pub(crate) struct OASHandler(OpenApi);

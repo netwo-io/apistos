@@ -2,9 +2,11 @@ use crate::ApiComponent;
 use actix_multipart::form::text::Text;
 use actix_multipart::form::{MultipartCollect, MultipartForm};
 use actix_multipart::Multipart;
+use netwopenapi_models::paths::{MediaType, RequestBody};
+use netwopenapi_models::reference_or::ReferenceOr;
+use netwopenapi_models::Schema;
 use serde::de::DeserializeOwned;
-use utoipa::openapi::request_body::{RequestBody, RequestBodyBuilder};
-use utoipa::openapi::{ContentBuilder, RefOr, Schema};
+use std::collections::BTreeMap;
 
 impl<T> ApiComponent for MultipartForm<T>
 where
@@ -14,11 +16,11 @@ where
     "multipart/form-data".to_string()
   }
 
-  fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
+  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
     T::child_schemas()
   }
 
-  fn schema() -> Option<(String, RefOr<Schema>)> {
+  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
     T::schema()
   }
 }
@@ -31,11 +33,11 @@ where
     "multipart/form-data".to_string()
   }
 
-  fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
+  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
     T::child_schemas()
   }
 
-  fn schema() -> Option<(String, RefOr<Schema>)> {
+  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
     T::schema()
   }
 }
@@ -48,11 +50,11 @@ where
     "multipart/form-data".to_string()
   }
 
-  fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
+  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
     T::child_schemas()
   }
 
-  fn schema() -> Option<(String, RefOr<Schema>)> {
+  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
     T::schema()
   }
 }
@@ -62,24 +64,23 @@ impl ApiComponent for Multipart {
     "multipart/form-data".to_string()
   }
 
-  fn child_schemas() -> Vec<(String, RefOr<Schema>)> {
+  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
     vec![]
   }
 
-  fn raw_schema() -> Option<RefOr<Schema>> {
+  fn raw_schema() -> Option<ReferenceOr<Schema>> {
     None
   }
 
-  fn schema() -> Option<(String, RefOr<Schema>)> {
+  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
     None
   }
 
   fn request_body() -> Option<RequestBody> {
-    Some(
-      RequestBodyBuilder::new()
-        .content(Self::content_type(), ContentBuilder::new().build())
-        .required(Some(Self::required()))
-        .build(),
-    )
+    Some(RequestBody {
+      content: BTreeMap::from_iter(vec![(Self::content_type(), MediaType::default())]),
+      required: Some(Self::required()),
+      ..Default::default()
+    })
   }
 }

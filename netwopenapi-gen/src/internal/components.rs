@@ -32,13 +32,15 @@ impl<'a> ToTokens for Components<'a> {
       }
     };
     tokens.extend(quote!(
-      fn components() -> Vec<utoipa::openapi::Components> {
+      fn components() -> Vec<netwopenapi::components::Components> {
         use netwopenapi::ApiComponent;
-        let mut component_builder = utoipa::openapi::ComponentsBuilder::new();
+        let mut component_builder = netwopenapi::components::Components::default();
 
         #(
           for (name, security) in <#args>::securities() {
-            component_builder = component_builder.security_scheme(name, security);
+            component_builder.security_schemes.insert(
+              name, netwopenapi::reference_or::ReferenceOr::Object(security)
+            );
           }
         )*
 
@@ -47,17 +49,15 @@ impl<'a> ToTokens for Components<'a> {
           schemas.push(<#args>::schema());
         )*
         schemas.push(<#responder_wrapper>::schema());
-        let mut schemas = schemas.into_iter().flatten().collect::<Vec<(String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)>>();
+        let mut schemas = schemas.into_iter().flatten().collect::<Vec<(String, netwopenapi::reference_or::ReferenceOr<netwopenapi::Schema>)>>();
         #(
           schemas.append(&mut <#args>::child_schemas());
         )*
         schemas.append(&mut <#responder_wrapper>::child_schemas());
         let error_schemas = <#responder_wrapper>::error_schemas();
         #error_codes_filter
-        for (name, schema) in schemas {
-          component_builder = component_builder.schema(name, schema);
-        }
-        vec![component_builder.build()]
+        component_builder.schemas = std::collections::BTreeMap::from_iter(schemas);
+        vec![component_builder]
       }
     ))
   }

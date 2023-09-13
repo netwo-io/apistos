@@ -7,10 +7,12 @@ use actix_web::body::MessageBody;
 use actix_web::dev::{AppService, HttpServiceFactory, ServiceRequest, ServiceResponse};
 use actix_web::guard::Guard;
 use actix_web::Error;
+use indexmap::IndexMap;
+use netwopenapi_models::components::Components;
+use netwopenapi_models::paths::PathItem;
 use std::collections::BTreeMap;
 use std::fmt::Debug;
 use std::future::Future;
-use utoipa::openapi::{Components, PathItem};
 
 pub struct Scope<S = actix_web::Scope> {
   pub(crate) item_map: BTreeMap<String, PathItem>,
@@ -158,7 +160,7 @@ where
 
   fn update_from_def_holder<D: DefinitionHolder>(&mut self, dh: &mut D) {
     self.components.extend(dh.components().into_iter());
-    let mut item_map = BTreeMap::new();
+    let mut item_map = IndexMap::new();
     dh.update_path_items(&mut item_map);
     for (path, mut path_item) in item_map {
       let p = vec![self.path.clone(), path]

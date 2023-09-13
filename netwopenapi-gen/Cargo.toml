@@ -17,7 +17,6 @@ darling = { workspace = true }
 proc-macro2 = { workspace = true }
 proc-macro-error = { workspace = true }
 quote = { workspace = true }
-serde_plain = { workspace = true }
 syn = { workspace = true, features = ["full", "extra-traits"] }
 
 [lib]

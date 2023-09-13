@@ -31,12 +31,12 @@ impl ToTokens for OpenapiErrorAttribute {
   fn to_tokens(&self, tokens: &mut TokenStream) {
     let defs = &self.status;
     tokens.extend(quote! {
-      fn error_responses() -> Vec<(String, utoipa::openapi::Response)> {
-        let responses: Vec<((String, utoipa::openapi::Response), Option<(String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)>)> = vec![#(#defs,)*];
+      fn error_responses() -> Vec<(String, netwopenapi::paths::Response)> {
+        let responses: Vec<((String, netwopenapi::paths::Response), Option<(String, netwopenapi::reference_or::ReferenceOr<netwopenapi::Schema>)>)> = vec![#(#defs,)*];
         responses.into_iter().map(|v| v.0).collect()
       }
 
-      fn schemas_by_status_code() -> std::collections::BTreeMap<String, (String, utoipa::openapi::RefOr<utoipa::openapi::Schema>)> {
+      fn schemas_by_status_code() -> std::collections::BTreeMap<String, (String, netwopenapi::reference_or::ReferenceOr<netwopenapi::Schema>)> {
         let mut schemas = std::collections::BTreeMap::default();
         for ((status_code, _), schema) in [#(#defs,)*] {
           if let Some(schema) = schema {
@@ -65,18 +65,20 @@ impl ToTokens for ErrorDefinition {
     };
     let description = self.description.as_deref().unwrap_or_else(|| default_description);
     let content = if self.with_schema.unwrap_or_default() {
-      quote!(.content(
-        "application/json",
-        utoipa::openapi::ContentBuilder::new().schema({
-          let schema = {
-            let settings = schemars::gen::SchemaSettings::openapi3();
-            let mut gen = settings.into_generator();
-            let schema = <Self as schemars::JsonSchema>::json_schema(&mut gen);
-            netwopenapi::json_schema_to_schemas(schema.into_object())
-          };
-          schema
-        }).build(),
-      ))
+      quote! {
+        content = {
+          let settings = schemars::gen::SchemaSettings::openapi3();
+          let mut gen = settings.into_generator();
+          let schema = <Self as netwopenapi::JsonSchema>::json_schema(&mut gen);
+          std::collections::BTreeMap::from_iter(vec![(
+            "application/json".to_string(),
+            netwopenapi::reference_or::ReferenceOr::Object(netwopenapi::paths::MediaType {
+              schema: Some(netwopenapi::reference_or::ReferenceOr::Object(schema)),
+              ..Default::default()
+            }),
+          )])
+        },
+      }
     } else {
       quote!()
     };
@@ -87,14 +89,18 @@ impl ToTokens for ErrorDefinition {
           let settings = schemars::gen::SchemaSettings::openapi3();
           let mut gen = settings.into_generator();
           let schema = <Self as schemars::JsonSchema>::json_schema(&mut gen);
-          (schema_name, netwopenapi::json_schema_to_schemas(schema.into_object()))
+          (schema_name, schema)
         }
       }
     } else {
       quote!(None)
     };
     tokens.extend(quote! {
-      ((#code.to_string(), utoipa::openapi::ResponseBuilder::new()#content.description(#description).build()), #schema)
+      ((#code.to_string(), netwopenapi::paths::Response {
+        description: #description.to_string(),
+        #content
+        ..Default::default()
+      }), #schema)
     });
   }
 }
