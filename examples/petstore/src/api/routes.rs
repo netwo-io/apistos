@@ -19,10 +19,10 @@ pub(crate) fn routes() -> Scope {
         scope("/{petId}").service(
           resource("")
             .route(get().to(get_pet))
-          .route(post().to(update_pet_with_form))
-          .route(delete().to(delete_pet)),
+            .route(post().to(update_pet_with_form))
+            .route(delete().to(delete_pet)),
         )
-       //.service(resource("/uploadImage").route(post().to(test))),
+        //.service(resource("/uploadImage").route(post().to(test))),
       ),
   )
   // .service(

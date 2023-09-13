@@ -4,6 +4,7 @@ use netwopenapi_models::paths::{Parameter, ParameterDefinition, ParameterIn, Req
 use netwopenapi_models::reference_or::ReferenceOr;
 use netwopenapi_models::ObjectValidation;
 use netwopenapi_models::Schema;
+use schemars::schema::{InstanceType, SingleOrVec};
 
 impl<T> ApiComponent for Path<T>
 where
@@ -97,8 +98,17 @@ fn parameters_for_schema(schema: ReferenceOr<Schema>, required: bool) -> Vec<Par
       if let Some(obj) = sch.object.clone() {
         parameters.append(&mut gen_path_parameter_for_object(&schema, obj, required));
       }
-      if let Some(_) = sch.instance_type.clone() {
-        parameters.push(gen_simple_path_parameter(schema.into(), required));
+      if let Some(instance_type) = sch.instance_type.clone() {
+        let processable_instance_type = match instance_type {
+          SingleOrVec::Single(it) => processable_instance_type(*it),
+          SingleOrVec::Vec(its) => its
+            .first()
+            .map(|it| processable_instance_type(it.clone()))
+            .unwrap_or_default(),
+        };
+        if processable_instance_type {
+          parameters.push(gen_simple_path_parameter(schema.into(), required));
+        }
       }
     }
   }
@@ -132,5 +142,16 @@ fn gen_simple_path_parameter(component: ReferenceOr<Schema>, required: bool) -> 
     definition: Some(ParameterDefinition::Schema(component)),
     required: Some(required),
     ..Default::default()
+  }
+}
+
+fn processable_instance_type(instance_type: InstanceType) -> bool {
+  match instance_type {
+    InstanceType::Null | InstanceType::Object => false,
+    InstanceType::Boolean
+    | InstanceType::Array
+    | InstanceType::Number
+    | InstanceType::String
+    | InstanceType::Integer => true,
   }
 }
