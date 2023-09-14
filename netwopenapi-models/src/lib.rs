@@ -1,3 +1,7 @@
+//! [OAS 3.0][OASv3.md] models over [schemars](https://github.com/GREsau/schemars)'s [`Schema`](https://docs.rs/schemars/latest/schemars/schema/enum.Schema.html).
+//!
+//! These models are not linked to any web framework.
+
 use crate::components::Components;
 use crate::info::Info;
 use crate::paths::{ExternalDocumentation, Paths};
@@ -57,4 +61,88 @@ pub struct OpenApi {
   /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions).
   #[serde(flatten, skip_serializing_if = "IndexMap::is_empty")]
   pub extensions: IndexMap<String, Value>,
+}
+
+#[cfg(test)]
+mod tests {
+  use crate::info::Info;
+  use crate::paths::{Operation, OperationType, PathItem, Paths, Response, Responses};
+  use crate::reference_or::ReferenceOr;
+  use crate::server::Server;
+  use crate::tag::Tag;
+  use crate::{OpenApi, OpenApiVersion};
+  use indexmap::IndexMap;
+  use std::collections::BTreeMap;
+
+  #[test]
+  fn empty_openapi_properly_generated() {
+    let oas = OpenApi {
+      openapi: OpenApiVersion::OAS3_0,
+      info: Info {
+        title: "Test".to_string(),
+        description: Some("Description".to_string()),
+        version: "1.0.0".to_string(),
+        ..Default::default()
+      },
+      paths: Paths::default(),
+      ..Default::default()
+    };
+
+    let oas_json = serde_json::to_string_pretty(&oas).expect("Error generating json for oas");
+    assert_eq!(oas_json, include_str!("../test-assets/empty-openapi.json"));
+  }
+
+  #[test]
+  fn openapi_properly_generated() {
+    let oas = OpenApi {
+      openapi: OpenApiVersion::OAS3_0,
+      info: Info {
+        title: "Test".to_string(),
+        description: Some("Description".to_string()),
+        version: "1.0.0".to_string(),
+        ..Default::default()
+      },
+      servers: vec![Server {
+        url: "https://google.com".to_string(),
+        description: Some("A big search server".to_string()),
+        ..Default::default()
+      }],
+      paths: Paths {
+        paths: IndexMap::from_iter(vec![(
+          "/search".to_string(),
+          PathItem {
+            operations: IndexMap::from_iter(vec![(
+              OperationType::Get,
+              Operation {
+                tags: vec!["Search".to_string()],
+                summary: Some("I don't know what this do".to_string()),
+                operation_id: Some("get_search".to_string()),
+                responses: Responses {
+                  responses: BTreeMap::from_iter(vec![(
+                    "200".to_string(),
+                    ReferenceOr::Object(Response {
+                      description: "A search thingy".to_string(),
+                      ..Default::default()
+                    }),
+                  )]),
+                  ..Default::default()
+                },
+                ..Default::default()
+              },
+            )]),
+            ..Default::default()
+          },
+        )]),
+        ..Default::default()
+      },
+      tags: vec![Tag {
+        name: "Search".to_string(),
+        ..Default::default()
+      }],
+      ..Default::default()
+    };
+
+    let oas_json = serde_json::to_string_pretty(&oas).expect("Error generating json for oas");
+    assert_eq!(oas_json, include_str!("../test-assets/openapi.json"));
+  }
 }

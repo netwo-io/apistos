@@ -1,0 +1,35 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Test",
+    "description": "Description",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://google.com",
+      "description": "A big search server"
+    }
+  ],
+  "paths": {
+    "/search": {
+      "get": {
+        "tags": [
+          "Search"
+        ],
+        "summary": "I don't know what this do",
+        "operationId": "get_search",
+        "responses": {
+          "200": {
+            "description": "A search thingy"
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Search"
+    }
+  ]
+}
