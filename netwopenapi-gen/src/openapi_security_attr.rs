@@ -83,6 +83,7 @@ impl ToTokens for SecurityScheme {
 #[derive(FromMeta, Clone)]
 #[darling(rename_all = "snake_case")]
 pub(crate) enum SecurityType {
+  #[darling(rename = "oauth2")]
   OAuth2(OAuth2),
   ApiKey(ApiKey),
   Http(Http),

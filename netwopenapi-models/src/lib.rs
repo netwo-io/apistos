@@ -1,4 +1,4 @@
-//! [OAS 3.0][OASv3.md] models over [schemars](https://github.com/GREsau/schemars)'s [`Schema`](https://docs.rs/schemars/latest/schemars/schema/enum.Schema.html).
+//! [OAS 3.0](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md) models over [schemars](https://github.com/GREsau/schemars)'s [`Schema`](https://docs.rs/schemars/latest/schemars/schema/enum.Schema.html).
 //!
 //! These models are not linked to any web framework.
 
