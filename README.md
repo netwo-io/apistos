@@ -22,6 +22,7 @@ An OpenAPI documentation tool exposing [OAS 3.0][OASv3.md] models as well as an 
 - [Installation](#installation)
 - [Usage example](#usage-example)
 - [Feature flags](#feature-flags)
+- [Alternatives](#alternatives)
 - [About us](#about-us)
 
 ### Installation
@@ -118,14 +119,22 @@ For a complete example, see [the sample petstore](https://github.com/netwo-io/ne
 
 ### Feature flags
 
-| name           | description                                                              | extra dependencies                                             |
-|----------------|--------------------------------------------------------------------------|----------------------------------------------------------------|
-| `chrono`       | Enables documenting types from `chrono`                                  | [`chrono`](https://crates.io/crates/chrono)                    |
-| `multipart`    | Enables documenting types from `actix-multipart`                         | [`actix-multipart`](https://crates.io/crates/actix-multipart)  |
-| `rust_decimal` | Enables documenting types from `rust_decimal`                            | [`rust_decimal`](https://crates.io/crates/rust-decimal) =      |
-| `uuid`         | Enables documenting types from `uuid`                                    | [`uuid`](https://crates.io/crates/uuid)                        |
-| `url`          | Enables documenting types from `url`                                     | [`url`](https://crates.io/crates/url)                          |
-| `extras`       | Enables `chrono`, `multipart`, `rust_decimal`, `uuid` and `url` features | All from previous features                                     |
+| name           | description                                                              | extra dependencies                                            |
+|----------------|--------------------------------------------------------------------------|---------------------------------------------------------------|
+| `chrono`       | Enables documenting types from `chrono`                                  | [`chrono`](https://crates.io/crates/chrono)                   |
+| `multipart`    | Enables documenting types from `actix-multipart`                         | [`actix-multipart`](https://crates.io/crates/actix-multipart) |
+| `rust_decimal` | Enables documenting types from `rust_decimal`                            | [`rust_decimal`](https://crates.io/crates/rust-decimal)       |
+| `uuid`         | Enables documenting types from `uuid`                                    | [`uuid`](https://crates.io/crates/uuid)                       |
+| `url`          | Enables documenting types from `url`                                     | [`url`](https://crates.io/crates/url)                         |
+| `extras`       | Enables `chrono`, `multipart`, `rust_decimal`, `uuid` and `url` features | All from previous features                                    |
+
+### Alternatives
+
+| Crate                                             | Key differences                                                                                                                                                                                                                                                                                                                               |
+|---------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [`paperclip`](https://crates.io/crates/paperclip) | Paperclip is similar to this project but generate Swagger v2 documentation. Paperclip also provide a tool to generate rust code from a Swagger v2 document.                                                                                                                                                                                   |
+| [`utoipa`](https://crates.io/crates/utoipa)       | Utoipa-actix integration rely on [actix web macros](https://docs.rs/actix-web-macros/latest/actix_web_macros/) for routing definition. At first, we planned on relying on utoipa for OAS types and schema derivation but for now [utoipa doesn't support generic struct the way we intended to](https://github.com/juhaku/utoipa/issues/703). |
+| [`okapi`](https://crates.io/crates/okapi)         | Pretty similar, based on schemars as well (and maintained by the founder of schemars) but not integrated with actix.                                                                                                                                                                                                                          |
 
 ### About us
 
