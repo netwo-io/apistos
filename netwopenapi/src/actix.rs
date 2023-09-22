@@ -84,6 +84,7 @@ impl<T: Responder> Responder for ResponderWrapper<T> {
   }
 }
 
+/// Empty struct to represent a 204 empty response
 #[derive(Debug)]
 pub struct NoContent;
 
@@ -118,6 +119,7 @@ impl ApiComponent for NoContent {
   }
 }
 
+/// Empty struct to represent a 202 with a body
 pub struct AcceptedJson<T: Serialize + ApiComponent>(pub T);
 
 impl<T> Responder for AcceptedJson<T>
@@ -172,6 +174,7 @@ where
   }
 }
 
+/// Empty struct to represent a 201 with a body
 pub struct CreatedJson<T: Serialize + ApiComponent>(pub T);
 
 impl<T> Responder for CreatedJson<T>
