@@ -1,7 +1,7 @@
 use proc_macro2::TokenStream;
 use quote::{quote, ToTokens};
 
-pub struct Schemas;
+pub(crate) struct Schemas;
 
 impl ToTokens for Schemas {
   fn to_tokens(&self, tokens: &mut TokenStream) {

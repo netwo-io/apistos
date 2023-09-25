@@ -1,3 +1,4 @@
+use netwopenapi_core::ApiComponent;
 use netwopenapi_gen::ApiComponent;
 use schemars::JsonSchema;
 
@@ -8,5 +9,5 @@ fn api_component_derive() {
     name: String,
   }
 
-  let name_schema = <Name as ApiComponent>::
+  let name_schema = <Name as ApiComponent>::schema();
 }

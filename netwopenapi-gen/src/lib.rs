@@ -639,7 +639,7 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
   };
 
   let (responder_wrapper, generated_item_ast) =
-    gen_item_ast(default_span, item_ast, &openapi_struct, &ty_generics, generics_call);
+    gen_item_ast(default_span, item_ast, &openapi_struct, &ty_generics, &generics_call);
   let generated_item_fn = match syn::parse::<ItemFn>(generated_item_ast.clone().into()) {
     Ok(v) => v,
     Err(e) => abort!(e.span(), format!("{e}")),
@@ -648,11 +648,11 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
     &generated_item_fn,
     operation_attribute,
     &openapi_struct,
-    openapi_struct_def,
-    impl_generics,
+    &openapi_struct_def,
+    &impl_generics,
     &ty_generics,
     where_clause,
-    responder_wrapper,
+    &responder_wrapper,
   );
 
   quote!(

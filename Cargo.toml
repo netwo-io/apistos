@@ -4,6 +4,7 @@ members = [
     "netwopenapi",
     "netwopenapi-core",
     "netwopenapi-gen",
+    "netwopenapi-gen-test",
     "netwopenapi-models"
 ]
 

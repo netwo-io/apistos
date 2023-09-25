@@ -14,18 +14,18 @@ pub(crate) fn parse_openapi_operation_attrs(attrs: &[NestedMeta]) -> OperationAt
 #[derive(FromMeta, Clone)]
 struct OperationAttrInternal {
   #[darling(default)]
-  pub skip: bool,
+  skip: bool,
   #[darling(default)]
-  pub deprecated: bool,
-  pub operation_id: Option<Expr>,
-  pub summary: Option<String>,
-  pub description: Option<String>,
+  deprecated: bool,
+  operation_id: Option<Expr>,
+  summary: Option<String>,
+  description: Option<String>,
   #[darling(multiple, rename = "tag")]
-  pub tags: Vec<String>,
+  tags: Vec<String>,
   #[darling(multiple, rename = "security_scope")]
-  pub scopes: Vec<SecurityScopes>,
+  scopes: Vec<SecurityScopes>,
   #[darling(multiple, rename = "error_code")]
-  pub error_codes: Vec<u16>,
+  error_codes: Vec<u16>,
 }
 
 #[derive(FromMeta, Clone)]
@@ -36,14 +36,14 @@ struct SecurityScopes {
 }
 
 pub(crate) struct OperationAttr {
-  pub skip: bool,
-  pub deprecated: bool,
-  pub operation_id: Option<Expr>,
-  pub summary: Option<String>,
-  pub description: Option<String>,
-  pub tags: Vec<String>,
-  pub scopes: BTreeMap<String, Vec<String>>,
-  pub error_codes: Vec<u16>,
+  pub(crate) skip: bool,
+  pub(crate) deprecated: bool,
+  pub(crate) operation_id: Option<Expr>,
+  pub(crate) summary: Option<String>,
+  pub(crate) description: Option<String>,
+  pub(crate) tags: Vec<String>,
+  pub(crate) scopes: BTreeMap<String, Vec<String>>,
+  pub(crate) error_codes: Vec<u16>,
 }
 
 impl From<OperationAttrInternal> for OperationAttr {
@@ -53,9 +53,13 @@ impl From<OperationAttrInternal> for OperationAttr {
       deprecated: value.deprecated,
       operation_id: value.operation_id,
       summary: value.summary,
-      description: value.description.map(|d| d.replace("\n", "\\\n")),
+      description: value.description.map(|d| d.replace('\n', "\\\n")),
       tags: value.tags,
-      scopes: BTreeMap::from_iter(value.scopes.into_iter().map(|s| (s.name, s.scopes)).collect::<Vec<_>>()),
+      scopes: value
+        .scopes
+        .into_iter()
+        .map(|s| (s.name, s.scopes))
+        .collect::<BTreeMap<_, _>>(),
       error_codes: value.error_codes,
     }
   }

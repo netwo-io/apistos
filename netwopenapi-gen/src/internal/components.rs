@@ -2,10 +2,10 @@ use proc_macro2::TokenStream;
 use quote::{quote, ToTokens};
 use syn::Type;
 
-pub struct Components<'a> {
-  pub args: &'a [Type],
-  pub responder_wrapper: &'a TokenStream,
-  pub error_codes: &'a [u16],
+pub(crate) struct Components<'a> {
+  pub(crate) args: &'a [Type],
+  pub(crate) responder_wrapper: &'a TokenStream,
+  pub(crate) error_codes: &'a [u16],
 }
 
 impl<'a> ToTokens for Components<'a> {

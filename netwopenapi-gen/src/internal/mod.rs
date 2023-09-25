@@ -2,7 +2,7 @@ use crate::internal::components::Components;
 use crate::internal::operation::Operation;
 use crate::operation_attr::OperationAttr;
 use proc_macro2::{Span, TokenStream as TokenStream2};
-use proc_macro_error::emit_error;
+use proc_macro_error::{abort, emit_error};
 use quote::quote;
 use syn::punctuated::Punctuated;
 use syn::token::Comma;
@@ -18,15 +18,16 @@ pub(crate) mod schemas;
 pub(crate) mod security;
 pub(crate) mod utils;
 
+#[allow(clippy::too_many_arguments)]
 pub(crate) fn gen_open_api_impl(
   item_ast: &ItemFn,
   operation_attribute: OperationAttr,
   openapi_struct: &Ident,
-  openapi_struct_def: TokenStream2,
-  impl_generics: ImplGenerics,
+  openapi_struct_def: &TokenStream2,
+  impl_generics: &ImplGenerics,
   ty_generics: &TypeGenerics,
   where_clause: Option<&WhereClause>,
-  responder_wrapper: TokenStream2,
+  responder_wrapper: &TokenStream2,
 ) -> TokenStream2 {
   let path_item_def_impl = if operation_attribute.skip {
     quote!(
@@ -52,7 +53,6 @@ pub(crate) fn gen_open_api_impl(
         None => false,
         Some(attr) => attr == "doc",
       })
-      .into_iter()
       .filter_map(|attr| match &attr.meta {
         Meta::NameValue(nv) => {
           if let Expr::Lit(ref doc_comment) = nv.value {
@@ -77,19 +77,16 @@ pub(crate) fn gen_open_api_impl(
 
     let operation = Operation {
       args: &args,
-      responder_wrapper: &responder_wrapper,
-      fn_name: &*item_ast.sig.ident.to_string(),
+      responder_wrapper,
+      fn_name: &item_ast.sig.ident.to_string(),
       operation_id: operation_attribute.operation_id,
       deprecated: Some(operation_attribute.deprecated || deprecated.unwrap_or_default()),
-      summary: operation_attribute
-        .summary
-        .as_ref()
-        .or_else(|| doc_comments.iter().next()),
-      description: operation_attribute.description.as_deref().or_else(|| {
+      summary: operation_attribute.summary.as_ref().or_else(|| doc_comments.first()),
+      description: operation_attribute.description.as_deref().or({
         if description.is_empty() {
           None
         } else {
-          Some(&description)
+          Some(description)
         }
       }),
       tags: &operation_attribute.tags,
@@ -98,7 +95,7 @@ pub(crate) fn gen_open_api_impl(
     };
     let components = Components {
       args: &args,
-      responder_wrapper: &responder_wrapper,
+      responder_wrapper,
       error_codes: &operation_attribute.error_codes,
     };
 
@@ -116,7 +113,7 @@ pub(crate) fn gen_open_api_impl(
     #[doc(hidden)]
     #openapi_struct_def
     #[automatically_derived]
-    impl #impl_generics netwopenapi::path_item_definition::PathItemDefinition for #openapi_struct #ty_generics #where_clause {
+    impl #impl_generics netwopenapi::PathItemDefinition for #openapi_struct #ty_generics #where_clause {
       #path_item_def_impl
     }
   }
@@ -127,14 +124,14 @@ pub(crate) fn gen_item_ast(
   mut item_ast: ItemFn,
   openapi_struct: &Ident,
   ty_generics: &TypeGenerics,
-  generics_call: TokenStream2,
+  generics_call: &TokenStream2,
 ) -> (proc_macro2::TokenStream, proc_macro2::TokenStream) {
   // Remove async prefix if any. This macro generate an impl Future
   if item_ast.sig.asyncness.is_some() {
     item_ast.sig.asyncness = None;
   } else {
     emit_error!(default_span, "Operation must be an async function.");
-    return (quote!().into(), quote!().into());
+    return (quote!(), quote!());
   }
 
   let mut is_impl_trait = false;
@@ -144,7 +141,7 @@ pub(crate) fn gen_item_ast(
   match &mut item_ast.sig.output {
     ReturnType::Default => {}
     ReturnType::Type(_, _type) => {
-      if let Type::ImplTrait(_) = (&**_type).clone() {
+      if let Type::ImplTrait(_) = (**_type).clone() {
         let string_type = quote!(#_type).to_string();
         is_impl_trait = true;
 
@@ -152,15 +149,20 @@ pub(crate) fn gen_item_ast(
           is_responder = true;
 
           *_type = Box::new(
-            syn::parse2(quote!(
+            match syn::parse2(quote!(
               impl std::future::Future<Output=netwopenapi::actix::ResponseWrapper<#_type>>
-            ))
-            .expect("parsing impl trait"),
+            )) {
+              Ok(parsed) => parsed,
+              Err(e) => abort!("parsing impl trait: {:?}", e),
+            },
           );
         }
       } else {
         // Any handler that's not returning an impl trait should return an `impl Future`
-        *_type = Box::new(syn::parse2(quote!(impl std::future::Future<Output=#_type>)).expect("parsing impl trait"));
+        *_type = Box::new(match syn::parse2(quote!(impl std::future::Future<Output=#_type>)) {
+          Ok(parsed) => parsed,
+          Err(e) => abort!("parsing impl trait: {:?}", e),
+        });
       }
 
       // should be an impl trait here for sure because if it was not initially
@@ -169,10 +171,10 @@ pub(crate) fn gen_item_ast(
           dyn_token: Some(Token![dyn](default_span)),
           bounds: imp.bounds.clone(),
         };
-        *_type = Box::new(
-          syn::parse2(quote!(#_type + netwopenapi::path_item_definition::PathItemDefinition))
-            .expect("parsing impl trait"),
-        );
+        *_type = Box::new(match syn::parse2(quote!(#_type + netwopenapi::PathItemDefinition)) {
+          Ok(parsed) => parsed,
+          Err(e) => abort!("parsing impl trait: {:?}", e),
+        });
 
         if !is_responder {
           responder_wrapper =
@@ -192,7 +194,7 @@ pub(crate) fn gen_item_ast(
   };
 
   item_ast.block = Box::new(
-    syn::parse2(quote!(
+    match syn::parse2(quote!(
         {
             let inner = #inner_handler;
             netwopenapi::actix::ResponseWrapper {
@@ -200,8 +202,10 @@ pub(crate) fn gen_item_ast(
                 path_item: #openapi_struct #generics_call,
             }
         }
-    ))
-    .expect("parsing wrapped block"),
+    )) {
+      Ok(parsed) => parsed,
+      Err(e) => abort!("parsing wrapped block: {:?}", e),
+    },
   );
 
   let responder_wrapper = if is_responder {

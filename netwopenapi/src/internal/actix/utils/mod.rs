@@ -5,9 +5,10 @@ use regex::{Captures, Regex};
 use std::borrow::Cow;
 
 /// Regex that can be used for fetching templated path parameters.
+#[allow(clippy::expect_used)]
 static PATH_TEMPLATE_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"\{(.*?)\}").expect("path template regex"));
 
-pub trait OperationUpdater {
+pub(crate) trait OperationUpdater {
   fn update_path_parameter_name_from_path(&mut self, path: &str);
 }
 

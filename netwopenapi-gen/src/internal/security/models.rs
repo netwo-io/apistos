@@ -4,10 +4,10 @@ use quote::{quote, ToTokens};
 
 #[derive(FromMeta, Clone)]
 #[darling(rename_all = "snake_case")]
-pub struct ApiKey {
-  pub name: String,
+pub(crate) struct ApiKey {
+  pub(crate) name: String,
   #[darling(rename = "api_key_in")]
-  pub _in: ApiKeyIn,
+  pub(crate) _in: ApiKeyIn,
 }
 
 impl ToTokens for ApiKey {
@@ -25,7 +25,7 @@ impl ToTokens for ApiKey {
 
 #[derive(FromMeta, Clone)]
 #[darling(rename_all = "snake_case")]
-pub enum ApiKeyIn {
+pub(crate) enum ApiKeyIn {
   Query,
   Header,
   Cookie,
@@ -43,9 +43,9 @@ impl ToTokens for ApiKeyIn {
 }
 
 #[derive(FromMeta, Clone)]
-pub struct Http {
-  pub scheme: String,
-  pub bearer_format: Option<String>,
+pub(crate) struct Http {
+  pub(crate) scheme: String,
+  pub(crate) bearer_format: Option<String>,
 }
 
 impl ToTokens for Http {
@@ -66,8 +66,8 @@ impl ToTokens for Http {
 }
 
 #[derive(FromMeta, Clone)]
-pub struct OpenIdConnect {
-  pub open_id_connect_url: String,
+pub(crate) struct OpenIdConnect {
+  pub(crate) open_id_connect_url: String,
 }
 
 impl ToTokens for OpenIdConnect {
@@ -82,8 +82,8 @@ impl ToTokens for OpenIdConnect {
 }
 
 #[derive(FromMeta, Clone)]
-pub struct OAuth2 {
-  pub flows: OauthFlows,
+pub(crate) struct OAuth2 {
+  pub(crate) flows: OauthFlows,
 }
 
 impl ToTokens for OAuth2 {
@@ -99,11 +99,11 @@ impl ToTokens for OAuth2 {
 
 #[derive(FromMeta, Clone)]
 #[darling(rename_all = "snake_case")]
-pub struct OauthFlows {
-  pub implicit: Option<OauthImplicit>,
-  pub password: Option<OauthToken>,
-  pub client_credentials: Option<OauthToken>,
-  pub authorization_code: Option<OauthToken>,
+pub(crate) struct OauthFlows {
+  pub(crate) implicit: Option<OauthImplicit>,
+  pub(crate) password: Option<OauthToken>,
+  pub(crate) client_credentials: Option<OauthToken>,
+  pub(crate) authorization_code: Option<OauthToken>,
 }
 
 impl ToTokens for OauthFlows {
@@ -142,11 +142,11 @@ impl ToTokens for OauthFlows {
 
 #[derive(FromMeta, Clone)]
 #[darling(rename_all = "snake_case")]
-pub struct OauthImplicit {
-  pub authorization_url: String,
-  pub refresh_url: Option<String>,
+pub(crate) struct OauthImplicit {
+  pub(crate) authorization_url: String,
+  pub(crate) refresh_url: Option<String>,
   #[darling(multiple)]
-  pub scopes: Vec<Scope>,
+  pub(crate) scopes: Vec<Scope>,
 }
 
 impl ToTokens for OauthImplicit {
@@ -178,11 +178,11 @@ impl ToTokens for OauthImplicit {
 }
 
 #[derive(FromMeta, Clone)]
-pub struct OauthToken {
-  pub token_url: String,
-  pub refresh_url: Option<String>,
+pub(crate) struct OauthToken {
+  pub(crate) token_url: String,
+  pub(crate) refresh_url: Option<String>,
   #[darling(multiple)]
-  pub scopes: Vec<Scope>,
+  pub(crate) scopes: Vec<Scope>,
 }
 
 impl ToTokens for OauthToken {
@@ -214,9 +214,9 @@ impl ToTokens for OauthToken {
 }
 
 #[derive(FromMeta, Clone)]
-pub struct Scope {
-  pub scope: String,
-  pub description: String,
+pub(crate) struct Scope {
+  pub(crate) scope: String,
+  pub(crate) description: String,
 }
 
 impl ToTokens for Scope {

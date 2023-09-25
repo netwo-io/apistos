@@ -1,4 +1,3 @@
-use actix_web::error::Error;
 use netwopenapi_models::paths::Response;
 use netwopenapi_models::reference_or::ReferenceOr;
 use netwopenapi_models::Schema;
@@ -9,7 +8,8 @@ pub trait ApiErrorComponent {
   fn error_responses() -> Vec<(String, Response)>;
 }
 
-impl ApiErrorComponent for Error {
+#[cfg(feature = "actix")]
+impl ApiErrorComponent for actix_web::error::Error {
   fn schemas_by_status_code() -> BTreeMap<String, (String, ReferenceOr<Schema>)> {
     BTreeMap::default()
   }

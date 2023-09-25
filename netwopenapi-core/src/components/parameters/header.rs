@@ -47,7 +47,7 @@ where
       style: Some(ParameterStyle::Simple),
       definition: Self::schema()
         .map(|(_, schema)| schema)
-        .or_else(|| Self::raw_schema())
+        .or_else(Self::raw_schema)
         .map(ParameterDefinition::Schema),
       ..Default::default()
     }]
@@ -85,7 +85,7 @@ where
       style: Some(ParameterStyle::Simple),
       definition: Self::schema()
         .map(|(_, schema)| schema)
-        .or_else(|| Self::raw_schema())
+        .or_else(Self::raw_schema)
         .map(ParameterDefinition::Schema),
       ..Default::default()
     }]

@@ -34,18 +34,18 @@ pub(crate) fn parse_openapi_cookie_attrs(
 
 #[derive(FromMeta, Clone)]
 struct OpenapiCookieAttribute {
-  pub name: String,
-  pub description: Option<String>,
-  pub required: Option<bool>,
-  pub deprecated: Option<bool>,
+  name: String,
+  description: Option<String>,
+  required: Option<bool>,
+  deprecated: Option<bool>,
 }
 
 #[derive(Clone)]
 pub(crate) struct OpenapiCookieAttributeExtended {
-  pub name: String,
-  pub description: Option<String>,
-  pub required: Option<bool>,
-  pub deprecated: Option<bool>,
+  pub(crate) name: String,
+  pub(crate) description: Option<String>,
+  pub(crate) required: Option<bool>,
+  pub(crate) deprecated: Option<bool>,
 }
 
 impl ToTokens for OpenapiCookieAttributeExtended {
@@ -78,7 +78,7 @@ impl ToTokens for OpenapiCookieAttributeExtended {
             deprecated: Some(#deprecated),
             definition: <Self as netwopenapi::ApiComponent>::schema()
               .map(|(_, schema)| schema)
-              .or_else(|| Self::raw_schema())
+              .or_else(Self::raw_schema)
               .map(netwopenapi::paths::ParameterDefinition::Schema),
             ..Default::default()
           }

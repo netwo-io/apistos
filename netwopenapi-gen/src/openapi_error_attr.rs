@@ -24,7 +24,7 @@ pub(crate) fn parse_openapi_error_attrs(attrs: &[Attribute]) -> Option<OpenapiEr
 #[derive(FromMeta, Clone)]
 pub(crate) struct OpenapiErrorAttribute {
   #[darling(multiple)]
-  pub status: Vec<ErrorDefinition>,
+  pub(crate) status: Vec<ErrorDefinition>,
 }
 
 impl ToTokens for OpenapiErrorAttribute {
@@ -51,9 +51,9 @@ impl ToTokens for OpenapiErrorAttribute {
 
 #[derive(FromMeta, Clone)]
 pub(crate) struct ErrorDefinition {
-  pub code: u16,
-  pub description: Option<String>,
-  pub with_schema: Option<bool>,
+  pub(crate) code: u16,
+  pub(crate) description: Option<String>,
+  pub(crate) with_schema: Option<bool>,
 }
 
 impl ToTokens for ErrorDefinition {
@@ -63,7 +63,7 @@ impl ToTokens for ErrorDefinition {
       Ok(status_code) => status_code.canonical_reason().unwrap_or_default(),
       Err(e) => abort!(Span::call_site(), format!("{e}")),
     };
-    let description = self.description.as_deref().unwrap_or_else(|| default_description);
+    let description = self.description.as_deref().unwrap_or(default_description);
     let content = if self.with_schema.unwrap_or_default() {
       quote! {
         content = {

@@ -65,6 +65,7 @@ pub struct OpenApi {
 
 #[cfg(test)]
 mod tests {
+  #![allow(clippy::expect_used)]
   use crate::info::Info;
   use crate::paths::{Operation, OperationType, PathItem, Paths, Response, Responses};
   use crate::reference_or::ReferenceOr;

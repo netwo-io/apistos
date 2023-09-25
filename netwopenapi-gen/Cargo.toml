@@ -17,13 +17,10 @@ proc-macro-error = { workspace = true }
 quote = { workspace = true }
 syn = { workspace = true, features = ["full", "extra-traits"] }
 
-schemars = { workspace = true }
-netwopenapi-core = { path = "../netwopenapi-core" }
-
 [dev-dependencies]
 garde = { workspace = true }
+schemars = { workspace = true }
 serde = { workspace = true }
-
 netwopenapi = { path = "../netwopenapi" }
 
 [lib]

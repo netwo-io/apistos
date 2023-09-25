@@ -23,7 +23,7 @@ pub(crate) fn parse_openapi_header_attrs(
     Ok(header_attributes) => {
       let mut header_attribute = header_attributes.first().cloned();
       if let Some(header_attribute) = &mut header_attribute {
-        header_attribute.deprecated = header_attribute.deprecated.or_else(|| deprecated)
+        header_attribute.deprecated = header_attribute.deprecated.or(deprecated)
       }
       header_attribute
     }
@@ -33,10 +33,10 @@ pub(crate) fn parse_openapi_header_attrs(
 
 #[derive(FromMeta, Clone)]
 pub(crate) struct OpenapiHeaderAttribute {
-  pub name: String,
-  pub description: Option<String>,
-  pub required: Option<bool>,
-  pub deprecated: Option<bool>,
+  pub(crate) name: String,
+  pub(crate) description: Option<String>,
+  pub(crate) required: Option<bool>,
+  pub(crate) deprecated: Option<bool>,
 }
 
 impl ToTokens for OpenapiHeaderAttribute {

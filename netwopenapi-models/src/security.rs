@@ -16,7 +16,7 @@ pub struct SecurityRequirement {
   pub requirements: BTreeMap<String, Vec<String>>,
 }
 
-/// Defines a security scheme that can be used by the operations. Supported schemes are HTTP authentication, an API key (either as a header, a cookie parameter or as a query parameter), OAuth2's common flows (implicit, password, client credentials and authorization code) as defined in [RFC6749](https://datatracker.ietf.org/doc/html/rfc6749), and [OpenID Connect Discovery](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-discovery-06).
+/// Defines a security scheme that can be used by the operations. Supported schemes are HTTP authentication, an API key (either as a header, a cookie parameter or as a query parameter), `OAuth2`'s common flows (implicit, password, client credentials and authorization code) as defined in [RFC6749](https://datatracker.ietf.org/doc/html/rfc6749), and [OpenID Connect Discovery](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-discovery-06).
 #[derive(Serialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct SecurityScheme {

@@ -1,4 +1,4 @@
-use crate::internal::components::ApiComponent;
+use crate::ApiComponent;
 use actix_web::web::Json;
 use netwopenapi_models::reference_or::ReferenceOr;
 use netwopenapi_models::Schema;

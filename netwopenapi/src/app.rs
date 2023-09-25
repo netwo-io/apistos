@@ -20,7 +20,7 @@ pub trait OpenApiWrapper<T> {
   fn document(self, spec: Spec) -> Self::Wrapper;
 }
 
-/// Wrapper for [actix_web::App] with openapi specification
+/// Wrapper for [actix_web::App](https://docs.rs/actix-web/latest/actix_web/struct.App.html) with openapi specification
 pub struct App<T> {
   open_api_spec: Arc<RwLock<OpenApi>>,
   inner: Option<actix_web::App<T>>, //an option juste to be able to replace it with a default in memory
@@ -31,8 +31,10 @@ impl<T> OpenApiWrapper<T> for actix_web::App<T> {
   type Wrapper = App<T>;
 
   fn document(self, spec: Spec) -> Self::Wrapper {
-    let mut open_api_spec = OpenApi::default();
-    open_api_spec.info = spec.info;
+    let mut open_api_spec = OpenApi {
+      info: spec.info,
+      ..Default::default()
+    };
     if !spec.tags.is_empty() {
       open_api_spec.tags = spec.tags;
     }
@@ -157,7 +159,8 @@ where
     }
   }
 
-  /// Add a new resource at **openapi_path** to expose the generated openapi schema and return an [actix_web::App]
+  /// Add a new resource at **`openapi_path`** to expose the generated openapi schema and return an [actix_web::App](https://docs.rs/actix-web/latest/actix_web/struct.App.html)
+  #[allow(clippy::unwrap_used, clippy::expect_used)]
   pub fn build(self, openapi_path: &str) -> actix_web::App<T> {
     let open_api_spec = self.open_api_spec.read().unwrap().clone();
     self
@@ -167,12 +170,13 @@ where
   }
 
   /// Updates the underlying spec with definitions and operations from the given definition holder.
+  #[allow(clippy::unwrap_used)]
   fn update_from_def_holder<D: DefinitionHolder>(&mut self, definition_holder: &mut D) {
     let mut open_api_spec = self.open_api_spec.write().unwrap();
     let components = definition_holder.components().into_iter().reduce(|mut acc, component| {
-      acc.schemas.extend(component.schemas.into_iter());
-      acc.responses.extend(component.responses.into_iter());
-      acc.security_schemes.extend(component.security_schemes.into_iter());
+      acc.schemas.extend(component.schemas);
+      acc.responses.extend(component.responses);
+      acc.security_schemes.extend(component.security_schemes);
       acc
     });
     definition_holder.update_path_items(&mut open_api_spec.paths.paths);
@@ -189,11 +193,12 @@ where
     open_api_spec.components = components;
 
     if !self.default_tags.is_empty() {
-      for pi in open_api_spec.paths.paths.values_mut() {
-        for op in pi.operations.values_mut() {
-          op.tags.append(&mut self.default_tags.clone());
-        }
-      }
+      open_api_spec
+        .paths
+        .paths
+        .values_mut()
+        .flat_map(|pi| pi.operations.values_mut())
+        .for_each(|op| op.tags.append(&mut self.default_tags.clone()))
     }
   }
 }
