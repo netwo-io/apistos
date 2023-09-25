@@ -6,7 +6,6 @@ use actix_web::Responder;
 use netwopenapi_models::paths::{MediaType, Parameter, RequestBody, Response, Responses};
 use netwopenapi_models::reference_or::ReferenceOr;
 use netwopenapi_models::security::SecurityScheme;
-use netwopenapi_models::InstanceType;
 use netwopenapi_models::Schema;
 use std::collections::BTreeMap;
 use std::future::Future;
@@ -19,11 +18,6 @@ pub mod json;
 pub mod multipart;
 pub mod parameters;
 pub mod simple;
-
-pub trait TypedSchema {
-  fn schema_type() -> InstanceType;
-  fn format() -> Option<String>;
-}
 
 pub trait ApiComponent {
   fn content_type() -> String {

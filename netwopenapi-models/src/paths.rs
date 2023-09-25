@@ -316,7 +316,7 @@ pub enum ExampleValue {
 #[derive(Serialize, Clone, Debug, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct RequestBody {
-  /// A brief description of the request body. This could contain examples of use. [CommonMark syntax](https://spec.commonmark.org/ MAY be used for rich text representation.
+  /// A brief description of the request body. This could contain examples of use. [CommonMark syntax](https://spec.commonmark.org/) MAY be used for rich text representation.
   #[serde(skip_serializing_if = "Option::is_none")]
   pub description: Option<String>,
   /// The content of the request body. The key is a media type or [media type range](https://datatracker.ietf.org/doc/html/rfc7231#appendix-D) and the value describes it. For requests that match multiple keys, only the most specific key is applicable. e.g. text/plain overrides text/*

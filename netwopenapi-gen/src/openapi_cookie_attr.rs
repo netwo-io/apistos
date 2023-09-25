@@ -76,7 +76,7 @@ impl ToTokens for OpenapiCookieAttributeExtended {
             _in: netwopenapi::paths::ParameterIn::Cookie,
             required: Some(#required),
             deprecated: Some(#deprecated),
-            definition: <Self as ApiComponent>::schema()
+            definition: <Self as netwopenapi::ApiComponent>::schema()
               .map(|(_, schema)| schema)
               .or_else(|| Self::raw_schema())
               .map(netwopenapi::paths::ParameterDefinition::Schema),

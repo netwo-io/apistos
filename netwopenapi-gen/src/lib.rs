@@ -29,9 +29,9 @@ const OPENAPI_STRUCT_PREFIX: &str = "__openapi_";
 
 /// Generate a custom OpenAPI type.
 ///
-/// This `#[derive]` macro should be used in combinaison with [TypedSchema][TypedSchema].
+/// This `#[derive]` macro should be used in combinaison with [TypedSchema](trait.TypedSchema.html).
 ///
-/// When deriving [ApiType], [ApiComponent] and [JsonSchema] are automatically implemented and thus
+/// When deriving [ApiType], [ApiComponent] and [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html) are automatically implemented and thus
 /// should not be derived.
 ///
 /// ```rust
@@ -64,7 +64,7 @@ pub fn derive_api_type(input: TokenStream) -> TokenStream {
 
   let (_, ty_generics, where_clause) = generics.split_for_impl();
   let component_name = quote!(#ident).to_string();
-  let res = quote!(
+  quote!(
     #[automatically_derived]
     impl #generics schemars::JsonSchema for #ident #ty_generics #where_clause {
        fn is_referenceable() -> bool {
@@ -102,30 +102,30 @@ pub fn derive_api_type(input: TokenStream) -> TokenStream {
         ))
       }
     }
-  );
-  // eprintln!("{:#}", res);
-  res.into()
+  )
+  .into()
 }
 
 /// Generate a reusable OpenAPI schema.
 ///
-/// This `#[derive]` macro should be used in combinaison with [ApiOperation][api_operation].
+/// This `#[derive]` macro should be used in combinaison with [api_operation](attr.api_operation.html).
 ///
-/// This macro require your type to derive [JsonSchema].
+/// This macro require your type to derive [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
 ///
 /// ```rust
 /// use netwopenapi::ApiComponent;
 /// use schemars::JsonSchema;
+/// use garde::Validate;
 ///
-/// #[derive(Debug, Clone, JsonSchema, ApiComponent)]
+/// #[derive(Debug, Clone, JsonSchema, ApiComponent, Validate)]
 /// pub(crate) struct QueryTag {
-///   #[garde(len > 1)]
-///   #[schemars(min = 2)]
+///   #[garde(length(min = 2))]
+///   #[schemars(length(min = 2))]
 ///   pub(crate) tags: Vec<String>,
 /// }
 /// ```
 ///
-/// Because this macro require [JsonSchema], all attributes supported by [JsonSchema] are forward to
+/// Because this macro require [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html), all attributes supported by [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html) are forward to
 /// this implementation.
 #[proc_macro_error]
 #[proc_macro_derive(ApiComponent)]
@@ -141,19 +141,18 @@ pub fn derive_api_component(input: TokenStream) -> TokenStream {
 
   let (_, ty_generics, where_clause) = generics.split_for_impl();
   let schema_impl = Schemas;
-  let res = quote!(
+  quote!(
     #[automatically_derived]
     impl #generics netwopenapi::ApiComponent for #ident #ty_generics #where_clause {
       #schema_impl
     }
-  );
-  // eprintln!("{:#}", res);
-  res.into()
+  )
+  .into()
 }
 
 /// Generate a reusable OpenAPI security scheme.
 ///
-/// This `#[derive]` macro should be used in combinaison with [ApiOperation][api_operation].
+/// This `#[derive]` macro should be used in combinaison with [api_operation](attr.api_operation.html).
 /// The macro require one and only one `openapi_security`.
 ///
 /// ```rust
@@ -243,7 +242,7 @@ pub fn derive_api_security(input: TokenStream) -> TokenStream {
   let security_name = &openapi_security_attributes.name;
 
   let (_, ty_generics, where_clause) = generics.split_for_impl();
-  let res = quote!(
+  quote!(
     #[automatically_derived]
     impl #generics netwopenapi::ApiComponent for #ident #ty_generics #where_clause {
       fn child_schemas() -> Vec<(String, netwopenapi::reference_or::ReferenceOr<netwopenapi::Schema>)> {
@@ -262,16 +261,16 @@ pub fn derive_api_security(input: TokenStream) -> TokenStream {
         Some(#security_name.to_string())
       }
     }
-  );
-  res.into()
+  )
+  .into()
 }
 
 /// Generate a reusable OpenAPI header schema.
 ///
-/// This `#[derive]` macro should be used in combinaison with [ApiOperation][api_operation].
+/// This `#[derive]` macro should be used in combinaison with [api_operation](attr.api_operation.html).
 /// The macro require one and only one `openapi_header`.
 ///
-/// This macro require your type to derive [JsonSchema].
+/// This macro require your type to derive [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
 ///
 /// ```rust
 /// use netwopenapi::ApiHeader;
@@ -292,7 +291,7 @@ pub fn derive_api_security(input: TokenStream) -> TokenStream {
 /// - `required = false` an optional parameter, default value is false
 /// - `deprecated = false` an optional parameter, default value is false
 ///
-/// Because this macro require [JsonSchema], all attributes supported by [JsonSchema] are forward to
+/// Because this macro require [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html), all attributes supported by [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html) are forward to
 /// this implementation.
 #[proc_macro_error]
 #[proc_macro_derive(ApiHeader, attributes(openapi_header))]
@@ -313,7 +312,7 @@ pub fn derive_api_header(input: TokenStream) -> TokenStream {
 
   let (_, ty_generics, where_clause) = generics.split_for_impl();
   let schema_impl = Schemas;
-  let res = quote!(
+  quote!(
     #[automatically_derived]
     impl #generics netwopenapi::ApiComponent for #ident #ty_generics #where_clause {
       #schema_impl
@@ -323,17 +322,16 @@ pub fn derive_api_header(input: TokenStream) -> TokenStream {
     impl #generics netwopenapi::ApiHeader for #ident #ty_generics #where_clause {
       #openapi_header_attributes
     }
-  );
-  // eprintln!("{:#}", res);
-  res.into()
+  )
+  .into()
 }
 
 /// Generate a reusable OpenAPI parameter schema in cookie.
 ///
-/// This `#[derive]` macro should be used in combinaison with [ApiOperation][api_operation].
+/// This `#[derive]` macro should be used in combinaison with [api_operation](attr.api_operation.html).
 /// The macro require one and only one `openapi_cookie`.
 ///
-/// This macro require your type to derive [JsonSchema].
+/// This macro require your type to derive [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
 ///
 /// ```rust
 /// use netwopenapi::ApiCookie;
@@ -354,7 +352,7 @@ pub fn derive_api_header(input: TokenStream) -> TokenStream {
 /// - `required = false` an optional parameter, default value is false
 /// - `deprecated = false` an optional parameter, default value is false
 ///
-/// Because this macro require [JsonSchema], all attributes supported by [JsonSchema] are forward to
+/// Because this macro require [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html), all attributes supported by [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html) are forward to
 /// this implementation.
 #[proc_macro_error]
 #[proc_macro_derive(ApiCookie, attributes(openapi_cookie))]
@@ -374,19 +372,18 @@ pub fn derive_api_cookie(input: TokenStream) -> TokenStream {
     .expect_or_abort("expected #[openapi_cookie(...)] attribute to be present when used with ApiCookie derive trait");
 
   let (_, ty_generics, where_clause) = generics.split_for_impl();
-  let res = quote!(
+  quote!(
     #[automatically_derived]
     impl #generics netwopenapi::ApiComponent for #ident #ty_generics #where_clause {
       #openapi_cookie_attributes
     }
-  );
-  // eprintln!("{:#}", res);
-  res.into()
+  )
+  .into()
 }
 
 /// Generate a reusable OpenAPI error schema.
 ///
-/// This `#[derive]` macro should be used in combinaison with [ApiOperation][api_operation].
+/// This `#[derive]` macro should be used in combinaison with [api_operation](attr.api_operation.html).
 /// The macro accept one and only one `openapi_error`.
 ///
 /// ```rust
@@ -411,7 +408,7 @@ pub fn derive_api_cookie(input: TokenStream) -> TokenStream {
 /// - `status(...)` a list of possible error status with
 ///   - `code = 000` a **required** http status code
 ///   - `description = "..."` an optional description, default is the canonical reason of the given status code
-///   - `with_schema = false` an optional parameter to indicate whether or not a schema should be included for this error definition in which case [JsonSchema] should be derived
+///   - `with_schema = false` an optional parameter to indicate whether or not a schema should be included for this error definition in which case [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html) should be derived
 #[proc_macro_error]
 #[proc_macro_derive(ApiErrorComponent, attributes(openapi_error))]
 pub fn derive_api_error(input: TokenStream) -> TokenStream {
@@ -429,20 +426,23 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
   );
 
   let (_, ty_generics, where_clause) = generics.split_for_impl();
-  let res = quote!(
+  quote!(
     #[automatically_derived]
     impl #generics netwopenapi::ApiErrorComponent for #ident #ty_generics #where_clause {
       #openapi_error_attributes
     }
-  );
-  // eprintln!("{:#}", res);
-  res.into()
+  )
+  .into()
 }
 
-/// Operation attribute macro implementing [PathItemDefinition] for the decorated handler function.
+/// Operation attribute macro implementing [PathItemDefinition](path_item_definition/trait.PathItemDefinition.html) for the decorated handler function.
 ///
 /// ```rust
+/// use std::fmt::Display;
 /// use actix_web::web::Json;
+/// use actix_web::http::StatusCode;
+/// use actix_web::ResponseError;
+/// use core::fmt::Formatter;
 /// use netwopenapi::actix::CreatedJson;
 /// use netwopenapi::{api_operation, ApiComponent, ApiErrorComponent};
 /// use schemars::JsonSchema;
@@ -453,12 +453,24 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
 ///   pub test: String
 /// }
 ///
-/// #[derive(Serialize, Deserialize, Clone, ApiErrorComponent)]
+/// #[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
 /// #[openapi_error(
 ///   status(code = 405, description = "Invalid input"),
 /// )]
 /// pub enum ErrorResponse {
 ///   MethodNotAllowed(String),
+/// }
+///
+/// impl Display for ErrorResponse {
+///   fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+///     todo!()
+///   }
+/// }
+///
+/// impl ResponseError for ErrorResponse {
+///   fn status_code(&self) -> StatusCode {
+///     todo!()
+///   }
 /// }
 ///
 /// #[api_operation(
@@ -495,6 +507,10 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
 /// For example:
 /// ```rust
 /// use actix_web::web::Json;
+/// use std::fmt::Display;
+/// use actix_web::http::StatusCode;
+/// use actix_web::ResponseError;
+/// use core::fmt::Formatter;
 /// use netwopenapi::actix::CreatedJson;
 /// use netwopenapi::{api_operation, ApiComponent, ApiErrorComponent};
 /// use schemars::JsonSchema;
@@ -505,12 +521,24 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
 ///   pub test: String
 /// }
 ///
-/// #[derive(Serialize, Deserialize, Clone, ApiErrorComponent)]
+/// #[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
 /// #[openapi_error(
 ///   status(code = 405, description = "Invalid input"),
 /// )]
 /// pub enum ErrorResponse {
 ///   MethodNotAllowed(String),
+/// }
+///
+/// impl Display for ErrorResponse {
+///   fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+///     todo!()
+///   }
+/// }
+///
+/// impl ResponseError for ErrorResponse {
+///   fn status_code(&self) -> StatusCode {
+///     todo!()
+///   }
 /// }
 ///
 /// #[api_operation(
@@ -529,7 +557,11 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
 ///
 /// is equivalent to
 /// ```rust
+/// use std::fmt::Display;
 /// use actix_web::web::Json;
+/// use actix_web::http::StatusCode;
+/// use actix_web::ResponseError;
+/// use core::fmt::Formatter;
 /// use netwopenapi::actix::CreatedJson;
 /// use netwopenapi::{api_operation, ApiComponent, ApiErrorComponent};
 /// use schemars::JsonSchema;
@@ -540,12 +572,24 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
 ///   pub test: String
 /// }
 ///
-/// #[derive(Serialize, Deserialize, Clone, ApiErrorComponent)]
+/// #[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
 /// #[openapi_error(
 ///   status(code = 405, description = "Invalid input"),
 /// )]
 /// pub enum ErrorResponse {
 ///   MethodNotAllowed(String),
+/// }
+///
+/// impl Display for ErrorResponse {
+///   fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+///     todo!()
+///   }
+/// }
+///
+/// impl ResponseError for ErrorResponse {
+///   fn status_code(&self) -> StatusCode {
+///     todo!()
+///   }
 /// }
 ///
 /// /// Add a new pet to the store
@@ -611,11 +655,10 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
     responder_wrapper,
   );
 
-  let res = quote!(
+  quote!(
     #open_api_def
 
     #generated_item_ast
-  );
-  // eprintln!("{:#}", res);
-  res.into()
+  )
+  .into()
 }

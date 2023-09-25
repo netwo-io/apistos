@@ -37,7 +37,7 @@ pub enum SecurityType {
   ApiKey(ApiKey),
   Http(Http),
   #[serde(rename = "oauth2")]
-  Oauth2(Oauth2),
+  OAuth2(OAuth2),
   OpenIdConnect(OpenIdConnect),
 }
 
@@ -71,7 +71,7 @@ pub struct Http {
 
 #[derive(Serialize, Clone, Debug, Default)]
 #[serde(rename_all = "camelCase")]
-pub struct Oauth2 {
+pub struct OAuth2 {
   /// An object containing configuration information for the flow types supported.
   pub flows: OauthFlows,
 }
@@ -81,13 +81,13 @@ pub struct Oauth2 {
 #[serde(rename_all = "camelCase")]
 pub struct OauthFlows {
   /// Configuration for the OAuth Implicit flow
-  pub implicit: OauthImplicit,
+  pub implicit: Option<OauthImplicit>,
   /// Configuration for the OAuth Resource Owner Password flow
-  pub password: OauthToken,
+  pub password: Option<OauthToken>,
   /// Configuration for the OAuth Client Credentials flow. Previously called `application` in OpenAPI 2.0.
-  pub client_credentials: OauthToken,
+  pub client_credentials: Option<OauthToken>,
   /// Configuration for the OAuth Authorization Code flow. Previously called `accessCode` in OpenAPI 2.0.
-  pub authorization_code: OauthToken,
+  pub authorization_code: Option<OauthToken>,
   /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions).
   #[serde(flatten, skip_serializing_if = "IndexMap::is_empty")]
   pub extensions: IndexMap<String, Value>,

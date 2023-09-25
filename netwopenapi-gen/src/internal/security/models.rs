@@ -45,17 +45,21 @@ impl ToTokens for ApiKeyIn {
 #[derive(FromMeta, Clone)]
 pub struct Http {
   pub scheme: String,
-  pub bearer_format: String,
+  pub bearer_format: Option<String>,
 }
 
 impl ToTokens for Http {
   fn to_tokens(&self, tokens: &mut TokenStream) {
     let scheme = &self.scheme;
-    let bearer_format = &self.bearer_format;
+    let bearer_format = if let Some(bearer_format) = &self.bearer_format {
+      quote!(Some(#bearer_format.to_string()))
+    } else {
+      quote!(None)
+    };
     tokens.extend(quote! {
       netwopenapi::security::Http {
         scheme: #scheme.to_string(),
-        bearer_format: #bearer_format.to_string()
+        bearer_format: #bearer_format
       }
     });
   }
@@ -96,20 +100,36 @@ impl ToTokens for OAuth2 {
 #[derive(FromMeta, Clone)]
 #[darling(rename_all = "snake_case")]
 pub struct OauthFlows {
-  pub implicit: OauthImplicit,
-  pub password: OauthToken,
-  pub client_credentials: OauthToken,
-  pub authorization_code: OauthToken,
+  pub implicit: Option<OauthImplicit>,
+  pub password: Option<OauthToken>,
+  pub client_credentials: Option<OauthToken>,
+  pub authorization_code: Option<OauthToken>,
 }
 
 impl ToTokens for OauthFlows {
   fn to_tokens(&self, tokens: &mut TokenStream) {
-    let implicit = &self.implicit;
-    let password = &self.password;
-    let client_credentials = &self.client_credentials;
-    let authorization_code = &self.authorization_code;
+    let implicit = if let Some(implicit) = &self.implicit {
+      quote!(Some(#implicit))
+    } else {
+      quote!(None)
+    };
+    let password = if let Some(password) = &self.password {
+      quote!(Some(#password))
+    } else {
+      quote!(None)
+    };
+    let client_credentials = if let Some(credentials) = &self.client_credentials {
+      quote!(Some(#credentials))
+    } else {
+      quote!(None)
+    };
+    let authorization_code = if let Some(code) = &self.authorization_code {
+      quote!(Some(#code))
+    } else {
+      quote!(None)
+    };
     tokens.extend(quote! {
-      netwopenapi::security::OauthImplicit {
+      netwopenapi::security::OauthFlows {
         implicit: #implicit,
         password: #password,
         client_credentials: #client_credentials,
@@ -125,7 +145,8 @@ impl ToTokens for OauthFlows {
 pub struct OauthImplicit {
   pub authorization_url: String,
   pub refresh_url: Option<String>,
-  pub scopes: Scopes,
+  #[darling(multiple)]
+  pub scopes: Vec<Scope>,
 }
 
 impl ToTokens for OauthImplicit {
@@ -136,11 +157,22 @@ impl ToTokens for OauthImplicit {
       .clone()
       .map(|r| quote!(Some(#r.to_string())))
       .unwrap_or_else(|| quote!(None));
-    let scopes = &self.scopes;
+    let scopes = if self.scopes.is_empty() {
+      quote!(std::collections::BTreeMap::default())
+    } else {
+      let scopes = &self.scopes;
+      quote! {
+        std::collections::BTreeMap::from_iter([
+          #(#scopes,)*
+        ])
+      }
+    };
     tokens.extend(quote! {
-      authorization_url: #authorization_url.to_string(),
-      refresh_url: #refresh_url,
-      scopes: #scopes,
+      netwopenapi::security::OauthImplicit {
+        authorization_url: #authorization_url.to_string(),
+        refresh_url: #refresh_url,
+        scopes: #scopes,
+      }
     });
   }
 }
@@ -149,7 +181,8 @@ impl ToTokens for OauthImplicit {
 pub struct OauthToken {
   pub token_url: String,
   pub refresh_url: Option<String>,
-  pub scopes: Scopes,
+  #[darling(multiple)]
+  pub scopes: Vec<Scope>,
 }
 
 impl ToTokens for OauthToken {
@@ -160,33 +193,23 @@ impl ToTokens for OauthToken {
       .clone()
       .map(|r| quote!(Some(#r.to_string())))
       .unwrap_or_else(|| quote!(None));
-    let scopes = &self.scopes;
-    tokens.extend(quote! {
-      token_url: #token_url.to_string(),
-      refresh_url: #refresh_url,
-      scopes: #scopes,
-    });
-  }
-}
-
-#[derive(FromMeta, Clone)]
-pub struct Scopes {
-  #[darling(multiple)]
-  pub scopes: Vec<Scope>,
-}
-
-impl ToTokens for Scopes {
-  fn to_tokens(&self, tokens: &mut TokenStream) {
-    let scopes = &self.scopes;
-    if scopes.is_empty() {
-      tokens.extend(quote!(std::collections::BTreeMap::default()))
+    let scopes = if self.scopes.is_empty() {
+      quote!(std::collections::BTreeMap::default())
     } else {
-      tokens.extend(quote! {
+      let scopes = &self.scopes;
+      quote! {
         std::collections::BTreeMap::from_iter([
           #(#scopes,)*
         ])
-      });
-    }
+      }
+    };
+    tokens.extend(quote! {
+      netwopenapi::security::OauthToken {
+        token_url: #token_url.to_string(),
+        refresh_url: #refresh_url,
+        scopes: #scopes,
+      }
+    });
   }
 }
 
@@ -201,7 +224,7 @@ impl ToTokens for Scope {
     let scope = &*self.scope;
     let description = &*self.description;
     tokens.extend(quote! {
-      (#scope, #description)
+      (#scope.to_string(), #description.to_string())
     });
   }
 }
