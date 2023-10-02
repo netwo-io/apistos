@@ -1,4 +1,7 @@
+use actix_multipart::form::MultipartForm;
+use actix_web::http::header::ContentType;
 use actix_web::web::Json;
+use actix_web::HttpResponse;
 use assert_json_diff::assert_json_eq;
 use netwopenapi::actix::{AcceptedJson, CreatedJson, NoContent};
 use netwopenapi_core::PathItemDefinition;
@@ -7,6 +10,8 @@ use schemars::_serde_json::json;
 
 #[allow(clippy::todo)]
 mod test_models {
+  use actix_multipart::form::{Limits, MultipartCollect, State};
+  use actix_multipart::{Field, MultipartError};
   use actix_web::dev::Payload;
   use actix_web::http::StatusCode;
   use actix_web::{Error, FromRequest, HttpRequest, ResponseError};
@@ -19,6 +24,25 @@ mod test_models {
   #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
   pub(crate) struct Test {
     pub(crate) test: String,
+  }
+
+  impl MultipartCollect for Test {
+    fn limit(_field_name: &str) -> Option<usize> {
+      todo!()
+    }
+
+    fn handle_field<'t>(
+      _req: &'t HttpRequest,
+      _field: Field,
+      _limits: &'t mut Limits,
+      _state: &'t mut State,
+    ) -> futures_core::future::LocalBoxFuture<'t, Result<(), MultipartError>> {
+      todo!()
+    }
+
+    fn from_state(_state: State) -> Result<Self, MultipartError> {
+      todo!()
+    }
   }
 
   #[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
@@ -731,6 +755,87 @@ fn api_operation_security() {
           ]
         }
       ],
+      "summary": "Add a new pet to the store"
+    })
+  );
+}
+
+#[test]
+#[allow(dead_code)]
+fn api_operation_multipart() {
+  /// Add a new pet to the store
+  /// Add a new pet to the store
+  /// Plop
+  #[api_operation()]
+  pub(crate) async fn test(
+    // Create a new pet in the store
+    _payload: MultipartForm<test_models::Test>,
+  ) -> Result<HttpResponse, test_models::MultipleErrorResponse> {
+    Ok(HttpResponse::Ok().content_type(ContentType::plaintext()).json(""))
+  }
+
+  let components = __openapi_test::components();
+  // only one component here because: error does not have schema and Test is used both for query and response
+  assert_eq!(components.len(), 1);
+  let components = serde_json::to_value(components).expect("Unable to serialize as Json");
+
+  let operation = __openapi_test::operation();
+  let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
+
+  assert_json_eq!(
+    components,
+    json!([
+      {
+        "schemas": {
+          "Test": {
+            "properties": {
+              "test": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "test"
+            ],
+            "title": "Test",
+            "type": "object"
+          }
+        }
+      }
+    ])
+  );
+  assert_json_eq!(
+    operation,
+    json!({
+      "deprecated": false,
+      "description": "Add a new pet to the store\\\nPlop",
+      "operationId": "test",
+      "requestBody": {
+        "content": {
+          "multipart/form-data": {
+            "schema": {
+              "$ref": "#/components/schemas/Test"
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "description": ""
+        },
+        "401": {
+          "description": "Unauthorized"
+        },
+        "403": {
+          "description": "Forbidden"
+        },
+        "404": {
+          "description": "Not Found"
+        },
+        "405": {
+          "description": "Method Not Allowed"
+        }
+      },
       "summary": "Add a new pet to the store"
     })
   );

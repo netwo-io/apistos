@@ -9,8 +9,10 @@ publish.workspace = true
 rust-version.workspace = true
 
 [dependencies]
+actix-multipart = { workspace = true }
 actix-web = { workspace = true }
 assert-json-diff = { workspace = true }
+futures-core = { workspace = true }
 netwopenapi = { path = "../netwopenapi" }
 netwopenapi-core = { path = "../netwopenapi-core" }
 netwopenapi-gen = { path = "../netwopenapi-gen" }

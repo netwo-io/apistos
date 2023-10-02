@@ -18,16 +18,14 @@ impl<'a> ToTokens for Components<'a> {
       let error_codes = self.error_codes;
       quote! {
         let available_error_codes = [#(#error_codes,)*];
-        error_schemas
-          .into_iter()
-          .for_each(|(status, s)| {
-            let status = status.parse::<u16>();
-            if let Ok(status) = status {
-              if status >= 400 &&available_error_codes.contains(&status) {
-                schemas.push(s);
-              }
+        for (status, s) in error_schemas {
+          let status = status.parse::<u16>();
+          if let Ok(status) = status {
+            if status >= 400 &&available_error_codes.contains(&status) {
+              schemas.push(s);
             }
-          });
+          }
+        }
       }
     };
     tokens.extend(quote!(
