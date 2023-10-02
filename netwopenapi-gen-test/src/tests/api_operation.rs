@@ -840,3 +840,87 @@ fn api_operation_multipart() {
     })
   );
 }
+
+#[test]
+#[allow(dead_code)]
+fn api_operation_consumes_produces() {
+  /// Add a new pet to the store
+  /// Add a new pet to the store
+  /// Plop
+  #[api_operation(consumes = "application/problem+json", produces = "text/plain")]
+  pub(crate) async fn test(
+    // Create a new pet in the store
+    _payload: MultipartForm<test_models::Test>,
+  ) -> Result<HttpResponse, test_models::MultipleErrorResponse> {
+    Ok(HttpResponse::Ok().content_type(ContentType::plaintext()).json(""))
+  }
+
+  let components = __openapi_test::components();
+  // only one component here because: error does not have schema and Test is used both for query and response
+  assert_eq!(components.len(), 1);
+  let components = serde_json::to_value(components).expect("Unable to serialize as Json");
+
+  let operation = __openapi_test::operation();
+  let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
+
+  assert_json_eq!(
+    components,
+    json!([
+      {
+        "schemas": {
+          "Test": {
+            "properties": {
+              "test": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "test"
+            ],
+            "title": "Test",
+            "type": "object"
+          }
+        }
+      }
+    ])
+  );
+  assert_json_eq!(
+    operation,
+    json!({
+      "deprecated": false,
+      "description": "Add a new pet to the store\\\nPlop",
+      "operationId": "test",
+      "requestBody": {
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Test"
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "text/plain": {}
+          },
+          "description": ""
+        },
+        "401": {
+          "description": "Unauthorized"
+        },
+        "403": {
+          "description": "Forbidden"
+        },
+        "404": {
+          "description": "Not Found"
+        },
+        "405": {
+          "description": "Method Not Allowed"
+        }
+      },
+      "summary": "Add a new pet to the store"
+    })
+  );
+}

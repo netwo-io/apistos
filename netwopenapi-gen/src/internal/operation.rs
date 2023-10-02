@@ -16,6 +16,8 @@ pub(crate) struct Operation<'a> {
   pub(crate) tags: &'a [String],
   pub(crate) scopes: BTreeMap<String, Vec<String>>,
   pub(crate) error_codes: &'a [u16],
+  pub(crate) consumes: Option<&'a String>,
+  pub(crate) produces: Option<&'a String>,
 }
 
 impl<'a> ToTokens for Operation<'a> {
@@ -96,6 +98,16 @@ impl<'a> ToTokens for Operation<'a> {
       }
     };
 
+    let consumes = if let Some(consumes) = self.consumes {
+      quote!(Some(#consumes.to_string()))
+    } else {
+      quote!(None)
+    };
+    let produces = if let Some(produces) = self.produces {
+      quote!(Some(#produces.to_string()))
+    } else {
+      quote!(None)
+    };
     tokens.extend(quote!(
       fn operation() -> netwopenapi::paths::Operation {
         use netwopenapi::ApiComponent;
@@ -103,7 +115,19 @@ impl<'a> ToTokens for Operation<'a> {
 
         let mut body_requests = vec![];
         #(
-          body_requests.push(<#args>::request_body());
+          let mut request_body = <#args>::request_body();
+          let consumes: Option<String> = #consumes;
+          if let Some(consumes) = consumes {
+            request_body
+              .as_mut()
+              .map(|t|
+                t.content = t
+                  .content
+                  .values()
+                  .map(|v| (consumes.clone(), v.clone())).collect::<std::collections::BTreeMap<String, netwopenapi::paths::MediaType>>()
+              );
+          }
+          body_requests.push(request_body);
         )*
         let body_requests = body_requests.into_iter().flatten().collect::<Vec<netwopenapi::paths::RequestBody>>();
         for body_request in body_requests {
@@ -118,7 +142,7 @@ impl<'a> ToTokens for Operation<'a> {
           operation_builder.parameters = parameters.into_iter().map(netwopenapi::reference_or::ReferenceOr::Object).collect();
         }
 
-        if let Some(responses) = <#responder_wrapper>::responses() {
+        if let Some(responses) = <#responder_wrapper>::responses(#produces) {
           #error_codes_filter
           operation_builder.responses = responses;
         }

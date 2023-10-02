@@ -92,6 +92,8 @@ pub(crate) fn gen_open_api_impl(
       tags: &operation_attribute.tags,
       scopes: operation_attribute.scopes,
       error_codes: &operation_attribute.error_codes,
+      consumes: operation_attribute.consumes.as_ref(),
+      produces: operation_attribute.produces.as_ref(),
     };
     let components = Components {
       args: &args,
