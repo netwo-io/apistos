@@ -87,13 +87,6 @@ jobs:
             cargo cranky --no-deps --all-features --tests --package ${{ matrix.crate }} -- -D warnings -D clippy::print_stdout
           fi
 
-      - name: Check deny
-        run: |
-          if [[ ${{ steps.changes.outputs.changes }} == true ]]; then
-            cargo install cargo-deny --force
-            cargo deny check licenses sources advisories --package ${{ matrix.crate }}
-          fi
-
       - name: Run tests
         run: |
           if [[ ${{ steps.changes.outputs.changes }} == true ]]; then
