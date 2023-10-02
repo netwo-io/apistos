@@ -1,4 +1,4 @@
-name: netwopenapi build
+name: netwopenapi deny
 
 on:
   pull_request:
@@ -25,16 +25,6 @@ permissions:
 
 jobs:
   test:
-    strategy:
-      matrix:
-        crate:
-          - netwopenapi
-          - netwopenapi-core
-          - netwopenapi-gen
-          - netwopenapi-gen-test
-          - netwopenapi-models
-      fail-fast: true
-
     runs-on: ubuntu-latest
 
     steps:
@@ -52,17 +42,7 @@ jobs:
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Check format
+      - name: Check deny
         run: |
-          rustup component add rustfmt
-          cargo fmt --all --check --package ${{ matrix.crate }}
-
-      - name: Check cranky
-        run: |
-          rustup component add clippy
-          cargo install cargo-cranky --force
-          cargo cranky --no-deps --all-features --tests --package ${{ matrix.crate }} -- -D warnings -D clippy::print_stdout
-
-      - name: Run tests
-        run: |
-          cargo test --all-features --package ${{ matrix.crate }}
+          cargo install cargo-deny --force
+          cargo deny check licenses sources advisories

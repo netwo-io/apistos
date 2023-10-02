@@ -34,7 +34,7 @@ impl ApiComponent for NoContent {
     None
   }
 
-  fn responses() -> Option<Responses> {
+  fn responses(_content_type: Option<String>) -> Option<Responses> {
     let status = StatusCode::NO_CONTENT;
     Some(Responses {
       responses: BTreeMap::from_iter(vec![(
@@ -86,7 +86,7 @@ where
     None
   }
 
-  fn responses() -> Option<Responses> {
+  fn responses(_content_type: Option<String>) -> Option<Responses> {
     let status = StatusCode::ACCEPTED;
     Self::schema().map(|(name, schema)| {
       let _ref = match schema {
@@ -137,7 +137,7 @@ where
     T::schema()
   }
 
-  fn responses() -> Option<Responses> {
+  fn responses(_content_type: Option<String>) -> Option<Responses> {
     let status = StatusCode::CREATED;
     Self::schema().map(|(name, schema)| {
       let _ref = match schema {

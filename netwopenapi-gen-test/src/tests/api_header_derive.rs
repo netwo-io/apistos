@@ -3,7 +3,7 @@ use assert_json_diff::assert_json_eq;
 use schemars::JsonSchema;
 use serde_json::json;
 
-use crate::assert_schema;
+use crate::utils::assert_schema;
 use netwopenapi_core::ApiComponent;
 use netwopenapi_gen::ApiHeader;
 
@@ -26,7 +26,7 @@ fn api_header_derive() {
   assert!(!header_parameter.is_empty());
   let (schema_name, schema) = schema.expect("schema should be defined");
   assert_eq!(schema_name, "OrganizationSlug");
-  assert_schema(schema.clone());
+  assert_schema(&schema.clone());
   let json = serde_json::to_value(schema).expect("Unable to serialize as Json");
   assert_json_eq!(
     json,

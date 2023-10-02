@@ -13,7 +13,7 @@ fn api_component_derive() {
     status(code = 405, description = "Invalid input"),
     status(code = 409)
   )]
-  pub enum ErrorResponse {
+  enum ErrorResponse {
     MethodNotAllowed(String),
     NotFound(String),
     Conflict(String),

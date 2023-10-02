@@ -11,6 +11,7 @@ edition.workspace = true
 repository.workspace = true
 publish.workspace = true
 rust-version.workspace = true
+license.workspace = true
 
 [dependencies]
 actix-service = { workspace = true }
@@ -42,8 +43,3 @@ url = ["netwopenapi-core/url"]
 extras = ["chrono", "multipart", "rust_decimal", "uuid", "url"]
 
 default = ["query"]
-
-#@todo doc
-#[package.metadata.docs.rs]
-#features = ["actix_extras", "non_strict_integers", "openapi_extensions", "uuid", "ulid", "url", "yaml"]
-#rustdoc-args = ["--cfg", "doc_cfg"]

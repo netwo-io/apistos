@@ -502,6 +502,8 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
 ///       - `name = "..."` a mandatory name referencing one of the security definition
 ///       - `scope(...)` a list of scope applying to this operation
 ///   - `error_code = 00` an optional list of error code to document only theses
+///   - `consumes = "..."` allow to override body content type
+///   - `produces = "..."` allow to override response content type
 ///
 /// If `summary` or `description` are not provided, default value will be extracted from comments. The first line is used as summary while the rest will be part of the description.
 ///

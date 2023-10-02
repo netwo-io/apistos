@@ -7,11 +7,14 @@ edition.workspace = true
 repository.workspace = true
 publish.workspace = true
 rust-version.workspace = true
+license.workspace = true
 
 [dependencies]
+actix-multipart = { workspace = true }
 actix-web = { workspace = true }
 assert-json-diff = { workspace = true }
-netwopenapi = { path = "../netwopenapi" }
+futures-core = { workspace = true }
+netwopenapi = { path = "../netwopenapi", features = ["multipart"] }
 netwopenapi-core = { path = "../netwopenapi-core" }
 netwopenapi-gen = { path = "../netwopenapi-gen" }
 schemars = { workspace = true }

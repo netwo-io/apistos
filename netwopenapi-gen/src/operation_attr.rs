@@ -26,6 +26,8 @@ struct OperationAttrInternal {
   scopes: Vec<SecurityScopes>,
   #[darling(multiple, rename = "error_code")]
   error_codes: Vec<u16>,
+  consumes: Option<String>,
+  produces: Option<String>,
 }
 
 #[derive(FromMeta, Clone)]
@@ -44,6 +46,8 @@ pub(crate) struct OperationAttr {
   pub(crate) tags: Vec<String>,
   pub(crate) scopes: BTreeMap<String, Vec<String>>,
   pub(crate) error_codes: Vec<u16>,
+  pub(crate) consumes: Option<String>,
+  pub(crate) produces: Option<String>,
 }
 
 impl From<OperationAttrInternal> for OperationAttr {
@@ -61,6 +65,8 @@ impl From<OperationAttrInternal> for OperationAttr {
         .map(|s| (s.name, s.scopes))
         .collect::<BTreeMap<_, _>>(),
       error_codes: value.error_codes,
+      consumes: value.consumes,
+      produces: value.produces,
     }
   }
 }

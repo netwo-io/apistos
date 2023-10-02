@@ -1,15 +1,17 @@
+use actix_multipart::form::MultipartForm;
+use actix_web::http::header::ContentType;
 use actix_web::web::Json;
-use actix_web::ResponseError;
+use actix_web::HttpResponse;
 use assert_json_diff::assert_json_eq;
-use netwopenapi::actix::CreatedJson;
+use netwopenapi::actix::{AcceptedJson, CreatedJson, NoContent};
 use netwopenapi_core::PathItemDefinition;
 use netwopenapi_gen::api_operation;
-use schemars::JsonSchema;
 use schemars::_serde_json::json;
-use serde::{Deserialize, Serialize};
-use std::fmt::Display;
 
+#[allow(clippy::todo)]
 mod test_models {
+  use actix_multipart::form::{Limits, MultipartCollect, State};
+  use actix_multipart::{Field, MultipartError};
   use actix_web::dev::Payload;
   use actix_web::http::StatusCode;
   use actix_web::{Error, FromRequest, HttpRequest, ResponseError};
@@ -20,18 +22,37 @@ mod test_models {
   use std::future::Ready;
 
   #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
-  pub struct Test {
-    pub test: String,
+  pub(crate) struct Test {
+    pub(crate) test: String,
+  }
+
+  impl MultipartCollect for Test {
+    fn limit(_field_name: &str) -> Option<usize> {
+      todo!()
+    }
+
+    fn handle_field<'t>(
+      _req: &'t HttpRequest,
+      _field: Field,
+      _limits: &'t mut Limits,
+      _state: &'t mut State,
+    ) -> futures_core::future::LocalBoxFuture<'t, Result<(), MultipartError>> {
+      todo!()
+    }
+
+    fn from_state(_state: State) -> Result<Self, MultipartError> {
+      todo!()
+    }
   }
 
   #[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
   #[openapi_error(status(code = 405, description = "Invalid input"))]
-  pub enum ErrorResponse {
+  pub(crate) enum ErrorResponse {
     MethodNotAllowed(String),
   }
 
   impl Display for ErrorResponse {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, _f: &mut Formatter<'_>) -> std::fmt::Result {
       todo!()
     }
   }
@@ -44,12 +65,12 @@ mod test_models {
 
   #[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
   #[openapi_error(status(code = 401), status(code = 403), status(code = 404), status(code = 405))]
-  pub enum MultipleErrorResponse {
+  pub(crate) enum MultipleErrorResponse {
     MethodNotAllowed(String),
   }
 
   impl Display for MultipleErrorResponse {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, _f: &mut Formatter<'_>) -> std::fmt::Result {
       todo!()
     }
   }
@@ -67,13 +88,13 @@ mod test_models {
     scopes(scope = "all:read", description = "Read all the things"),
     scopes(scope = "all:write", description = "Write all the things")
   ))))))]
-  pub struct ApiKey;
+  pub(crate) struct ApiKey;
 
   impl FromRequest for ApiKey {
     type Error = Error;
     type Future = Ready<Result<Self, Self::Error>>;
 
-    fn from_request(req: &HttpRequest, payload: &mut Payload) -> Self::Future {
+    fn from_request(_req: &HttpRequest, _payload: &mut Payload) -> Self::Future {
       todo!()
     }
   }
@@ -82,6 +103,163 @@ mod test_models {
 #[test]
 #[allow(dead_code)]
 fn api_operation() {
+  /// Add a new pet to the store
+  /// Add a new pet to the store
+  /// Plop
+  #[api_operation(tag = "pet")]
+  pub(crate) async fn test(
+    // Create a new pet in the store
+    body: Json<test_models::Test>,
+  ) -> Result<Json<test_models::Test>, test_models::ErrorResponse> {
+    Ok(Json(body.0))
+  }
+
+  let components = __openapi_test::components();
+  // only one component here because: error does not have schema and Test is used both for query and response
+  assert_eq!(components.len(), 1);
+  let components = serde_json::to_value(components).expect("Unable to serialize as Json");
+
+  let operation = __openapi_test::operation();
+  let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
+
+  assert_json_eq!(
+    components,
+    json!([
+      {
+        "schemas": {
+          "Test": {
+            "properties": {
+              "test": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "test"
+            ],
+            "title": "Test",
+            "type": "object"
+          }
+        }
+      }
+    ])
+  );
+  assert_json_eq!(
+    operation,
+    json!({
+      "deprecated": false,
+      "description": "Add a new pet to the store\\\nPlop",
+      "operationId": "test",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Test"
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Test"
+              }
+            }
+          },
+          "description": ""
+        },
+        "405": {
+          "description": "Invalid input"
+        }
+      },
+      "summary": "Add a new pet to the store",
+      "tags": [
+        "pet"
+      ]
+    })
+  );
+}
+
+#[test]
+#[allow(dead_code)]
+fn api_operation_no_content() {
+  /// Add a new pet to the store
+  /// Add a new pet to the store
+  /// Plop
+  #[api_operation(tag = "pet")]
+  pub(crate) async fn test(
+    // Create a new pet in the store
+    _body: Json<test_models::Test>,
+  ) -> Result<NoContent, test_models::ErrorResponse> {
+    Ok(NoContent)
+  }
+
+  let components = __openapi_test::components();
+  // only one component here because: error does not have schema and Test is used both for query and response
+  assert_eq!(components.len(), 1);
+  let components = serde_json::to_value(components).expect("Unable to serialize as Json");
+
+  let operation = __openapi_test::operation();
+  let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
+
+  assert_json_eq!(
+    components,
+    json!([
+      {
+        "schemas": {
+          "Test": {
+            "properties": {
+              "test": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "test"
+            ],
+            "title": "Test",
+            "type": "object"
+          }
+        }
+      }
+    ])
+  );
+  assert_json_eq!(
+    operation,
+    json!({
+      "deprecated": false,
+      "description": "Add a new pet to the store\\\nPlop",
+      "operationId": "test",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Test"
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "204": {
+          "description": ""
+        },
+        "405": {
+          "description": "Invalid input"
+        }
+      },
+      "summary": "Add a new pet to the store",
+      "tags": [
+        "pet"
+      ]
+    })
+  );
+}
+
+#[test]
+#[allow(dead_code)]
+fn api_operation_created_json() {
   /// Add a new pet to the store
   /// Add a new pet to the store
   /// Plop
@@ -140,6 +318,81 @@ fn api_operation() {
       },
       "responses": {
         "201": {
+          "$ref": "#/components/schemas/Test"
+        },
+        "405": {
+          "description": "Invalid input"
+        }
+      },
+      "summary": "Add a new pet to the store",
+      "tags": [
+        "pet"
+      ]
+    })
+  );
+}
+
+#[test]
+#[allow(dead_code)]
+fn api_operation_accepted_json() {
+  /// Add a new pet to the store
+  /// Add a new pet to the store
+  /// Plop
+  #[api_operation(tag = "pet")]
+  pub(crate) async fn test(
+    // Create a new pet in the store
+    body: Json<test_models::Test>,
+  ) -> Result<AcceptedJson<test_models::Test>, test_models::ErrorResponse> {
+    Ok(AcceptedJson(body.0))
+  }
+
+  let components = __openapi_test::components();
+  // only one component here because: error does not have schema and Test is used both for query and response
+  assert_eq!(components.len(), 1);
+  let components = serde_json::to_value(components).expect("Unable to serialize as Json");
+
+  let operation = __openapi_test::operation();
+  let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
+
+  assert_json_eq!(
+    components,
+    json!([
+      {
+        "schemas": {
+          "Test": {
+            "properties": {
+              "test": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "test"
+            ],
+            "title": "Test",
+            "type": "object"
+          }
+        }
+      }
+    ])
+  );
+  assert_json_eq!(
+    operation,
+    json!({
+      "deprecated": false,
+      "description": "Add a new pet to the store\\\nPlop",
+      "operationId": "test",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Test"
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "202": {
           "$ref": "#/components/schemas/Test"
         },
         "405": {
@@ -502,6 +755,171 @@ fn api_operation_security() {
           ]
         }
       ],
+      "summary": "Add a new pet to the store"
+    })
+  );
+}
+
+#[test]
+#[allow(dead_code)]
+fn api_operation_multipart() {
+  /// Add a new pet to the store
+  /// Add a new pet to the store
+  /// Plop
+  #[api_operation()]
+  pub(crate) async fn test(
+    // Create a new pet in the store
+    _payload: MultipartForm<test_models::Test>,
+  ) -> Result<HttpResponse, test_models::MultipleErrorResponse> {
+    Ok(HttpResponse::Ok().content_type(ContentType::plaintext()).json(""))
+  }
+
+  let components = __openapi_test::components();
+  // only one component here because: error does not have schema and Test is used both for query and response
+  assert_eq!(components.len(), 1);
+  let components = serde_json::to_value(components).expect("Unable to serialize as Json");
+
+  let operation = __openapi_test::operation();
+  let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
+
+  assert_json_eq!(
+    components,
+    json!([
+      {
+        "schemas": {
+          "Test": {
+            "properties": {
+              "test": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "test"
+            ],
+            "title": "Test",
+            "type": "object"
+          }
+        }
+      }
+    ])
+  );
+  assert_json_eq!(
+    operation,
+    json!({
+      "deprecated": false,
+      "description": "Add a new pet to the store\\\nPlop",
+      "operationId": "test",
+      "requestBody": {
+        "content": {
+          "multipart/form-data": {
+            "schema": {
+              "$ref": "#/components/schemas/Test"
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "description": ""
+        },
+        "401": {
+          "description": "Unauthorized"
+        },
+        "403": {
+          "description": "Forbidden"
+        },
+        "404": {
+          "description": "Not Found"
+        },
+        "405": {
+          "description": "Method Not Allowed"
+        }
+      },
+      "summary": "Add a new pet to the store"
+    })
+  );
+}
+
+#[test]
+#[allow(dead_code)]
+fn api_operation_consumes_produces() {
+  /// Add a new pet to the store
+  /// Add a new pet to the store
+  /// Plop
+  #[api_operation(consumes = "application/problem+json", produces = "text/plain")]
+  pub(crate) async fn test(
+    // Create a new pet in the store
+    _payload: MultipartForm<test_models::Test>,
+  ) -> Result<HttpResponse, test_models::MultipleErrorResponse> {
+    Ok(HttpResponse::Ok().content_type(ContentType::plaintext()).json(""))
+  }
+
+  let components = __openapi_test::components();
+  // only one component here because: error does not have schema and Test is used both for query and response
+  assert_eq!(components.len(), 1);
+  let components = serde_json::to_value(components).expect("Unable to serialize as Json");
+
+  let operation = __openapi_test::operation();
+  let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
+
+  assert_json_eq!(
+    components,
+    json!([
+      {
+        "schemas": {
+          "Test": {
+            "properties": {
+              "test": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "test"
+            ],
+            "title": "Test",
+            "type": "object"
+          }
+        }
+      }
+    ])
+  );
+  assert_json_eq!(
+    operation,
+    json!({
+      "deprecated": false,
+      "description": "Add a new pet to the store\\\nPlop",
+      "operationId": "test",
+      "requestBody": {
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Test"
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "text/plain": {}
+          },
+          "description": ""
+        },
+        "401": {
+          "description": "Unauthorized"
+        },
+        "403": {
+          "description": "Forbidden"
+        },
+        "404": {
+          "description": "Not Found"
+        },
+        "405": {
+          "description": "Method Not Allowed"
+        }
+      },
       "summary": "Add a new pet to the store"
     })
   );

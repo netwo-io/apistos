@@ -59,7 +59,7 @@ pub trait ApiComponent {
     BTreeMap::default()
   }
 
-  fn responses() -> Option<Responses> {
+  fn responses(_content_type: Option<String>) -> Option<Responses> {
     None
   }
 
@@ -148,8 +148,8 @@ where
     E::schemas_by_status_code()
   }
 
-  fn responses() -> Option<Responses> {
-    T::responses()
+  fn responses(content_type: Option<String>) -> Option<Responses> {
+    T::responses(content_type)
   }
 }
 
@@ -202,9 +202,9 @@ where
     R::error_schemas()
   }
 
-  fn responses() -> Option<Responses> {
+  fn responses(content_type: Option<String>) -> Option<Responses> {
     let mut responses = vec![];
-    if let Some(response) = R::responses() {
+    if let Some(response) = R::responses(content_type.clone()) {
       responses.append(
         &mut response
           .responses
@@ -220,12 +220,20 @@ where
         "200".to_owned(),
         ReferenceOr::Object(Response {
           content: BTreeMap::from_iter(vec![(
-            Self::content_type(),
+            content_type.unwrap_or_else(Self::content_type),
             MediaType {
               schema: Some(ReferenceOr::Reference { _ref }),
               ..Default::default()
             },
           )]),
+          ..Default::default()
+        }),
+      ));
+    } else if let Some(content_type) = content_type {
+      responses.push((
+        "200".to_owned(),
+        ReferenceOr::Object(Response {
+          content: BTreeMap::from_iter(vec![(content_type, MediaType::default())]),
           ..Default::default()
         }),
       ));
