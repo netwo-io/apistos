@@ -1,4 +1,4 @@
-use crate::internal::components::ApiComponent;
+use crate::ApiComponent;
 
 macro_rules! simple_modifier {
   ($ty:ty) => {

@@ -32,7 +32,7 @@ where
   }
 
   fn parameters() -> Vec<Parameter> {
-    let schema = T::schema().map(|(_, sch)| sch).or_else(|| Self::raw_schema());
+    let schema = T::schema().map(|(_, sch)| sch).or_else(Self::raw_schema);
 
     if let Some(schema) = schema {
       parameters_for_schema(schema, Self::required())
@@ -69,7 +69,7 @@ where
   }
 
   fn parameters() -> Vec<Parameter> {
-    let schema = T::schema().map(|(_, sch)| sch).or_else(|| Self::raw_schema());
+    let schema = T::schema().map(|(_, sch)| sch).or_else(Self::raw_schema);
     if let Some(schema) = schema {
       parameters_for_schema(schema, Self::required())
     } else {
@@ -96,15 +96,12 @@ fn parameters_for_schema(schema: ReferenceOr<Schema>, required: bool) -> Vec<Par
         }
       }
       if let Some(obj) = sch.object.clone() {
-        parameters.append(&mut gen_path_parameter_for_object(&schema, obj, required));
+        parameters.append(&mut gen_path_parameter_for_object(&schema, &obj, required));
       }
       if let Some(instance_type) = sch.instance_type.clone() {
         let processable_instance_type = match instance_type {
           SingleOrVec::Single(it) => processable_instance_type(*it),
-          SingleOrVec::Vec(its) => its
-            .first()
-            .map(|it| processable_instance_type(it.clone()))
-            .unwrap_or_default(),
+          SingleOrVec::Vec(its) => its.first().map(|it| processable_instance_type(*it)).unwrap_or_default(),
         };
         if processable_instance_type {
           parameters.push(gen_simple_path_parameter(schema.into(), required));
@@ -116,7 +113,7 @@ fn parameters_for_schema(schema: ReferenceOr<Schema>, required: bool) -> Vec<Par
   parameters
 }
 
-fn gen_path_parameter_for_object(schema: &Schema, obj: Box<ObjectValidation>, required: bool) -> Vec<Parameter> {
+fn gen_path_parameter_for_object(schema: &Schema, obj: &ObjectValidation, required: bool) -> Vec<Parameter> {
   if obj.properties.is_empty() {
     vec![gen_simple_path_parameter(schema.clone().into(), required)]
   } else {

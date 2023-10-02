@@ -38,7 +38,7 @@ where
 
   fn parameters() -> Vec<Parameter> {
     let mut parameters = vec![];
-    let schema = T::schema().map(|(_, sch)| sch).or_else(|| Self::raw_schema());
+    let schema = T::schema().map(|(_, sch)| sch).or_else(Self::raw_schema);
     if let Some(schema) = schema {
       match schema {
         ReferenceOr::Reference { _ref } => {
@@ -95,7 +95,7 @@ where
 
   fn parameters() -> Vec<Parameter> {
     let parameters;
-    let schema = V::schema().map(|(_, sch)| sch).or_else(|| Self::raw_schema());
+    let schema = V::schema().map(|(_, sch)| sch).or_else(Self::raw_schema);
     if let Some(schema) = schema {
       match schema {
         ReferenceOr::Reference { .. } => {
@@ -167,7 +167,7 @@ where
 
   fn parameters() -> Vec<Parameter> {
     let mut parameters = vec![];
-    let schema = T::schema().map(|(_, sch)| sch).or_else(|| Self::raw_schema());
+    let schema = T::schema().map(|(_, sch)| sch).or_else(Self::raw_schema);
     if let Some(schema) = schema {
       match schema {
         ReferenceOr::Reference { _ref } => {
@@ -225,7 +225,7 @@ where
 
   fn parameters() -> Vec<Parameter> {
     let parameters;
-    let schema = V::schema().map(|(_, sch)| sch).or_else(|| Self::raw_schema());
+    let schema = V::schema().map(|(_, sch)| sch).or_else(Self::raw_schema);
     if let Some(schema) = schema {
       match schema {
         ReferenceOr::Reference { .. } => {
@@ -299,7 +299,7 @@ where
 
   fn parameters() -> Vec<Parameter> {
     let mut parameters = vec![];
-    let schema = T::schema().map(|(_, sch)| sch).or_else(|| Self::raw_schema());
+    let schema = T::schema().map(|(_, sch)| sch).or_else(Self::raw_schema);
     if let Some(schema) = schema {
       match schema {
         ReferenceOr::Reference { _ref } => {
@@ -356,7 +356,7 @@ where
 
   fn parameters() -> Vec<Parameter> {
     let parameters;
-    let schema = V::schema().map(|(_, sch)| sch).or_else(|| Self::raw_schema());
+    let schema = V::schema().map(|(_, sch)| sch).or_else(Self::raw_schema);
     if let Some(schema) = schema {
       match schema {
         ReferenceOr::Reference { .. } => {
@@ -428,7 +428,7 @@ where
 
   fn parameters() -> Vec<Parameter> {
     let mut parameters = vec![];
-    let schema = T::schema().map(|(_, sch)| sch).or_else(|| Self::raw_schema());
+    let schema = T::schema().map(|(_, sch)| sch).or_else(Self::raw_schema);
     if let Some(schema) = schema {
       match schema {
         ReferenceOr::Reference { _ref } => {
@@ -485,7 +485,7 @@ where
 
   fn parameters() -> Vec<Parameter> {
     let parameters;
-    let schema = V::schema().map(|(_, sch)| sch).or_else(|| Self::raw_schema());
+    let schema = V::schema().map(|(_, sch)| sch).or_else(Self::raw_schema);
     if let Some(schema) = schema {
       match schema {
         ReferenceOr::Reference { .. } => {

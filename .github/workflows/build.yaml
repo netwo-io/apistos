@@ -1,4 +1,4 @@
-name: garde-actix-web build
+name: netwopenapi build
 
 on:
   pull_request:
@@ -29,7 +29,9 @@ jobs:
       matrix:
         crate:
           - netwopenapi
+          - netwopenapi-core
           - netwopenapi-gen
+          - netwopenapi-gen-test
           - netwopenapi-models
       fail-fast: true
 

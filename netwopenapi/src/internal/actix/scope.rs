@@ -159,11 +159,11 @@ where
   }
 
   fn update_from_def_holder<D: DefinitionHolder>(&mut self, dh: &mut D) {
-    self.components.extend(dh.components().into_iter());
+    self.components.extend(dh.components());
     let mut item_map = IndexMap::new();
     dh.update_path_items(&mut item_map);
     for (path, mut path_item) in item_map {
-      let p = vec![self.path.clone(), path]
+      let p = [self.path.clone(), path]
         .iter()
         .map(|p| p.trim_matches('/'))
         .collect::<Vec<&str>>()

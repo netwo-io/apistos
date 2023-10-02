@@ -20,7 +20,7 @@ pub struct Components {
   /// An object to hold reusable [Parameter Objects](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameter-object).
   #[serde(skip_serializing_if = "BTreeMap::is_empty")]
   pub parameters: BTreeMap<String, ReferenceOr<Parameter>>,
-  /// 	An object to hold reusable [Example Objects](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#example-object).
+  /// An object to hold reusable [Example Objects](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#example-object).
   #[serde(skip_serializing_if = "BTreeMap::is_empty")]
   pub examples: BTreeMap<String, ReferenceOr<Example>>,
   /// An object to hold reusable [Request Body Objects](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#request-body-object).

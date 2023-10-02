@@ -29,8 +29,8 @@ pub(crate) fn parse_openapi_security_attrs(attrs: &[Attribute], struct_name: Str
 
 #[derive(FromMeta, Clone)]
 struct SecurityDeclarationInternal {
-  pub name: Option<String>,
-  pub scheme: SecurityScheme,
+  name: Option<String>,
+  scheme: SecurityScheme,
 }
 
 #[derive(FromMeta, Clone)]
@@ -83,7 +83,8 @@ impl ToTokens for SecurityScheme {
 #[derive(FromMeta, Clone)]
 #[darling(rename_all = "snake_case")]
 pub(crate) enum SecurityType {
-  OAuth2(OAuth2),
+  #[darling(rename = "oauth2")]
+  OAuth2(Box<OAuth2>),
   ApiKey(ApiKey),
   Http(Http),
   OpenIdConnect(OpenIdConnect),
@@ -92,7 +93,10 @@ pub(crate) enum SecurityType {
 impl ToTokens for SecurityType {
   fn to_tokens(&self, tokens: &mut TokenStream) {
     let scheme_tokens = match self {
-      SecurityType::OAuth2(v) => quote!(OAuth2(#v)),
+      SecurityType::OAuth2(v) => {
+        let v = *v.clone();
+        quote!(OAuth2(#v))
+      }
       SecurityType::ApiKey(v) => quote!(ApiKey(#v)),
       SecurityType::Http(v) => quote!(Http(#v)),
       SecurityType::OpenIdConnect(v) => quote!(OpenIdConnect(#v)),

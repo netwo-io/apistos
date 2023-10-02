@@ -1,5 +1,9 @@
 [package]
 name = "netwopenapi"
+description = "Actix-web OpenAPI v3.0 documentation generator"
+readme = "README.md"
+keywords = ["actix", "actix-web", "openapi", "oas3", "documentation"]
+categories = ["web-programming"]
 version = "0.1.0"
 
 authors.workspace = true
@@ -13,38 +17,28 @@ actix-service = { workspace = true }
 actix-web = { workspace = true }
 indexmap = { workspace = true }
 once_cell = { workspace = true }
-pin-project = { workspace = true }
 regex = { workspace = true }
-schemars = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 
+netwopenapi-core = { path = "../netwopenapi-core" }
 netwopenapi-gen = { path = "../netwopenapi-gen" }
 netwopenapi-models = { path = "../netwopenapi-models" }
-
-actix-multipart = { workspace = true, optional = true }
-garde-actix-web = { workspace = true, optional = true }
-chrono = { workspace = true, optional = true }
-garde = { workspace = true, optional = true }
-rust_decimal = { workspace = true, optional = true }
-serde_qs = { workspace = true, features = ["actix4"], optional = true }
-uuid = { workspace = true, optional = true }
-url = { workspace = true, optional = true }
 
 [features]
 # query related features
 query = []
-qs_query = ["dep:serde_qs", "garde-actix-web?/serde_qs"]
+qs_query = ["netwopenapi-core/qs_query"]
 
 # actix garde feature
-garde = ["dep:garde", "dep:garde-actix-web"]
+garde = ["netwopenapi-core/garde"]
 
 # extra types related features
-chrono = ["dep:chrono", "schemars/chrono"]
-multipart = ["dep:actix-multipart"]
-rust_decimal = ["dep:rust_decimal", "schemars/rust_decimal"]
-uuid = ["dep:uuid", "schemars/uuid1"]
-url = ["dep:url", "schemars/url"]
+chrono = ["netwopenapi-core/chrono"]
+multipart = ["netwopenapi-core/multipart"]
+rust_decimal = ["netwopenapi-core/rust_decimal"]
+uuid = ["netwopenapi-core/uuid"]
+url = ["netwopenapi-core/url"]
 extras = ["chrono", "multipart", "rust_decimal", "uuid", "url"]
 
 default = ["query"]

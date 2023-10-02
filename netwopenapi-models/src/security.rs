@@ -16,7 +16,7 @@ pub struct SecurityRequirement {
   pub requirements: BTreeMap<String, Vec<String>>,
 }
 
-/// Defines a security scheme that can be used by the operations. Supported schemes are HTTP authentication, an API key (either as a header, a cookie parameter or as a query parameter), OAuth2's common flows (implicit, password, client credentials and authorization code) as defined in [RFC6749](https://datatracker.ietf.org/doc/html/rfc6749), and [OpenID Connect Discovery](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-discovery-06).
+/// Defines a security scheme that can be used by the operations. Supported schemes are HTTP authentication, an API key (either as a header, a cookie parameter or as a query parameter), `OAuth2`'s common flows (implicit, password, client credentials and authorization code) as defined in [RFC6749](https://datatracker.ietf.org/doc/html/rfc6749), and [OpenID Connect Discovery](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-discovery-06).
 #[derive(Serialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct SecurityScheme {
@@ -37,7 +37,7 @@ pub enum SecurityType {
   ApiKey(ApiKey),
   Http(Http),
   #[serde(rename = "oauth2")]
-  Oauth2(Oauth2),
+  OAuth2(OAuth2),
   OpenIdConnect(OpenIdConnect),
 }
 
@@ -71,7 +71,7 @@ pub struct Http {
 
 #[derive(Serialize, Clone, Debug, Default)]
 #[serde(rename_all = "camelCase")]
-pub struct Oauth2 {
+pub struct OAuth2 {
   /// An object containing configuration information for the flow types supported.
   pub flows: OauthFlows,
 }
@@ -81,13 +81,17 @@ pub struct Oauth2 {
 #[serde(rename_all = "camelCase")]
 pub struct OauthFlows {
   /// Configuration for the OAuth Implicit flow
-  pub implicit: OauthImplicit,
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub implicit: Option<OauthImplicit>,
   /// Configuration for the OAuth Resource Owner Password flow
-  pub password: OauthToken,
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub password: Option<OauthToken>,
   /// Configuration for the OAuth Client Credentials flow. Previously called `application` in OpenAPI 2.0.
-  pub client_credentials: OauthToken,
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub client_credentials: Option<OauthToken>,
   /// Configuration for the OAuth Authorization Code flow. Previously called `accessCode` in OpenAPI 2.0.
-  pub authorization_code: OauthToken,
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub authorization_code: Option<OauthToken>,
   /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions).
   #[serde(flatten, skip_serializing_if = "IndexMap::is_empty")]
   pub extensions: IndexMap<String, Value>,

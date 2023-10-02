@@ -24,7 +24,7 @@ pub(crate) fn parse_openapi_error_attrs(attrs: &[Attribute]) -> Option<OpenapiEr
 #[derive(FromMeta, Clone)]
 pub(crate) struct OpenapiErrorAttribute {
   #[darling(multiple)]
-  pub status: Vec<ErrorDefinition>,
+  pub(crate) status: Vec<ErrorDefinition>,
 }
 
 impl ToTokens for OpenapiErrorAttribute {
@@ -51,9 +51,8 @@ impl ToTokens for OpenapiErrorAttribute {
 
 #[derive(FromMeta, Clone)]
 pub(crate) struct ErrorDefinition {
-  pub code: u16,
-  pub description: Option<String>,
-  pub with_schema: Option<bool>,
+  pub(crate) code: u16,
+  pub(crate) description: Option<String>,
 }
 
 impl ToTokens for ErrorDefinition {
@@ -63,44 +62,12 @@ impl ToTokens for ErrorDefinition {
       Ok(status_code) => status_code.canonical_reason().unwrap_or_default(),
       Err(e) => abort!(Span::call_site(), format!("{e}")),
     };
-    let description = self.description.as_deref().unwrap_or_else(|| default_description);
-    let content = if self.with_schema.unwrap_or_default() {
-      quote! {
-        content = {
-          let settings = schemars::gen::SchemaSettings::openapi3();
-          let mut gen = settings.into_generator();
-          let schema = <Self as netwopenapi::JsonSchema>::json_schema(&mut gen);
-          std::collections::BTreeMap::from_iter(vec![(
-            "application/json".to_string(),
-            netwopenapi::reference_or::ReferenceOr::Object(netwopenapi::paths::MediaType {
-              schema: Some(netwopenapi::reference_or::ReferenceOr::Object(schema)),
-              ..Default::default()
-            }),
-          )])
-        },
-      }
-    } else {
-      quote!()
-    };
-    let schema = if self.with_schema.unwrap_or_default() {
-      quote! {
-        {
-          let schema_name = <Self as schemars::JsonSchema>::schema_name();
-          let settings = schemars::gen::SchemaSettings::openapi3();
-          let mut gen = settings.into_generator();
-          let schema = <Self as schemars::JsonSchema>::json_schema(&mut gen);
-          (schema_name, schema)
-        }
-      }
-    } else {
-      quote!(None)
-    };
+    let description = self.description.as_deref().unwrap_or(default_description);
     tokens.extend(quote! {
       ((#code.to_string(), netwopenapi::paths::Response {
         description: #description.to_string(),
-        #content
         ..Default::default()
-      }), #schema)
+      }), None)
     });
   }
 }

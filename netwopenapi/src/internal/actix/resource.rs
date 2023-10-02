@@ -1,12 +1,12 @@
 use crate::internal::actix::route::{Route, RouteWrapper};
 use crate::internal::actix::utils::OperationUpdater;
 use crate::internal::actix::METHODS;
-use crate::path_item_definition::PathItemDefinition;
 use actix_service::{ServiceFactory, Transform};
 use actix_web::body::MessageBody;
 use actix_web::dev::{AppService, HttpServiceFactory, ServiceRequest, ServiceResponse};
 use actix_web::guard::Guard;
 use actix_web::{Error, FromRequest, Handler, Responder};
+use netwopenapi_core::PathItemDefinition;
 use netwopenapi_models::components::Components;
 use netwopenapi_models::paths::PathItem;
 use std::fmt::Debug;
@@ -66,9 +66,9 @@ where
   pub fn route(mut self, route: Route) -> Self {
     let w = RouteWrapper::new(&self.path, route);
     let mut item_definition = self.item_definition.unwrap_or_default();
-    item_definition.operations.extend(w.def.item.operations.into_iter());
+    item_definition.operations.extend(w.def.item.operations);
     self.item_definition = Some(item_definition);
-    self.components.extend(w.component.into_iter());
+    self.components.extend(w.component);
     self.inner = self.inner.route(w.inner);
     self
   }
@@ -98,7 +98,7 @@ where
       }
       operation.update_path_parameter_name_from_path(&self.path);
       self.item_definition = Some(item_definition);
-      self.components.extend(F::Future::components().into_iter());
+      self.components.extend(F::Future::components());
     }
     self.inner = self.inner.to(handler);
     self

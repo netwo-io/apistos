@@ -20,6 +20,7 @@ pub trait OpenApiWrapper<T> {
   fn document(self, spec: Spec) -> Self::Wrapper;
 }
 
+/// Wrapper for [actix_web::App](https://docs.rs/actix-web/latest/actix_web/struct.App.html) with openapi specification
 pub struct App<T> {
   open_api_spec: Arc<RwLock<OpenApi>>,
   inner: Option<actix_web::App<T>>, //an option juste to be able to replace it with a default in memory
@@ -30,8 +31,10 @@ impl<T> OpenApiWrapper<T> for actix_web::App<T> {
   type Wrapper = App<T>;
 
   fn document(self, spec: Spec) -> Self::Wrapper {
-    let mut open_api_spec = OpenApi::default();
-    open_api_spec.info = spec.info;
+    let mut open_api_spec = OpenApi {
+      info: spec.info,
+      ..Default::default()
+    };
     if !spec.tags.is_empty() {
       open_api_spec.tags = spec.tags;
     }
@@ -51,11 +54,13 @@ impl<T> App<T>
 where
   T: ServiceFactory<ServiceRequest, Config = (), Error = Error, InitError = ()>,
 {
+  /// Drop in for [`actix_web::App::app_data`](https://docs.rs/actix-web/*/actix_web/struct.App.html#method.app_data)
   pub fn app_data<U: 'static>(mut self, ext: U) -> Self {
     self.inner = self.inner.take().map(|app| app.app_data(ext));
     self
   }
 
+  /// Drop in for [`actix_web::App::data_factory`](https://docs.rs/actix-web/*/actix_web/struct.App.html#method.data_factory)
   pub fn data_factory<F, Out, D, E>(mut self, data: F) -> Self
   where
     F: Fn() -> Out + 'static,
@@ -67,6 +72,7 @@ where
     self
   }
 
+  /// Drop in for [`actix_web::App::configure`](https://docs.rs/actix-web/*/actix_web/struct.App.html#method.configure)
   pub fn configure<F>(mut self, f: F) -> Self
   where
     F: FnOnce(&mut ServiceConfig),
@@ -81,6 +87,7 @@ where
     self
   }
 
+  /// Drop in for [`actix_web::App::route`](https://docs.rs/actix-web/*/actix_web/struct.App.html#method.route)
   pub fn route(mut self, path: &str, route: Route) -> Self {
     let mut w = RouteWrapper::new(path, route);
     self.update_from_def_holder(&mut w);
@@ -88,6 +95,7 @@ where
     self
   }
 
+  /// Drop in for [`actix_web::App::service`](https://docs.rs/actix-web/*/actix_web/struct.App.html#method.service)
   pub fn service<F>(mut self, mut factory: F) -> Self
   where
     F: DefinitionHolder + HttpServiceFactory + 'static,
@@ -97,6 +105,7 @@ where
     self
   }
 
+  /// Drop in for [`actix_web::App::default_service`](https://docs.rs/actix-web/*/actix_web/struct.App.html#method.default_service)
   pub fn default_service<F, U>(mut self, svc: F) -> Self
   where
     F: IntoServiceFactory<U, ServiceRequest>,
@@ -107,6 +116,7 @@ where
     self
   }
 
+  /// Drop in for [`actix_web::App::external_resource`](https://docs.rs/actix-web/*/actix_web/struct.App.html#method.external_resource)
   pub fn external_resource<N, U>(mut self, name: N, url: U) -> Self
   where
     N: AsRef<str>,
@@ -116,6 +126,7 @@ where
     self
   }
 
+  /// Drop in for [`actix_web::App::wrap`](https://docs.rs/actix-web/*/actix_web/struct.App.html#method.wrap)
   pub fn wrap<M, B>(
     mut self,
     mw: M,
@@ -131,6 +142,7 @@ where
     }
   }
 
+  /// Drop in for [`actix_web::App::wrap_fn`](https://docs.rs/actix-web/*/actix_web/struct.App.html#method.wrap_fn)
   pub fn wrap_fn<F, R, B>(
     mut self,
     mw: F,
@@ -147,6 +159,8 @@ where
     }
   }
 
+  /// Add a new resource at **`openapi_path`** to expose the generated openapi schema and return an [actix_web::App](https://docs.rs/actix-web/latest/actix_web/struct.App.html)
+  #[allow(clippy::unwrap_used, clippy::expect_used)]
   pub fn build(self, openapi_path: &str) -> actix_web::App<T> {
     let open_api_spec = self.open_api_spec.read().unwrap().clone();
     self
@@ -155,16 +169,17 @@ where
       .service(resource(openapi_path).route(get().to(OASHandler::new(open_api_spec))))
   }
 
-  /// Updates the underlying spec with definitions and operations from the given factory.
-  fn update_from_def_holder<D: DefinitionHolder>(&mut self, factory: &mut D) {
+  /// Updates the underlying spec with definitions and operations from the given definition holder.
+  #[allow(clippy::unwrap_used)]
+  fn update_from_def_holder<D: DefinitionHolder>(&mut self, definition_holder: &mut D) {
     let mut open_api_spec = self.open_api_spec.write().unwrap();
-    let components = factory.components().into_iter().reduce(|mut acc, component| {
-      acc.schemas.extend(component.schemas.into_iter());
-      acc.responses.extend(component.responses.into_iter());
-      acc.security_schemes.extend(component.security_schemes.into_iter());
+    let components = definition_holder.components().into_iter().reduce(|mut acc, component| {
+      acc.schemas.extend(component.schemas);
+      acc.responses.extend(component.responses);
+      acc.security_schemes.extend(component.security_schemes);
       acc
     });
-    factory.update_path_items(&mut open_api_spec.paths.paths);
+    definition_holder.update_path_items(&mut open_api_spec.paths.paths);
     let mut paths = IndexMap::new();
     for (path, item) in mem::take(&mut open_api_spec.paths.paths) {
       let path = if path.starts_with('/') {
@@ -178,11 +193,12 @@ where
     open_api_spec.components = components;
 
     if !self.default_tags.is_empty() {
-      for pi in open_api_spec.paths.paths.values_mut() {
-        for op in pi.operations.values_mut() {
-          op.tags.append(&mut self.default_tags.clone());
-        }
-      }
+      open_api_spec
+        .paths
+        .paths
+        .values_mut()
+        .flat_map(|pi| pi.operations.values_mut())
+        .for_each(|op| op.tags.append(&mut self.default_tags.clone()))
     }
   }
 }

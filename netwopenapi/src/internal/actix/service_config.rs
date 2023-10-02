@@ -26,7 +26,7 @@ impl<'a> ServiceConfig<'a> {
   pub fn route(&mut self, path: &str, route: Route) -> &mut Self {
     let mut w = RouteWrapper::new(path, route);
     w.update_path_items(&mut self.item_map);
-    self.components.extend(w.components().into_iter());
+    self.components.extend(w.components());
     self.inner.route(path, w.inner);
     self
   }
@@ -37,7 +37,7 @@ impl<'a> ServiceConfig<'a> {
     F: DefinitionHolder + HttpServiceFactory + 'static,
   {
     factory.update_path_items(&mut self.item_map);
-    self.components.extend(factory.components().into_iter());
+    self.components.extend(factory.components());
     self.inner.service(factory);
     self
   }

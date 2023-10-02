@@ -1,29 +1,13 @@
-use crate::actix::ResponseWrapper;
-use crate::internal::components::error::ApiErrorComponent;
-use crate::path_item_definition::PathItemDefinition;
-use actix_web::web::{Data, ReqData};
-use actix_web::Responder;
+use crate::ApiErrorComponent;
+#[cfg(feature = "actix")]
+use crate::{PathItemDefinition, ResponseWrapper};
 use netwopenapi_models::paths::{MediaType, Parameter, RequestBody, Response, Responses};
 use netwopenapi_models::reference_or::ReferenceOr;
 use netwopenapi_models::security::SecurityScheme;
-use netwopenapi_models::InstanceType;
 use netwopenapi_models::Schema;
 use std::collections::BTreeMap;
+#[cfg(feature = "actix")]
 use std::future::Future;
-
-pub mod empty;
-pub mod error;
-pub mod form;
-pub mod json;
-#[cfg(any(feature = "multipart", feature = "extras"))]
-pub mod multipart;
-pub mod parameters;
-pub mod simple;
-
-pub trait TypedSchema {
-  fn schema_type() -> InstanceType;
-  fn format() -> Option<String>;
-}
 
 pub trait ApiComponent {
   fn content_type() -> String {
@@ -83,7 +67,6 @@ pub trait ApiComponent {
     vec![]
   }
 }
-
 impl<T> ApiComponent for Option<T>
 where
   T: ApiComponent,
@@ -170,7 +153,8 @@ where
   }
 }
 
-impl<T> ApiComponent for Data<T> {
+#[cfg(feature = "actix")]
+impl<T> ApiComponent for actix_web::web::Data<T> {
   fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
     vec![]
   }
@@ -180,7 +164,8 @@ impl<T> ApiComponent for Data<T> {
   }
 }
 
-impl<T: Clone> ApiComponent for ReqData<T> {
+#[cfg(feature = "actix")]
+impl<T: Clone> ApiComponent for actix_web::web::ReqData<T> {
   fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
     vec![]
   }
@@ -190,10 +175,11 @@ impl<T: Clone> ApiComponent for ReqData<T> {
   }
 }
 
+#[cfg(feature = "actix")]
 impl<F, R, P> ApiComponent for ResponseWrapper<F, P>
 where
   F: Future<Output = R>,
-  R: Responder + ApiComponent,
+  R: actix_web::Responder + ApiComponent,
   P: PathItemDefinition,
 {
   fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {

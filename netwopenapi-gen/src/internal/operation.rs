@@ -5,17 +5,17 @@ use quote::{quote, ToTokens};
 use std::collections::BTreeMap;
 use syn::{Expr, ExprLit, Lit, LitStr, Type};
 
-pub struct Operation<'a> {
-  pub args: &'a [Type],
-  pub responder_wrapper: &'a TokenStream,
-  pub fn_name: &'a str,
-  pub operation_id: Option<Expr>,
-  pub deprecated: Option<bool>,
-  pub summary: Option<&'a String>,
-  pub description: Option<&'a str>,
-  pub tags: &'a [String],
-  pub scopes: BTreeMap<String, Vec<String>>,
-  pub error_codes: &'a [u16],
+pub(crate) struct Operation<'a> {
+  pub(crate) args: &'a [Type],
+  pub(crate) responder_wrapper: &'a TokenStream,
+  pub(crate) fn_name: &'a str,
+  pub(crate) operation_id: Option<Expr>,
+  pub(crate) deprecated: Option<bool>,
+  pub(crate) summary: Option<&'a String>,
+  pub(crate) description: Option<&'a str>,
+  pub(crate) tags: &'a [String],
+  pub(crate) scopes: BTreeMap<String, Vec<String>>,
+  pub(crate) error_codes: &'a [u16],
 }
 
 impl<'a> ToTokens for Operation<'a> {
@@ -75,7 +75,7 @@ impl<'a> ToTokens for Operation<'a> {
     } else {
       let error_codes = self.error_codes;
       quote! {
-        let available_error_codes = vec![#(#error_codes)*,];
+        let available_error_codes = vec![#(#error_codes,)*];
         let responses = responses.responses
           .into_iter()
           .filter(|(status, _)| {

@@ -3,11 +3,11 @@ use quote::{quote, ToTokens};
 use std::collections::BTreeMap;
 use syn::Type;
 
-pub mod models;
+pub(crate) mod models;
 
-pub struct Security<'a> {
-  pub args: &'a [Type],
-  pub scopes: &'a BTreeMap<String, Vec<String>>,
+pub(crate) struct Security<'a> {
+  pub(crate) args: &'a [Type],
+  pub(crate) scopes: &'a BTreeMap<String, Vec<String>>,
 }
 
 impl<'a> ToTokens for Security<'a> {

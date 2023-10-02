@@ -1,0 +1,19 @@
+[package]
+name = "netwopenapi-gen-test"
+version = "0.1.0"
+
+authors.workspace = true
+edition.workspace = true
+repository.workspace = true
+publish.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+actix-web = { workspace = true }
+assert-json-diff = { workspace = true }
+netwopenapi = { path = "../netwopenapi" }
+netwopenapi-core = { path = "../netwopenapi-core" }
+netwopenapi-gen = { path = "../netwopenapi-gen" }
+schemars = { workspace = true }
+serde = { version = "1.0.188", features = ["derive"] }
+serde_json = { workspace = true }

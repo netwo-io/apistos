@@ -1,10 +1,10 @@
 use netwopenapi_models::paths::OperationType;
 
-pub mod handler;
-pub mod resource;
-pub mod route;
-pub mod scope;
-pub mod service_config;
+pub(crate) mod handler;
+pub(crate) mod resource;
+pub(crate) mod route;
+pub(crate) mod scope;
+pub(crate) mod service_config;
 
 mod utils;
 

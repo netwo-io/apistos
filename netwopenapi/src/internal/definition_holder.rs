@@ -11,11 +11,11 @@ pub trait DefinitionHolder {
   fn path(&self) -> &str;
   fn operations(&mut self) -> IndexMap<OperationType, Operation>;
   fn components(&mut self) -> Vec<Components>;
-  fn update_path_items(&mut self, path_op_map: &mut IndexMap<String, PathItem>) -> () {
+  fn update_path_items(&mut self, path_op_map: &mut IndexMap<String, PathItem>) {
     let ops = self.operations();
     if !ops.is_empty() {
       let op_map = path_op_map.entry(self.path().into()).or_insert_with(Default::default);
-      op_map.operations.extend(ops.into_iter());
+      op_map.operations.extend(ops);
     }
   }
 }
@@ -48,6 +48,7 @@ impl DefinitionHolder for Resource {
   }
 }
 
+#[allow(clippy::unimplemented)]
 impl<T> DefinitionHolder for Scope<T> {
   fn path(&self) -> &str {
     unimplemented!("Scope has multiple paths");
@@ -61,7 +62,7 @@ impl<T> DefinitionHolder for Scope<T> {
     mem::take(&mut self.components)
   }
 
-  fn update_path_items(&mut self, path_op_map: &mut IndexMap<String, PathItem>) -> () {
+  fn update_path_items(&mut self, path_op_map: &mut IndexMap<String, PathItem>) {
     for (path, item) in mem::take(&mut self.item_map) {
       let op_map = path_op_map.entry(path).or_insert_with(Default::default);
       op_map.operations.extend(item.operations.into_iter());
@@ -69,7 +70,7 @@ impl<T> DefinitionHolder for Scope<T> {
   }
 }
 
-// weird, should not happen ?
+#[allow(clippy::unimplemented)]
 impl<'a> DefinitionHolder for ServiceConfig<'a> {
   fn path(&self) -> &str {
     unimplemented!("ServiceConfig has multiple paths.");
@@ -83,7 +84,7 @@ impl<'a> DefinitionHolder for ServiceConfig<'a> {
     mem::take(&mut self.components)
   }
 
-  fn update_path_items(&mut self, path_op_map: &mut IndexMap<String, PathItem>) -> () {
+  fn update_path_items(&mut self, path_op_map: &mut IndexMap<String, PathItem>) {
     for (path, item) in mem::take(&mut self.item_map) {
       let op_map = path_op_map.entry(path).or_insert_with(Default::default);
       op_map.operations.extend(item.operations.into_iter());

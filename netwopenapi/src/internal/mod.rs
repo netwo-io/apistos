@@ -1,3 +1,2 @@
-pub mod actix;
-pub mod components;
-pub mod definition_holder;
+pub(crate) mod actix;
+pub(crate) mod definition_holder;

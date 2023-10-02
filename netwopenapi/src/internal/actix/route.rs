@@ -1,12 +1,12 @@
 use crate::internal::actix::utils::OperationUpdater;
 use crate::internal::actix::METHODS;
-use crate::path_item_definition::PathItemDefinition;
 use actix_service::ServiceFactory;
 use actix_web::dev::ServiceRequest;
 use actix_web::guard::Guard;
 use actix_web::http::Method;
 use actix_web::{Error, FromRequest, Handler, Responder};
 use indexmap::IndexMap;
+use netwopenapi_core::PathItemDefinition;
 use netwopenapi_models::components::Components;
 use netwopenapi_models::paths::{Operation, OperationType, PathItem};
 

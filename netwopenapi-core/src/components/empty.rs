@@ -1,4 +1,4 @@
-use super::ApiComponent;
+use crate::ApiComponent;
 use actix_web::dev::Payload;
 use actix_web::{HttpRequest, HttpResponse};
 use netwopenapi_models::reference_or::ReferenceOr;
