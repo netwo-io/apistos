@@ -81,12 +81,16 @@ pub struct OAuth2 {
 #[serde(rename_all = "camelCase")]
 pub struct OauthFlows {
   /// Configuration for the OAuth Implicit flow
+  #[serde(skip_serializing_if = "Option::is_none")]
   pub implicit: Option<OauthImplicit>,
   /// Configuration for the OAuth Resource Owner Password flow
+  #[serde(skip_serializing_if = "Option::is_none")]
   pub password: Option<OauthToken>,
   /// Configuration for the OAuth Client Credentials flow. Previously called `application` in OpenAPI 2.0.
+  #[serde(skip_serializing_if = "Option::is_none")]
   pub client_credentials: Option<OauthToken>,
   /// Configuration for the OAuth Authorization Code flow. Previously called `accessCode` in OpenAPI 2.0.
+  #[serde(skip_serializing_if = "Option::is_none")]
   pub authorization_code: Option<OauthToken>,
   /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions).
   #[serde(flatten, skip_serializing_if = "IndexMap::is_empty")]

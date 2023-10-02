@@ -140,7 +140,7 @@ pub fn derive_api_component(input: TokenStream) -> TokenStream {
   } = input;
 
   let (_, ty_generics, where_clause) = generics.split_for_impl();
-  let schema_impl = Schemas;
+  let schema_impl = Schemas { deprecated: false };
   quote!(
     #[automatically_derived]
     impl #generics netwopenapi::ApiComponent for #ident #ty_generics #where_clause {
@@ -311,7 +311,9 @@ pub fn derive_api_header(input: TokenStream) -> TokenStream {
     .expect_or_abort("expected #[openapi_header(...)] attribute to be present when used with ApiHeader derive trait");
 
   let (_, ty_generics, where_clause) = generics.split_for_impl();
-  let schema_impl = Schemas;
+  let schema_impl = Schemas {
+    deprecated: openapi_header_attributes.deprecated.unwrap_or_default(),
+  };
   quote!(
     #[automatically_derived]
     impl #generics netwopenapi::ApiComponent for #ident #ty_generics #where_clause {
@@ -408,7 +410,6 @@ pub fn derive_api_cookie(input: TokenStream) -> TokenStream {
 /// - `status(...)` a list of possible error status with
 ///   - `code = 000` a **required** http status code
 ///   - `description = "..."` an optional description, default is the canonical reason of the given status code
-///   - `with_schema = false` an optional parameter to indicate whether or not a schema should be included for this error definition in which case [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html) should be derived
 #[proc_macro_error]
 #[proc_macro_derive(ApiErrorComponent, attributes(openapi_error))]
 pub fn derive_api_error(input: TokenStream) -> TokenStream {
@@ -662,3 +663,13 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
   )
   .into()
 }
+
+// Imports bellow aim at making cargo-cranky happy. Those dependencies are necessary for doc-test.
+#[cfg(test)]
+use garde as _;
+#[cfg(test)]
+use netwopenapi as _;
+#[cfg(test)]
+use schemars as _;
+#[cfg(test)]
+use serde as _;

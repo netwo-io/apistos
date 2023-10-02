@@ -60,7 +60,9 @@ impl ToTokens for OpenapiCookieAttributeExtended {
     let deprecated = self.deprecated.unwrap_or_default();
     let deprecated = quote!(#deprecated);
 
-    let schema_impl = Schemas;
+    let schema_impl = Schemas {
+      deprecated: self.deprecated.unwrap_or_default(),
+    };
     tokens.extend(quote! {
       #schema_impl
 

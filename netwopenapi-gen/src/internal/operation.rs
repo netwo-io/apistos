@@ -75,7 +75,7 @@ impl<'a> ToTokens for Operation<'a> {
     } else {
       let error_codes = self.error_codes;
       quote! {
-        let available_error_codes = vec![#(#error_codes)*,];
+        let available_error_codes = vec![#(#error_codes,)*];
         let responses = responses.responses
           .into_iter()
           .filter(|(status, _)| {

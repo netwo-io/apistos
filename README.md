@@ -128,6 +128,9 @@ For a complete example, see [the sample petstore](https://github.com/netwo-io/ne
 | `url`          | Enables documenting types from `url`                                     | [`url`](https://crates.io/crates/url)                         |
 | `extras`       | Enables `chrono`, `multipart`, `rust_decimal`, `uuid` and `url` features | All from previous features                                    |
 
+### What's next
+- Handle schema for errors using ApiErrorComponent derive macro
+
 ### Alternatives
 
 | Crate                                             | Key differences                                                                                                                                                                                                                                                                                                                               |

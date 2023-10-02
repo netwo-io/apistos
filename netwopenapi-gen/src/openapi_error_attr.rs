@@ -53,7 +53,6 @@ impl ToTokens for OpenapiErrorAttribute {
 pub(crate) struct ErrorDefinition {
   pub(crate) code: u16,
   pub(crate) description: Option<String>,
-  pub(crate) with_schema: Option<bool>,
 }
 
 impl ToTokens for ErrorDefinition {
@@ -64,43 +63,11 @@ impl ToTokens for ErrorDefinition {
       Err(e) => abort!(Span::call_site(), format!("{e}")),
     };
     let description = self.description.as_deref().unwrap_or(default_description);
-    let content = if self.with_schema.unwrap_or_default() {
-      quote! {
-        content = {
-          let settings = schemars::gen::SchemaSettings::openapi3();
-          let mut gen = settings.into_generator();
-          let schema = <Self as netwopenapi::JsonSchema>::json_schema(&mut gen);
-          std::collections::BTreeMap::from_iter(vec![(
-            "application/json".to_string(),
-            netwopenapi::reference_or::ReferenceOr::Object(netwopenapi::paths::MediaType {
-              schema: Some(netwopenapi::reference_or::ReferenceOr::Object(schema)),
-              ..Default::default()
-            }),
-          )])
-        },
-      }
-    } else {
-      quote!()
-    };
-    let schema = if self.with_schema.unwrap_or_default() {
-      quote! {
-        {
-          let schema_name = <Self as schemars::JsonSchema>::schema_name();
-          let settings = schemars::gen::SchemaSettings::openapi3();
-          let mut gen = settings.into_generator();
-          let schema = <Self as schemars::JsonSchema>::json_schema(&mut gen);
-          (schema_name, schema)
-        }
-      }
-    } else {
-      quote!(None)
-    };
     tokens.extend(quote! {
       ((#code.to_string(), netwopenapi::paths::Response {
         description: #description.to_string(),
-        #content
         ..Default::default()
-      }), #schema)
+      }), None)
     });
   }
 }

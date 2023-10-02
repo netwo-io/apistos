@@ -20,6 +20,7 @@ publish = true
 [workspace.dependencies]
 actix-service = "2"
 actix-web = "4"
+assert-json-diff = "2.0.2"
 convert_case = "0.6"
 darling = "0.20"
 indexmap = { version = "2", features = ["serde"] }

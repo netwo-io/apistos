@@ -9,7 +9,11 @@ publish.workspace = true
 rust-version.workspace = true
 
 [dependencies]
-schemars = { workspace = true }
+actix-web = { workspace = true }
+assert-json-diff = { workspace = true }
 netwopenapi = { path = "../netwopenapi" }
 netwopenapi-core = { path = "../netwopenapi-core" }
 netwopenapi-gen = { path = "../netwopenapi-gen" }
+schemars = { workspace = true }
+serde = { version = "1.0.188", features = ["derive"] }
+serde_json = { workspace = true }
