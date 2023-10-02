@@ -61,6 +61,10 @@ jobs:
               changes=true
             elif [[ "$change" == "netwopenapi-models" && "${{ matrix.crate }}" == "netwopenapi-models" && $changes == false ]]; then
               changes=true
+            elif [[ "$change" == "netwopenapi-gen-test" && "${{ matrix.crate }}" == "netwopenapi-gen-test" && $changes == false ]]; then
+              changes=true
+            elif [[ "$change" == "netwopenapi-core" && "${{ matrix.crate }}" == "netwopenapi-core" && $changes == false ]]; then
+              changes=true
             elif [[ "$change" == "netwopenapi" && "${{ matrix.crate }}" == "netwopenapi" && $changes == false ]]; then
               changes=true
             fi
