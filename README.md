@@ -14,6 +14,7 @@ An OpenAPI documentation tool exposing [OAS 3.0][OASv3.md] models as well as an 
 
 **Netwopenapi** is composed of three crates:
 - [`netwopenapi`](./netwopenapi): [actix-web](https://github.com/actix/actix-web) wrapper to generate an OpenAPI v3.0.3 documentation file
+- [`netwopenapi-core`](./netwopenapi-core): A set of traits and common models around [OpenAPI v3.0.3][OASv3.md]
 - [`netwopenapi-gen`](./netwopenapi-gen): macro utilities to generate [OpenAPI v3.0.3][OASv3.md] documentation from Rust models
 - [`netwopenapi-models`](./netwopenapi-models): [OpenAPI v3.0.3][OASv3.md] models with [`Schema`](https://docs.rs/schemars/latest/schemars/schema/enum.Schema.html) based on [schemars](https://github.com/GREsau/schemars) definition 
 
