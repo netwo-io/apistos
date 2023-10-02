@@ -13,7 +13,7 @@ actix-multipart = { workspace = true }
 actix-web = { workspace = true }
 assert-json-diff = { workspace = true }
 futures-core = { workspace = true }
-netwopenapi = { path = "../netwopenapi" }
+netwopenapi = { path = "../netwopenapi", features = ["multipart"] }
 netwopenapi-core = { path = "../netwopenapi-core" }
 netwopenapi-gen = { path = "../netwopenapi-gen" }
 schemars = { workspace = true }
