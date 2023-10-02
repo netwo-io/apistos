@@ -23,7 +23,11 @@ fn api_security_derive_api_key() {
       "type": "apiKey"
     })
   );
+}
 
+#[test]
+#[allow(dead_code)]
+fn api_security_derive_api_key_named() {
   #[derive(ApiSecurity)]
   #[openapi_security(
     name = "my_api_key",
@@ -55,7 +59,7 @@ fn api_security_derive_oauth2() {
     scopes(scope = "all:read", description = "Read all the things"),
     scopes(scope = "all:write", description = "Write all the things")
   ))))))]
-  pub struct ApiKey;
+  struct ApiKey;
 
   let securities = ApiKey::securities();
   assert_eq!(securities.len(), 1);
@@ -77,7 +81,11 @@ fn api_security_derive_oauth2() {
       "type": "oauth2"
     })
   );
+}
 
+#[test]
+#[allow(dead_code)]
+fn api_security_derive_oauth2_password() {
   #[derive(ApiSecurity)]
   #[openapi_security(scheme(security_type(oauth2(flows(password(
     token_url = "https://token.com",
@@ -85,7 +93,7 @@ fn api_security_derive_oauth2() {
     scopes(scope = "all:read", description = "Read all the things"),
     scopes(scope = "all:write", description = "Write all the things")
   ))))))]
-  pub struct ApiKey2;
+  struct ApiKey2;
 
   let securities = ApiKey2::securities();
   assert_eq!(securities.len(), 1);
@@ -114,7 +122,7 @@ fn api_security_derive_oauth2() {
 fn api_security_derive_http() {
   #[derive(ApiSecurity)]
   #[openapi_security(scheme(security_type(http(scheme = "bearer", bearer_format = "JWT"))))]
-  pub struct ApiKeyHttp;
+  struct ApiKeyHttp;
 
   let securities = ApiKeyHttp::securities();
   assert_eq!(securities.len(), 1);
@@ -135,7 +143,7 @@ fn api_security_derive_http() {
 fn api_security_derive_openid_connect() {
   #[derive(ApiSecurity)]
   #[openapi_security(scheme(security_type(open_id_connect(open_id_connect_url = "https://connect.com"))))]
-  pub struct ApiKeyOpenIdConnect;
+  struct ApiKeyOpenIdConnect;
 
   let securities = ApiKeyOpenIdConnect::securities();
   assert_eq!(securities.len(), 1);

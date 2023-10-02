@@ -2,7 +2,7 @@ use assert_json_diff::assert_json_eq;
 use schemars::JsonSchema;
 use serde_json::json;
 
-use crate::assert_schema;
+use crate::utils::assert_schema;
 use netwopenapi_core::ApiComponent;
 use netwopenapi_gen::ApiCookie;
 
@@ -15,7 +15,7 @@ fn api_cookie_derive() {
     description = "Organization of the current caller",
     required = true
   )]
-  pub struct OrganizationSlugCookie(String);
+  struct OrganizationSlugCookie(String);
 
   let schema = <OrganizationSlugCookie as ApiComponent>::schema();
   let child_schemas = <OrganizationSlugCookie as ApiComponent>::child_schemas();
@@ -25,7 +25,7 @@ fn api_cookie_derive() {
   assert!(!header_parameter.is_empty());
   let (schema_name, schema) = schema.expect("schema should be defined");
   assert_eq!(schema_name, "OrganizationSlugCookie");
-  assert_schema(schema.clone());
+  assert_schema(&schema.clone());
   let json = serde_json::to_value(schema).expect("Unable to serialize as Json");
   assert_json_eq!(
     json,
@@ -63,7 +63,7 @@ fn api_cookie_derive_deprecated() {
     required = true
   )]
   #[deprecated]
-  pub struct OrganizationSlugCookie(String);
+  struct OrganizationSlugCookie(String);
 
   let schema = <OrganizationSlugCookie as ApiComponent>::schema();
   let child_schemas = <OrganizationSlugCookie as ApiComponent>::child_schemas();
@@ -73,7 +73,7 @@ fn api_cookie_derive_deprecated() {
   assert!(!header_parameter.is_empty());
   let (schema_name, schema) = schema.expect("schema should be defined");
   assert_eq!(schema_name, "OrganizationSlugCookie");
-  assert_schema(schema.clone());
+  assert_schema(&schema.clone());
   let json = serde_json::to_value(schema).expect("Unable to serialize as Json");
   assert_json_eq!(
     json,
@@ -101,7 +101,11 @@ fn api_cookie_derive_deprecated() {
       }
     })
   );
+}
 
+#[test]
+#[allow(dead_code)]
+fn api_cookie_derive_deprecated_attribute() {
   #[derive(JsonSchema, ApiCookie)]
   #[openapi_cookie(
     name = "X-Organization-Slug",
@@ -109,7 +113,7 @@ fn api_cookie_derive_deprecated() {
     required = true,
     deprecated = true
   )]
-  pub struct OrganizationSlugCookie2(String);
+  struct OrganizationSlugCookie2(String);
 
   let schema = <OrganizationSlugCookie2 as ApiComponent>::schema();
   let child_schemas = <OrganizationSlugCookie2 as ApiComponent>::child_schemas();
@@ -119,7 +123,7 @@ fn api_cookie_derive_deprecated() {
   assert!(!header_parameter.is_empty());
   let (schema_name, schema) = schema.expect("schema should be defined");
   assert_eq!(schema_name, "OrganizationSlugCookie2");
-  assert_schema(schema.clone());
+  assert_schema(&schema.clone());
   let json = serde_json::to_value(schema).expect("Unable to serialize as Json");
   assert_json_eq!(
     json,

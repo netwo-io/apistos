@@ -2,10 +2,9 @@ use assert_json_diff::assert_json_eq;
 use schemars::JsonSchema;
 use serde_json::json;
 
+use crate::utils::assert_schema;
 use netwopenapi_core::ApiComponent;
 use netwopenapi_gen::ApiComponent;
-
-use crate::assert_schema;
 
 #[test]
 #[allow(dead_code)]
@@ -21,7 +20,7 @@ fn api_component_derive() {
   assert!(name_child_schemas.is_empty());
   let (schema_name, schema) = name_schema.expect("schema should be defined");
   assert_eq!(schema_name, "Name");
-  assert_schema(schema.clone());
+  assert_schema(&schema.clone());
   let json = serde_json::to_value(schema).expect("Unable to serialize as Json");
   assert_json_eq!(
     json,
@@ -44,7 +43,10 @@ fn api_component_derive() {
 #[allow(dead_code)]
 fn api_component_derive_with_generic() {
   #[derive(JsonSchema, ApiComponent)]
-  struct Name<T: JsonSchema> {
+  struct Name<T>
+  where
+    T: JsonSchema,
+  {
     name: String,
     id: T,
   }
@@ -61,7 +63,7 @@ fn api_component_derive_with_generic() {
   assert_eq!(name_child_schemas.len(), 1);
   let (schema_name, schema) = name_schema.expect("schema should be defined");
   assert_eq!(schema_name, "Name_for_Test");
-  assert_schema(schema.clone());
+  assert_schema(&schema.clone());
   let json = serde_json::to_value(schema).expect("Unable to serialize as Json");
   assert_json_eq!(
     json,
@@ -85,7 +87,7 @@ fn api_component_derive_with_generic() {
 
   let (child_schema_name, child_schema) = name_child_schemas.first().expect("missing child schema");
   assert_eq!(child_schema_name, "Test");
-  assert_schema(child_schema.clone());
+  assert_schema(&child_schema.clone());
   let json = serde_json::to_value(child_schema).expect("Unable to serialize as Json");
   assert_json_eq!(
     json,
@@ -130,7 +132,7 @@ fn api_component_derive_with_flatten() {
   assert!(name_child_schemas.is_empty());
   let (schema_name, schema) = name_schema.expect("schema should be defined");
   assert_eq!(schema_name, "Name");
-  assert_schema(schema.clone());
+  assert_schema(&schema.clone());
   let json = serde_json::to_value(schema).expect("Unable to serialize as Json");
   assert_json_eq!(
     json,
@@ -173,7 +175,7 @@ fn api_component_derive_with_format() {
   assert!(name_child_schemas.is_empty());
   let (schema_name, schema) = name_schema.expect("schema should be defined");
   assert_eq!(schema_name, "Name");
-  assert_schema(schema.clone());
+  assert_schema(&schema.clone());
   let json = serde_json::to_value(schema).expect("Unable to serialize as Json");
   assert_json_eq!(
     json,
@@ -210,7 +212,7 @@ fn api_component_derive_recursive() {
   assert_eq!(name_child_schemas.len(), 1);
   let (schema_name, schema) = name_schema.expect("schema should be defined");
   assert_eq!(schema_name, "Name");
-  assert_schema(schema.clone());
+  assert_schema(&schema.clone());
   let json = serde_json::to_value(schema).expect("Unable to serialize as Json");
   assert_json_eq!(
     json,
@@ -232,7 +234,7 @@ fn api_component_derive_recursive() {
 
   let (child_schema_name, child_schema) = name_child_schemas.first().expect("missing child schema");
   assert_eq!(child_schema_name, "Name");
-  assert_schema(child_schema.clone());
+  assert_schema(&child_schema.clone());
   let json = serde_json::to_value(child_schema).expect("Unable to serialize as Json");
   assert_json_eq!(
     json,

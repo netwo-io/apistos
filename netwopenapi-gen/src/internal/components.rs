@@ -17,7 +17,7 @@ impl<'a> ToTokens for Components<'a> {
     } else {
       let error_codes = self.error_codes;
       quote! {
-        let available_error_codes = vec![#(#error_codes,)*];
+        let available_error_codes = [#(#error_codes,)*];
         error_schemas
           .into_iter()
           .for_each(|(status, s)| {

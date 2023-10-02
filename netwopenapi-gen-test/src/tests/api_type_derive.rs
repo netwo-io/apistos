@@ -2,10 +2,9 @@ use assert_json_diff::assert_json_eq;
 use schemars::schema::InstanceType;
 use serde_json::json;
 
+use crate::utils::assert_schema;
 use netwopenapi_core::{ApiComponent, TypedSchema};
 use netwopenapi_gen::ApiType;
-
-use crate::assert_schema;
 
 #[test]
 #[allow(dead_code)]
@@ -29,7 +28,7 @@ fn api_type_derive() {
   assert!(name_child_schemas.is_empty());
   let (schema_name, schema) = name_schema.expect("schema should be defined");
   assert_eq!(schema_name, "Name");
-  assert_schema(schema.clone());
+  assert_schema(&schema.clone());
   let json = serde_json::to_value(schema).expect("Unable to serialize as Json");
   assert_json_eq!(
     json,
@@ -62,7 +61,7 @@ fn api_type_derive_with_format() {
   assert!(name_child_schemas.is_empty());
   let (schema_name, schema) = name_schema.expect("schema should be defined");
   assert_eq!(schema_name, "Name");
-  assert_schema(schema.clone());
+  assert_schema(&schema.clone());
   let json = serde_json::to_value(schema).expect("Unable to serialize as Json");
   assert_json_eq!(
     json,
@@ -99,7 +98,7 @@ fn api_type_derive_with_format_complex_struct() {
   assert!(name_child_schemas.is_empty());
   let (schema_name, schema) = name_schema.expect("schema should be defined");
   assert_eq!(schema_name, "Name");
-  assert_schema(schema.clone());
+  assert_schema(&schema.clone());
   let json = serde_json::to_value(schema).expect("Unable to serialize as Json");
   assert_json_eq!(
     json,

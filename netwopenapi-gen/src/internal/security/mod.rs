@@ -44,7 +44,6 @@ impl<'a> ToTokens for Security<'a> {
           let scopes: Vec<String> = needed_scopes.get(&security_requirement_name).cloned().unwrap_or_default();
           security_requirements.push(netwopenapi::security::SecurityRequirement {
             requirements: std::collections::BTreeMap::from_iter(vec![(security_requirement_name, scopes)]),
-            ..Default::default()
           });
         }
         securities.append(&mut security_requirements);
