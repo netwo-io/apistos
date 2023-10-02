@@ -52,43 +52,17 @@ jobs:
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Resolve changed paths
-        id: changes
-        run: |
-          changes=false
-          while read -r change; do
-            if [[ "$change" == "netwopenapi-gen" && "${{ matrix.crate }}" == "netwopenapi-gen" && $changes == false ]]; then
-              changes=true
-            elif [[ "$change" == "netwopenapi-models" && "${{ matrix.crate }}" == "netwopenapi-models" && $changes == false ]]; then
-              changes=true
-            elif [[ "$change" == "netwopenapi-gen-test" && "${{ matrix.crate }}" == "netwopenapi-gen-test" && $changes == false ]]; then
-              changes=true
-            elif [[ "$change" == "netwopenapi-core" && "${{ matrix.crate }}" == "netwopenapi-core" && $changes == false ]]; then
-              changes=true
-            elif [[ "$change" == "netwopenapi" && "${{ matrix.crate }}" == "netwopenapi" && $changes == false ]]; then
-              changes=true
-            fi
-          done < <(git diff --name-only ${{ github.sha }}~ ${{ github.sha }} | grep .rs | awk -F \/ '{print $1}')
-          echo "${{ matrix.crate }} changes: $changes"
-          echo "changes=$changes" >> $GITHUB_OUTPUT
-
       - name: Check format
         run: |
-          if [[ ${{ steps.changes.outputs.changes }} == true ]]; then
-            rustup component add rustfmt
-            cargo fmt --all --check --package ${{ matrix.crate }}
-          fi
+          rustup component add rustfmt
+          cargo fmt --all --check --package ${{ matrix.crate }}
 
       - name: Check cranky
         run: |
-          if [[ ${{ steps.changes.outputs.changes }} == true ]]; then
-            rustup component add clippy
-            cargo install cargo-cranky --force
-            cargo cranky --no-deps --all-features --tests --package ${{ matrix.crate }} -- -D warnings -D clippy::print_stdout
-          fi
+          rustup component add clippy
+          cargo install cargo-cranky --force
+          cargo cranky --no-deps --all-features --tests --package ${{ matrix.crate }} -- -D warnings -D clippy::print_stdout
 
       - name: Run tests
         run: |
-          if [[ ${{ steps.changes.outputs.changes }} == true ]]; then
-            cargo test --all-features --package ${{ matrix.crate }}
-          fi
+          cargo test --all-features --package ${{ matrix.crate }}
