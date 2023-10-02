@@ -1,0 +1,101 @@
+name: netwopenapi build
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - "**.rs"
+      - "**Cargo.toml"
+  push:
+    branches:
+      - main
+    paths:
+      - "**.rs"
+      - "**Cargo.toml"
+  workflow_dispatch:
+env:
+  CARGO_TERM_COLOR: always
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        crate:
+          - netwopenapi
+          - netwopenapi-core
+          - netwopenapi-gen
+          - netwopenapi-gen-test
+          - netwopenapi-models
+      fail-fast: true
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Resolve changed paths
+        id: changes
+        run: |
+          changes=false
+          while read -r change; do
+            if [[ "$change" == "netwopenapi-gen" && "${{ matrix.crate }}" == "netwopenapi-gen" && $changes == false ]]; then
+              changes=true
+            elif [[ "$change" == "netwopenapi-models" && "${{ matrix.crate }}" == "netwopenapi-models" && $changes == false ]]; then
+              changes=true
+            elif [[ "$change" == "netwopenapi-gen-test" && "${{ matrix.crate }}" == "netwopenapi-gen-test" && $changes == false ]]; then
+              changes=true
+            elif [[ "$change" == "netwopenapi-core" && "${{ matrix.crate }}" == "netwopenapi-core" && $changes == false ]]; then
+              changes=true
+            elif [[ "$change" == "netwopenapi" && "${{ matrix.crate }}" == "netwopenapi" && $changes == false ]]; then
+              changes=true
+            fi
+          done < <(git diff --name-only ${{ github.sha }}~ ${{ github.sha }} | grep .rs | awk -F \/ '{print $1}')
+          echo "${{ matrix.crate }} changes: $changes"
+          echo "changes=$changes" >> $GITHUB_OUTPUT
+
+      - name: Check format
+        run: |
+          if [[ ${{ steps.changes.outputs.changes }} == true ]]; then
+            rustup component add rustfmt
+            cargo fmt --all --check --package ${{ matrix.crate }}
+          fi
+
+      - name: Check cranky
+        run: |
+          if [[ ${{ steps.changes.outputs.changes }} == true ]]; then
+            rustup component add clippy
+            cargo install cargo-cranky --force
+            cargo cranky --no-deps --all-features --tests --package ${{ matrix.crate }} -- -D warnings -D clippy::print_stdout
+          fi
+
+      - name: Check deny
+        run: |
+          if [[ ${{ steps.changes.outputs.changes }} == true ]]; then
+            cargo install cargo-deny --force
+            cargo deny check licenses sources advisories --package ${{ matrix.crate }}
+          fi
+
+      - name: Run tests
+        run: |
+          if [[ ${{ steps.changes.outputs.changes }} == true ]]; then
+            cargo test --all-features --package ${{ matrix.crate }}
+          fi
