@@ -19,12 +19,16 @@ actix-web = { workspace = true }
 indexmap = { workspace = true }
 once_cell = { workspace = true }
 regex = { workspace = true }
+schemars = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 
 netwopenapi-core = { path = "../netwopenapi-core" }
 netwopenapi-gen = { path = "../netwopenapi-gen" }
 netwopenapi-models = { path = "../netwopenapi-models" }
+
+[dev-dependencies]
+netwopenapi-models = { path = "../netwopenapi-models", features = ["deserialize"] }
 
 [features]
 # query related features

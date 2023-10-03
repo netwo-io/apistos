@@ -32,7 +32,7 @@ where
   }
 
   fn parameters() -> Vec<Parameter> {
-    let schema = T::schema().map(|(_, sch)| sch).or_else(Self::raw_schema);
+    let schema = T::schema().map(|(_, sch)| sch).or_else(|| Self::raw_schema());
 
     if let Some(schema) = schema {
       parameters_for_schema(schema, Self::required())
@@ -69,7 +69,7 @@ where
   }
 
   fn parameters() -> Vec<Parameter> {
-    let schema = T::schema().map(|(_, sch)| sch).or_else(Self::raw_schema);
+    let schema = T::schema().map(|(_, sch)| sch).or_else(|| Self::raw_schema());
     if let Some(schema) = schema {
       parameters_for_schema(schema, Self::required())
     } else {
@@ -77,6 +77,99 @@ where
     }
   }
 }
+
+macro_rules! impl_path_tuple ({ $($ty:ident),+ } => {
+  impl<$($ty,)+> ApiComponent for Path<($($ty,)+)>
+  where
+    $($ty: ApiComponent,)+
+  {
+    // always required in Path
+    fn required() -> bool {
+      true
+    }
+
+    fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
+      vec![]
+    }
+
+    fn raw_schema() -> Option<ReferenceOr<Schema>> {
+      None
+    }
+
+    fn schema() -> Option<(String, ReferenceOr<Schema>)> {
+      None
+    }
+
+    fn request_body() -> Option<RequestBody> {
+      None
+    }
+
+    fn parameters() -> Vec<Parameter> {
+      let mut parameters = vec![];
+      $(
+        let schema = $ty::schema().map(|(_, sch)| sch).or_else($ty::raw_schema);
+
+        if let Some(schema) = schema {
+          parameters.append(&mut parameters_for_schema(schema, Self::required()));
+        }
+      )+
+      parameters
+    }
+  }
+
+  #[cfg(feature = "garde")]
+  impl<$($ty,)+> ApiComponent for garde_actix_web::web::Path<($($ty,)+)>
+  where
+    $($ty: ApiComponent,)+
+  {
+
+    fn required() -> bool {
+      true
+    }
+
+    fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
+      vec![]
+    }
+
+    fn raw_schema() -> Option<ReferenceOr<Schema>> {
+      None
+    }
+
+    fn schema() -> Option<(String, ReferenceOr<Schema>)> {
+      None
+    }
+
+    fn request_body() -> Option<RequestBody> {
+      None
+    }
+
+    fn parameters() -> Vec<Parameter> {
+      let mut parameters = vec![];
+      $(
+        let schema = $ty::schema().map(|(_, sch)| sch).or_else($ty::raw_schema);
+
+        if let Some(schema) = schema {
+          parameters.append(&mut parameters_for_schema(schema, Self::required()));
+        }
+      )+
+      parameters
+    }
+  }
+});
+
+impl_path_tuple!(A);
+impl_path_tuple!(A, B);
+impl_path_tuple!(A, B, C);
+impl_path_tuple!(A, B, C, D);
+impl_path_tuple!(A, B, C, D, E);
+impl_path_tuple!(A, B, C, D, E, F);
+impl_path_tuple!(A, B, C, D, E, F, G);
+impl_path_tuple!(A, B, C, D, E, F, G, H);
+impl_path_tuple!(A, B, C, D, E, F, G, H, I);
+impl_path_tuple!(A, B, C, D, E, F, G, H, I, J);
+impl_path_tuple!(A, B, C, D, E, F, G, H, I, J, K);
+impl_path_tuple!(A, B, C, D, E, F, G, H, I, J, K, L);
+impl_path_tuple!(A, B, C, D, E, F, G, H, I, J, K, L, M);
 
 fn parameters_for_schema(schema: ReferenceOr<Schema>, required: bool) -> Vec<Parameter> {
   let mut parameters = vec![];

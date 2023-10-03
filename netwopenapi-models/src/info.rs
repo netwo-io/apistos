@@ -4,6 +4,7 @@ use serde_json::Value;
 
 /// The object provides metadata about the API. The metadata MAY be used by the clients if needed, and MAY be presented in editing or documentation generation tools for convenience.
 #[derive(Serialize, Clone, Debug, Default)]
+#[cfg_attr(any(test, feature = "deserialize"), derive(serde::Deserialize, PartialEq))]
 #[serde(rename_all = "camelCase")]
 pub struct Info {
   /// The title of the API
@@ -29,6 +30,7 @@ pub struct Info {
 
 /// Contact information for the exposed API.
 #[derive(Serialize, Clone, Debug, Default)]
+#[cfg_attr(any(test, feature = "deserialize"), derive(serde::Deserialize, PartialEq))]
 #[serde(rename_all = "camelCase")]
 pub struct Contact {
   /// The identifying name of the contact person/organization.
@@ -47,6 +49,7 @@ pub struct Contact {
 
 /// License information for the exposed API.
 #[derive(Serialize, Clone, Debug, Default)]
+#[cfg_attr(any(test, feature = "deserialize"), derive(serde::Deserialize, PartialEq))]
 #[serde(rename_all = "camelCase")]
 pub struct License {
   /// The license name used for the API.

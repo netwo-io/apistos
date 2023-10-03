@@ -13,3 +13,6 @@ pub use netwopenapi_gen::{api_operation, ApiComponent, ApiCookie, ApiErrorCompon
 
 pub use indexmap::IndexMap;
 pub use netwopenapi_models::*;
+
+// Imports bellow aim at making cargo-cranky happy. Those dependencies are necessary for integration-test.
+use schemars as _;

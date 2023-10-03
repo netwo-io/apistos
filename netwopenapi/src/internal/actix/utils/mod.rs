@@ -19,6 +19,7 @@ impl OperationUpdater for Operation {
       param_names.push(c[1].to_owned());
       Into::<Cow<'static, str>>::into(":")
     });
+    param_names.reverse();
 
     for param in self
       .parameters
@@ -39,5 +40,76 @@ impl OperationUpdater for Operation {
         break;
       }
     }
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use crate::internal::actix::utils::OperationUpdater;
+  use netwopenapi_models::paths::{Operation, Parameter, ParameterIn};
+  use netwopenapi_models::reference_or::ReferenceOr;
+
+  #[test]
+  fn simple_path_parameter_name_replacement() {
+    let mut operation = Operation {
+      parameters: vec![ReferenceOr::Object(Parameter {
+        name: "".to_string(),
+        _in: ParameterIn::Path,
+        ..Default::default()
+      })],
+      ..Default::default()
+    };
+
+    operation.update_path_parameter_name_from_path("/test/{plop_id}/plop");
+
+    let first_parameter_name = operation
+      .parameters
+      .first()
+      .and_then(|p| match p {
+        ReferenceOr::Reference { .. } => None,
+        ReferenceOr::Object(obj) => Some(obj.name.clone()),
+      })
+      .unwrap_or_default();
+    assert_eq!(first_parameter_name, "plop_id".to_string());
+  }
+
+  #[test]
+  fn multiple_path_parameter_name_replacement() {
+    let mut operation = Operation {
+      parameters: vec![
+        ReferenceOr::Object(Parameter {
+          name: "".to_string(),
+          _in: ParameterIn::Path,
+          ..Default::default()
+        }),
+        ReferenceOr::Object(Parameter {
+          name: "".to_string(),
+          _in: ParameterIn::Path,
+          ..Default::default()
+        }),
+      ],
+      ..Default::default()
+    };
+
+    operation.update_path_parameter_name_from_path("/test/{plop_id}/plop/{clap_id}");
+
+    let first_parameter_name = operation
+      .parameters
+      .first()
+      .and_then(|p| match p {
+        ReferenceOr::Reference { .. } => None,
+        ReferenceOr::Object(obj) => Some(obj.name.clone()),
+      })
+      .unwrap_or_default();
+    let second_parameter_name = operation
+      .parameters
+      .last()
+      .and_then(|p| match p {
+        ReferenceOr::Reference { .. } => None,
+        ReferenceOr::Object(obj) => Some(obj.name.clone()),
+      })
+      .unwrap_or_default();
+    assert_eq!(first_parameter_name, "plop_id".to_string());
+    assert_eq!(second_parameter_name, "clap_id".to_string());
   }
 }

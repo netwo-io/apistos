@@ -2,13 +2,14 @@ use schemars::schema::Schema;
 use serde::Serialize;
 
 #[derive(Serialize, Clone, Debug)]
+#[cfg_attr(any(test, feature = "deserialize"), derive(serde::Deserialize, PartialEq))]
 #[serde(untagged)]
 pub enum ReferenceOr<T: Clone> {
+  Object(T),
   Reference {
     #[serde(rename = "$ref")]
     _ref: String,
   },
-  Object(T),
 }
 
 impl From<Schema> for ReferenceOr<Schema> {
