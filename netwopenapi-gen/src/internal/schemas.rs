@@ -43,7 +43,7 @@ impl ToTokens for Schemas {
             netwopenapi::reference_or::ReferenceOr::Object(schemars::schema::Schema::Object(schema.schema))
           )
         };
-        Some((name.to_string(), schema))
+        Some((name, schema))
       }
     });
   }
