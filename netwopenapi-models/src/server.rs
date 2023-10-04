@@ -5,6 +5,7 @@ use std::collections::BTreeMap;
 
 /// An object representing a Server.
 #[derive(Serialize, Clone, Debug, Default)]
+#[cfg_attr(any(test, feature = "deserialize"), derive(serde::Deserialize, PartialEq))]
 #[serde(rename_all = "camelCase")]
 pub struct Server {
   /// A URL to the target host. This URL supports Server Variables and MAY be relative, to indicate that the host location is relative to the location where the OpenAPI document is being served. Variable substitutions will be made when a variable is named in `{`brackets`}`.
@@ -13,7 +14,7 @@ pub struct Server {
   #[serde(skip_serializing_if = "Option::is_none")]
   pub description: Option<String>,
   /// A map between a variable name and its value. The value is used for substitution in the server's URL template.
-  #[serde(skip_serializing_if = "BTreeMap::is_empty")]
+  #[serde(skip_serializing_if = "BTreeMap::is_empty", default)]
   pub variables: BTreeMap<String, ServerVariable>,
   /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions).
   #[serde(flatten, skip_serializing_if = "IndexMap::is_empty")]
@@ -22,6 +23,7 @@ pub struct Server {
 
 /// An object representing a Server Variable for server URL template substitution.
 #[derive(Serialize, Clone, Debug, Default)]
+#[cfg_attr(any(test, feature = "deserialize"), derive(serde::Deserialize, PartialEq))]
 #[serde(rename_all = "camelCase")]
 pub struct ServerVariable {
   /// An enumeration of string values to be used if the substitution options are from a limited set. The array SHOULD NOT be empty.

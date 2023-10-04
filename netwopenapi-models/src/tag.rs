@@ -5,6 +5,7 @@ use serde_json::Value;
 
 /// Adds metadata to a single tag that is used by the [Operation Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#operation-object). It is not mandatory to have a Tag Object per tag defined in the Operation Object instances.
 #[derive(Serialize, Clone, Debug, Default)]
+#[cfg_attr(any(test, feature = "deserialize"), derive(serde::Deserialize, PartialEq))]
 #[serde(rename_all = "camelCase")]
 pub struct Tag {
   /// The name of the tag.

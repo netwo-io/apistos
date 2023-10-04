@@ -2,6 +2,9 @@
 //!
 //! These models are not linked to any web framework.
 
+// schemars::Schema does not implement Eq
+#![allow(clippy::derive_partial_eq_without_eq)]
+
 use crate::components::Components;
 use crate::info::Info;
 use crate::paths::{ExternalDocumentation, Paths};
@@ -23,6 +26,7 @@ pub mod tag;
 pub use schemars::schema::*;
 
 #[derive(Serialize, Clone, Debug)]
+#[cfg_attr(any(test, feature = "deserialize"), derive(serde::Deserialize, PartialEq))]
 pub enum OpenApiVersion {
   #[serde(rename = "3.0.3")]
   OAS3_0,
@@ -36,6 +40,7 @@ impl Default for OpenApiVersion {
 
 /// This is the root document object of the [OpenAPI document](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#openapi-document).
 #[derive(Serialize, Clone, Debug, Default)]
+#[cfg_attr(any(test, feature = "deserialize"), derive(serde::Deserialize, PartialEq))]
 #[serde(rename_all = "camelCase")]
 pub struct OpenApi {
   /// This string MUST be the [semantic version number](https://semver.org/spec/v2.0.0.html) of the [OpenAPI Specification version](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#versions) that the OpenAPI document uses. The `openapi` field SHOULD be used by tooling specifications and clients to interpret the OpenAPI document. This is not related to the API [**`info.version`**](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#infoVersion) string.
@@ -50,10 +55,10 @@ pub struct OpenApi {
   #[serde(skip_serializing_if = "Option::is_none")]
   pub components: Option<Components>,
   /// A declaration of which security mechanisms can be used across the API. The list of values includes alternative security requirement objects that can be used. Only one of the security requirement objects need to be satisfied to authorize a request. Individual operations can override this definition. To make security optional, an empty security requirement (`{}`) can be included in the array.
-  #[serde(skip_serializing_if = "Vec::is_empty")]
+  #[serde(skip_serializing_if = "Vec::is_empty", default)]
   pub security: Vec<SecurityRequirement>,
   /// A list of tags used by the specification with additional metadata. The order of the tags can be used to reflect on their order by the parsing tools. Not all tags that are used by the [Operation Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#operation-object) must be declared. The tags that are not declared MAY be organized randomly or based on the tools' logic. Each tag name in the list MUST be unique.
-  #[serde(skip_serializing_if = "Vec::is_empty")]
+  #[serde(skip_serializing_if = "Vec::is_empty", default)]
   pub tags: Vec<Tag>,
   /// Additional external documentation.
   #[serde(skip_serializing_if = "Option::is_none")]

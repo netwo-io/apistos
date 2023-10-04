@@ -9,6 +9,7 @@ use std::collections::BTreeMap;
 ///
 /// When a list of Security Requirement Objects is defined on the [OpenAPI Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#openapi-object) or [Operation Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#operation-object), only one of the Security Requirement Objects in the list needs to be satisfied to authorize the request.
 #[derive(Serialize, Clone, Debug, Default)]
+#[cfg_attr(any(test, feature = "deserialize"), derive(serde::Deserialize, PartialEq))]
 #[serde(rename_all = "camelCase")]
 pub struct SecurityRequirement {
   /// Each name MUST correspond to a security scheme which is declared in the [Security Schemes](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#componentsSecuritySchemes) under the [Components Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#components-object). If the security scheme is of type `"oauth2"` or `"openIdConnect"`, then the value is a list of scope names required for the execution, and the list MAY be empty if authorization does not require a specified scope. For other security scheme types, the array MUST be empty.
@@ -18,6 +19,7 @@ pub struct SecurityRequirement {
 
 /// Defines a security scheme that can be used by the operations. Supported schemes are HTTP authentication, an API key (either as a header, a cookie parameter or as a query parameter), `OAuth2`'s common flows (implicit, password, client credentials and authorization code) as defined in [RFC6749](https://datatracker.ietf.org/doc/html/rfc6749), and [OpenID Connect Discovery](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-discovery-06).
 #[derive(Serialize, Clone, Debug)]
+#[cfg_attr(any(test, feature = "deserialize"), derive(serde::Deserialize, PartialEq))]
 #[serde(rename_all = "camelCase")]
 pub struct SecurityScheme {
   /// The type of the security scheme. Valid values are `"apiKey"`, `"http"`, `"oauth2"`, `"openIdConnect"`.
@@ -32,6 +34,7 @@ pub struct SecurityScheme {
 }
 
 #[derive(Serialize, Clone, Debug)]
+#[cfg_attr(any(test, feature = "deserialize"), derive(serde::Deserialize, PartialEq))]
 #[serde(rename_all = "camelCase", tag = "type")]
 pub enum SecurityType {
   ApiKey(ApiKey),
@@ -42,6 +45,7 @@ pub enum SecurityType {
 }
 
 #[derive(Serialize, Clone, Debug)]
+#[cfg_attr(any(test, feature = "deserialize"), derive(serde::Deserialize, PartialEq))]
 #[serde(rename_all = "camelCase")]
 pub struct ApiKey {
   /// The name of the header, query or cookie parameter to be used.
@@ -52,6 +56,7 @@ pub struct ApiKey {
 }
 
 #[derive(Serialize, Clone, Debug)]
+#[cfg_attr(any(test, feature = "deserialize"), derive(serde::Deserialize, PartialEq))]
 #[serde(rename_all = "camelCase")]
 pub enum ApiKeyIn {
   Query,
@@ -60,6 +65,7 @@ pub enum ApiKeyIn {
 }
 
 #[derive(Serialize, Clone, Debug, Default)]
+#[cfg_attr(any(test, feature = "deserialize"), derive(serde::Deserialize, PartialEq))]
 #[serde(rename_all = "camelCase")]
 pub struct Http {
   /// The name of the HTTP Authorization scheme to be used in the [Authorization header as defined in RFC7235](https://datatracker.ietf.org/doc/html/rfc7235#section-5.1). The values used SHOULD be registered in the [IANA Authentication Scheme registry](https://www.iana.org/assignments/http-authschemes/http-authschemes.xhtml).
@@ -70,6 +76,7 @@ pub struct Http {
 }
 
 #[derive(Serialize, Clone, Debug, Default)]
+#[cfg_attr(any(test, feature = "deserialize"), derive(serde::Deserialize, PartialEq))]
 #[serde(rename_all = "camelCase")]
 pub struct OAuth2 {
   /// An object containing configuration information for the flow types supported.
@@ -78,6 +85,7 @@ pub struct OAuth2 {
 
 /// Allows configuration of the supported OAuth Flows.
 #[derive(Serialize, Clone, Debug, Default)]
+#[cfg_attr(any(test, feature = "deserialize"), derive(serde::Deserialize, PartialEq))]
 #[serde(rename_all = "camelCase")]
 pub struct OauthFlows {
   /// Configuration for the OAuth Implicit flow
@@ -98,6 +106,7 @@ pub struct OauthFlows {
 }
 
 #[derive(Serialize, Clone, Debug, Default)]
+#[cfg_attr(any(test, feature = "deserialize"), derive(serde::Deserialize, PartialEq))]
 #[serde(rename_all = "camelCase")]
 pub struct OauthImplicit {
   /// The authorization URL to be used for this flow. This MUST be in the form of a URL.
@@ -110,6 +119,7 @@ pub struct OauthImplicit {
 }
 
 #[derive(Serialize, Clone, Debug, Default)]
+#[cfg_attr(any(test, feature = "deserialize"), derive(serde::Deserialize, PartialEq))]
 #[serde(rename_all = "camelCase")]
 pub struct OauthToken {
   /// The token URL to be used for this flow. This MUST be in the form of a URL.
@@ -122,6 +132,7 @@ pub struct OauthToken {
 }
 
 #[derive(Serialize, Clone, Debug, Default)]
+#[cfg_attr(any(test, feature = "deserialize"), derive(serde::Deserialize, PartialEq))]
 #[serde(rename_all = "camelCase")]
 pub struct OpenIdConnect {
   /// OpenId Connect URL to discover OAuth2 configuration values. This MUST be in the form of a URL.

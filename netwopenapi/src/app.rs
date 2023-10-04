@@ -202,3 +202,62 @@ where
     }
   }
 }
+
+#[cfg(test)]
+mod tests {
+  #![allow(clippy::expect_used)]
+
+  use crate::app::OpenApiWrapper;
+  use crate::spec::Spec;
+  use actix_web::test::{call_service, init_service, try_read_body_json, TestRequest};
+  use actix_web::App;
+  use netwopenapi_models::info::Info;
+  use netwopenapi_models::tag::Tag;
+  use netwopenapi_models::OpenApi;
+
+  #[actix_web::test]
+  async fn open_api_available() {
+    let openapi_path = "/test.json";
+
+    let app = App::new().document(Spec::default()).build(openapi_path);
+    let app = init_service(app).await;
+
+    let req = TestRequest::get().uri(openapi_path).to_request();
+    let resp = call_service(&app, req).await;
+    assert!(resp.status().is_success());
+
+    let body: OpenApi = try_read_body_json(resp).await.expect("Unable to read body");
+    assert_eq!(body, OpenApi::default());
+  }
+
+  #[actix_web::test]
+  async fn open_api_spec_correctly_populated() {
+    let openapi_path = "/test.json";
+
+    let info = Info {
+      title: "A well documented API".to_string(),
+      description: Some("Really well document I mean it".to_string()),
+      terms_of_service: Some("https://terms.com".to_string()),
+      ..Default::default()
+    };
+    let tags = vec![Tag {
+      name: "A super tag".to_owned(),
+      ..Default::default()
+    }];
+    let spec = Spec {
+      info: info.clone(),
+      tags: tags.clone(),
+      ..Default::default()
+    };
+    let app = App::new().document(spec).build(openapi_path);
+    let app = init_service(app).await;
+
+    let req = TestRequest::get().uri(openapi_path).to_request();
+    let resp = call_service(&app, req).await;
+    assert!(resp.status().is_success());
+
+    let body: OpenApi = try_read_body_json(resp).await.expect("Unable to read body");
+    assert_eq!(body.info, info);
+    assert_eq!(body.tags, tags);
+  }
+}

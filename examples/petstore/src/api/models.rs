@@ -98,7 +98,7 @@ pub(crate) struct PetUpdatesQuery {
   pub(crate) status: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent, ApiHeader)]
+#[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiHeader)]
 #[openapi_header(
   name = "X-Organization-Slug",
   description = "Organization of the current caller",
