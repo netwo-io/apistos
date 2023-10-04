@@ -23,3 +23,19 @@ impl From<String> for ReferenceOr<String> {
     Self::Reference { _ref: value }
   }
 }
+
+impl<T: Clone> ReferenceOr<T> {
+  pub fn get_object(self) -> Option<T> {
+    match self {
+      ReferenceOr::Reference { .. } => None,
+      ReferenceOr::Object(p) => Some(p),
+    }
+  }
+
+  pub fn get_object_mut(&mut self) -> Option<&mut T> {
+    match self {
+      ReferenceOr::Reference { .. } => None,
+      ReferenceOr::Object(p) => Some(p),
+    }
+  }
+}

@@ -4,7 +4,7 @@ pub mod empty;
 pub mod form;
 #[cfg(feature = "actix")]
 pub mod json;
-#[cfg(any(feature = "multipart", feature = "extras"))]
+#[cfg(feature = "multipart")]
 pub mod multipart;
 #[cfg(feature = "actix")]
 pub mod parameters;

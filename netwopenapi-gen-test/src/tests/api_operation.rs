@@ -108,7 +108,6 @@ fn api_operation() {
   /// Plop
   #[api_operation(tag = "pet")]
   pub(crate) async fn test(
-    // Create a new pet in the store
     body: Json<test_models::Test>,
   ) -> Result<Json<test_models::Test>, test_models::ErrorResponse> {
     Ok(Json(body.0))
@@ -189,10 +188,7 @@ fn api_operation_no_content() {
   /// Add a new pet to the store
   /// Plop
   #[api_operation(tag = "pet")]
-  pub(crate) async fn test(
-    // Create a new pet in the store
-    _body: Json<test_models::Test>,
-  ) -> Result<NoContent, test_models::ErrorResponse> {
+  pub(crate) async fn test(_body: Json<test_models::Test>) -> Result<NoContent, test_models::ErrorResponse> {
     Ok(NoContent)
   }
 
@@ -265,7 +261,6 @@ fn api_operation_created_json() {
   /// Plop
   #[api_operation(tag = "pet")]
   pub(crate) async fn test(
-    // Create a new pet in the store
     body: Json<test_models::Test>,
   ) -> Result<CreatedJson<test_models::Test>, test_models::ErrorResponse> {
     Ok(CreatedJson(body.0))
@@ -340,7 +335,6 @@ fn api_operation_accepted_json() {
   /// Plop
   #[api_operation(tag = "pet")]
   pub(crate) async fn test(
-    // Create a new pet in the store
     body: Json<test_models::Test>,
   ) -> Result<AcceptedJson<test_models::Test>, test_models::ErrorResponse> {
     Ok(AcceptedJson(body.0))
@@ -415,7 +409,6 @@ fn api_operation_deprecated() {
   /// Plop
   #[api_operation(tag = "pet", deprecated)]
   pub(crate) async fn test(
-    // Create a new pet in the store
     body: Json<test_models::Test>,
   ) -> Result<CreatedJson<test_models::Test>, test_models::ErrorResponse> {
     Ok(CreatedJson(body.0))
@@ -486,7 +479,6 @@ fn api_operation_deprecated() {
   #[api_operation(tag = "pet")]
   #[deprecated]
   pub(crate) async fn test2(
-    // Create a new pet in the store
     body: Json<test_models::Test>,
   ) -> Result<CreatedJson<test_models::Test>, test_models::ErrorResponse> {
     Ok(CreatedJson(body.0))
@@ -560,7 +552,6 @@ fn api_operation_skip() {
   /// Plop
   #[api_operation(tag = "pet", skip)]
   pub(crate) async fn test(
-    // Create a new pet in the store
     body: Json<test_models::Test>,
   ) -> Result<CreatedJson<test_models::Test>, test_models::ErrorResponse> {
     Ok(CreatedJson(body.0))
@@ -588,7 +579,6 @@ fn api_operation_error() {
   /// Plop
   #[api_operation(tag = "pet", error_code = "404", error_code = "401")]
   pub(crate) async fn test(
-    // Create a new pet in the store
     body: Json<test_models::Test>,
   ) -> Result<CreatedJson<test_models::Test>, test_models::MultipleErrorResponse> {
     Ok(CreatedJson(body.0))
@@ -665,7 +655,6 @@ fn api_operation_security() {
   /// Plop
   #[api_operation(security_scope(name = "api_key", scope = "read:pets"))]
   pub(crate) async fn test(
-    // Create a new pet in the store
     body: Json<test_models::Test>,
     _key: test_models::ApiKey,
   ) -> Result<CreatedJson<test_models::Test>, test_models::MultipleErrorResponse> {
@@ -768,7 +757,6 @@ fn api_operation_multipart() {
   /// Plop
   #[api_operation()]
   pub(crate) async fn test(
-    // Create a new pet in the store
     _payload: MultipartForm<test_models::Test>,
   ) -> Result<HttpResponse, test_models::MultipleErrorResponse> {
     Ok(HttpResponse::Ok().content_type(ContentType::plaintext()).json(""))
@@ -849,7 +837,6 @@ fn api_operation_consumes_produces() {
   /// Plop
   #[api_operation(consumes = "application/problem+json", produces = "text/plain")]
   pub(crate) async fn test(
-    // Create a new pet in the store
     _payload: MultipartForm<test_models::Test>,
   ) -> Result<HttpResponse, test_models::MultipleErrorResponse> {
     Ok(HttpResponse::Ok().content_type(ContentType::plaintext()).json(""))

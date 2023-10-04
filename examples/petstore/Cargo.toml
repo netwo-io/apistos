@@ -4,9 +4,7 @@ description = "Simple petstore example api"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
-authors = [
-    "Example <example@example.com>"
-]
+authors = ["Netwo <oss@netwo.com>"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

@@ -18,7 +18,8 @@ pub trait ApiComponent {
     true
   }
 
-  /// contains childs schemas recursively for this operation
+  /// Contains children schemas for this operation
+  /// Each child can also contain child schemas
   fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)>;
 
   fn raw_schema() -> Option<ReferenceOr<Schema>> {

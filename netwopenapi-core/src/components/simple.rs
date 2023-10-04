@@ -44,20 +44,20 @@ simple_modifier!(u64);
 simple_modifier!(u128);
 simple_modifier!(usize);
 
-#[cfg(any(feature = "chrono", feature = "extras"))]
+#[cfg(feature = "chrono")]
 simple_modifier!(chrono::NaiveDate);
-#[cfg(any(feature = "chrono", feature = "extras"))]
+#[cfg(feature = "chrono")]
 simple_modifier!(chrono::NaiveTime);
-#[cfg(any(feature = "chrono", feature = "extras"))]
+#[cfg(feature = "chrono")]
 simple_modifier!(chrono::NaiveDateTime);
-#[cfg(any(feature = "rust_decimal", feature = "extras"))]
+#[cfg(feature = "rust_decimal")]
 simple_modifier!(rust_decimal::Decimal);
-#[cfg(any(feature = "uuid", feature = "extras"))]
+#[cfg(feature = "uuid")]
 simple_modifier!(uuid::Uuid);
-#[cfg(any(feature = "url", feature = "extras"))]
+#[cfg(feature = "url")]
 simple_modifier!(url::Url);
 
-#[cfg(any(feature = "chrono", feature = "extras"))]
+#[cfg(feature = "chrono")]
 impl<T: chrono::TimeZone> ApiComponent for chrono::DateTime<T> {
   fn child_schemas() -> Vec<(
     String,
