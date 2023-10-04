@@ -32,7 +32,7 @@ where
   }
 
   fn parameters() -> Vec<Parameter> {
-    let schema = T::schema().map(|(_, sch)| sch).or_else(|| Self::raw_schema());
+    let schema = T::schema().map(|(_, sch)| sch).or_else(Self::raw_schema);
 
     if let Some(schema) = schema {
       parameters_for_schema(schema, Self::required())
@@ -69,7 +69,7 @@ where
   }
 
   fn parameters() -> Vec<Parameter> {
-    let schema = T::schema().map(|(_, sch)| sch).or_else(|| Self::raw_schema());
+    let schema = T::schema().map(|(_, sch)| sch).or_else(Self::raw_schema);
     if let Some(schema) = schema {
       parameters_for_schema(schema, Self::required())
     } else {
