@@ -94,7 +94,7 @@ impl Route {
       "HEAD" => OperationType::Head,
       "PATCH" => OperationType::Patch,
       "TRACE" => OperationType::Trace,
-      m @ _ => panic!("unsupported method: {}", m),
+      m => panic!("unsupported method: {}", m),
     };
     self.path_item_type = Some(path_item_type);
     self.inner = self.inner.method(method);
