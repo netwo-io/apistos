@@ -22,35 +22,6 @@ pub(crate) fn routes() -> Scope {
             .route(post().to(update_pet_with_form))
             .route(delete().to(delete_pet)),
         )
-        //.service(resource("/uploadImage").route(post().to(test))),
       ),
   )
-  // .service(
-  //   scope("/store")
-  //     .service(
-  //       scope("")
-  //         .service(resource("/inventory").route(get().to(test)))
-  //         .service(resource("/order").route(post().to(test)))
-  //     )
-  //     .service(
-  //       scope("/order").service(resource("/{orderId}")
-  //         .route(get().to(test))
-  //         .route(delete().to(test))
-  //       )
-  //     )
-  // )
-  // .service(
-  //   scope("/user")
-  //     .service(resource("").route(post().to(test)))
-  //     .service(resource("/createWithArray").route(post().to(test)))
-  //     .service(resource("/createWithList").route(post().to(test)))
-  //     .service(resource("/login").route(get().to(test)))
-  //     .service(resource("/logout").route(get().to(test)))
-  //     .service(
-  //       resource("/{username}")
-  //         .route(get().to(test))
-  //         .route(put().to(test))
-  //         .route(delete().to(test))
-  //     )
-  // )
 }

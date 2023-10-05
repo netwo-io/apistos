@@ -1,5 +1,4 @@
 #![allow(clippy::expect_used)]
-#![allow(clippy::todo)]
 
 use actix_web::http::StatusCode;
 use actix_web::test::{call_service, init_service, try_read_body_json, TestRequest};
@@ -29,13 +28,13 @@ async fn path_parameter_replacement() {
 
   impl Display for ErrorResponse {
     fn fmt(&self, _f: &mut Formatter<'_>) -> std::fmt::Result {
-      todo!()
+      panic!()
     }
   }
 
   impl ResponseError for ErrorResponse {
     fn status_code(&self) -> StatusCode {
-      todo!()
+      panic!()
     }
   }
 
@@ -47,7 +46,7 @@ async fn path_parameter_replacement() {
 
   #[api_operation(tag = "pet")]
   pub(crate) async fn test(_params: Path<(u32, String)>) -> Result<Json<Test>, ErrorResponse> {
-    todo!()
+    panic!()
   }
 
   let openapi_path = "/test.json";

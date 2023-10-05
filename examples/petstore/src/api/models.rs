@@ -13,12 +13,9 @@ use url::Url;
 
 #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
 pub(crate) struct Pet {
-  // #[openapi(example = 10)]
   pub(crate) id: Option<i64>,
-  // #[openapi(example = "doggie")]
   pub(crate) name: String,
   pub(crate) category: Option<Category>,
-  // #[openapi(rename = "photoUrls")]
   pub(crate) photo_urls: Vec<String>,
   pub(crate) tags: Option<Vec<Tag>>,
   /// pet status in the store
@@ -28,9 +25,7 @@ pub(crate) struct Pet {
 /// A category for a pet
 #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
 pub(crate) struct Category {
-  // #[openapi(example = 1)]
   pub(crate) id: Option<Finite<f32>>,
-  // #[openapi(example = "Dogs")]
   pub(crate) name: Option<Name>,
   pub(crate) docs: Option<Url>,
 }
@@ -75,7 +70,6 @@ pub(crate) enum Status {
 }
 
 /// A tag for a pet
-// #[openapi(rename = "Pet tag")]
 #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
 pub(crate) struct Tag {
   pub(crate) id: Option<Decimal>,

@@ -74,7 +74,6 @@ pub enum ErrorResponse {
   error_code = 405
 )]
 pub(crate) async fn test(
-  // Create a new pet in the store
   body: Json<Test>,
 ) -> Result<CreatedJson<Test>, ErrorResponse> {
   Ok(CreatedJson(body.0))

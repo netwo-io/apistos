@@ -482,7 +482,6 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
 ///   error_code = 405
 /// )]
 /// pub(crate) async fn test(
-///   // Create a new pet in the store
 ///   body: Json<Test>,
 /// ) -> Result<CreatedJson<Test>, ErrorResponse> {
 ///   Ok(CreatedJson(body.0))
@@ -551,7 +550,6 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
 ///     Plop"###,
 /// )]
 /// pub(crate) async fn test(
-///   // Create a new pet in the store
 ///   body: Json<Test>,
 /// ) -> Result<CreatedJson<Test>, ErrorResponse> {
 ///   Ok(CreatedJson(body.0))
@@ -602,7 +600,6 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
 ///   tag = "pet",
 /// )]
 /// pub(crate) async fn test(
-///   // Create a new pet in the store
 ///   body: Json<Test>,
 /// ) -> Result<CreatedJson<Test>, ErrorResponse> {
 ///   Ok(CreatedJson(body.0))
