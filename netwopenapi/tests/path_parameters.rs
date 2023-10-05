@@ -1,4 +1,5 @@
 #![allow(clippy::expect_used)]
+#![allow(clippy::panic)]
 
 use actix_web::http::StatusCode;
 use actix_web::test::{call_service, init_service, try_read_body_json, TestRequest};
@@ -130,6 +131,7 @@ async fn path_parameter_replacement() {
 // Imports bellow aim at making cargo-cranky happy. Those dependencies are necessary for integration-test.
 use actix_service as _;
 use indexmap as _;
+use log as _;
 use netwopenapi_core as _;
 use once_cell as _;
 use regex as _;

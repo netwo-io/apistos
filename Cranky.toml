@@ -119,9 +119,9 @@ warn = [
   "clippy::no_effect_underscore_binding",
   "clippy::nonstandard_macro_braces",
   # "clippy::option_if_let_else", Debatable
-  # "clippy::option_option", May conflict with the way we want to handle http patch
+  "clippy::option_option",
   "clippy::or_fun_call",
-  # "clippy::panic", triggered by sqlx macro
+  "clippy::panic",
   # "clippy::panic_in_result_fn", probable false positives
   "clippy::path_buf_push_overwrite",
   "clippy::print_stderr",
