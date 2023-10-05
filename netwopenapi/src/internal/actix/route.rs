@@ -94,6 +94,7 @@ impl Route {
       "HEAD" => OperationType::Head,
       "PATCH" => OperationType::Patch,
       "TRACE" => OperationType::Trace,
+      "GET" => OperationType::Get,
       m => panic!("unsupported method: {}", m),
     };
     self.path_item_type = Some(path_item_type);
