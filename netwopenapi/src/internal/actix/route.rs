@@ -6,6 +6,7 @@ use actix_web::guard::Guard;
 use actix_web::http::Method;
 use actix_web::{Error, FromRequest, Handler, Responder};
 use indexmap::IndexMap;
+use log::warn;
 use netwopenapi_core::PathItemDefinition;
 use netwopenapi_models::components::Components;
 use netwopenapi_models::paths::{Operation, OperationType, PathItem};
@@ -50,9 +51,15 @@ pub fn head() -> Route {
   method(Method::HEAD)
 }
 
+pub enum OperationTypeDoc {
+  OperationType(OperationType),
+  AllMethods,
+  Undocumented,
+}
+
 pub struct Route {
   operation: Option<Operation>,
-  path_item_type: Option<OperationType>,
+  path_item_type: OperationTypeDoc,
   components: Vec<Components>,
   inner: actix_web::Route,
 }
@@ -78,7 +85,7 @@ impl Route {
   pub fn new() -> Route {
     Route {
       operation: None,
-      path_item_type: None,
+      path_item_type: OperationTypeDoc::AllMethods,
       components: Default::default(),
       inner: actix_web::Route::new(),
     }
@@ -87,17 +94,20 @@ impl Route {
   /// Wrapper for [`actix_web::Route::method`](https://docs.rs/actix-web/*/actix_web/struct.Route.html#method.method)
   pub fn method(mut self, method: Method) -> Self {
     let path_item_type = match method.as_str() {
-      "PUT" => OperationType::Put,
-      "POST" => OperationType::Post,
-      "DELETE" => OperationType::Delete,
-      "OPTIONS" => OperationType::Options,
-      "HEAD" => OperationType::Head,
-      "PATCH" => OperationType::Patch,
-      "TRACE" => OperationType::Trace,
-      "GET" => OperationType::Get,
-      m => panic!("unsupported method: {}", m),
+      "PUT" => OperationTypeDoc::OperationType(OperationType::Put),
+      "POST" => OperationTypeDoc::OperationType(OperationType::Post),
+      "DELETE" => OperationTypeDoc::OperationType(OperationType::Delete),
+      "OPTIONS" => OperationTypeDoc::OperationType(OperationType::Options),
+      "HEAD" => OperationTypeDoc::OperationType(OperationType::Head),
+      "PATCH" => OperationTypeDoc::OperationType(OperationType::Patch),
+      "TRACE" => OperationTypeDoc::OperationType(OperationType::Trace),
+      "GET" => OperationTypeDoc::OperationType(OperationType::Get),
+      m => {
+        warn!("Unsupported method found: {m}, operation will not be documented");
+        OperationTypeDoc::Undocumented
+      }
     };
-    self.path_item_type = Some(path_item_type);
+    self.path_item_type = path_item_type;
     self.inner = self.inner.method(method);
     self
   }
@@ -146,12 +156,16 @@ impl RouteWrapper {
     if let Some(mut operation) = route.operation {
       operation.update_path_parameter_name_from_path(&path);
 
-      if let Some(path_item_type) = route.path_item_type {
-        operations.insert(path_item_type, operation);
-      } else {
-        for path_item_type in METHODS {
-          operations.insert(path_item_type.clone(), operation.clone());
+      match route.path_item_type {
+        OperationTypeDoc::OperationType(path_item_type) => {
+          operations.insert(path_item_type, operation);
         }
+        OperationTypeDoc::AllMethods => {
+          for path_item_type in METHODS {
+            operations.insert(path_item_type.clone(), operation.clone());
+          }
+        }
+        OperationTypeDoc::Undocumented => {}
       }
     }
     path_item.operations = operations;
