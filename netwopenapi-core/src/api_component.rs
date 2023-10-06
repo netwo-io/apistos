@@ -192,7 +192,7 @@ where
   }
 
   fn schema() -> Option<(String, ReferenceOr<Schema>)> {
-    None
+    R::schema()
   }
 
   fn error_responses() -> Vec<(String, Response)> {
@@ -212,7 +212,7 @@ where
           .into_iter()
           .collect::<Vec<(String, ReferenceOr<Response>)>>(),
       );
-    } else if let Some((name, schema)) = R::schema() {
+    } else if let Some((name, schema)) = Self::schema() {
       let _ref = match schema {
         ReferenceOr::Reference { _ref } => _ref,
         ReferenceOr::Object(_) => format!("#/components/schemas/{}", name),

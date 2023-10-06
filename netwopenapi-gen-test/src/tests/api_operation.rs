@@ -26,6 +26,11 @@ mod test_models {
     pub(crate) test: String,
   }
 
+  #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
+  pub(crate) struct TestResult {
+    pub(crate) id: u32,
+  }
+
   impl MultipartCollect for Test {
     fn limit(_field_name: &str) -> Option<usize> {
       todo!()
@@ -108,9 +113,9 @@ fn api_operation() {
   /// Plop
   #[api_operation(tag = "pet")]
   pub(crate) async fn test(
-    body: Json<test_models::Test>,
-  ) -> Result<Json<test_models::Test>, test_models::ErrorResponse> {
-    Ok(Json(body.0))
+    _body: Json<test_models::Test>,
+  ) -> Result<Json<test_models::TestResult>, test_models::ErrorResponse> {
+    Ok(Json(test_models::TestResult { id: 0 }))
   }
 
   let components = __openapi_test::components();
@@ -136,6 +141,20 @@ fn api_operation() {
               "test"
             ],
             "title": "Test",
+            "type": "object"
+          },
+          "TestResult": {
+            "properties": {
+              "id": {
+                "format": "uint32",
+                "minimum": 0.0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "id"
+            ],
+            "title": "TestResult",
             "type": "object"
           }
         }
@@ -163,7 +182,7 @@ fn api_operation() {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Test"
+                "$ref": "#/components/schemas/TestResult"
               }
             }
           },
@@ -261,9 +280,9 @@ fn api_operation_created_json() {
   /// Plop
   #[api_operation(tag = "pet")]
   pub(crate) async fn test(
-    body: Json<test_models::Test>,
-  ) -> Result<CreatedJson<test_models::Test>, test_models::ErrorResponse> {
-    Ok(CreatedJson(body.0))
+    _body: Json<test_models::Test>,
+  ) -> Result<CreatedJson<test_models::TestResult>, test_models::ErrorResponse> {
+    Ok(CreatedJson(test_models::TestResult { id: 1 }))
   }
 
   let components = __openapi_test::components();
@@ -289,6 +308,20 @@ fn api_operation_created_json() {
               "test"
             ],
             "title": "Test",
+            "type": "object"
+          },
+          "TestResult": {
+            "properties": {
+              "id": {
+                "format": "uint32",
+                "minimum": 0.0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "id"
+            ],
+            "title": "TestResult",
             "type": "object"
           }
         }
@@ -316,16 +349,7 @@ fn api_operation_created_json() {
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "test": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "test"
-                ],
-                "title": "Test",
-                "type": "object"
+                "$ref": "#/components/schemas/TestResult"
               }
             }
           },
@@ -351,9 +375,9 @@ fn api_operation_accepted_json() {
   /// Plop
   #[api_operation(tag = "pet")]
   pub(crate) async fn test(
-    body: Json<test_models::Test>,
-  ) -> Result<AcceptedJson<test_models::Test>, test_models::ErrorResponse> {
-    Ok(AcceptedJson(body.0))
+    _body: Json<test_models::Test>,
+  ) -> Result<AcceptedJson<test_models::TestResult>, test_models::ErrorResponse> {
+    Ok(AcceptedJson(test_models::TestResult { id: 0 }))
   }
 
   let components = __openapi_test::components();
@@ -379,6 +403,20 @@ fn api_operation_accepted_json() {
               "test"
             ],
             "title": "Test",
+            "type": "object"
+          },
+          "TestResult": {
+            "properties": {
+              "id": {
+                "format": "uint32",
+                "minimum": 0.0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "id"
+            ],
+            "title": "TestResult",
             "type": "object"
           }
         }
@@ -406,16 +444,7 @@ fn api_operation_accepted_json() {
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "test": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "test"
-                ],
-                "title": "Test",
-                "type": "object"
+                "$ref": "#/components/schemas/TestResult"
               }
             }
           },
@@ -441,9 +470,9 @@ fn api_operation_deprecated() {
   /// Plop
   #[api_operation(tag = "pet", deprecated)]
   pub(crate) async fn test(
-    body: Json<test_models::Test>,
-  ) -> Result<CreatedJson<test_models::Test>, test_models::ErrorResponse> {
-    Ok(CreatedJson(body.0))
+    _body: Json<test_models::Test>,
+  ) -> Result<CreatedJson<test_models::TestResult>, test_models::ErrorResponse> {
+    Ok(CreatedJson(test_models::TestResult { id: 4 }))
   }
 
   let components = __openapi_test::components();
@@ -468,6 +497,20 @@ fn api_operation_deprecated() {
               "test"
             ],
             "title": "Test",
+            "type": "object"
+          },
+          "TestResult": {
+            "properties": {
+              "id": {
+                "format": "uint32",
+                "minimum": 0.0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "id"
+            ],
+            "title": "TestResult",
             "type": "object"
           }
         }
@@ -495,16 +538,7 @@ fn api_operation_deprecated() {
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "test": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "test"
-                ],
-                "title": "Test",
-                "type": "object"
+                "$ref": "#/components/schemas/TestResult"
               }
             }
           },
@@ -527,9 +561,9 @@ fn api_operation_deprecated() {
   #[api_operation(tag = "pet")]
   #[deprecated]
   pub(crate) async fn test2(
-    body: Json<test_models::Test>,
-  ) -> Result<CreatedJson<test_models::Test>, test_models::ErrorResponse> {
-    Ok(CreatedJson(body.0))
+    _body: Json<test_models::Test>,
+  ) -> Result<CreatedJson<test_models::TestResult>, test_models::ErrorResponse> {
+    Ok(CreatedJson(test_models::TestResult { id: 2 }))
   }
 
   let components = __openapi_test2::components();
@@ -554,6 +588,20 @@ fn api_operation_deprecated() {
               "test"
             ],
             "title": "Test",
+            "type": "object"
+          },
+          "TestResult": {
+            "properties": {
+              "id": {
+                "format": "uint32",
+                "minimum": 0.0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "id"
+            ],
+            "title": "TestResult",
             "type": "object"
           }
         }
@@ -581,16 +629,7 @@ fn api_operation_deprecated() {
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "test": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "test"
-                ],
-                "title": "Test",
-                "type": "object"
+                "$ref": "#/components/schemas/TestResult"
               }
             }
           },
@@ -616,9 +655,9 @@ fn api_operation_skip() {
   /// Plop
   #[api_operation(tag = "pet", skip)]
   pub(crate) async fn test(
-    body: Json<test_models::Test>,
-  ) -> Result<CreatedJson<test_models::Test>, test_models::ErrorResponse> {
-    Ok(CreatedJson(body.0))
+    _body: Json<test_models::Test>,
+  ) -> Result<CreatedJson<test_models::TestResult>, test_models::ErrorResponse> {
+    Ok(CreatedJson(test_models::TestResult { id: 6 }))
   }
 
   let components = __openapi_test::components();
@@ -643,9 +682,9 @@ fn api_operation_error() {
   /// Plop
   #[api_operation(tag = "pet", error_code = "404", error_code = "401")]
   pub(crate) async fn test(
-    body: Json<test_models::Test>,
-  ) -> Result<CreatedJson<test_models::Test>, test_models::MultipleErrorResponse> {
-    Ok(CreatedJson(body.0))
+    _body: Json<test_models::Test>,
+  ) -> Result<CreatedJson<test_models::TestResult>, test_models::MultipleErrorResponse> {
+    Ok(CreatedJson(test_models::TestResult { id: 1 }))
   }
 
   let components = __openapi_test::components();
@@ -670,6 +709,20 @@ fn api_operation_error() {
               "test"
             ],
             "title": "Test",
+            "type": "object"
+          },
+          "TestResult": {
+            "properties": {
+              "id": {
+                "format": "uint32",
+                "minimum": 0.0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "id"
+            ],
+            "title": "TestResult",
             "type": "object"
           }
         }
@@ -697,16 +750,7 @@ fn api_operation_error() {
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "test": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "test"
-                ],
-                "title": "Test",
-                "type": "object"
+                "$ref": "#/components/schemas/TestResult"
               }
             }
           },
@@ -735,10 +779,10 @@ fn api_operation_security() {
   /// Plop
   #[api_operation(security_scope(name = "api_key", scope = "read:pets"))]
   pub(crate) async fn test(
-    body: Json<test_models::Test>,
+    _body: Json<test_models::Test>,
     _key: test_models::ApiKey,
-  ) -> Result<CreatedJson<test_models::Test>, test_models::MultipleErrorResponse> {
-    Ok(CreatedJson(body.0))
+  ) -> Result<CreatedJson<test_models::TestResult>, test_models::MultipleErrorResponse> {
+    Ok(CreatedJson(test_models::TestResult { id: 0 }))
   }
 
   let components = __openapi_test::components();
@@ -763,6 +807,20 @@ fn api_operation_security() {
               "test"
             ],
             "title": "Test",
+            "type": "object"
+          },
+          "TestResult": {
+            "properties": {
+              "id": {
+                "format": "uint32",
+                "minimum": 0.0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "id"
+            ],
+            "title": "TestResult",
             "type": "object"
           }
         },
@@ -805,16 +863,7 @@ fn api_operation_security() {
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "test": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "test"
-                ],
-                "title": "Test",
-                "type": "object"
+                "$ref": "#/components/schemas/TestResult"
               }
             }
           },
