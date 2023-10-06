@@ -313,7 +313,23 @@ fn api_operation_created_json() {
       },
       "responses": {
         "201": {
-          "$ref": "#/components/schemas/Test"
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "test": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "test"
+                ],
+                "title": "Test",
+                "type": "object"
+              }
+            }
+          },
+          "description": ""
         },
         "405": {
           "description": "Invalid input"
@@ -387,7 +403,23 @@ fn api_operation_accepted_json() {
       },
       "responses": {
         "202": {
-          "$ref": "#/components/schemas/Test"
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "test": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "test"
+                ],
+                "title": "Test",
+                "type": "object"
+              }
+            }
+          },
+          "description": ""
         },
         "405": {
           "description": "Invalid input"
@@ -460,7 +492,23 @@ fn api_operation_deprecated() {
       },
       "responses": {
         "201": {
-          "$ref": "#/components/schemas/Test"
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "test": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "test"
+                ],
+                "title": "Test",
+                "type": "object"
+              }
+            }
+          },
+          "description": ""
         },
         "405": {
           "description": "Invalid input"
@@ -530,7 +578,23 @@ fn api_operation_deprecated() {
       },
       "responses": {
         "201": {
-          "$ref": "#/components/schemas/Test"
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "test": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "test"
+                ],
+                "title": "Test",
+                "type": "object"
+              }
+            }
+          },
+          "description": ""
         },
         "405": {
           "description": "Invalid input"
@@ -630,7 +694,23 @@ fn api_operation_error() {
       },
       "responses": {
         "201": {
-          "$ref": "#/components/schemas/Test"
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "test": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "test"
+                ],
+                "title": "Test",
+                "type": "object"
+              }
+            }
+          },
+          "description": ""
         },
         "401": {
           "description": "Unauthorized"
@@ -722,7 +802,23 @@ fn api_operation_security() {
       },
       "responses": {
         "201": {
-          "$ref": "#/components/schemas/Test"
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "test": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "test"
+                ],
+                "title": "Test",
+                "type": "object"
+              }
+            }
+          },
+          "description": ""
         },
         "401": {
           "description": "Unauthorized"
