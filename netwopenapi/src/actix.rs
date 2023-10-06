@@ -79,7 +79,7 @@ where
   }
 
   fn schema() -> Option<(String, ReferenceOr<Schema>)> {
-    None
+    T::schema()
   }
 
   fn request_body() -> Option<RequestBody> {
@@ -88,7 +88,7 @@ where
 
   fn responses(_content_type: Option<String>) -> Option<Responses> {
     let status = StatusCode::ACCEPTED;
-    response_from_schema(status, T::schema())
+    response_from_schema(status, Self::schema())
   }
 }
 
@@ -125,27 +125,29 @@ where
   }
 
   fn schema() -> Option<(String, ReferenceOr<Schema>)> {
-    None
+    T::schema()
   }
 
   fn responses(_content_type: Option<String>) -> Option<Responses> {
     let status = StatusCode::CREATED;
-    response_from_schema(status, T::schema())
+    response_from_schema(status, Self::schema())
   }
 }
 
 fn response_from_schema(status: StatusCode, schema: Option<(String, ReferenceOr<Schema>)>) -> Option<Responses> {
-  schema.map(|(_, schema)| match schema {
+  schema.map(|(name, schema)| match schema {
     ReferenceOr::Reference { _ref } => Responses {
       responses: BTreeMap::from_iter(vec![(status.as_str().to_string(), ReferenceOr::Reference { _ref })]),
       ..Default::default()
     },
-    ReferenceOr::Object(sch) => {
+    ReferenceOr::Object(_) => {
       let response = Response {
         content: BTreeMap::from_iter(vec![(
           "application/json".to_string(),
           MediaType {
-            schema: Some(ReferenceOr::Object(sch)),
+            schema: Some(ReferenceOr::Reference {
+              _ref: format!("#/components/schemas/{}", name),
+            }),
             ..Default::default()
           },
         )]),
