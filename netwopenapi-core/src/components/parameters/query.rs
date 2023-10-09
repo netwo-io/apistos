@@ -57,7 +57,7 @@ where
                   name,
                   _in: ParameterIn::Query,
                   definition: Some(ParameterDefinition::Schema(schema.into())),
-                  required,
+                  required: Some(required),
                   ..Default::default()
                 }
               })
@@ -190,7 +190,7 @@ where
                   _in: ParameterIn::Query,
                   definition: Some(ParameterDefinition::Schema(schema.into())),
                   style: Some(ParameterStyle::DeepObject),
-                  required,
+                  required: Some(required),
                   ..Default::default()
                 }
               })
@@ -324,7 +324,7 @@ where
                   name,
                   _in: ParameterIn::Query,
                   definition: Some(ParameterDefinition::Schema(schema.into())),
-                  required,
+                  required: Some(required),
                   ..Default::default()
                 }
               })
@@ -456,7 +456,7 @@ where
                   name,
                   _in: ParameterIn::Query,
                   definition: Some(ParameterDefinition::Schema(schema.into())),
-                  required,
+                  required: Some(required),
                   ..Default::default()
                 }
               })
@@ -544,21 +544,21 @@ where
   }
 }
 
-fn extract_required_from_schema(sch_obj: &SchemaObject, property_name: &str, default_required: bool) -> Option<bool> {
+fn extract_required_from_schema(sch_obj: &SchemaObject, property_name: &str, default_required: bool) -> bool {
   if let Some(obj) = &sch_obj.object {
-    for ri in obj.required.iter() {
-      if ri.clone() == property_name.to_string() {
-        return Some(true);
+    for ri in &obj.required {
+      if ri.clone() == *property_name {
+        return true;
       }
     }
   }
-  if *&sch_obj.subschemas.is_some()
-    || *&sch_obj.string.is_some()
-    || *&sch_obj.number.is_some()
-    || *&sch_obj.array.is_some()
-    || *&sch_obj.reference.is_some()
+  if sch_obj.subschemas.is_some()
+    || sch_obj.string.is_some()
+    || sch_obj.number.is_some()
+    || sch_obj.array.is_some()
+    || sch_obj.reference.is_some()
   {
-    return Some(default_required);
+    return default_required;
   }
-  Some(false)
+  false
 }
