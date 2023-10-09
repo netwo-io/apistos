@@ -13,6 +13,7 @@ license.workspace = true
 actix-multipart = { workspace = true }
 actix-web = { workspace = true }
 assert-json-diff = { workspace = true }
+chrono = { workspace = true, features = ["serde"] }
 futures-core = { workspace = true }
 netwopenapi = { path = "../netwopenapi", features = ["multipart"] }
 netwopenapi-core = { path = "../netwopenapi-core" }

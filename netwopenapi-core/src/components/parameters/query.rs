@@ -46,17 +46,20 @@ where
         }
         ReferenceOr::Object(schema) => {
           let sch = schema.into_object();
-          if let Some(obj) = sch.object {
+          if let Some(obj) = &sch.object {
             parameters = obj
               .properties
               .clone()
               .into_iter()
-              .map(|(name, schema)| Parameter {
-                name,
-                _in: ParameterIn::Query,
-                definition: Some(ParameterDefinition::Schema(schema.into())),
-                required: Some(Self::required()),
-                ..Default::default()
+              .map(|(name, schema)| {
+                let required = extract_required_from_schema(&sch, &name, Self::required());
+                Parameter {
+                  name,
+                  _in: ParameterIn::Query,
+                  definition: Some(ParameterDefinition::Schema(schema.into())),
+                  required,
+                  ..Default::default()
+                }
               })
               .collect()
           }
@@ -175,18 +178,21 @@ where
         }
         ReferenceOr::Object(schema) => {
           let sch = schema.into_object();
-          if let Some(obj) = sch.object {
+          if let Some(obj) = &sch.object {
             parameters = obj
               .properties
               .clone()
               .into_iter()
-              .map(|(name, schema)| Parameter {
-                name,
-                _in: ParameterIn::Query,
-                definition: Some(ParameterDefinition::Schema(schema.into())),
-                style: Some(ParameterStyle::DeepObject),
-                required: Some(Self::required()),
-                ..Default::default()
+              .map(|(name, schema)| {
+                let required = extract_required_from_schema(&sch, &name, Self::required());
+                Parameter {
+                  name,
+                  _in: ParameterIn::Query,
+                  definition: Some(ParameterDefinition::Schema(schema.into())),
+                  style: Some(ParameterStyle::DeepObject),
+                  required,
+                  ..Default::default()
+                }
               })
               .collect()
           }
@@ -307,17 +313,20 @@ where
         }
         ReferenceOr::Object(schema) => {
           let sch = schema.into_object();
-          if let Some(obj) = sch.object {
+          if let Some(obj) = &sch.object {
             parameters = obj
               .properties
               .clone()
               .into_iter()
-              .map(|(name, schema)| Parameter {
-                name,
-                _in: ParameterIn::Query,
-                definition: Some(ParameterDefinition::Schema(schema.into())),
-                required: Some(Self::required()),
-                ..Default::default()
+              .map(|(name, schema)| {
+                let required = extract_required_from_schema(&sch, &name, Self::required());
+                Parameter {
+                  name,
+                  _in: ParameterIn::Query,
+                  definition: Some(ParameterDefinition::Schema(schema.into())),
+                  required,
+                  ..Default::default()
+                }
               })
               .collect()
           }
@@ -436,17 +445,20 @@ where
         }
         ReferenceOr::Object(schema) => {
           let sch = schema.into_object();
-          if let Some(obj) = sch.object {
+          if let Some(obj) = &sch.object {
             parameters = obj
               .properties
               .clone()
               .into_iter()
-              .map(|(name, schema)| Parameter {
-                name,
-                _in: ParameterIn::Query,
-                definition: Some(ParameterDefinition::Schema(schema.into())),
-                required: Some(Self::required()),
-                ..Default::default()
+              .map(|(name, schema)| {
+                let required = extract_required_from_schema(&sch, &name, Self::required());
+                Parameter {
+                  name,
+                  _in: ParameterIn::Query,
+                  definition: Some(ParameterDefinition::Schema(schema.into())),
+                  required,
+                  ..Default::default()
+                }
               })
               .collect()
           }
@@ -530,4 +542,23 @@ where
 
     parameters
   }
+}
+
+fn extract_required_from_schema(sch_obj: &SchemaObject, property_name: &str, default_required: bool) -> Option<bool> {
+  if let Some(obj) = &sch_obj.object {
+    for ri in obj.required.iter() {
+      if ri.clone() == property_name.to_string() {
+        return Some(true);
+      }
+    }
+  }
+  if *&sch_obj.subschemas.is_some()
+    || *&sch_obj.string.is_some()
+    || *&sch_obj.number.is_some()
+    || *&sch_obj.array.is_some()
+    || *&sch_obj.reference.is_some()
+  {
+    return Some(default_required);
+  }
+  Some(false)
 }
