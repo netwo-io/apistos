@@ -2,7 +2,6 @@ use darling::ast::NestedMeta;
 use darling::FromMeta;
 use proc_macro_error::abort;
 use std::collections::BTreeMap;
-use syn::Expr;
 
 pub(crate) fn parse_openapi_operation_attrs(attrs: &[NestedMeta]) -> OperationAttr {
   match OperationAttrInternal::from_list(attrs) {
@@ -17,7 +16,7 @@ struct OperationAttrInternal {
   skip: bool,
   #[darling(default)]
   deprecated: bool,
-  operation_id: Option<Expr>,
+  operation_id: Option<String>,
   summary: Option<String>,
   description: Option<String>,
   #[darling(multiple, rename = "tag")]
@@ -40,7 +39,7 @@ struct SecurityScopes {
 pub(crate) struct OperationAttr {
   pub(crate) skip: bool,
   pub(crate) deprecated: bool,
-  pub(crate) operation_id: Option<Expr>,
+  pub(crate) operation_id: Option<String>,
   pub(crate) summary: Option<String>,
   pub(crate) description: Option<String>,
   pub(crate) tags: Vec<String>,

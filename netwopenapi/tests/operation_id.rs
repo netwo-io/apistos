@@ -10,17 +10,15 @@ use netwopenapi::spec::Spec;
 use netwopenapi::web::{get, resource, scope};
 use netwopenapi_gen::{api_operation, ApiComponent, ApiErrorComponent};
 use netwopenapi_models::info::Info;
-use netwopenapi_models::paths::{OperationType, Parameter, ParameterDefinition};
-use netwopenapi_models::reference_or::ReferenceOr;
+use netwopenapi_models::paths::OperationType;
 use netwopenapi_models::tag::Tag;
 use netwopenapi_models::OpenApi;
-use schemars::schema::{InstanceType, SingleOrVec};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
 
 #[actix_web::test]
-async fn path_parameter_replacement() {
+async fn default_operation_id() {
   #[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
   #[openapi_error(status(code = 405, description = "Invalid input"))]
   pub(crate) enum ErrorResponse {
@@ -50,8 +48,20 @@ async fn path_parameter_replacement() {
     panic!()
   }
 
+  #[api_operation(tag = "pet")]
+  pub(crate) async fn test2(_params: Path<u32>) -> Result<Json<Test>, ErrorResponse> {
+    panic!()
+  }
+
+  #[api_operation(tag = "pet", operation_id = "test3")]
+  pub(crate) async fn test3(_params: Path<u32>) -> Result<Json<Test>, ErrorResponse> {
+    panic!()
+  }
+
   let openapi_path = "/test.json";
-  let operation_path = "/test/{plop_id}/{clap_name}/";
+  let operation_path = "/test/{plop_id}/{clap_name}";
+  let operation_path2 = "/test/line/{plop_id}";
+  let operation_path3 = "/test/line2/{plop_id}";
 
   let info = Info {
     title: "A well documented API".to_string(),
@@ -70,7 +80,12 @@ async fn path_parameter_replacement() {
   };
   let app = App::new()
     .document(spec)
-    .service(scope(operation_path).service(resource("").route(get().to(test))))
+    .service(
+      scope("test")
+        .service(resource("/{plop_id}/{clap_name}").route(get().to(test)))
+        .service(resource("/line/{plop_id}").route(get().to(test2)))
+        .service(resource("/line2/{plop_id}").route(get().to(test3))),
+    )
     .build(openapi_path);
   let app = init_service(app).await;
 
@@ -79,53 +94,46 @@ async fn path_parameter_replacement() {
   assert!(resp.status().is_success());
 
   let body: OpenApi = try_read_body_json(resp).await.expect("Unable to read body");
-  let parameters: Vec<Parameter> = body
-    .paths
-    .paths
-    .get(&operation_path.to_string())
-    .cloned()
+  let paths = body.paths.paths;
+
+  let operation = paths.get(&operation_path.to_string()).cloned();
+  assert!(operation.is_some());
+  let operation = operation
     .unwrap_or_default()
     .operations
     .get(&OperationType::Get)
     .cloned()
+    .unwrap_or_default();
+  let operation_id = operation.operation_id;
+  assert_eq!(
+    operation_id,
+    Some("get_test-6dcecae37dd6df4024e8ec3a32ca81ea".to_string())
+  );
+
+  let operation2 = paths.get(&operation_path2.to_string()).cloned();
+  assert!(operation2.is_some());
+  let operation2 = operation2
     .unwrap_or_default()
-    .parameters
-    .iter()
-    .filter_map(|p| match p {
-      ReferenceOr::Reference { .. } => None,
-      ReferenceOr::Object(obj) => Some(obj.clone()),
-    })
-    .collect();
-
-  assert_eq!(parameters.len(), 2);
-
-  let first_parameter = parameters.first().cloned().unwrap_or_default();
-  assert_eq!(first_parameter.name, "plop_id");
-  let first_parameter_schema = first_parameter
-    .definition
-    .and_then(|p| match p {
-      ParameterDefinition::Schema(ReferenceOr::Object(sch)) => Some(sch.into_object().clone()),
-      _ => None,
-    })
+    .operations
+    .get(&OperationType::Get)
+    .cloned()
     .unwrap_or_default();
+  let operation_id2 = operation2.operation_id;
   assert_eq!(
-    first_parameter_schema.instance_type,
-    Some(SingleOrVec::Single(Box::new(InstanceType::Integer)))
+    operation_id2,
+    Some("get_test-line-e6d32c785aeb754bd68fcc6878de32d6".to_string())
   );
 
-  let last_parameter = parameters.last().cloned().unwrap_or_default();
-  assert_eq!(last_parameter.name, "clap_name");
-  let last_parameter_schema = last_parameter
-    .definition
-    .and_then(|p| match p {
-      ParameterDefinition::Schema(ReferenceOr::Object(sch)) => Some(sch.into_object().clone()),
-      _ => None,
-    })
+  let operation3 = paths.get(&operation_path3.to_string()).cloned();
+  assert!(operation3.is_some());
+  let operation3 = operation3
+    .unwrap_or_default()
+    .operations
+    .get(&OperationType::Get)
+    .cloned()
     .unwrap_or_default();
-  assert_eq!(
-    last_parameter_schema.instance_type,
-    Some(SingleOrVec::Single(Box::new(InstanceType::String)))
-  );
+  let operation_id3 = operation3.operation_id;
+  assert_eq!(operation_id3, Some("test3".to_string()))
 }
 
 // Imports bellow aim at making cargo-cranky happy. Those dependencies are necessary for integration-test.

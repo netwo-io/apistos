@@ -166,7 +166,6 @@ fn api_operation() {
     json!({
       "deprecated": false,
       "description": "Add a new pet to the store\\\nPlop",
-      "operationId": "test",
       "requestBody": {
         "content": {
           "application/json": {
@@ -245,7 +244,6 @@ fn api_operation_no_content() {
     json!({
       "deprecated": false,
       "description": "Add a new pet to the store\\\nPlop",
-      "operationId": "test",
       "requestBody": {
         "content": {
           "application/json": {
@@ -333,7 +331,6 @@ fn api_operation_created_json() {
     json!({
       "deprecated": false,
       "description": "Add a new pet to the store\\\nPlop",
-      "operationId": "test",
       "requestBody": {
         "content": {
           "application/json": {
@@ -428,7 +425,6 @@ fn api_operation_accepted_json() {
     json!({
       "deprecated": false,
       "description": "Add a new pet to the store\\\nPlop",
-      "operationId": "test",
       "requestBody": {
         "content": {
           "application/json": {
@@ -522,7 +518,6 @@ fn api_operation_deprecated() {
     json!({
       "deprecated": true,
       "description": "Add a new pet to the store\\\nPlop",
-      "operationId": "test",
       "requestBody": {
         "content": {
           "application/json": {
@@ -558,7 +553,7 @@ fn api_operation_deprecated() {
   /// Add a new pet to the store
   /// Add a new pet to the store
   /// Plop
-  #[api_operation(tag = "pet")]
+  #[api_operation(tag = "pet", operation_id = "test2")]
   #[deprecated]
   pub(crate) async fn test2(
     _body: Json<test_models::Test>,
@@ -734,7 +729,6 @@ fn api_operation_error() {
     json!({
       "deprecated": false,
       "description": "Add a new pet to the store\\\nPlop",
-      "operationId": "test",
       "requestBody": {
         "content": {
           "application/json": {
@@ -847,7 +841,6 @@ fn api_operation_security() {
     json!({
       "deprecated": false,
       "description": "Add a new pet to the store\\\nPlop",
-      "operationId": "test",
       "requestBody": {
         "content": {
           "application/json": {
@@ -941,7 +934,6 @@ fn api_operation_multipart() {
     json!({
       "deprecated": false,
       "description": "Add a new pet to the store\\\nPlop",
-      "operationId": "test",
       "requestBody": {
         "content": {
           "multipart/form-data": {
@@ -1021,7 +1013,6 @@ fn api_operation_consumes_produces() {
     json!({
       "deprecated": false,
       "description": "Add a new pet to the store\\\nPlop",
-      "operationId": "test",
       "requestBody": {
         "content": {
           "application/problem+json": {

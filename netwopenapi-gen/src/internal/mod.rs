@@ -78,8 +78,7 @@ pub(crate) fn gen_open_api_impl(
     let operation = Operation {
       args: &args,
       responder_wrapper,
-      fn_name: &item_ast.sig.ident.to_string(),
-      operation_id: operation_attribute.operation_id,
+      operation_id: operation_attribute.operation_id.as_ref(),
       deprecated: Some(operation_attribute.deprecated || deprecated.unwrap_or_default()),
       summary: operation_attribute.summary.as_ref().or_else(|| doc_comments.first()),
       description: operation_attribute.description.as_deref().or({

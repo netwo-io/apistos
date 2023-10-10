@@ -1,15 +1,13 @@
 use crate::internal::security::Security;
-use proc_macro2::{Span, TokenStream};
-use proc_macro_error::abort;
+use proc_macro2::TokenStream;
 use quote::{quote, ToTokens};
 use std::collections::BTreeMap;
-use syn::{Expr, ExprLit, Lit, LitStr, Type};
+use syn::Type;
 
 pub(crate) struct Operation<'a> {
   pub(crate) args: &'a [Type],
   pub(crate) responder_wrapper: &'a TokenStream,
-  pub(crate) fn_name: &'a str,
-  pub(crate) operation_id: Option<Expr>,
+  pub(crate) operation_id: Option<&'a String>,
   pub(crate) deprecated: Option<bool>,
   pub(crate) summary: Option<&'a String>,
   pub(crate) description: Option<&'a str>,
@@ -24,23 +22,11 @@ impl<'a> ToTokens for Operation<'a> {
   fn to_tokens(&self, tokens: &mut TokenStream) {
     let args = self.args;
     let responder_wrapper = self.responder_wrapper;
-    let operation_id = self
-      .operation_id
-      .clone()
-      .or(Some(
-        ExprLit {
-          attrs: vec![],
-          lit: Lit::Str(LitStr::new(self.fn_name, Span::call_site())),
-        }
-        .into(),
-      ))
-      .unwrap_or_else(|| {
-        abort! {
-            Span::call_site(), "operation id is not defined for path";
-            help = r###"Try to define it in #[netwopenapi::api_operation(operation_id = {})]"###, &self.fn_name;
-            help = "Did you define the #[netwopenapi::api_operation(...)] over function?"
-        }
-      });
+    let operation_id = self.operation_id;
+    let operation_id = match operation_id {
+      None => quote!(None),
+      Some(op_id) => quote!(Some(#op_id.to_string())),
+    };
     let deprecated = self
       .deprecated
       .map(|deprecated| quote!(Some(#deprecated)))
@@ -154,7 +140,7 @@ impl<'a> ToTokens for Operation<'a> {
           operation_builder.security = securities;
         }
 
-        operation_builder.operation_id = Some(#operation_id.to_string());
+        operation_builder.operation_id = #operation_id;
 
         operation_builder.deprecated = #deprecated;
 
