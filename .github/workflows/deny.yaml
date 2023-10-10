@@ -6,12 +6,14 @@ on:
     paths:
       - "**.rs"
       - "**Cargo.toml"
+      - "deny.toml"
   push:
     branches:
       - main
     paths:
       - "**.rs"
       - "**Cargo.toml"
+      - "deny.toml"
   workflow_dispatch:
 env:
   CARGO_TERM_COLOR: always
