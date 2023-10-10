@@ -9,7 +9,10 @@ use actix_web::dev::{HttpServiceFactory, ServiceRequest, ServiceResponse};
 use actix_web::web::{get, resource};
 use actix_web::Error;
 use indexmap::IndexMap;
+use netwopenapi_models::paths::OperationType;
 use netwopenapi_models::OpenApi;
+use once_cell::sync::Lazy;
+use regex::Regex;
 use std::future::Future;
 use std::sync::{Arc, RwLock};
 use std::{fmt, mem};
@@ -181,12 +184,18 @@ where
     });
     definition_holder.update_path_items(&mut open_api_spec.paths.paths);
     let mut paths = IndexMap::new();
-    for (path, item) in mem::take(&mut open_api_spec.paths.paths) {
+    for (path, mut item) in mem::take(&mut open_api_spec.paths.paths) {
       let path = if path.starts_with('/') {
         path
       } else {
         "/".to_owned() + &path
       };
+
+      item.operations.iter_mut().for_each(|(op_type, op)| {
+        let operation_id = build_operation_id(&path, op_type);
+        op.operation_id = op.operation_id.clone().or(Some(operation_id));
+      });
+
       paths.insert(path, item);
     }
     open_api_spec.paths.paths = paths;
@@ -201,6 +210,24 @@ where
         .for_each(|op| op.tags.append(&mut self.default_tags.clone()))
     }
   }
+}
+
+#[allow(clippy::expect_used)]
+static PATH_RESOURCE_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"/(.*?)/\{(.*?)\}").expect("path template regex"));
+
+fn build_operation_id(path: &str, operation_type: &OperationType) -> String {
+  let resource = PATH_RESOURCE_REGEX
+    .captures(path)
+    .and_then(|c| c.get(1))
+    .map(|_match| _match.as_str())
+    .unwrap_or("default");
+  format!(
+    "{:?}_{}-{:x}",
+    operation_type,
+    resource.replace('/', "-"),
+    md5::compute(path)
+  )
+  .to_lowercase()
 }
 
 #[cfg(test)]

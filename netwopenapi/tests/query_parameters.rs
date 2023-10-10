@@ -61,6 +61,7 @@ async fn query_parameters() {
 use actix_service as _;
 use indexmap as _;
 use log as _;
+use md5 as _;
 use netwopenapi_models as _;
 use once_cell as _;
 use regex as _;
