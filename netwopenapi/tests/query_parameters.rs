@@ -57,6 +57,63 @@ async fn query_parameters() {
   assert_eq!(offset_parameter.required, Some(false));
 }
 
+#[actix_web::test]
+async fn query_parameters_with_flatten_enums() {
+  #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  pub(crate) enum StatusQuery {
+    Active(u32),
+    Inactive(u32),
+  }
+
+  #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  pub(crate) enum KindQuery {
+    Big(String),
+    Small(String),
+  }
+
+  #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  pub(crate) struct StructQuery {
+    pub(crate) test: Option<String>,
+    #[serde(flatten)]
+    pub(crate) status: Option<StatusQuery>,
+    #[serde(flatten)]
+    pub(crate) kind: KindQuery,
+  }
+
+  let parameters = <Query<StructQuery> as ApiComponent>::parameters();
+  assert_eq!(parameters.len(), 5);
+
+  let test_parameter = parameters
+    .iter()
+    .find(|p| p.name == *"test")
+    .expect("Unable to retrieve test parameter");
+  assert_eq!(test_parameter.required, None);
+
+  let active_parameter = parameters
+    .iter()
+    .find(|p| p.name == *"Active")
+    .expect("Unable to retrieve Active parameter");
+  assert_eq!(active_parameter.required, Some(false));
+
+  let inactive_parameter = parameters
+    .iter()
+    .find(|p| p.name == *"Inactive")
+    .expect("Unable to retrieve Inactive parameter");
+  assert_eq!(inactive_parameter.required, Some(false));
+
+  let big_parameter = parameters
+    .iter()
+    .find(|p| p.name == *"Big")
+    .expect("Unable to retrieve Big parameter");
+  assert_eq!(big_parameter.required, Some(false));
+
+  let small_parameter = parameters
+    .iter()
+    .find(|p| p.name == *"Small")
+    .expect("Unable to retrieve Small parameter");
+  assert_eq!(small_parameter.required, Some(false));
+}
+
 // Imports bellow aim at making cargo-cranky happy. Those dependencies are necessary for integration-test.
 use actix_service as _;
 use indexmap as _;
