@@ -220,7 +220,8 @@ fn build_operation_id(path: &str, operation_type: &OperationType) -> String {
     .captures(path)
     .and_then(|c| c.get(1))
     .map(|_match| _match.as_str())
-    .unwrap_or("default");
+    .unwrap_or(path)
+    .trim_matches('/');
   format!(
     "{:?}_{}-{:x}",
     operation_type,
@@ -234,11 +235,12 @@ fn build_operation_id(path: &str, operation_type: &OperationType) -> String {
 mod tests {
   #![allow(clippy::expect_used)]
 
-  use crate::app::OpenApiWrapper;
+  use crate::app::{build_operation_id, OpenApiWrapper};
   use crate::spec::Spec;
   use actix_web::test::{call_service, init_service, try_read_body_json, TestRequest};
   use actix_web::App;
   use netwopenapi_models::info::Info;
+  use netwopenapi_models::paths::OperationType;
   use netwopenapi_models::tag::Tag;
   use netwopenapi_models::OpenApi;
 
@@ -286,5 +288,17 @@ mod tests {
     let body: OpenApi = try_read_body_json(resp).await.expect("Unable to read body");
     assert_eq!(body.info, info);
     assert_eq!(body.tags, tags);
+  }
+
+  #[test]
+  fn test_build_operation_id() {
+    let operation_id = build_operation_id("/api/v1/plop/", &OperationType::Get);
+    assert_eq!(operation_id, "get_api-v1-plop-89654e0732d51aafdc164076a57fd663");
+
+    let operation_id = build_operation_id("/api/v1/plap/{test_id}", &OperationType::Get);
+    assert_eq!(operation_id, "get_api-v1-plap-97ba4631a55f77d23b996bf558be60da");
+
+    let operation_id = build_operation_id("/api/v1/plip/{test_id}/test/", &OperationType::Get);
+    assert_eq!(operation_id, "get_api-v1-plip-f5c9e39d7a1acb928c72745f3893bce8")
   }
 }
