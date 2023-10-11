@@ -30,7 +30,7 @@ where
   }
 
   fn schema() -> Option<(String, ReferenceOr<Schema>)> {
-    T::schema()
+    None
   }
 
   fn request_body() -> Option<RequestBody> {
@@ -45,7 +45,7 @@ where
       required: Some(<T as ApiHeader>::required()),
       deprecated: Some(<T as ApiHeader>::deprecated()),
       style: Some(ParameterStyle::Simple),
-      definition: Self::schema()
+      definition: T::schema()
         .map(|(_, schema)| schema)
         .or_else(Self::raw_schema)
         .map(ParameterDefinition::Schema),
@@ -68,7 +68,7 @@ where
   }
 
   fn schema() -> Option<(String, ReferenceOr<Schema>)> {
-    T::schema()
+    None
   }
 
   fn request_body() -> Option<RequestBody> {
@@ -83,7 +83,7 @@ where
       required: Some(<T as ApiHeader>::required()),
       deprecated: Some(<T as ApiHeader>::deprecated()),
       style: Some(ParameterStyle::Simple),
-      definition: Self::schema()
+      definition: T::schema()
         .map(|(_, schema)| schema)
         .or_else(Self::raw_schema)
         .map(ParameterDefinition::Schema),
