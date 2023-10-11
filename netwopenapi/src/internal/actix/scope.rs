@@ -24,7 +24,19 @@ pub struct Scope<S = actix_web::Scope> {
 
 impl Scope {
   /// Wrapper for [`actix_web::Scope::new`](https://docs.rs/actix-web/*/actix_web/struct.Scope.html#method.new)
-  pub fn new(path: &str, tags: Vec<String>) -> Self {
+  pub fn new(path: &str) -> Self {
+    Scope {
+      item_map: Default::default(),
+      components: Default::default(),
+      tags: Default::default(),
+      path: path.into(),
+      inner: Some(actix_web::Scope::new(path)),
+    }
+  }
+
+  /// Wrapper for [`actix_web::Scope::new`](https://docs.rs/actix-web/*/actix_web/struct.Scope.html#method.new) with a list of tag names for the given scope.
+  /// Tags should exist in `Spec` otherwise documentation might be considered as invalid by consumers.
+  pub fn new_tagged(path: &str, tags: Vec<String>) -> Self {
     Scope {
       item_map: Default::default(),
       components: Default::default(),
@@ -185,11 +197,11 @@ where
 
 /// Wrapper for [`actix_web::web::scope`](https://docs.rs/actix-web/*/actix_web/web/fn.scope.html).
 pub fn scope(path: &str) -> Scope {
-  Scope::new(path, vec![])
+  Scope::new(path)
 }
 
 /// Wrapper for [`actix_web::web::scope`](https://docs.rs/actix-web/*/actix_web/web/fn.scope.html) with a list of tag names for the given scope.
 /// Tags should exist in `Spec` otherwise documentation might be considered as invalid by consumers.
 pub fn tagged_scope(path: &str, tags: Vec<String>) -> Scope {
-  Scope::new(path, tags)
+  Scope::new_tagged(path, tags)
 }

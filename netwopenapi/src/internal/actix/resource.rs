@@ -22,7 +22,19 @@ pub struct Resource<R = actix_web::Resource> {
 
 impl Resource {
   /// Wrapper for [`actix_web::Resource::new`](https://docs.rs/actix-web/*/actix_web/struct.Resource.html#method.new).
-  pub fn new(path: &str, tags: Vec<String>) -> Resource {
+  pub fn new(path: &str) -> Resource {
+    Resource {
+      path: path.to_owned(),
+      item_definition: None,
+      components: Default::default(),
+      tags: Default::default(),
+      inner: actix_web::Resource::new(path),
+    }
+  }
+
+  /// Wrapper for [`actix_web::Resource::new`](https://docs.rs/actix-web/*/actix_web/struct.Resource.html#method.new) with a list of tag names for the given scope.
+  /// Tags should exist in `Spec` otherwise documentation might be considered as invalid by consumers.
+  pub fn new_tagged(path: &str, tags: Vec<String>) -> Resource {
     Resource {
       path: path.to_owned(),
       item_definition: None,
@@ -176,11 +188,11 @@ where
 
 /// Wrapper for [`actix_web::web::resource`](https://docs.rs/actix-web/*/actix_web/web/fn.resource.html).
 pub fn resource(path: &str) -> Resource {
-  Resource::new(path, vec![])
+  Resource::new(path)
 }
 
 /// Wrapper for [`actix_web::web::resource`](https://docs.rs/actix-web/*/actix_web/web/fn.resource.html) with a list of tag names for the given scope.
 /// Tags should exist in `Spec` otherwise documentation might be considered as invalid by consumers.
 pub fn tagged_resource(path: &str, tags: Vec<String>) -> Resource {
-  Resource::new(path, tags)
+  Resource::new_tagged(path, tags)
 }
