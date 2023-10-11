@@ -543,12 +543,27 @@ fn api_component_derive_named_enums() {
   );
 }
 
+#[allow(unused_qualifications)]
 #[test]
 fn api_component_derive_named_enums_deep() {
+  #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  pub(crate) struct TestStuff {
+    pub(crate) name: String,
+  }
+
+  #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  #[schemars(rename_all = "snake_case")]
+  #[schemars(tag = "type")]
+  pub(crate) enum Level4Query {
+    Something(TestStuff),
+    Other(TestStuff),
+  }
+
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
   pub(crate) struct ActiveOrInactiveQuery {
     pub(crate) id: u32,
     pub(crate) description: String,
+    pub(crate) level4: Level4Query,
   }
 
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
@@ -576,7 +591,7 @@ fn api_component_derive_named_enums_deep() {
   let name_schema = <Query as ApiComponent>::schema();
   let name_child_schemas = <Query as ApiComponent>::child_schemas();
   assert!(name_schema.is_some());
-  assert_eq!(name_child_schemas.len(), 4);
+  assert_eq!(name_child_schemas.len(), 5);
   let (schema_name, schema) = name_schema.expect("schema should be defined");
   assert_eq!(schema_name, "Query");
   assert_schema(&schema.clone());
@@ -703,13 +718,69 @@ fn api_component_derive_named_enums_deep() {
           "format": "uint32",
           "minimum": 0.0,
           "type": "integer"
+        },
+        "level4": {
+          "$ref": "#/components/schemas/Level4Query"
         }
       },
       "required": [
         "description",
-        "id"
+        "id",
+        "level4"
       ],
       "type": "object"
+    })
+  );
+
+  let (_, child_schema) = name_child_schemas
+    .iter()
+    .find(|(name, _)| name == "Level4Query")
+    .expect("missing child schema");
+  assert_schema(&child_schema.clone());
+  let json = serde_json::to_value(child_schema).expect("Unable to serialize as Json");
+  assert_json_eq!(
+    json,
+    json!({
+      "oneOf": [
+        {
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "type": {
+              "enum": [
+                "something"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "type"
+          ],
+          "title": "something",
+          "type": "object"
+        },
+        {
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "type": {
+              "enum": [
+                "other"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "type"
+          ],
+          "title": "other",
+          "type": "object"
+        }
+      ]
     })
   );
 }

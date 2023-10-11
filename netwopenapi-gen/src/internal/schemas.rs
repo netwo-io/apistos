@@ -19,28 +19,38 @@ impl ToTokens for Schemas {
       quote!()
     };
 
-    let update_one_of_title = quote!(one_of.iter_mut().for_each(|s| {
+    let update_metadata_title = quote!(match sch_obj.metadata.as_mut() {
+      None => {
+        sch_obj.metadata = Some(Box::new(schemars::schema::Metadata {
+          title: Some(prop_name.clone()),
+          ..Default::default()
+        }));
+      }
+      Some(m) => m.title = m.title.clone().or_else(|| Some(prop_name.clone())),
+    });
+    let update_one_of_title = quote!(for s in &mut *one_of {
       match s {
         schemars::schema::Schema::Bool(_) => {}
         schemars::schema::Schema::Object(sch_obj) => {
           if let Some(obj) = sch_obj.object.as_mut() {
             if obj.properties.len() == 1 {
-              obj.properties.first_key_value().map(|(prop_name, _)| {
-                match sch_obj.metadata.as_mut() {
-                  None => {
-                    sch_obj.metadata = Some(Box::new(schemars::schema::Metadata {
-                      title: Some(prop_name.clone()),
-                      ..Default::default()
-                    }));
-                  }
-                  Some(m) => m.title = m.title.clone().or_else(|| Some(prop_name.clone())),
-                };
-              });
-            };
+              if let Some((prop_name, _)) = obj.properties.first_key_value() {
+                #update_metadata_title;
+              }
+            } else if let Some(enum_values) = obj.properties.iter_mut().find_map(|(_, p)| match p {
+              schemars::schema::Schema::Bool(_) => None,
+              schemars::schema::Schema::Object(sch_obj) => sch_obj.enum_values.as_mut(),
+            }) {
+              if enum_values.len() == 1 {
+                if let Some(serde_json::Value::String(prop_name)) = enum_values.first() {
+                  #update_metadata_title
+                }
+              }
+            }
           };
         }
       }
-    }));
+    });
 
     tokens.extend(quote! {
       fn child_schemas() -> Vec<(String, netwopenapi::reference_or::ReferenceOr<netwopenapi::Schema>)> {
@@ -54,7 +64,7 @@ impl ToTokens for Schemas {
             schemars::schema::Schema::Bool(_) => {}
             schemars::schema::Schema::Object(schema) => {
               if let Some(one_of) = schema.subschemas.as_mut().and_then(|s| s.one_of.as_mut()) {
-                #update_one_of_title
+                #update_one_of_title;
               }
             }
           }
