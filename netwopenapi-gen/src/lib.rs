@@ -663,8 +663,6 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
   .into()
 }
 
-// Necessary in macro expansion
-use serde_json as _;
 // Imports bellow aim at making cargo-cranky happy. Those dependencies are necessary for doc-test.
 #[cfg(test)]
 use garde as _;

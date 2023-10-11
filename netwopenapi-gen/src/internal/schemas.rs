@@ -42,7 +42,7 @@ impl ToTokens for Schemas {
               schemars::schema::Schema::Object(sch_obj) => sch_obj.enum_values.as_mut(),
             }) {
               if enum_values.len() == 1 {
-                if let Some(serde_json::Value::String(prop_name)) = enum_values.first() {
+                if let Some(schemars::_serde_json::Value::String(prop_name)) = enum_values.first() {
                   #update_metadata_title
                 }
               }
