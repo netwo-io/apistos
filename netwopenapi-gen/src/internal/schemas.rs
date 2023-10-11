@@ -36,7 +36,34 @@ impl ToTokens for Schemas {
           let schema_name = <Self as schemars::JsonSchema>::schema_name();
           let settings = schemars::gen::SchemaSettings::openapi3();
           let mut gen = settings.into_generator();
-          let schema: netwopenapi::RootSchema = gen.into_root_schema_for::<Self>();
+          let mut schema: netwopenapi::RootSchema = gen.into_root_schema_for::<Self>();
+          if let Some(one_of) = schema.schema.subschemas.as_mut().and_then(|s| s.one_of.as_mut()) {
+            one_of.iter_mut().for_each(|s| {
+              match s {
+                schemars::schema::Schema::Bool(_) => {}
+                schemars::schema::Schema::Object(sch_obj) => {
+                  if let Some(obj) = sch_obj.object.as_mut() {
+                    if obj.properties.len() == 1 {
+                      obj
+                        .properties
+                        .first_key_value()
+                        .map(|(prop_name, _)| {
+                          match sch_obj.metadata.as_mut() {
+                            None => {
+                              sch_obj.metadata = Some(Box::new(schemars::schema::Metadata {
+                                title: Some(prop_name.clone()),
+                                ..Default::default()
+                              }));
+                            }
+                            Some(m) => m.title = m.title.clone().or_else(|| Some(prop_name.clone())),
+                          };
+                        });
+                    };
+                  };
+                }
+              }
+            })
+          }
           #deprecated
           (
             schema_name,
