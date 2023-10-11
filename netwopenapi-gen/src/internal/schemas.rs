@@ -18,6 +18,30 @@ impl ToTokens for Schemas {
     } else {
       quote!()
     };
+
+    let update_one_of_title = quote!(one_of.iter_mut().for_each(|s| {
+      match s {
+        schemars::schema::Schema::Bool(_) => {}
+        schemars::schema::Schema::Object(sch_obj) => {
+          if let Some(obj) = sch_obj.object.as_mut() {
+            if obj.properties.len() == 1 {
+              obj.properties.first_key_value().map(|(prop_name, _)| {
+                match sch_obj.metadata.as_mut() {
+                  None => {
+                    sch_obj.metadata = Some(Box::new(schemars::schema::Metadata {
+                      title: Some(prop_name.clone()),
+                      ..Default::default()
+                    }));
+                  }
+                  Some(m) => m.title = m.title.clone().or_else(|| Some(prop_name.clone())),
+                };
+              });
+            };
+          };
+        }
+      }
+    }));
+
     tokens.extend(quote! {
       fn child_schemas() -> Vec<(String, netwopenapi::reference_or::ReferenceOr<netwopenapi::Schema>)> {
         let settings = schemars::gen::SchemaSettings::openapi3();
@@ -25,7 +49,15 @@ impl ToTokens for Schemas {
         let schema: netwopenapi::RootSchema = gen.into_root_schema_for::<Self>();
 
         let mut schemas: Vec<(String, netwopenapi::reference_or::ReferenceOr<netwopenapi::Schema>)> = vec![];
-        for (def_name, def) in schema.definitions {
+        for (def_name, mut def) in schema.definitions {
+          match &mut def {
+            schemars::schema::Schema::Bool(_) => {}
+            schemars::schema::Schema::Object(schema) => {
+              if let Some(one_of) = schema.subschemas.as_mut().and_then(|s| s.one_of.as_mut()) {
+                #update_one_of_title
+              }
+            }
+          }
           schemas.push((def_name, netwopenapi::reference_or::ReferenceOr::Object(def)));
         }
         schemas
@@ -38,31 +70,7 @@ impl ToTokens for Schemas {
           let mut gen = settings.into_generator();
           let mut schema: netwopenapi::RootSchema = gen.into_root_schema_for::<Self>();
           if let Some(one_of) = schema.schema.subschemas.as_mut().and_then(|s| s.one_of.as_mut()) {
-            one_of.iter_mut().for_each(|s| {
-              match s {
-                schemars::schema::Schema::Bool(_) => {}
-                schemars::schema::Schema::Object(sch_obj) => {
-                  if let Some(obj) = sch_obj.object.as_mut() {
-                    if obj.properties.len() == 1 {
-                      obj
-                        .properties
-                        .first_key_value()
-                        .map(|(prop_name, _)| {
-                          match sch_obj.metadata.as_mut() {
-                            None => {
-                              sch_obj.metadata = Some(Box::new(schemars::schema::Metadata {
-                                title: Some(prop_name.clone()),
-                                ..Default::default()
-                              }));
-                            }
-                            Some(m) => m.title = m.title.clone().or_else(|| Some(prop_name.clone())),
-                          };
-                        });
-                    };
-                  };
-                }
-              }
-            })
+            #update_one_of_title
           }
           #deprecated
           (
