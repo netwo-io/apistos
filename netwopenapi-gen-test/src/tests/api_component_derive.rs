@@ -297,6 +297,7 @@ fn api_component_derive_flatten_algebric_enums() {
           "required": [
             "after_id"
           ],
+          "title": "after_id",
           "type": "object"
         },
         {
@@ -310,6 +311,7 @@ fn api_component_derive_flatten_algebric_enums() {
           "required": [
             "after_date"
           ],
+          "title": "after_date",
           "type": "object"
         }
       ],
@@ -391,6 +393,103 @@ fn api_component_derive_optional_enums() {
         "limit"
       ],
       "title": "Query",
+      "type": "object"
+    })
+  );
+}
+
+#[test]
+fn api_component_derive_named_enums() {
+  #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  pub(crate) struct ActiveOrInactiveQuery {
+    pub(crate) id: u32,
+    pub(crate) description: String,
+  }
+
+  #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  pub(crate) enum KindQuery {
+    Active(ActiveOrInactiveQuery),
+    Inactive(ActiveOrInactiveQuery),
+  }
+
+  #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  pub(crate) struct Query {
+    pub(crate) test: Option<String>,
+    #[serde(flatten)]
+    pub(crate) kind: KindQuery,
+  }
+
+  let name_schema = <Query as ApiComponent>::schema();
+  let name_child_schemas = <Query as ApiComponent>::child_schemas();
+  assert!(name_schema.is_some());
+  assert_eq!(name_child_schemas.len(), 1);
+  let (schema_name, schema) = name_schema.expect("schema should be defined");
+  assert_eq!(schema_name, "Query");
+  assert_schema(&schema.clone());
+  let json = serde_json::to_value(schema).expect("Unable to serialize as Json");
+  assert_json_eq!(
+    json,
+    json!({
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "Active": {
+              "$ref": "#/components/schemas/ActiveOrInactiveQuery"
+            }
+          },
+          "required": [
+            "Active"
+          ],
+          "title": "Active",
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "Inactive": {
+              "$ref": "#/components/schemas/ActiveOrInactiveQuery"
+            }
+          },
+          "required": [
+            "Inactive"
+          ],
+          "title": "Inactive",
+          "type": "object"
+        }
+      ],
+      "properties": {
+        "test": {
+          "nullable": true,
+          "type": "string"
+        }
+      },
+      "title": "Query",
+      "type": "object"
+    })
+  );
+
+  let (child_schema_name, child_schema) = name_child_schemas.first().expect("missing child schema");
+  assert_eq!(child_schema_name, "ActiveOrInactiveQuery");
+  assert_schema(&child_schema.clone());
+  let json = serde_json::to_value(child_schema).expect("Unable to serialize as Json");
+  assert_json_eq!(
+    json,
+    json!({
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "id": {
+          "format": "uint32",
+          "minimum": 0.0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "description",
+        "id"
+      ],
       "type": "object"
     })
   );
