@@ -17,16 +17,18 @@ use std::future::Future;
 pub struct Scope<S = actix_web::Scope> {
   pub(crate) item_map: BTreeMap<String, PathItem>,
   pub(crate) components: Vec<Components>,
+  tags: Vec<String>,
   path: String,
   inner: Option<S>,
 }
 
 impl Scope {
   /// Wrapper for [`actix_web::Scope::new`](https://docs.rs/actix-web/*/actix_web/struct.Scope.html#method.new)
-  pub fn new(path: &str) -> Self {
+  pub fn new(path: &str, tags: Vec<String>) -> Self {
     Scope {
       item_map: Default::default(),
       components: Default::default(),
+      tags,
       path: path.into(),
       inner: Some(actix_web::Scope::new(path)),
     }
@@ -130,6 +132,7 @@ where
     Scope {
       item_map: self.item_map,
       components: self.components,
+      tags: self.tags,
       path: self.path,
       inner: self.inner.take().map(|s| s.wrap(mw)),
     }
@@ -153,6 +156,7 @@ where
     Scope {
       item_map: self.item_map,
       components: self.components,
+      tags: self.tags,
       path: self.path,
       inner: self.inner.take().map(|s| s.wrap_fn(mw)),
     }
@@ -171,6 +175,7 @@ where
 
       for operation in path_item.operations.values_mut() {
         operation.update_path_parameter_name_from_path(&p);
+        operation.tags.append(&mut self.tags.clone());
       }
 
       self.item_map.insert(p, path_item);
@@ -180,5 +185,11 @@ where
 
 /// Wrapper for [`actix_web::web::scope`](https://docs.rs/actix-web/*/actix_web/web/fn.scope.html).
 pub fn scope(path: &str) -> Scope {
-  Scope::new(path)
+  Scope::new(path, vec![])
+}
+
+/// Wrapper for [`actix_web::web::scope`](https://docs.rs/actix-web/*/actix_web/web/fn.scope.html) with a list of tag names for the given scope.
+/// Tags should exist in `Spec` otherwise documentation might be considered as invalid by consumers.
+pub fn tagged_scope(path: &str, tags: Vec<String>) -> Scope {
+  Scope::new(path, tags)
 }

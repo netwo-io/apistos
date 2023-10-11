@@ -16,16 +16,18 @@ pub struct Resource<R = actix_web::Resource> {
   pub(crate) path: String,
   pub(crate) item_definition: Option<PathItem>,
   pub(crate) components: Vec<Components>,
+  tags: Vec<String>,
   inner: R,
 }
 
 impl Resource {
   /// Wrapper for [`actix_web::Resource::new`](https://docs.rs/actix-web/*/actix_web/struct.Resource.html#method.new).
-  pub fn new(path: &str) -> Resource {
+  pub fn new(path: &str, tags: Vec<String>) -> Resource {
     Resource {
       path: path.to_owned(),
       item_definition: None,
       components: Default::default(),
+      tags,
       inner: actix_web::Resource::new(path),
     }
   }
@@ -66,7 +68,11 @@ where
   pub fn route(mut self, route: Route) -> Self {
     let w = RouteWrapper::new(&self.path, route);
     let mut item_definition = self.item_definition.unwrap_or_default();
-    item_definition.operations.extend(w.def.item.operations);
+    let mut operations = w.def.item.operations;
+    for operation in operations.values_mut() {
+      operation.tags.append(&mut self.tags.clone());
+    }
+    item_definition.operations.extend(operations);
     self.item_definition = Some(item_definition);
     self.components.extend(w.component);
     self.inner = self.inner.route(w.inner);
@@ -92,6 +98,7 @@ where
   {
     if F::Future::is_visible() {
       let mut operation = F::Future::operation();
+      operation.tags.append(&mut self.tags.clone());
       let mut item_definition = self.item_definition.unwrap_or_default();
       for method in METHODS {
         item_definition.operations.insert(method.clone(), operation.clone());
@@ -123,6 +130,7 @@ where
       path: self.path,
       item_definition: self.item_definition,
       components: self.components,
+      tags: self.tags,
       inner: self.inner.wrap(mw),
     }
   }
@@ -147,6 +155,7 @@ where
       path: self.path,
       item_definition: self.item_definition,
       components: self.components,
+      tags: self.tags,
       inner: self.inner.wrap_fn(mw),
     }
   }
@@ -167,5 +176,11 @@ where
 
 /// Wrapper for [`actix_web::web::resource`](https://docs.rs/actix-web/*/actix_web/web/fn.resource.html).
 pub fn resource(path: &str) -> Resource {
-  Resource::new(path)
+  Resource::new(path, vec![])
+}
+
+/// Wrapper for [`actix_web::web::resource`](https://docs.rs/actix-web/*/actix_web/web/fn.resource.html) with a list of tag names for the given scope.
+/// Tags should exist in `Spec` otherwise documentation might be considered as invalid by consumers.
+pub fn tagged_resource(path: &str, tags: Vec<String>) -> Resource {
+  Resource::new(path, tags)
 }
