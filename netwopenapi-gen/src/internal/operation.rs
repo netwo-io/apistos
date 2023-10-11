@@ -64,7 +64,7 @@ impl<'a> ToTokens for Operation<'a> {
       let error_codes = self.error_codes;
       quote! {
         let available_error_codes = [#(#error_codes,)*];
-        let responses = responses.responses
+        let mut responses = responses.responses
           .into_iter()
           .filter(|(status, _)| {
             use std::str::FromStr;
@@ -77,7 +77,7 @@ impl<'a> ToTokens for Operation<'a> {
             true
           })
           .collect::<std::collections::BTreeMap<String, netwopenapi::reference_or::ReferenceOr<netwopenapi::paths::Response>>>();
-       let responses = netwopenapi::paths::Responses {
+        let responses = netwopenapi::paths::Responses {
           responses: std::collections::BTreeMap::from_iter(responses),
           ..Default::default()
         };

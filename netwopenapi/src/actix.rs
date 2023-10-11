@@ -188,7 +188,7 @@ mod test {
   }
 
   #[test]
-  fn accepted_jsom_generate_valid_response() {
+  fn accepted_json_generate_valid_response() {
     #[derive(Serialize, ApiComponent, JsonSchema)]
     struct Test {
       test: String,
@@ -203,7 +203,7 @@ mod test {
   }
 
   #[test]
-  fn created_jsom_generate_valid_response() {
+  fn created_json_generate_valid_response() {
     #[derive(Serialize, ApiComponent, JsonSchema)]
     struct Test {
       test: String,

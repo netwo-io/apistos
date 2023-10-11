@@ -17,6 +17,6 @@ pub struct Tag {
   #[serde(skip_serializing_if = "Option::is_none")]
   pub external_docs: Option<ExternalDocumentation>,
   /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions).
-  #[serde(flatten, skip_serializing_if = "IndexMap::is_empty")]
+  #[serde(flatten, skip_serializing_if = "IndexMap::is_empty", skip_deserializing)]
   pub extensions: IndexMap<String, Value>,
 }

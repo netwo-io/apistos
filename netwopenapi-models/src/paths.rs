@@ -14,7 +14,7 @@ pub struct Paths {
   #[serde(flatten)]
   pub paths: IndexMap<String, PathItem>,
   /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions).
-  #[serde(flatten, skip_serializing_if = "IndexMap::is_empty")]
+  #[serde(flatten, skip_serializing_if = "IndexMap::is_empty", skip_deserializing)]
   pub extensions: IndexMap<String, Value>,
 }
 
@@ -38,7 +38,7 @@ pub struct PathItem {
   #[serde(skip_serializing_if = "Vec::is_empty", default)]
   pub parameters: Vec<ReferenceOr<Parameter>>,
   /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions).
-  #[serde(flatten, skip_serializing_if = "IndexMap::is_empty")]
+  #[serde(flatten, skip_serializing_if = "IndexMap::is_empty", skip_deserializing)]
   pub extensions: IndexMap<String, Value>,
 }
 
@@ -105,7 +105,7 @@ pub struct Operation {
   #[serde(skip_serializing_if = "Vec::is_empty", default)]
   pub servers: Vec<Server>,
   /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions).
-  #[serde(flatten, skip_serializing_if = "IndexMap::is_empty")]
+  #[serde(flatten, skip_serializing_if = "IndexMap::is_empty", skip_deserializing)]
   pub extensions: IndexMap<String, Value>,
 }
 
@@ -120,7 +120,7 @@ pub struct ExternalDocumentation {
   /// The URL for the target documentation. Value MUST be in the format of a URL.
   pub url: String,
   /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions).
-  #[serde(flatten, skip_serializing_if = "IndexMap::is_empty")]
+  #[serde(flatten, skip_serializing_if = "IndexMap::is_empty", skip_deserializing)]
   pub extensions: IndexMap<String, Value>,
 }
 
@@ -171,7 +171,7 @@ pub struct Parameter {
   #[serde(flatten, skip_serializing_if = "Option::is_none")]
   pub example: Option<Examples>,
   /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions).
-  #[serde(flatten, skip_serializing_if = "IndexMap::is_empty")]
+  #[serde(flatten, skip_serializing_if = "IndexMap::is_empty", skip_deserializing)]
   pub extensions: IndexMap<String, Value>,
 }
 
@@ -199,7 +199,7 @@ pub struct MediaType {
   #[serde(skip_serializing_if = "BTreeMap::is_empty", default)]
   pub encoding: BTreeMap<String, Encoding>,
   /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions).
-  #[serde(flatten, skip_serializing_if = "IndexMap::is_empty")]
+  #[serde(flatten, skip_serializing_if = "IndexMap::is_empty", skip_deserializing)]
   pub extensions: IndexMap<String, Value>,
 }
 
@@ -224,7 +224,7 @@ pub struct Encoding {
   #[serde(skip_serializing_if = "Option::is_none")]
   pub allow_reserved: Option<bool>,
   /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions).
-  #[serde(flatten, skip_serializing_if = "IndexMap::is_empty")]
+  #[serde(flatten, skip_serializing_if = "IndexMap::is_empty", skip_deserializing)]
   pub extensions: IndexMap<String, Value>,
 }
 
@@ -313,7 +313,7 @@ pub struct Example {
   #[serde(flatten)]
   pub value: ExampleValue,
   /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions).
-  #[serde(flatten, skip_serializing_if = "IndexMap::is_empty")]
+  #[serde(flatten, skip_serializing_if = "IndexMap::is_empty", skip_deserializing)]
   pub extensions: IndexMap<String, Value>,
 }
 
@@ -342,7 +342,7 @@ pub struct RequestBody {
   #[serde(skip_serializing_if = "Option::is_none")]
   pub required: Option<bool>,
   /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions).
-  #[serde(flatten, skip_serializing_if = "IndexMap::is_empty")]
+  #[serde(flatten, skip_serializing_if = "IndexMap::is_empty", skip_deserializing)]
   pub extensions: IndexMap<String, Value>,
 }
 
@@ -363,7 +363,7 @@ pub struct Responses {
   #[serde(flatten, skip_serializing_if = "BTreeMap::is_empty")]
   pub responses: BTreeMap<String, ReferenceOr<Response>>,
   /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions).
-  #[serde(flatten, skip_serializing_if = "IndexMap::is_empty")]
+  #[serde(flatten, skip_serializing_if = "IndexMap::is_empty", skip_deserializing)]
   pub extensions: IndexMap<String, Value>,
 }
 
@@ -385,7 +385,7 @@ pub struct Response {
   #[serde(skip_serializing_if = "BTreeMap::is_empty", default)]
   pub links: BTreeMap<String, ReferenceOr<Link>>,
   /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions).
-  #[serde(flatten, skip_serializing_if = "IndexMap::is_empty")]
+  #[serde(flatten, skip_serializing_if = "IndexMap::is_empty", skip_deserializing)]
   pub extensions: IndexMap<String, Value>,
 }
 
@@ -413,7 +413,7 @@ pub struct Link {
   #[serde(skip_serializing_if = "Option::is_none")]
   pub server: Option<Server>,
   /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions).
-  #[serde(flatten, skip_serializing_if = "IndexMap::is_empty")]
+  #[serde(flatten, skip_serializing_if = "IndexMap::is_empty", skip_deserializing)]
   pub extensions: IndexMap<String, Value>,
 }
 
@@ -426,7 +426,7 @@ pub struct Callback {
   #[serde(flatten, skip_serializing_if = "BTreeMap::is_empty")]
   pub callbacks: BTreeMap<String, PathItem>,
   /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions).
-  #[serde(flatten, skip_serializing_if = "IndexMap::is_empty")]
+  #[serde(flatten, skip_serializing_if = "IndexMap::is_empty", skip_deserializing)]
   pub extensions: IndexMap<String, Value>,
 }
 
