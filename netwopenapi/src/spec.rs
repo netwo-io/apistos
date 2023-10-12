@@ -1,5 +1,5 @@
 use netwopenapi_models::info::Info;
-use netwopenapi_models::paths::ExternalDocumentation;
+use netwopenapi_models::paths::{ExternalDocumentation, Parameter};
 use netwopenapi_models::server::Server;
 use netwopenapi_models::tag::Tag;
 
@@ -13,4 +13,6 @@ pub struct Spec {
   pub external_docs: Option<ExternalDocumentation>,
   /// See more details at <https://spec.openapis.org/oas/latest.html#server-object>.
   pub servers: Vec<Server>,
+  /// Default parameters to be added to each operation. This only serve for documentation purpose.
+  pub default_parameters: Vec<Parameter>,
 }
