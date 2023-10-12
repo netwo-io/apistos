@@ -6,9 +6,8 @@ use actix_web::test::{call_service, init_service, try_read_body_json, TestReques
 use actix_web::web::{Header, Json, Path};
 use actix_web::{App, ResponseError};
 use netwopenapi::app::OpenApiWrapper;
-use netwopenapi::spec::Spec;
+use netwopenapi::spec::{DefaultParameterAccessor, DefaultParameters, Spec};
 use netwopenapi::web::{get, resource, scope};
-use netwopenapi_core::ApiComponent;
 use netwopenapi_gen::{api_operation, ApiComponent, ApiErrorComponent, ApiHeader};
 use netwopenapi_models::info::Info;
 use netwopenapi_models::paths::{OperationType, Parameter, ParameterIn};
@@ -45,6 +44,21 @@ async fn default_parameters() {
     id_string: String,
   }
 
+  #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
+  struct TestHeaderStruct {
+    plop: u32,
+    plap: String,
+  }
+
+  #[allow(unused_tuple_struct_fields)]
+  #[derive(Clone, Debug, JsonSchema, ApiHeader)]
+  #[openapi_header(
+    name = "X-Env-Complex",
+    description = "`X-Env-Complx` header should contain the current env",
+    required = true
+  )]
+  struct SomeComplexHeader(TestHeaderStruct);
+
   #[allow(unused_tuple_struct_fields)]
   #[derive(Clone, Debug, JsonSchema, ApiHeader)]
   #[openapi_header(
@@ -73,16 +87,23 @@ async fn default_parameters() {
     ..Default::default()
   }];
 
-  let mut default_parameters_macro = <Header<SomeHeader> as ApiComponent>::parameters();
-  let simple_default_parameters = Parameter {
-    name: "X-SomeParam".to_string(),
-    _in: ParameterIn::Header,
-    required: Some(true),
-    ..Default::default()
+  let default_parameters_macro = <Header<SomeHeader> as DefaultParameterAccessor>::get_default_parameter();
+  let default_complex_parameters_macro =
+    <Header<SomeComplexHeader> as DefaultParameterAccessor>::get_default_parameter();
+  let simple_default_parameters = DefaultParameters {
+    parameters: vec![Parameter {
+      name: "X-SomeParam".to_string(),
+      _in: ParameterIn::Header,
+      required: Some(true),
+      ..Default::default()
+    }],
+    components: vec![],
   };
-  let mut default_parameters = vec![];
-  default_parameters.append(&mut default_parameters_macro);
-  default_parameters.push(simple_default_parameters);
+  let default_parameters = vec![
+    default_parameters_macro,
+    default_complex_parameters_macro,
+    simple_default_parameters,
+  ];
   let spec = Spec {
     info: info.clone(),
     tags: tags.clone(),
@@ -112,7 +133,7 @@ async fn default_parameters() {
     .unwrap_or_default()
     .parameters;
 
-  assert_eq!(parameters.len(), 4);
+  assert_eq!(parameters.len(), 5);
 
   let parameters_name = parameters
     .iter()
@@ -128,15 +149,27 @@ async fn default_parameters() {
       "plop_id".to_string(),
       "clap_name".to_string(),
       "X-Env".to_string(),
+      "X-Env-Complex".to_string(),
       "X-SomeParam".to_string()
     ]
   );
 
-  let parameter_components = body.components.map(|c| c.parameters).unwrap_or_default();
-  assert_eq!(parameter_components.len(), 2);
+  let parameter_components = body.components.clone().map(|c| c.parameters).unwrap_or_default();
+  assert_eq!(parameter_components.len(), 3);
   assert_eq!(
     parameter_components.keys().cloned().collect::<Vec<String>>(),
-    vec!["X-Env".to_string(), "X-SomeParam".to_string()]
+    vec![
+      "X-Env".to_string(),
+      "X-Env-Complex".to_string(),
+      "X-SomeParam".to_string()
+    ]
+  );
+
+  let schema_components = body.components.map(|c| c.schemas).unwrap_or_default();
+  assert_eq!(schema_components.len(), 2);
+  assert_eq!(
+    schema_components.keys().cloned().collect::<Vec<String>>(),
+    vec!["Test".to_string(), "TestHeaderStruct".to_string(),]
   );
 }
 

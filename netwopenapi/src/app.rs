@@ -1,7 +1,7 @@
 use crate::internal::actix::handler::OASHandler;
 use crate::internal::actix::route::{Route, RouteWrapper};
 use crate::internal::definition_holder::DefinitionHolder;
-use crate::spec::Spec;
+use crate::spec::{DefaultParameters, Spec};
 use crate::web::ServiceConfig;
 use actix_service::{IntoServiceFactory, ServiceFactory, Transform};
 use actix_web::body::MessageBody;
@@ -14,6 +14,8 @@ use netwopenapi_models::reference_or::ReferenceOr;
 use netwopenapi_models::OpenApi;
 use once_cell::sync::Lazy;
 use regex::Regex;
+use schemars::schema::Schema;
+use std::collections::BTreeMap;
 use std::future::Future;
 use std::sync::{Arc, RwLock};
 use std::{fmt, mem};
@@ -29,7 +31,7 @@ pub struct App<T> {
   open_api_spec: Arc<RwLock<OpenApi>>,
   inner: Option<actix_web::App<T>>, //an option juste to be able to replace it with a default in memory
   default_tags: Vec<String>,
-  default_parameters: Vec<Parameter>,
+  default_parameters: Vec<DefaultParameters>,
 }
 
 impl<T> OpenApiWrapper<T> for actix_web::App<T> {
@@ -205,15 +207,23 @@ where
     }
 
     if !self.default_parameters.is_empty() {
-      let mut parameter_components = self
+      let mut parameter_components: BTreeMap<String, ReferenceOr<Parameter>> = self
         .default_parameters
         .iter()
+        .flat_map(|p| &p.parameters)
         .map(|p| (p.name.clone(), ReferenceOr::Object(p.clone())))
+        .collect();
+
+      let mut schema_components: BTreeMap<String, ReferenceOr<Schema>> = self
+        .default_parameters
+        .iter()
+        .flat_map(|p| p.components.clone())
         .collect();
 
       let mut parameter_refs = self
         .default_parameters
         .iter()
+        .flat_map(|p| &p.parameters)
         .map(|p| ReferenceOr::Reference {
           _ref: format!("#/components/parameters/{}", p.name),
         })
@@ -225,7 +235,8 @@ where
         .for_each(|op| op.parameters.append(&mut parameter_refs));
 
       if let Some(c) = components.as_mut() {
-        c.parameters.append(&mut parameter_components)
+        c.parameters.append(&mut parameter_components);
+        c.schemas.append(&mut schema_components);
       }
     }
 
