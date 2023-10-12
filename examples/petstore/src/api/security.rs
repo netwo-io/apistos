@@ -1,8 +1,8 @@
 use actix_web::dev::Payload;
 use actix_web::http::Error;
 use actix_web::{FromRequest, HttpRequest};
+use apistos::ApiSecurity;
 use futures::future::{ready, Ready};
-use netwopenapi::ApiSecurity;
 
 #[derive(ApiSecurity)]
 #[openapi_security(scheme(security_type(api_key(name = "api_key", api_key_in = "header"))))]

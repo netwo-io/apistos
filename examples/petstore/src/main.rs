@@ -1,13 +1,13 @@
 use crate::api::routes::routes;
 use actix_web::middleware::Logger;
 use actix_web::{App, HttpServer};
-use netwopenapi::app::OpenApiWrapper;
-use netwopenapi::info::{Contact, Info, License};
-use netwopenapi::paths::ExternalDocumentation;
-use netwopenapi::server::Server;
-use netwopenapi::spec::Spec;
-use netwopenapi::tag::Tag;
-use netwopenapi::web::scope;
+use apistos::app::OpenApiWrapper;
+use apistos::info::{Contact, Info, License};
+use apistos::paths::ExternalDocumentation;
+use apistos::server::Server;
+use apistos::spec::Spec;
+use apistos::tag::Tag;
+use apistos::web::scope;
 use std::error::Error;
 use std::net::Ipv4Addr;
 

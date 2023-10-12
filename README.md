@@ -1,26 +1,30 @@
-# Netwopenapi &emsp; [![Documentation]][docs.rs] [![Latest Version]][crates.io] [![Build Status]][build]
+# Apistos &emsp; [![Documentation]][docs.rs] [![Latest Version]][crates.io] [![Build Status]][build]
 
 
-[docs.rs]: https://docs.rs/netwopenapi/
-[crates.io]: https://crates.io/crates/netwopenapi
-[build]: https://github.com/netwo-io/netwopenapi/actions/workflows/build.yaml?branch=main
-[Documentation]: https://img.shields.io/docsrs/netwopenapi
-[Latest Version]: https://img.shields.io/crates/v/netwopenapi.svg
-[Build Status]: https://github.com/netwo-io/netwopenapi/actions/workflows/build.yaml/badge.svg?branch=main
+[docs.rs]: https://docs.rs/apistos/
+[crates.io]: https://crates.io/crates/apistos
+[build]: https://github.com/netwo-io/apistos/actions/workflows/build.yaml?branch=main
+[Documentation]: https://img.shields.io/docsrs/apistos
+[Latest Version]: https://img.shields.io/crates/v/apistos.svg
+[Build Status]: https://github.com/netwo-io/apistos/actions/workflows/build.yaml/badge.svg?branch=main
 
 [OASv3.md]: https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md
 
 An OpenAPI documentation tool exposing [OAS 3.0][OASv3.md] models as well as an actix-web wrapper similar to [paperclip](https://github.com/paperclip-rs/paperclip).
 
-**Netwopenapi** is composed of three crates:
-- [`netwopenapi`](./netwopenapi): [actix-web](https://github.com/actix/actix-web) wrapper to generate an OpenAPI v3.0.3 documentation file
-- [`netwopenapi-core`](./netwopenapi-core): A set of traits and common models around [OpenAPI v3.0.3][OASv3.md]
-- [`netwopenapi-gen`](./netwopenapi-gen): macro utilities to generate [OpenAPI v3.0.3][OASv3.md] documentation from Rust models
-- [`netwopenapi-models`](./netwopenapi-models): [OpenAPI v3.0.3][OASv3.md] models with [`Schema`](https://docs.rs/schemars/latest/schemars/schema/enum.Schema.html) based on [schemars](https://github.com/GREsau/schemars) definition 
+**Apistos** is composed of three crates:
+- [`apistos`](./apistos): [actix-web](https://github.com/actix/actix-web) wrapper to generate an OpenAPI v3.0.3 documentation file
+- [`apistos-core`](./apistos-core): A set of traits and common models around [OpenAPI v3.0.3][OASv3.md]
+- [`apistos-gen`](./apistos-gen): macro utilities to generate [OpenAPI v3.0.3][OASv3.md] documentation from Rust models
+- [`apistos-models`](./apistos-models): [OpenAPI v3.0.3][OASv3.md] models with [`Schema`](https://docs.rs/schemars/latest/schemars/schema/enum.Schema.html) based on [schemars](https://github.com/GREsau/schemars) definition 
 
 Check out our [example project](examples/petstore).
 
-## Netwopenapi
+### What does Apistos means
+
+Apistos (pronounced **_/a.p.i.stos/_**) is a word play between Héphaïstos (grec god of blacksmiths, carpenters, craftsmen, metallurgy ... which can also be considered by some as the god of technology) and API (pronounced **_/a.p.i/_** in French).
+
+## Apistos
 
 - [Installation](#installation)
 - [Usage example](#usage-example)
@@ -33,24 +37,24 @@ Check out our [example project](examples/petstore).
 ```toml
 [dependencies]
 schemars = "0.8"
-netwopenapi = "0.1"
+apistos = "0.1"
 ```
 
 ### Usage example
 
-Wrap your regular actix-web app using netwopenapi types. 
+Wrap your regular actix-web app using apistos types. 
 
 Most of these types are drop-in types for actix-web one's.
 
 ```rust
 use actix_web::{App, HttpServer};
 use actix_web::web::Json;
-use netwopenapi::actix::CreatedJson;
-use netwopenapi::api_operation;
-use netwopenapi::ApiComponent;
-use netwopenapi::ApiErrorComponent;
-use netwopenapi::spec::Spec;
-use netwopenapi::web::{post, resource, scope};
+use apistos::actix::CreatedJson;
+use apistos::api_operation;
+use apistos::ApiComponent;
+use apistos::ApiErrorComponent;
+use apistos::spec::Spec;
+use apistos::web::{post, resource, scope};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::error::Error;
@@ -117,7 +121,7 @@ async fn main() -> Result<(), impl Error> {
 }
 ```
 
-For a complete example, see [the sample petstore](https://github.com/netwo-io/netwopenapi/tree/main/examples/petstore).
+For a complete example, see [the sample petstore](https://github.com/netwo-io/apistos/tree/main/examples/petstore).
 
 ### Feature flags
 
@@ -143,7 +147,7 @@ For a complete example, see [the sample petstore](https://github.com/netwo-io/ne
 
 ### About us
 
-netwopenapi is provided by [Netwo](https://www.netwo.io).
+apistos is provided by [Netwo](https://www.netwo.io).
 
 We use this crate for our internal needs and therefore are committed to its maintenance, however we cannot provide any additional guaranty. Use it at your own risks.
 

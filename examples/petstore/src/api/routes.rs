@@ -2,7 +2,7 @@
 use crate::api::handlers::{
   add_pet, delete_pet, find_by_status, find_by_tags, get_pet, update_pet, update_pet_with_form,
 };
-use netwopenapi::web::{delete, get, post, put, resource, scope, Scope};
+use apistos::web::{delete, get, post, put, resource, scope, Scope};
 
 #[rustfmt::skip]
 pub(crate) fn routes() -> Scope {

@@ -13,10 +13,10 @@ jobs:
     strategy:
       matrix:
         crate:
-          - netwopenapi
-          - netwopenapi-core
-          - netwopenapi-gen
-          - netwopenapi-models
+          - apistos
+          - apistos-core
+          - apistos-gen
+          - apistos-models
       fail-fast: true
     runs-on: ubuntu-latest
 

@@ -1,6 +1,6 @@
 use actix_web::http::StatusCode;
 use actix_web::ResponseError;
-use netwopenapi::ApiErrorComponent;
+use apistos::ApiErrorComponent;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Debug, Display, Formatter};
 

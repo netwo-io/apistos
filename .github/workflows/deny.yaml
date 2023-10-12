@@ -1,4 +1,4 @@
-name: netwopenapi deny
+name: apistos deny
 
 on:
   pull_request:
