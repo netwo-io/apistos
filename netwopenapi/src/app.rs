@@ -260,6 +260,33 @@ mod tests {
   }
 
   #[actix_web::test]
+  async fn multiple_open_api_available() {
+    let openapi_path = "/test.json";
+    let second_openapi_path = "/test2.json";
+
+    let app = App::new()
+      .document(Spec::default())
+      .build(openapi_path)
+      .document(Spec::default())
+      .build(second_openapi_path);
+    let app = init_service(app).await;
+
+    let req = TestRequest::get().uri(openapi_path).to_request();
+    let resp = call_service(&app, req).await;
+    assert!(resp.status().is_success());
+
+    let body: OpenApi = try_read_body_json(resp).await.expect("Unable to read body");
+    assert_eq!(body, OpenApi::default());
+
+    let req = TestRequest::get().uri(second_openapi_path).to_request();
+    let resp = call_service(&app, req).await;
+    assert!(resp.status().is_success());
+
+    let body: OpenApi = try_read_body_json(resp).await.expect("Unable to read body");
+    assert_eq!(body, OpenApi::default());
+  }
+
+  #[actix_web::test]
   async fn open_api_spec_correctly_populated() {
     let openapi_path = "/test.json";
 
@@ -288,6 +315,67 @@ mod tests {
     let body: OpenApi = try_read_body_json(resp).await.expect("Unable to read body");
     assert_eq!(body.info, info);
     assert_eq!(body.tags, tags);
+  }
+
+  #[actix_web::test]
+  async fn multiple_open_api_spec_correctly_populated() {
+    let openapi_path = "/test.json";
+    let second_openapi_path = "/test2.json";
+
+    let info = Info {
+      title: "A well documented API".to_string(),
+      description: Some("Really well document I mean it".to_string()),
+      terms_of_service: Some("https://terms.com".to_string()),
+      ..Default::default()
+    };
+    let tags = vec![Tag {
+      name: "A super tag".to_owned(),
+      ..Default::default()
+    }];
+    let spec = Spec {
+      info: info.clone(),
+      tags: tags.clone(),
+      ..Default::default()
+    };
+
+    let second_info = Info {
+      title: "Another well documented API".to_string(),
+      description: Some("Really well document I mean it".to_string()),
+      terms_of_service: Some("https://terms.com".to_string()),
+      ..Default::default()
+    };
+    let second_tags = vec![Tag {
+      name: "Another super tag".to_owned(),
+      ..Default::default()
+    }];
+    let second_spec = Spec {
+      info: second_info.clone(),
+      tags: second_tags.clone(),
+      ..Default::default()
+    };
+
+    let app = App::new()
+      .document(spec)
+      .build(openapi_path)
+      .document(second_spec)
+      .build(second_openapi_path);
+    let app = init_service(app).await;
+
+    let req = TestRequest::get().uri(openapi_path).to_request();
+    let resp = call_service(&app, req).await;
+    assert!(resp.status().is_success());
+
+    let body: OpenApi = try_read_body_json(resp).await.expect("Unable to read body");
+    assert_eq!(body.info, info);
+    assert_eq!(body.tags, tags);
+
+    let req = TestRequest::get().uri(second_openapi_path).to_request();
+    let resp = call_service(&app, req).await;
+    assert!(resp.status().is_success());
+
+    let body: OpenApi = try_read_body_json(resp).await.expect("Unable to read body");
+    assert_eq!(body.info, second_info);
+    assert_eq!(body.tags, second_tags);
   }
 
   #[test]
