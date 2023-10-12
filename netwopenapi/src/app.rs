@@ -9,7 +9,8 @@ use actix_web::dev::{HttpServiceFactory, ServiceRequest, ServiceResponse};
 use actix_web::web::{get, resource};
 use actix_web::Error;
 use indexmap::IndexMap;
-use netwopenapi_models::paths::OperationType;
+use netwopenapi_models::paths::{OperationType, Parameter};
+use netwopenapi_models::reference_or::ReferenceOr;
 use netwopenapi_models::OpenApi;
 use once_cell::sync::Lazy;
 use regex::Regex;
@@ -28,6 +29,7 @@ pub struct App<T> {
   open_api_spec: Arc<RwLock<OpenApi>>,
   inner: Option<actix_web::App<T>>, //an option juste to be able to replace it with a default in memory
   default_tags: Vec<String>,
+  default_parameters: Vec<Parameter>,
 }
 
 impl<T> OpenApiWrapper<T> for actix_web::App<T> {
@@ -49,6 +51,7 @@ impl<T> OpenApiWrapper<T> for actix_web::App<T> {
       open_api_spec: Arc::new(RwLock::new(open_api_spec)),
       inner: Some(self),
       default_tags: spec.default_tags,
+      default_parameters: spec.default_parameters,
     }
   }
 }
@@ -142,6 +145,7 @@ where
       open_api_spec: self.open_api_spec,
       inner: self.inner.take().map(|app| app.wrap(mw)),
       default_tags: self.default_tags,
+      default_parameters: self.default_parameters,
     }
   }
 
@@ -159,6 +163,7 @@ where
       open_api_spec: self.open_api_spec,
       inner: self.inner.take().map(|app| app.wrap_fn(mw)),
       default_tags: self.default_tags,
+      default_parameters: self.default_parameters,
     }
   }
 
@@ -176,7 +181,7 @@ where
   #[allow(clippy::unwrap_used)]
   fn update_from_def_holder<D: DefinitionHolder>(&mut self, definition_holder: &mut D) {
     let mut open_api_spec = self.open_api_spec.write().unwrap();
-    let components = definition_holder.components().into_iter().reduce(|mut acc, component| {
+    let mut components = definition_holder.components().into_iter().reduce(|mut acc, component| {
       acc.schemas.extend(component.schemas);
       acc.responses.extend(component.responses);
       acc.security_schemes.extend(component.security_schemes);
@@ -198,17 +203,41 @@ where
 
       paths.insert(path, item);
     }
-    open_api_spec.paths.paths = paths;
-    open_api_spec.components = components;
+
+    if !self.default_parameters.is_empty() {
+      let mut parameter_components = self
+        .default_parameters
+        .iter()
+        .map(|p| (p.name.clone(), ReferenceOr::Object(p.clone())))
+        .collect();
+
+      let mut parameter_refs = self
+        .default_parameters
+        .iter()
+        .map(|p| ReferenceOr::Reference {
+          _ref: format!("#/components/parameters/{}", p.name),
+        })
+        .collect();
+
+      paths
+        .values_mut()
+        .flat_map(|pi| pi.operations.values_mut())
+        .for_each(|op| op.parameters.append(&mut parameter_refs));
+
+      if let Some(c) = components.as_mut() {
+        c.parameters.append(&mut parameter_components)
+      }
+    }
 
     if !self.default_tags.is_empty() {
-      open_api_spec
-        .paths
-        .paths
+      paths
         .values_mut()
         .flat_map(|pi| pi.operations.values_mut())
         .for_each(|op| op.tags.append(&mut self.default_tags.clone()))
     }
+
+    open_api_spec.paths.paths = paths;
+    open_api_spec.components = components;
   }
 }
 
