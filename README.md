@@ -22,7 +22,7 @@ Check out our [example project](examples/petstore).
 
 ### What does Apistos means
 
-Apistos (pronounced **_/a.p.i.stos/_**) is a word play between Héphaïstos (grec god of blacksmiths, carpenters, craftsmen, metallurgy ... which can also be considered by some as the god of technology) and API (pronounced **_/a.p.i/_** in French).
+Apistos (pronounced **_/a.p.i.stos/_**) is a word play between Héphaïstos (Ἥφαιστος, grec god of blacksmiths, carpenters, craftsmen, metallurgy ... which can also be considered by some as the god of technology) and API (pronounced **_/a.p.i/_** in French).
 
 ## Apistos
 
