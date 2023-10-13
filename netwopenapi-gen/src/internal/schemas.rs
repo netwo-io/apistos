@@ -28,6 +28,11 @@ impl ToTokens for Schemas {
       }
       Some(m) => m.title = m.title.clone().or_else(|| Some(prop_name.clone())),
     });
+    let update_single_enum_value = quote!(if enum_values.len() == 1 {
+      if let Some(schemars::_serde_json::Value::String(prop_name)) = enum_values.first() {
+        #update_metadata_title
+      }
+    });
     let update_one_of_title = quote!(for s in &mut *one_of {
       match s {
         schemars::schema::Schema::Bool(_) => {}
@@ -41,12 +46,10 @@ impl ToTokens for Schemas {
               schemars::schema::Schema::Bool(_) => None,
               schemars::schema::Schema::Object(sch_obj) => sch_obj.enum_values.as_mut(),
             }) {
-              if enum_values.len() == 1 {
-                if let Some(schemars::_serde_json::Value::String(prop_name)) = enum_values.first() {
-                  #update_metadata_title
-                }
-              }
+              #update_single_enum_value
             }
+          } else if let Some(enum_values) = sch_obj.enum_values.as_mut() {
+            #update_single_enum_value
           };
         }
       }

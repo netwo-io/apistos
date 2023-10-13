@@ -543,6 +543,79 @@ fn api_component_derive_named_enums() {
   );
 }
 
+#[test]
+fn api_component_derive_named_enums_documented() {
+  #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  pub(crate) enum Kind {
+    Complex,
+    /// A simple stuff
+    Simple,
+  }
+
+  #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  pub(crate) struct Query {
+    pub(crate) test: String,
+    pub(crate) kind: Kind,
+  }
+
+  let name_schema = <Query as ApiComponent>::schema();
+  let name_child_schemas = <Query as ApiComponent>::child_schemas();
+  assert!(name_schema.is_some());
+  assert_eq!(name_child_schemas.len(), 1);
+  let (schema_name, schema) = name_schema.expect("schema should be defined");
+  assert_eq!(schema_name, "Query");
+  assert_schema(&schema.clone());
+  let json = serde_json::to_value(schema).expect("Unable to serialize as Json");
+  assert_json_eq!(
+    json,
+    json!({
+      "properties": {
+        "kind": {
+          "$ref": "#/components/schemas/Kind"
+        },
+        "test": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "test"
+      ],
+      "title": "Query",
+      "type": "object"
+    })
+  );
+
+  let (_, child_schema) = name_child_schemas
+    .iter()
+    .find(|(name, _)| name == "Kind")
+    .expect("missing child schema");
+  assert_schema(&child_schema.clone());
+  let json = serde_json::to_value(child_schema).expect("Unable to serialize as Json");
+  assert_json_eq!(
+    json,
+    json!({
+      "oneOf": [
+        {
+          "enum": [
+            "Complex"
+          ],
+          "title": "Complex",
+          "type": "string"
+        },
+        {
+          "description": "A simple stuff",
+          "enum": [
+            "Simple"
+          ],
+          "title": "Simple",
+          "type": "string"
+        }
+      ]
+    })
+  );
+}
+
 #[allow(unused_qualifications)]
 #[test]
 fn api_component_derive_named_enums_deep() {
