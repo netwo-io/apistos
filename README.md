@@ -36,7 +36,9 @@ Apistos (pronounced **_/a.p.i.stos/_**) is a word play between Héphaïstos (Ἥ
 
 ```toml
 [dependencies]
-schemars = "0.8"
+#schemars = "0.8"
+# sadly we currently rely on a fork to fix multiple flatten for enums, related PR can be found here: https://github.com/GREsau/schemars/pull/250
+schemars = { git = "https://github.com/rlebran-netwo/schemars", branch = "fix-multiple-flatten" }
 apistos = "0.1"
 ```
 
