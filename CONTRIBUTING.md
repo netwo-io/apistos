@@ -12,12 +12,16 @@ All types of contributions are encouraged and valued. See the [Table of Contents
 
 ## Table of Contents
 
+- [Legals](#legals)
 - [Code of Conduct](#code-of-conduct)
 - [I Have a Question](#i-have-a-question)
 - [I Want To Contribute](#i-want-to-contribute)
 - [Reporting Bugs](#reporting-bugs)
 - [Suggesting Enhancements](#suggesting-enhancements)
 
+## Legals
+
+Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in this crate by you, shall be dual licensed, without any additional terms or conditions.
 
 ## Code of Conduct
 
