@@ -12,7 +12,8 @@ env_logger = "0.10.0"
 futures = "0.3"
 num-traits = "0.2"
 rust_decimal = "1"
-schemars = { version = "0.8", features = ["chrono", "uuid1", "url", "rust_decimal"] }
+#schemars = { version = "0.8", features = ["chrono", "uuid1", "url", "rust_decimal"] }
+schemars = { git = "https://github.com/rlebran-netwo/schemars", branch = "fix-multiple-flatten", features = ["chrono", "uuid1", "url", "rust_decimal"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_qs = { version = "0.12", features = ["actix4"] }
 uuid = { version = "1", features = ["serde", "v4"] }
