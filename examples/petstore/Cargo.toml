@@ -3,10 +3,8 @@ name = "petstore"
 description = "Simple petstore example api"
 version = "0.1.0"
 edition = "2021"
-license = "MIT"
+license = "MIT OR Apache-2.0"
 authors = ["Netwo <oss@netwo.com>"]
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 actix-web = "4"
@@ -14,12 +12,13 @@ env_logger = "0.10.0"
 futures = "0.3"
 num-traits = "0.2"
 rust_decimal = "1"
-schemars = { version = "0.8", features = ["chrono", "uuid1", "url", "rust_decimal"] }
+#schemars = { version = "0.8", features = ["chrono", "uuid1", "url", "rust_decimal"] }
+schemars = { git = "https://github.com/rlebran-netwo/schemars", branch = "fix-multiple-flatten", features = ["chrono", "uuid1", "url", "rust_decimal"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_qs = { version = "0.12", features = ["actix4"] }
 uuid = { version = "1", features = ["serde", "v4"] }
 url = { version = "2", features = ["serde"] }
 
-netwopenapi = { path = "../../netwopenapi", features = ["extras", "qs_query"] }
+apistos = { path = "../../apistos", features = ["extras", "qs_query"] }
 
 [workspace]

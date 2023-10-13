@@ -1,0 +1,51 @@
+[package]
+name = "apistos"
+description = "Actix-web OpenAPI v3.0 documentation generator"
+readme = "README.md"
+keywords = ["actix", "actix-web", "openapi", "oas3", "documentation"]
+categories = ["web-programming"]
+
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+repository.workspace = true
+publish.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+actix-service = { workspace = true }
+actix-web = { workspace = true }
+indexmap = { workspace = true }
+log = { workspace = true }
+md5 = { workspace = true }
+once_cell = { workspace = true }
+regex = { workspace = true }
+schemars = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+apistos-core = { path = "../apistos-core" }
+apistos-gen = { path = "../apistos-gen" }
+apistos-models = { path = "../apistos-models" }
+
+[dev-dependencies]
+apistos-models = { path = "../apistos-models", features = ["deserialize"] }
+
+[features]
+# query related features
+query = []
+qs_query = ["apistos-core/qs_query"]
+
+# actix garde feature
+garde = ["apistos-core/garde"]
+
+# extra types related features
+chrono = ["apistos-core/chrono"]
+multipart = ["apistos-core/multipart"]
+rust_decimal = ["apistos-core/rust_decimal"]
+uuid = ["apistos-core/uuid"]
+url = ["apistos-core/url"]
+extras = ["chrono", "multipart", "rust_decimal", "uuid", "url"]
+
+default = ["query"]

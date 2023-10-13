@@ -1,4 +1,4 @@
-name: netwopenapi build
+name: apistos build
 
 on:
   pull_request:
@@ -28,11 +28,11 @@ jobs:
     strategy:
       matrix:
         crate:
-          - netwopenapi
-          - netwopenapi-core
-          - netwopenapi-gen
-          - netwopenapi-gen-test
-          - netwopenapi-models
+          - apistos
+          - apistos-core
+          - apistos-gen
+          - apistos-gen-test
+          - apistos-models
       fail-fast: true
 
     runs-on: ubuntu-latest
