@@ -128,7 +128,7 @@ async fn path_parameter_replacement() {
   );
 }
 
-// Imports bellow aim at making cargo-cranky happy. Those dependencies are necessary for integration-test.
+// Imports bellow aim at making clippy happy. Those dependencies are necessary for integration-test.
 use actix_service as _;
 use apistos_core as _;
 use indexmap as _;

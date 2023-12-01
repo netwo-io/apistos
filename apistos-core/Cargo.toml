@@ -25,6 +25,9 @@ url = { workspace = true, optional = true }
 
 apistos-models = { path = "../apistos-models" }
 
+[lints]
+workspace = true
+
 [features]
 actix = ["actix-web"]
 

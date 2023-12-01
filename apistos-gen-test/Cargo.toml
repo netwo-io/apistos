@@ -21,3 +21,6 @@ apistos-gen = { path = "../apistos-gen" }
 schemars = { workspace = true }
 serde = { version = "1.0.188", features = ["derive"] }
 serde_json = { workspace = true }
+
+[lints]
+workspace = true

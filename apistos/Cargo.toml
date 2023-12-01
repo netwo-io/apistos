@@ -32,6 +32,9 @@ apistos-models = { path = "../apistos-models" }
 [dev-dependencies]
 apistos-models = { path = "../apistos-models", features = ["deserialize"] }
 
+[lints]
+workspace = true
+
 [features]
 # query related features
 query = []

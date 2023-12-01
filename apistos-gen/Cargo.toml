@@ -24,5 +24,8 @@ schemars = { workspace = true }
 serde = { workspace = true }
 apistos = { path = "../apistos" }
 
+[lints]
+workspace = true
+
 [lib]
 proc-macro = true

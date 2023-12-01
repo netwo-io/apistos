@@ -114,7 +114,7 @@ async fn query_parameters_with_flatten_enums() {
   assert_eq!(small_parameter.required, Some(false));
 }
 
-// Imports bellow aim at making cargo-cranky happy. Those dependencies are necessary for integration-test.
+// Imports bellow aim at making clippy happy. Those dependencies are necessary for integration-test.
 use actix_service as _;
 use apistos_models as _;
 use indexmap as _;
