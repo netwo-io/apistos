@@ -5,7 +5,7 @@ use apistos_models::paths::{MediaType, Parameter, RequestBody, Response, Respons
 use apistos_models::reference_or::ReferenceOr;
 use apistos_models::security::SecurityScheme;
 use apistos_models::Schema;
-use schemars::schema::{ArrayValidation, SchemaObject};
+use schemars::schema::{ArrayValidation, InstanceType, SchemaObject, SingleOrVec};
 use std::collections::BTreeMap;
 #[cfg(feature = "actix")]
 use std::future::Future;
@@ -127,6 +127,7 @@ where
       (
         name,
         ReferenceOr::Object(Schema::Object(SchemaObject {
+          instance_type: Some(SingleOrVec::Single(Box::new(InstanceType::Array))),
           array: Some(Box::new(ArrayValidation {
             items: Some(Schema::new_ref(_ref).into()),
             ..Default::default()
@@ -361,6 +362,7 @@ mod test {
     assert_json_eq!(
       json,
       json!({
+        "type": "array",
         "items": {
           "$ref": "#/components/schemas/Test"
         }
