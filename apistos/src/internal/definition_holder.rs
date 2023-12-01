@@ -14,7 +14,7 @@ pub trait DefinitionHolder {
   fn update_path_items(&mut self, path_op_map: &mut IndexMap<String, PathItem>) {
     let ops = self.operations();
     if !ops.is_empty() {
-      let op_map = path_op_map.entry(self.path().into()).or_insert_with(Default::default);
+      let op_map = path_op_map.entry(self.path().into()).or_default();
       op_map.operations.extend(ops);
     }
   }
@@ -64,7 +64,7 @@ impl<T> DefinitionHolder for Scope<T> {
 
   fn update_path_items(&mut self, path_op_map: &mut IndexMap<String, PathItem>) {
     for (path, item) in mem::take(&mut self.item_map) {
-      let op_map = path_op_map.entry(path).or_insert_with(Default::default);
+      let op_map = path_op_map.entry(path).or_default();
       op_map.operations.extend(item.operations.into_iter());
     }
   }
@@ -86,7 +86,7 @@ impl<'a> DefinitionHolder for ServiceConfig<'a> {
 
   fn update_path_items(&mut self, path_op_map: &mut IndexMap<String, PathItem>) {
     for (path, item) in mem::take(&mut self.item_map) {
-      let op_map = path_op_map.entry(path).or_insert_with(Default::default);
+      let op_map = path_op_map.entry(path).or_default();
       op_map.operations.extend(item.operations.into_iter());
     }
   }
