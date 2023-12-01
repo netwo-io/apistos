@@ -44,7 +44,6 @@ jobs:
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Check deny
-        run: |
-          cargo install cargo-deny --force
-          cargo deny check licenses sources advisories
+      - uses: EmbarkStudios/cargo-deny-action@v1
+        with:
+          commande: check licenses sources advisories
