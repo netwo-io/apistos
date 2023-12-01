@@ -99,14 +99,20 @@
 //!
 //! # Feature flags
 //!
-//! | name           | description                                                              | extra dependencies                                            |
-//! |----------------|--------------------------------------------------------------------------|---------------------------------------------------------------|
-//! | `chrono`       | Enables documenting types from `chrono`                                  | [`chrono`](https://crates.io/crates/chrono)                   |
-//! | `multipart`    | Enables documenting types from `actix-multipart`                         | [`actix-multipart`](https://crates.io/crates/actix-multipart) |
-//! | `rust_decimal` | Enables documenting types from `rust_decimal`                            | [`rust_decimal`](https://crates.io/crates/rust-decimal)       |
-//! | `uuid`         | Enables documenting types from `uuid`                                    | [`uuid`](https://crates.io/crates/uuid)                       |
-//! | `url`          | Enables documenting types from `url`                                     | [`url`](https://crates.io/crates/url)                         |
-//! | `extras`       | Enables `chrono`, `multipart`, `rust_decimal`, `uuid` and `url` features | All from previous features                                    |
+//! | name           | description                                                                 | extra dependencies                                            |
+//! |----------------|-----------------------------------------------------------------------------|---------------------------------------------------------------|
+//! | `query` (default) | Enables documenting `actix_web::web::Query`                              |                                                               |
+//! | `actix` (default) | Enables documenting types from `actix`                                   |                                                               |
+//! | `garde`           | Enables input validation through `garde`                                 | [`garde`](https://crates.io/crates/garde)                     |
+//! | `qs_query`        | Enables documenting types from `serde_qs`                                | [`serde_qs`](https://crates.io/crates/serde-qs)               |
+//! | `chrono`          | Enables documenting types from `chrono`                                  | [`chrono`](https://crates.io/crates/chrono)                   |
+//! | `multipart`       | Enables documenting types from `actix-multipart`                         | [`actix-multipart`](https://crates.io/crates/actix-multipart) |
+//! | `rust_decimal`    | Enables documenting types from `rust_decimal`                            | [`rust_decimal`](https://crates.io/crates/rust-decimal)       |
+//! | `uuid`            | Enables documenting types from `uuid`                                    | [`uuid`](https://crates.io/crates/uuid)                       |
+//! | `url`             | Enables documenting types from `url`                                     | [`url`](https://crates.io/crates/url)                         |
+//! | `extras`          | Enables `chrono`, `multipart`, `rust_decimal`, `uuid` and `url` features | All from previous features                                    |
+//!
+//! It is possible to completely disable the documentation of `actix_web::web::Query`. This is useful when you want to enforce the use of `serde_qs::actix::QsQuery` in your project. To do so disable the default features. (Note: you might need to add `actix` feature as well)
 //!
 //! # What's next
 //! - Handle schema for errors using `ApiErrorComponent`[ derive macro
@@ -119,6 +125,14 @@
 //! | [`utoipa`](https://crates.io/crates/utoipa)       | Utoipa-actix integration rely on [actix web macros](https://docs.rs/actix-web-macros/latest/actix_web_macros/) for routing definition. At first, we planned on relying on utoipa for OAS types and schema derivation but for now [utoipa doesn't support generic struct the way we intended to](https://github.com/juhaku/utoipa/issues/703). |
 //! | [`okapi`](https://crates.io/crates/okapi)         | Pretty similar, based on schemars as well (and maintained by the founder of schemars) but not integrated with actix.                                                                                                                                                                                                                          |
 
+pub use indexmap::IndexMap;
+
+pub use apistos_core::parameters::header::ApiHeader;
+pub use apistos_core::PathItemDefinition;
+pub use apistos_core::{ApiComponent, ApiErrorComponent, TypedSchema};
+pub use apistos_gen::{api_operation, ApiComponent, ApiCookie, ApiErrorComponent, ApiHeader, ApiSecurity, ApiType};
+pub use apistos_models::*;
+
 mod internal;
 
 pub mod actix;
@@ -126,14 +140,3 @@ pub mod actix;
 pub mod app;
 pub mod spec;
 pub mod web;
-
-pub use apistos_core::parameters::header::ApiHeader;
-pub use apistos_core::PathItemDefinition;
-pub use apistos_core::{ApiComponent, ApiErrorComponent, TypedSchema};
-pub use apistos_gen::{api_operation, ApiComponent, ApiCookie, ApiErrorComponent, ApiHeader, ApiSecurity, ApiType};
-
-pub use apistos_models::*;
-pub use indexmap::IndexMap;
-
-// Imports bellow aim at making clippy happy. Those dependencies are necessary for integration-test.
-use schemars as _;

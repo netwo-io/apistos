@@ -127,14 +127,18 @@ For a complete example, see [the sample petstore](https://github.com/netwo-io/ap
 
 ### Feature flags
 
-| name           | description                                                              | extra dependencies                                            |
-|----------------|--------------------------------------------------------------------------|---------------------------------------------------------------|
-| `chrono`       | Enables documenting types from `chrono`                                  | [`chrono`](https://crates.io/crates/chrono)                   |
-| `multipart`    | Enables documenting types from `actix-multipart`                         | [`actix-multipart`](https://crates.io/crates/actix-multipart) |
-| `rust_decimal` | Enables documenting types from `rust_decimal`                            | [`rust_decimal`](https://crates.io/crates/rust-decimal)       |
-| `uuid`         | Enables documenting types from `uuid`                                    | [`uuid`](https://crates.io/crates/uuid)                       |
-| `url`          | Enables documenting types from `url`                                     | [`url`](https://crates.io/crates/url)                         |
-| `extras`       | Enables `chrono`, `multipart`, `rust_decimal`, `uuid` and `url` features | All from previous features                                    |
+| name              | description                                                              | extra dependencies                                            |
+|-------------------|--------------------------------------------------------------------------|---------------------------------------------------------------|
+| `query` (default) | Enables documenting `actix_web::web::Query`                              |                                                               |
+| `actix` (default) | Enables documenting types from `actix`                                   |                                                               |
+| `garde`           | Enables input validation through `garde`                                 | [`garde`](https://crates.io/crates/garde)                     |
+| `qs_query`        | Enables documenting types from `serde_qs`                                | [`serde_qs`](https://crates.io/crates/serde-qs)               |
+| `chrono`          | Enables documenting types from `chrono`                                  | [`chrono`](https://crates.io/crates/chrono)                   |
+| `multipart`       | Enables documenting types from `actix-multipart`                         | [`actix-multipart`](https://crates.io/crates/actix-multipart) |
+| `rust_decimal`    | Enables documenting types from `rust_decimal`                            | [`rust_decimal`](https://crates.io/crates/rust-decimal)       |
+| `uuid`            | Enables documenting types from `uuid`                                    | [`uuid`](https://crates.io/crates/uuid)                       |
+| `url`             | Enables documenting types from `url`                                     | [`url`](https://crates.io/crates/url)                         |
+| `extras`          | Enables `chrono`, `multipart`, `rust_decimal`, `uuid` and `url` features | All from previous features                                    |
 
 ### What's next
 - Handle schema for errors using ApiErrorComponent derive macro
