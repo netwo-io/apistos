@@ -234,9 +234,23 @@ where
           .collect::<Vec<(String, ReferenceOr<Response>)>>(),
       );
     } else if let Some((name, schema)) = Self::schema() {
-      let _ref = match schema {
-        ReferenceOr::Reference { _ref } => _ref,
-        ReferenceOr::Object(_) => format!("#/components/schemas/{}", name),
+      let ref_or = match schema {
+        r @ ReferenceOr::Reference { .. } => r,
+        ReferenceOr::Object(schema_obj) => {
+          let _ref = ReferenceOr::Reference {
+            _ref: format!("#/components/schemas/{}", name),
+          };
+          match schema_obj {
+            Schema::Object(obj) => {
+              if obj.instance_type == Some(SingleOrVec::Single(Box::new(InstanceType::Array))) {
+                ReferenceOr::Object(Schema::Object(obj))
+              } else {
+                _ref
+              }
+            }
+            Schema::Bool(_) => _ref,
+          }
+        }
       };
       responses.push((
         "200".to_owned(),
@@ -244,7 +258,7 @@ where
           content: BTreeMap::from_iter(vec![(
             content_type.unwrap_or_else(Self::content_type),
             MediaType {
-              schema: Some(ReferenceOr::Reference { _ref }),
+              schema: Some(ref_or),
               ..Default::default()
             },
           )]),
