@@ -57,11 +57,10 @@ jobs:
           rustup component add rustfmt
           cargo fmt --all --check --package ${{ matrix.crate }}
 
-      - name: Check cranky
+      - name: Check clippy
         run: |
           rustup component add clippy
-          cargo install cargo-cranky --force
-          cargo cranky --no-deps --all-features --tests --package ${{ matrix.crate }} -- -D warnings -D clippy::print_stdout
+          cargo clippy --no-deps --all-features --tests --package ${{ matrix.crate }} -- -D warnings
 
       - name: Run tests
         run: |

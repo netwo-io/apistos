@@ -14,5 +14,5 @@ pub use apistos_gen::{api_operation, ApiComponent, ApiCookie, ApiErrorComponent,
 pub use apistos_models::*;
 pub use indexmap::IndexMap;
 
-// Imports bellow aim at making cargo-cranky happy. Those dependencies are necessary for integration-test.
+// Imports bellow aim at making clippy happy. Those dependencies are necessary for integration-test.
 use schemars as _;

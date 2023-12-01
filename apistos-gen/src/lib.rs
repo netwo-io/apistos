@@ -663,7 +663,7 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
   .into()
 }
 
-// Imports bellow aim at making cargo-cranky happy. Those dependencies are necessary for doc-test.
+// Imports bellow aim at making clippy happy. Those dependencies are necessary for doc-test.
 #[cfg(test)]
 use apistos as _;
 #[cfg(test)]
