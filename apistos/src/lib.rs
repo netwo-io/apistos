@@ -20,15 +20,21 @@
 //!
 //! Most of these types are drop-in types for actix-web one's.
 //!
-//! ```rust
-//! use actix_web::{App, HttpServer};
+//! ```no_run
+//! use std::fmt::Display;
+//! use actix_web::{App, HttpServer, ResponseError};
+//! use actix_web::http::StatusCode;
+//! use actix_web::middleware::Logger;
 //! use actix_web::web::Json;
 //! use apistos::actix::CreatedJson;
 //! use apistos::api_operation;
 //! use apistos::ApiComponent;
 //! use apistos::ApiErrorComponent;
+//! use apistos::app::OpenApiWrapper;
 //! use apistos::spec::Spec;
 //! use apistos::web::{post, resource, scope};
+//! use apistos_models::info::Info;
+//! use core::fmt::Formatter;
 //! use schemars::JsonSchema;
 //! use serde::{Deserialize, Serialize};
 //! use std::error::Error;
@@ -39,7 +45,7 @@
 //!   pub test: String
 //! }
 //!
-//! #[derive(Serialize, Deserialize, Clone, ApiErrorComponent)]
+//! #[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
 //! #[openapi_error(
 //!   status(code = 403),
 //!   status(code = 404),
@@ -51,6 +57,18 @@
 //!   NotFound(String),
 //!   Conflict(String),
 //!   Unauthorized(String),
+//! }
+//!
+//! impl Display for ErrorResponse {
+//!   fn fmt(&self, _f: &mut Formatter<'_>) -> std::fmt::Result {
+//!     todo!()
+//!   }
+//! }
+//!
+//! impl ResponseError for ErrorResponse {
+//!   fn status_code(&self) -> StatusCode {
+//!     todo!()
+//!   }
 //! }
 //!
 //! #[api_operation(
