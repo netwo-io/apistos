@@ -25,6 +25,10 @@ url = { workspace = true, optional = true }
 
 apistos-models = { path = "../apistos-models" }
 
+[dev-dependencies]
+assert-json-diff = { workspace = true }
+serde_json = { workspace = true }
+
 [lints]
 workspace = true
 

@@ -5,6 +5,7 @@ use apistos_models::paths::{MediaType, Parameter, RequestBody, Response, Respons
 use apistos_models::reference_or::ReferenceOr;
 use apistos_models::security::SecurityScheme;
 use apistos_models::Schema;
+use schemars::schema::{ArrayValidation, SchemaObject};
 use std::collections::BTreeMap;
 #[cfg(feature = "actix")]
 use std::future::Future;
@@ -68,6 +69,7 @@ pub trait ApiComponent {
     vec![]
   }
 }
+
 impl<T> ApiComponent for Option<T>
 where
   T: ApiComponent,
@@ -106,7 +108,7 @@ where
   }
 
   fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
-    T::child_schemas()
+    T::schema().into_iter().collect()
   }
 
   fn raw_schema() -> Option<ReferenceOr<Schema>> {
@@ -114,7 +116,23 @@ where
   }
 
   fn schema() -> Option<(String, ReferenceOr<Schema>)> {
-    T::schema()
+    T::schema().map(|(name, schema)| {
+      let _ref = match schema {
+        ReferenceOr::Reference { _ref } => _ref,
+        ReferenceOr::Object(_) => format!("#/components/schemas/{}", name),
+      };
+
+      (
+        name,
+        ReferenceOr::Object(Schema::Object(SchemaObject {
+          array: Some(Box::new(ArrayValidation {
+            items: Some(Schema::new_ref(_ref).into()),
+            ..Default::default()
+          })),
+          ..Default::default()
+        })),
+      )
+    })
   }
 }
 
@@ -252,5 +270,83 @@ where
       responses: BTreeMap::from_iter(responses),
       ..Default::default()
     })
+  }
+}
+
+#[cfg(test)]
+mod test {
+  use crate::ApiComponent;
+  use apistos_models::reference_or::ReferenceOr;
+  use assert_json_diff::assert_json_eq;
+  use schemars::schema::{InstanceType, ObjectValidation, Schema, SchemaObject, SingleOrVec};
+  use schemars::{Map, Set};
+  use serde_json::json;
+
+  #[test]
+  #[allow(dead_code)]
+  fn api_component_schema_vec() {
+    struct Test {
+      name: String,
+    }
+
+    impl ApiComponent for Test {
+      fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
+        vec![]
+      }
+
+      fn schema() -> Option<(String, ReferenceOr<Schema>)> {
+        Some((
+          "Test".to_string(),
+          ReferenceOr::Object(Schema::Object(SchemaObject {
+            object: Some(Box::new(ObjectValidation {
+              required: Set::from_iter(vec!["name".to_string()]),
+              properties: Map::from_iter(vec![(
+                "name".to_string(),
+                Schema::Object(SchemaObject {
+                  instance_type: Some(SingleOrVec::Single(Box::new(InstanceType::String))),
+                  ..Default::default()
+                }),
+              )]),
+              ..Default::default()
+            })),
+            ..Default::default()
+          })),
+        ))
+      }
+    }
+
+    let schema = <Vec<Test> as ApiComponent>::schema();
+    assert!(schema.is_some());
+
+    let json = serde_json::to_value(schema.expect("Missing schema").1).expect("Unable to serialize as Json");
+    assert_json_eq!(
+      json,
+      json!({
+        "items": {
+          "$ref": "#/components/schemas/Test"
+        }
+      })
+    );
+
+    let child_schema = <Vec<Test> as ApiComponent>::child_schemas();
+    assert_eq!(child_schema.len(), 1);
+    let child_schema = child_schema.first().cloned();
+    assert!(child_schema.is_some());
+
+    let json =
+      serde_json::to_value(child_schema.expect("Missing child schema").1).expect("Unable to serialize as Json");
+    assert_json_eq!(
+      json,
+      json!( {
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      })
+    );
   }
 }
