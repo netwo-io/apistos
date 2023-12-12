@@ -34,12 +34,12 @@ impl Resource {
 
   /// Wrapper for [`actix_web::Resource::new`](https://docs.rs/actix-web/*/actix_web/struct.Resource.html#method.new) with a list of tag names for the given scope.
   /// Tags should exist in `Spec` otherwise documentation might be considered as invalid by consumers.
-  pub fn new_tagged(path: &str, tags: Vec<String>) -> Resource {
+  pub fn new_tagged<T: Into<String>>(path: &str, tags: Vec<T>) -> Resource {
     Resource {
       path: path.to_owned(),
       item_definition: None,
       components: Default::default(),
-      tags,
+      tags: tags.into_iter().map(Into::into).collect(),
       inner: actix_web::Resource::new(path),
     }
   }
@@ -193,6 +193,6 @@ pub fn resource(path: &str) -> Resource {
 
 /// Wrapper for [`actix_web::web::resource`](https://docs.rs/actix-web/*/actix_web/web/fn.resource.html) with a list of tag names for the given scope.
 /// Tags should exist in `Spec` otherwise documentation might be considered as invalid by consumers.
-pub fn tagged_resource(path: &str, tags: Vec<String>) -> Resource {
+pub fn tagged_resource<T: Into<String>>(path: &str, tags: Vec<T>) -> Resource {
   Resource::new_tagged(path, tags)
 }
