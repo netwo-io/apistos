@@ -8,7 +8,6 @@ categories = ["web-programming"]
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
-description.workspace = true
 repository.workspace = true
 publish.workspace = true
 rust-version.workspace = true
