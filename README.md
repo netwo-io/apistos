@@ -169,6 +169,9 @@ For a complete example, see [the sample petstore](https://github.com/netwo-io/ap
 | [`utoipa`](https://crates.io/crates/utoipa)       | Utoipa-actix integration rely on [actix web macros](https://docs.rs/actix-web-macros/latest/actix_web_macros/) for routing definition. At first, we planned on relying on utoipa for OAS types and schema derivation but for now [utoipa doesn't support generic struct the way we intended to](https://github.com/juhaku/utoipa/issues/703). |
 | [`okapi`](https://crates.io/crates/okapi)         | Pretty similar, based on schemars as well (and maintained by the founder of schemars) but not integrated with actix.                                                                                                                                                                                                                          |
 
+### Articles ###
+- announcement article can be found [on medium](https://medium.com/netwo/documenting-api-for-actix-web-b575adb841a1). It acts as a tutorial for Apistos.
+
 ### About us
 
 apistos is provided by [Netwo](https://www.netwo.io).
