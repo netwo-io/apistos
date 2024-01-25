@@ -257,7 +257,7 @@ fn api_component_derive_recursive() {
 }
 
 #[test]
-fn api_component_derive_flatten_algebric_enums() {
+fn api_component_derive_flatten_algebraic_enums() {
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
   pub(crate) enum IdOrDateQuery {
     #[serde(rename = "after_id")]
