@@ -29,7 +29,7 @@ const OPENAPI_STRUCT_PREFIX: &str = "__openapi_";
 
 /// Generate a custom OpenAPI type.
 ///
-/// This `#[derive]` macro should be used in combinaison with [TypedSchema](trait.TypedSchema.html).
+/// This `#[derive]` macro should be used in combination with [TypedSchema](trait.TypedSchema.html).
 ///
 /// When deriving [ApiType], [ApiComponent] and [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html) are automatically implemented and thus
 /// should not be derived.
@@ -108,7 +108,7 @@ pub fn derive_api_type(input: TokenStream) -> TokenStream {
 
 /// Generate a reusable OpenAPI schema.
 ///
-/// This `#[derive]` macro should be used in combinaison with [api_operation](attr.api_operation.html).
+/// This `#[derive]` macro should be used in combination with [api_operation](attr.api_operation.html).
 ///
 /// This macro require your type to derive [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
 ///
@@ -152,7 +152,7 @@ pub fn derive_api_component(input: TokenStream) -> TokenStream {
 
 /// Generate a reusable OpenAPI security scheme.
 ///
-/// This `#[derive]` macro should be used in combinaison with [api_operation](attr.api_operation.html).
+/// This `#[derive]` macro should be used in combination with [api_operation](attr.api_operation.html).
 /// The macro require one and only one `openapi_security`.
 ///
 /// ```rust
@@ -267,7 +267,7 @@ pub fn derive_api_security(input: TokenStream) -> TokenStream {
 
 /// Generate a reusable OpenAPI header schema.
 ///
-/// This `#[derive]` macro should be used in combinaison with [api_operation](attr.api_operation.html).
+/// This `#[derive]` macro should be used in combination with [api_operation](attr.api_operation.html).
 /// The macro require one and only one `openapi_header`.
 ///
 /// This macro require your type to derive [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
@@ -330,7 +330,7 @@ pub fn derive_api_header(input: TokenStream) -> TokenStream {
 
 /// Generate a reusable OpenAPI parameter schema in cookie.
 ///
-/// This `#[derive]` macro should be used in combinaison with [api_operation](attr.api_operation.html).
+/// This `#[derive]` macro should be used in combination with [api_operation](attr.api_operation.html).
 /// The macro require one and only one `openapi_cookie`.
 ///
 /// This macro require your type to derive [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
@@ -385,7 +385,7 @@ pub fn derive_api_cookie(input: TokenStream) -> TokenStream {
 
 /// Generate a reusable OpenAPI error schema.
 ///
-/// This `#[derive]` macro should be used in combinaison with [api_operation](attr.api_operation.html).
+/// This `#[derive]` macro should be used in combination with [api_operation](attr.api_operation.html).
 /// The macro accept one and only one `openapi_error`.
 ///
 /// ```rust
