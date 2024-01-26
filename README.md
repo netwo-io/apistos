@@ -1,4 +1,4 @@
-# Apistos &emsp; [![Documentation]][docs.rs] [![Latest Version]][crates.io] [![Build Status]][build]
+# Apistos &emsp; [![Documentation]][docs.rs] [![Latest Version]][crates.io] [![Build Status]][build] [![Deps Status]][deps.rs]
 
 
 [docs.rs]: https://docs.rs/apistos/
@@ -7,6 +7,8 @@
 [Documentation]: https://img.shields.io/docsrs/apistos
 [Latest Version]: https://img.shields.io/crates/v/apistos.svg
 [Build Status]: https://github.com/netwo-io/apistos/actions/workflows/build.yaml/badge.svg?branch=main
+[deps.rs]: https://deps.rs/crate/apistos
+[Deps Status]: https://deps.rs/crate/apistos/latest/status.svg
 
 [OASv3.md]: https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md
 
