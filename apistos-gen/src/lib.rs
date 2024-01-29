@@ -4,7 +4,7 @@
 
 use crate::internal::schemas::Schemas;
 use crate::internal::utils::extract_deprecated_from_attr;
-use crate::internal::{extract_generics_params, gen_item_ast, gen_open_api_impl};
+use crate::internal::{gen_item_ast, gen_open_api_impl};
 use crate::openapi_cookie_attr::parse_openapi_cookie_attrs;
 use crate::openapi_error_attr::parse_openapi_error_attrs;
 use crate::openapi_header_attr::parse_openapi_header_attrs;
@@ -632,8 +632,7 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
   let openapi_struct_def = if !generics.params.is_empty() {
     let turbofish = ty_generics.as_turbofish();
     generics_call = quote!(#turbofish { p: std::marker::PhantomData });
-    let generics_params = extract_generics_params(&item_ast);
-    quote!(struct #openapi_struct #ty_generics { p: std::marker::PhantomData<(#generics_params)> } )
+    quote!(struct #openapi_struct #impl_generics #where_clause { p: std::marker::PhantomData #ty_generics } )
   } else {
     quote!(struct #openapi_struct;)
   };

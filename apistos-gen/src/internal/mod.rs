@@ -4,11 +4,10 @@ use crate::operation_attr::OperationAttr;
 use proc_macro2::{Span, TokenStream as TokenStream2};
 use proc_macro_error::{abort, emit_error};
 use quote::quote;
-use syn::punctuated::Punctuated;
-use syn::token::Comma;
+
 use syn::{
-  Expr, FnArg, GenericParam, Ident, ImplGenerics, ItemFn, Lit, Meta, ReturnType, Token, Type, TypeGenerics,
-  TypeTraitObject, WhereClause,
+  Expr, FnArg, Ident, ImplGenerics, ItemFn, Lit, Meta, ReturnType, Token, Type, TypeGenerics, TypeTraitObject,
+  WhereClause,
 };
 
 mod components;
@@ -215,10 +214,6 @@ pub(crate) fn gen_item_ast(
     quote! { #responder_wrapper }
   };
   (responder_wrapper, quote!(#item_ast))
-}
-
-pub(crate) fn extract_generics_params(item_ast: &ItemFn) -> Punctuated<GenericParam, Comma> {
-  item_ast.sig.generics.params.clone()
 }
 
 fn extract_fn_arguments_types(item_ast: &ItemFn) -> Vec<Type> {
