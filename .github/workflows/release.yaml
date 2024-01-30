@@ -20,3 +20,4 @@ jobs:
       name: Cargo publish
       with:
         registry-token: ${{ secrets.CARGO_LOGIN }}
+        ignore-unpublished-changes: true
