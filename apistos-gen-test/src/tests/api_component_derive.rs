@@ -164,6 +164,45 @@ fn api_component_derive_with_flatten() {
 }
 
 #[test]
+fn api_component_derive_with_deprecated_field() {
+  #[derive(JsonSchema, ApiComponent)]
+  struct Name {
+    #[deprecated]
+    name: Option<String>,
+    new_name: String,
+  }
+
+  let name_schema = <Name as ApiComponent>::schema();
+  let name_child_schemas = <Name as ApiComponent>::child_schemas();
+  assert!(name_schema.is_some());
+  assert!(name_child_schemas.is_empty());
+  let (schema_name, schema) = name_schema.expect("schema should be defined");
+  assert_eq!(schema_name, "Name");
+  assert_schema(&schema.clone());
+  let json = serde_json::to_value(schema).expect("Unable to serialize as Json");
+  assert_json_eq!(
+    json,
+    json!({
+      "properties": {
+        "name": {
+          "type": "string",
+          "deprecated": true,
+          "nullable": true
+        },
+        "new_name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "new_name"
+      ],
+      "title": "Name",
+      "type": "object"
+    })
+  );
+}
+
+#[test]
 fn api_component_derive_with_format() {
   #[derive(JsonSchema, ApiComponent)]
   struct Name {
