@@ -126,7 +126,7 @@ pub(crate) fn gen_item_ast(
   ty_generics: &TypeGenerics,
   generics_call: &TokenStream2,
 ) -> (proc_macro2::TokenStream, proc_macro2::TokenStream) {
-  // Remove async prefix if any. This macro generate an impl Future
+  // Remove async prefix if any. This macro generates an impl Future
   if item_ast.sig.asyncness.is_some() {
     item_ast.sig.asyncness = None;
   } else {

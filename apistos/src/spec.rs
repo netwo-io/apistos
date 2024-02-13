@@ -7,7 +7,7 @@ use apistos_models::reference_or::ReferenceOr;
 use apistos_models::server::Server;
 use apistos_models::tag::Tag;
 
-/// Define an accessor for `DefaultParameters`
+/// Defines an accessor for `DefaultParameters`
 pub trait DefaultParameterAccessor {
   fn get_default_parameter() -> DefaultParameters;
 }
@@ -28,7 +28,7 @@ where
   }
 }
 
-/// Define default parameters with there associated components. Can be build from a type implementing `ApiComponent` using `DefaultParameterAccessor` trait
+/// Defines default parameters with their associated components. Can be built from a type implementing `ApiComponent` using the `DefaultParameterAccessor` trait
 pub struct DefaultParameters {
   pub parameters: Vec<Parameter>,
   pub components: Vec<(String, ReferenceOr<Schema>)>,
@@ -44,6 +44,6 @@ pub struct Spec {
   pub external_docs: Option<ExternalDocumentation>,
   /// See more details at <https://spec.openapis.org/oas/latest.html#server-object>.
   pub servers: Vec<Server>,
-  /// Default parameters to be added to each operation. This only serve for documentation purpose.
+  /// Default parameters to be added to each operation. This only serves for documentation purpose.
   pub default_parameters: Vec<DefaultParameters>,
 }
