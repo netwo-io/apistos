@@ -129,4 +129,4 @@ We use this crate for our internal needs and therefore are committed to its main
 
 While we won't invest in any feature we don't need, we are open to accept any pull request you might propose.
 
-We are a France based full-remote company operating in the telecom sector. If you are interested in learning more, feel free to visit [our career page](https://www.netwo.io/carriere).
+We are a France based full-remote company operating in the telecom industry. If you are interested in learning more, feel free to visit [our career page](https://www.netwo.io/carriere).

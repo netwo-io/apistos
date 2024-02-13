@@ -27,7 +27,7 @@ mod operation_attr;
 
 const OPENAPI_STRUCT_PREFIX: &str = "__openapi_";
 
-/// Generate a custom OpenAPI type.
+/// Generates a custom OpenAPI type.
 ///
 /// This `#[derive]` macro should be used in combination with [TypedSchema](trait.TypedSchema.html).
 ///
@@ -106,11 +106,11 @@ pub fn derive_api_type(input: TokenStream) -> TokenStream {
   .into()
 }
 
-/// Generate a reusable OpenAPI schema.
+/// Generates a reusable OpenAPI schema.
 ///
 /// This `#[derive]` macro should be used in combination with [api_operation](attr.api_operation.html).
 ///
-/// This macro require your type to derive [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
+/// This macro requires your type to derive [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
 ///
 /// ```rust
 /// use apistos::ApiComponent;
@@ -125,7 +125,7 @@ pub fn derive_api_type(input: TokenStream) -> TokenStream {
 /// }
 /// ```
 ///
-/// Because this macro require [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html), all attributes supported by [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html) are forward to
+/// Because this macro requires [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html), all attributes supported by [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html) are forwarded to
 /// this implementation.
 #[proc_macro_error]
 #[proc_macro_derive(ApiComponent)]
@@ -150,10 +150,10 @@ pub fn derive_api_component(input: TokenStream) -> TokenStream {
   .into()
 }
 
-/// Generate a reusable OpenAPI security scheme.
+/// Generates a reusable OpenAPI security scheme.
 ///
 /// This `#[derive]` macro should be used in combination with [api_operation](attr.api_operation.html).
-/// The macro require one and only one `openapi_security`.
+/// The macro requires one and only one `openapi_security`.
 ///
 /// ```rust
 /// use apistos::ApiSecurity;
@@ -265,12 +265,12 @@ pub fn derive_api_security(input: TokenStream) -> TokenStream {
   .into()
 }
 
-/// Generate a reusable OpenAPI header schema.
+/// Generates a reusable OpenAPI header schema.
 ///
 /// This `#[derive]` macro should be used in combination with [api_operation](attr.api_operation.html).
-/// The macro require one and only one `openapi_header`.
+/// The macro requires one and only one `openapi_header`.
 ///
-/// This macro require your type to derive [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
+/// This macro requires your type to derive [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
 ///
 /// ```rust
 /// use apistos::ApiHeader;
@@ -291,7 +291,7 @@ pub fn derive_api_security(input: TokenStream) -> TokenStream {
 /// - `required = false` an optional parameter, default value is false
 /// - `deprecated = false` an optional parameter, default value is false
 ///
-/// Because this macro require [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html), all attributes supported by [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html) are forward to
+/// Because this macro requires [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html), all attributes supported by [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html) are forwarded to
 /// this implementation.
 #[proc_macro_error]
 #[proc_macro_derive(ApiHeader, attributes(openapi_header))]
@@ -328,12 +328,12 @@ pub fn derive_api_header(input: TokenStream) -> TokenStream {
   .into()
 }
 
-/// Generate a reusable OpenAPI parameter schema in cookie.
+/// Generates a reusable OpenAPI parameter schema in cookie.
 ///
 /// This `#[derive]` macro should be used in combination with [api_operation](attr.api_operation.html).
-/// The macro require one and only one `openapi_cookie`.
+/// The macro requires one and only one `openapi_cookie`.
 ///
-/// This macro require your type to derive [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
+/// This macro requires your type to derive [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
 ///
 /// ```rust
 /// use apistos::ApiCookie;
@@ -354,7 +354,7 @@ pub fn derive_api_header(input: TokenStream) -> TokenStream {
 /// - `required = false` an optional parameter, default value is false
 /// - `deprecated = false` an optional parameter, default value is false
 ///
-/// Because this macro require [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html), all attributes supported by [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html) are forward to
+/// Because this macro requires [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html), all attributes supported by [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html) are forwarded to
 /// this implementation.
 #[proc_macro_error]
 #[proc_macro_derive(ApiCookie, attributes(openapi_cookie))]
@@ -383,10 +383,10 @@ pub fn derive_api_cookie(input: TokenStream) -> TokenStream {
   .into()
 }
 
-/// Generate a reusable OpenAPI error schema.
+/// Generates a reusable OpenAPI error schema.
 ///
 /// This `#[derive]` macro should be used in combination with [api_operation](attr.api_operation.html).
-/// The macro accept one and only one `openapi_error`.
+/// The macro only supports one `openapi_error`.
 ///
 /// ```rust
 /// use apistos::ApiErrorComponent;
@@ -493,18 +493,18 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
 ///  strictly associated to this operation will be document in the resulting openapi definition.
 ///   - `deprecated` a bool indicating the operation is deprecated. Deprecation can also be declared
 ///  with rust `#[deprecated]` decorator.
-///   - `operation_id = "..."` an optional operation id for this operation. Default is the handler fn name.
+///   - `operation_id = "..."` an optional operation id for this operation. Default is the handler's fn name.
 ///   - `summary = "..."` an optional summary
 ///   - `description = "..."` an optional description
-///   - `tag = "..."` an optional list of tags associated to this operation (define tag multiple time to add to the list)
+///   - `tag = "..."` an optional list of tags associated with this operation (define tag multiple times to add to the list)
 ///   - `security_scope(...)` an optional list representing which security scopes apply for a given operation with
-///       - `name = "..."` a mandatory name referencing one of the security definition
-///       - `scope(...)` a list of scope applying to this operation
-///   - `error_code = 00` an optional list of error code to document only theses
+///       - `name = "..."` a mandatory name referencing one of the security definitions
+///       - `scope(...)` a list of scopes applying to this operation
+///   - `error_code = 00` an optional list of error codes to document only theses
 ///   - `consumes = "..."` allow to override body content type
 ///   - `produces = "..."` allow to override response content type
 ///
-/// If `summary` or `description` are not provided, default value will be extracted from comments. The first line is used as summary while the rest will be part of the description.
+/// If `summary` or `description` are not provided, a default value will be extracted from the comments. The first line will be used as summary while the rest will be part of the description.
 ///
 /// For example:
 /// ```rust
