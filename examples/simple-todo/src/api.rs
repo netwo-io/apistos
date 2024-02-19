@@ -19,7 +19,7 @@ pub struct Todo {
   pub description: Option<String>,
 }
 
-#[api_operation(summary = "Add a new element to the todo list")]
+#[api_operation(summary = "Get an element from the todo list")]
 pub(crate) async fn get_todo(todo_id: Path<Uuid>) -> Result<Json<Todo>, Error> {
   // because it is a sample app, we do not currently implement any logic to store todos
   Ok(Json(Todo {
