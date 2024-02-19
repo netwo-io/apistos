@@ -9,15 +9,26 @@ env:
 
 jobs:
   publish:
+    if: ${{ github.ref, '' }}
     runs-on: ubuntu-latest
 
     steps:
+    - shell: bash
+      name: Should release crate to crates.io
+      id: should_release
+      run: |
+        if [[ ${{ github.ref }} =~ apistos-[0-9].* ]]; then
+          echo "should_release=true" >> $GITHUB_OUTPUT
+        fi
+
     - uses: actions/checkout@v3
+      if: ${{ steps.should_release.outputs.should_release == "true" }}
       with:
         fetch-depth: 2
 
     - uses: katyo/publish-crates@v2
       name: Cargo publish
+      if: ${{ steps.should_release.outputs.should_release == "true" }}
       with:
         registry-token: ${{ secrets.CARGO_LOGIN }}
         ignore-unpublished-changes: true
