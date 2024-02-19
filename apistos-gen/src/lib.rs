@@ -66,7 +66,7 @@ pub fn derive_api_type(input: TokenStream) -> TokenStream {
   let component_name = quote!(#ident).to_string();
   quote!(
     #[automatically_derived]
-    impl #generics schemars::JsonSchema for #ident #ty_generics #where_clause {
+    impl #ty_generics schemars::JsonSchema for #ident #ty_generics #where_clause {
        fn is_referenceable() -> bool {
         false
       }
@@ -86,7 +86,7 @@ pub fn derive_api_type(input: TokenStream) -> TokenStream {
     }
 
     #[automatically_derived]
-    impl #generics apistos::ApiComponent for #ident #ty_generics #where_clause {
+    impl #ty_generics apistos::ApiComponent for #ident #ty_generics #where_clause {
       fn child_schemas() -> Vec<(String, apistos::reference_or::ReferenceOr<apistos::Schema>)> {
         vec![]
       }
