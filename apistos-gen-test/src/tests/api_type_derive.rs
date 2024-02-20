@@ -1,6 +1,7 @@
 use assert_json_diff::assert_json_eq;
 use schemars::schema::InstanceType;
 use serde_json::json;
+use std::str::FromStr;
 
 use crate::utils::assert_schema;
 use apistos_core::{ApiComponent, TypedSchema};
@@ -95,6 +96,44 @@ fn api_type_derive_with_default_type_parameter() {
 
   let name_schema = <Name as ApiComponent>::schema();
   let name_child_schemas = <Name as ApiComponent>::child_schemas();
+  assert!(name_schema.is_some());
+  assert!(name_child_schemas.is_empty());
+  let (schema_name, schema) = name_schema.expect("schema should be defined");
+  assert_eq!(schema_name, "Name");
+  assert_schema(&schema.clone());
+  let json = serde_json::to_value(schema).expect("Unable to serialize as Json");
+  assert_json_eq!(
+    json,
+    json!({
+      "type": "string",
+      "format": "lastname"
+    })
+  );
+}
+
+#[test]
+#[allow(dead_code)]
+fn api_type_derive_with_generic_type_parameter() {
+  struct GenericHolder<T: FromStr> {
+    inner: T,
+  }
+
+  #[derive(ApiType)]
+  struct Name<T: FromStr>(GenericHolder<T>);
+
+  impl<T: FromStr> TypedSchema for Name<T> {
+    fn schema_type() -> InstanceType {
+      InstanceType::String
+    }
+
+    fn format() -> Option<String> {
+      // not a real format but not a problem
+      Some("lastname".to_string())
+    }
+  }
+
+  let name_schema = <Name<String> as ApiComponent>::schema();
+  let name_child_schemas = <Name<String> as ApiComponent>::child_schemas();
   assert!(name_schema.is_some());
   assert!(name_child_schemas.is_empty());
   let (schema_name, schema) = name_schema.expect("schema should be defined");
