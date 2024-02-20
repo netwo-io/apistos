@@ -9,7 +9,6 @@ env:
 
 jobs:
   publish:
-    if: ${{ github.ref, '' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -22,13 +21,13 @@ jobs:
         fi
 
     - uses: actions/checkout@v3
-      if: ${{ steps.should_release.outputs.should_release == "true" }}
+      if: ${{ steps.should_release.outputs.should_release == 'true' }}
       with:
         fetch-depth: 2
 
     - uses: katyo/publish-crates@v2
       name: Cargo publish
-      if: ${{ steps.should_release.outputs.should_release == "true" }}
+      if: ${{ steps.should_release.outputs.should_release == 'true' }}
       with:
         registry-token: ${{ secrets.CARGO_LOGIN }}
         ignore-unpublished-changes: true
