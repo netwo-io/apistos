@@ -62,11 +62,11 @@ pub fn derive_api_type(input: TokenStream) -> TokenStream {
     vis: _vis,
   } = input;
 
-  let (_, ty_generics, where_clause) = generics.split_for_impl();
+  let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
   let component_name = quote!(#ident).to_string();
   quote!(
     #[automatically_derived]
-    impl #ty_generics schemars::JsonSchema for #ident #ty_generics #where_clause {
+    impl #impl_generics schemars::JsonSchema for #ident #ty_generics #where_clause {
        fn is_referenceable() -> bool {
         false
       }
@@ -86,7 +86,7 @@ pub fn derive_api_type(input: TokenStream) -> TokenStream {
     }
 
     #[automatically_derived]
-    impl #ty_generics apistos::ApiComponent for #ident #ty_generics #where_clause {
+    impl #impl_generics apistos::ApiComponent for #ident #ty_generics #where_clause {
       fn child_schemas() -> Vec<(String, apistos::reference_or::ReferenceOr<apistos::Schema>)> {
         vec![]
       }
@@ -139,11 +139,11 @@ pub fn derive_api_component(input: TokenStream) -> TokenStream {
     vis: _vis,
   } = input;
 
-  let (_, ty_generics, where_clause) = generics.split_for_impl();
+  let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
   let schema_impl = Schemas { deprecated: false };
   quote!(
     #[automatically_derived]
-    impl #generics apistos::ApiComponent for #ident #ty_generics #where_clause {
+    impl #impl_generics apistos::ApiComponent for #ident #ty_generics #where_clause {
       #schema_impl
     }
   )
@@ -241,10 +241,10 @@ pub fn derive_api_security(input: TokenStream) -> TokenStream {
   );
   let security_name = &openapi_security_attributes.name;
 
-  let (_, ty_generics, where_clause) = generics.split_for_impl();
+  let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
   quote!(
     #[automatically_derived]
-    impl #generics apistos::ApiComponent for #ident #ty_generics #where_clause {
+    impl #impl_generics apistos::ApiComponent for #ident #ty_generics #where_clause {
       fn child_schemas() -> Vec<(String, apistos::reference_or::ReferenceOr<apistos::Schema>)> {
         vec![]
       }
@@ -310,18 +310,18 @@ pub fn derive_api_header(input: TokenStream) -> TokenStream {
   let openapi_header_attributes = parse_openapi_header_attrs(&attrs, deprecated)
     .expect_or_abort("expected #[openapi_header(...)] attribute to be present when used with ApiHeader derive trait");
 
-  let (_, ty_generics, where_clause) = generics.split_for_impl();
+  let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
   let schema_impl = Schemas {
     deprecated: openapi_header_attributes.deprecated.unwrap_or_default(),
   };
   quote!(
     #[automatically_derived]
-    impl #generics apistos::ApiComponent for #ident #ty_generics #where_clause {
+    impl #impl_generics apistos::ApiComponent for #ident #ty_generics #where_clause {
       #schema_impl
     }
 
     #[automatically_derived]
-    impl #generics apistos::ApiHeader for #ident #ty_generics #where_clause {
+    impl #impl_generics apistos::ApiHeader for #ident #ty_generics #where_clause {
       #openapi_header_attributes
     }
   )
@@ -373,10 +373,10 @@ pub fn derive_api_cookie(input: TokenStream) -> TokenStream {
   let openapi_cookie_attributes = parse_openapi_cookie_attrs(&attrs, deprecated)
     .expect_or_abort("expected #[openapi_cookie(...)] attribute to be present when used with ApiCookie derive trait");
 
-  let (_, ty_generics, where_clause) = generics.split_for_impl();
+  let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
   quote!(
     #[automatically_derived]
-    impl #generics apistos::ApiComponent for #ident #ty_generics #where_clause {
+    impl #impl_generics apistos::ApiComponent for #ident #ty_generics #where_clause {
       #openapi_cookie_attributes
     }
   )
@@ -426,10 +426,10 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
     "expected #[openapi_error(...)] attribute to be present when used with ApiErrorComponent derive trait",
   );
 
-  let (_, ty_generics, where_clause) = generics.split_for_impl();
+  let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
   quote!(
     #[automatically_derived]
-    impl #generics apistos::ApiErrorComponent for #ident #ty_generics #where_clause {
+    impl #impl_generics apistos::ApiErrorComponent for #ident #ty_generics #where_clause {
       #openapi_error_attributes
     }
   )
