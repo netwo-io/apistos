@@ -1,30 +1,43 @@
 # Apistos &emsp; [![Documentation]][docs.rs] [![Latest Version]][crates.io] [![Build Status]][build] [![Deps Status]][deps.rs]
 
-
 [docs.rs]: https://docs.rs/apistos/
+
 [crates.io]: https://crates.io/crates/apistos
+
 [build]: https://github.com/netwo-io/apistos/actions/workflows/build.yaml?branch=main
+
 [Documentation]: https://img.shields.io/docsrs/apistos
+
 [Latest Version]: https://img.shields.io/crates/v/apistos.svg
+
 [Build Status]: https://github.com/netwo-io/apistos/actions/workflows/build.yaml/badge.svg?branch=main
+
 [deps.rs]: https://deps.rs/crate/apistos
+
 [Deps Status]: https://deps.rs/crate/apistos/latest/status.svg
 
 [OASv3.md]: https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md
 
-An OpenAPI documentation tool exposing [OAS 3.0][OASv3.md] models as well as an actix-web wrapper similar to [paperclip](https://github.com/paperclip-rs/paperclip).
+An OpenAPI documentation tool exposing [OAS 3.0][OASv3.md] models as well as an actix-web wrapper similar
+to [paperclip](https://github.com/paperclip-rs/paperclip).
 
 **Apistos** is composed of three crates:
-- [`apistos`](./apistos): [actix-web](https://github.com/actix/actix-web) wrapper to generate an OpenAPI v3.0.3 documentation file
+
+- [`apistos`](./apistos): [actix-web](https://github.com/actix/actix-web) wrapper to generate an OpenAPI v3.0.3
+  documentation file
 - [`apistos-core`](./apistos-core): A set of traits and common models around [OpenAPI v3.0.3][OASv3.md]
 - [`apistos-gen`](./apistos-gen): macro utilities to generate [OpenAPI v3.0.3][OASv3.md] documentation from Rust models
-- [`apistos-models`](./apistos-models): [OpenAPI v3.0.3][OASv3.md] models with [`Schema`](https://docs.rs/schemars/latest/schemars/schema/enum.Schema.html) based on [schemars](https://github.com/GREsau/schemars) definition 
+- [`apistos-models`](./apistos-models): [OpenAPI v3.0.3][OASv3.md] models
+  with [`Schema`](https://docs.rs/schemars/latest/schemars/schema/enum.Schema.html) based
+  on [schemars](https://github.com/GREsau/schemars) definition
 
 Check out our [example project](examples/petstore).
 
 ### What does Apistos means
 
-Apistos (pronounced **_/a.p.i.stos/_**) is a word play between Héphaïstos (Ἥφαιστος, grec god of blacksmiths, carpenters, craftsmen, metallurgy ... which can also be considered by some as the god of technology) and API (pronounced **_/a.p.i/_** in French).
+Apistos (pronounced **_/a.p.i.stos/_**) is a word play between Héphaïstos (Ἥφαιστος, grec god of blacksmiths,
+carpenters, craftsmen, metallurgy ... which can also be considered by some as the god of technology) and API (pronounced
+**_/a.p.i/_** in French).
 
 ## Apistos
 
@@ -46,7 +59,7 @@ apistos = "0.1"
 
 ### Usage example
 
-Wrap your regular actix-web app using apistos types. 
+Wrap your regular actix-web app using apistos types.
 
 Most of these types are drop-in types for actix-web one's.
 
@@ -77,10 +90,10 @@ pub struct Test {
 
 #[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
 #[openapi_error(
-  status(code = 403),
-  status(code = 404),
-  status(code = 405, description = "Invalid input"),
-  status(code = 409)
+status(code = 403),
+status(code = 404),
+status(code = 405, description = "Invalid input"),
+status(code = 409)
 )]
 pub enum ErrorResponse {
   MethodNotAllowed(String),
@@ -102,11 +115,11 @@ impl ResponseError for ErrorResponse {
 }
 
 #[api_operation(
-  tag = "pet",
-  summary = "Add a new pet to the store",
-  description = r###"Add a new pet to the store
+tag = "pet",
+summary = "Add a new pet to the store",
+description = r###"Add a new pet to the store
     Plop"###,
-  error_code = 405
+error_code = 405
 )]
 pub(crate) async fn test(
   body: Json<Test>,
@@ -136,7 +149,7 @@ async fn main() -> Result<(), impl Error> {
         )
       )
       .build("/openapi.json")
-    })
+  })
     .bind((Ipv4Addr::UNSPECIFIED, 8080))?
     .run()
     .await
@@ -151,6 +164,7 @@ For a complete example, see [the sample petstore](https://github.com/netwo-io/ap
 |-------------------|--------------------------------------------------------------------------|---------------------------------------------------------------|
 | `query` (default) | Enables documenting `actix_web::web::Query`                              |                                                               |
 | `actix` (default) | Enables documenting types from `actix`                                   |                                                               |
+| `lab_query`       | Enables documenting `actix_web_lab::extract::Query`                      | [`actix-web-lab`](https://crates.io/crates/actix-web-lab)     |
 | `garde`           | Enables input validation through `garde`                                 | [`garde`](https://crates.io/crates/garde)                     |
 | `qs_query`        | Enables documenting types from `serde_qs`                                | [`serde_qs`](https://crates.io/crates/serde-qs)               |
 | `chrono`          | Enables documenting types from `chrono`                                  | [`chrono`](https://crates.io/crates/chrono)                   |
@@ -161,6 +175,7 @@ For a complete example, see [the sample petstore](https://github.com/netwo-io/ap
 | `extras`          | Enables `chrono`, `multipart`, `rust_decimal`, `uuid` and `url` features | All from previous features                                    |
 
 ### What's next
+
 - Handle schema for errors using ApiErrorComponent derive macro
 
 ### Alternatives
@@ -172,14 +187,18 @@ For a complete example, see [the sample petstore](https://github.com/netwo-io/ap
 | [`okapi`](https://crates.io/crates/okapi)         | Pretty similar, based on schemars as well (and maintained by the founder of schemars) but not integrated with actix.                                                                                                                                                                                                                          |
 
 ### Articles ###
-- announcement article can be found [on medium](https://medium.com/netwo/documenting-api-for-actix-web-b575adb841a1). It acts as a tutorial for Apistos.
+
+- announcement article can be found [on medium](https://medium.com/netwo/documenting-api-for-actix-web-b575adb841a1). It
+  acts as a tutorial for Apistos.
 
 ### About us
 
 apistos is provided by [Netwo](https://www.netwo.io).
 
-We use this crate for our internal needs and therefore are committed to its maintenance, however we cannot provide any additional guaranty. Use it at your own risks.
+We use this crate for our internal needs and therefore are committed to its maintenance, however we cannot provide any
+additional guaranty. Use it at your own risks.
 
 While we won't invest in any feature we don't need, we are open to accept any pull request you might propose.
 
-We are a France based full-remote company operating in the telecom industry. If you are interested in learning more, feel free to visit [our career page](https://www.netwo.io/carriere).
+We are a France based full-remote company operating in the telecom industry. If you are interested in learning more,
+feel free to visit [our career page](https://www.netwo.io/carriere).
