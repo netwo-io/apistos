@@ -29,7 +29,8 @@ pub trait OpenApiWrapper<T> {
 /// Wrapper for [actix_web::App](https://docs.rs/actix-web/latest/actix_web/struct.App.html) with openapi specification
 pub struct App<T> {
   open_api_spec: Arc<RwLock<OpenApi>>,
-  inner: Option<actix_web::App<T>>, //an option juste to be able to replace it with a default in memory
+  inner: Option<actix_web::App<T>>,
+  //an option juste to be able to replace it with a default in memory
   default_tags: Vec<String>,
   default_parameters: Vec<DefaultParameters>,
 }
@@ -272,7 +273,7 @@ fn build_operation_id(path: &str, operation_type: &OperationType) -> String {
 }
 
 #[cfg(test)]
-mod tests {
+mod test {
   #![allow(clippy::expect_used)]
 
   use crate::app::{build_operation_id, OpenApiWrapper};

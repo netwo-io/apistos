@@ -1,262 +1,102 @@
 use crate::ApiComponent;
 #[cfg(feature = "query")]
 use actix_web::web::Query;
+#[cfg(feature = "lab_query")]
+use actix_web_lab::extract::Query as LabQuery;
 use apistos_models::paths::ParameterStyle;
 use apistos_models::paths::{Parameter, ParameterDefinition, ParameterIn, RequestBody};
 use apistos_models::reference_or::ReferenceOr;
 use apistos_models::Schema;
 use apistos_models::{ObjectValidation, SchemaObject};
+#[cfg(all(feature = "lab_query", feature = "garde"))]
+use garde_actix_web::web::LabQuery as GardeLabQuery;
+#[cfg(all(feature = "qs_query", feature = "garde"))]
+use garde_actix_web::web::QsQuery as GardeQsQuery;
+#[cfg(all(feature = "query", feature = "garde"))]
+use garde_actix_web::web::Query as GardeQuery;
 #[cfg(feature = "qs_query")]
 use serde_qs::actix::QsQuery;
 use std::collections::HashMap;
 
-#[cfg(feature = "query")]
-impl<T> ApiComponent for Query<T>
-where
-  T: ApiComponent,
-{
-  fn required() -> bool {
-    T::required()
-  }
+macro_rules! impl_query {
+  ($ty:ident) => {
+    impl_query!($ty, None);
+  };
+  ($ty:ident, $ident:expr) => {
+    impl<T> ApiComponent for $ty<T>
+    where
+      T: ApiComponent,
+    {
+      fn required() -> bool {
+        T::required()
+      }
 
-  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
-    T::child_schemas()
-  }
+      fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
+        T::child_schemas()
+      }
 
-  fn raw_schema() -> Option<ReferenceOr<Schema>> {
-    T::raw_schema()
-  }
+      fn raw_schema() -> Option<ReferenceOr<Schema>> {
+        T::raw_schema()
+      }
 
-  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
-    None
-  }
+      fn schema() -> Option<(String, ReferenceOr<Schema>)> {
+        None
+      }
 
-  fn request_body() -> Option<RequestBody> {
-    None
-  }
+      fn request_body() -> Option<RequestBody> {
+        None
+      }
 
-  fn parameters() -> Vec<Parameter> {
-    let schema = T::schema().map(|(_, sch)| sch).or_else(Self::raw_schema);
-    parameters_from_schema(schema, None, &None)
-  }
+      fn parameters() -> Vec<Parameter> {
+        let schema = T::schema().map(|(_, sch)| sch).or_else(Self::raw_schema);
+        parameters_from_schema(schema, None, &None)
+      }
+    }
+
+    impl<K, V> ApiComponent for $ty<HashMap<K, V>>
+    where
+      V: ApiComponent,
+    {
+      fn required() -> bool {
+        false
+      }
+
+      fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
+        V::child_schemas()
+      }
+
+      fn raw_schema() -> Option<ReferenceOr<Schema>> {
+        V::raw_schema()
+      }
+
+      fn schema() -> Option<(String, ReferenceOr<Schema>)> {
+        None
+      }
+
+      fn request_body() -> Option<RequestBody> {
+        None
+      }
+
+      fn parameters() -> Vec<Parameter> {
+        let schema = V::schema().map(|(_, sch)| sch).or_else(Self::raw_schema);
+        parameters_from_hashmap(schema, $ident)
+      }
+    }
+  };
 }
 
 #[cfg(feature = "query")]
-impl<K, V> ApiComponent for Query<HashMap<K, V>>
-where
-  V: ApiComponent,
-{
-  fn required() -> bool {
-    false
-  }
-
-  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
-    V::child_schemas()
-  }
-
-  fn raw_schema() -> Option<ReferenceOr<Schema>> {
-    V::raw_schema()
-  }
-
-  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
-    None
-  }
-
-  fn request_body() -> Option<RequestBody> {
-    None
-  }
-
-  fn parameters() -> Vec<Parameter> {
-    let schema = V::schema().map(|(_, sch)| sch).or_else(Self::raw_schema);
-    parameters_from_hashmap(schema, None)
-  }
-}
-
+impl_query!(Query);
+#[cfg(feature = "lab_query")]
+impl_query!(LabQuery);
 #[cfg(feature = "qs_query")]
-impl<T> ApiComponent for QsQuery<T>
-where
-  T: ApiComponent,
-{
-  fn required() -> bool {
-    T::required()
-  }
-
-  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
-    T::child_schemas()
-  }
-
-  fn raw_schema() -> Option<ReferenceOr<Schema>> {
-    T::raw_schema()
-  }
-
-  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
-    None
-  }
-
-  fn request_body() -> Option<RequestBody> {
-    None
-  }
-
-  fn parameters() -> Vec<Parameter> {
-    let schema = T::schema().map(|(_, sch)| sch).or_else(Self::raw_schema);
-    parameters_from_schema(schema, None, &None)
-  }
-}
-
-#[cfg(feature = "qs_query")]
-impl<K, V> ApiComponent for QsQuery<HashMap<K, V>>
-where
-  V: ApiComponent,
-{
-  fn required() -> bool {
-    false
-  }
-
-  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
-    V::child_schemas()
-  }
-
-  fn raw_schema() -> Option<ReferenceOr<Schema>> {
-    V::raw_schema()
-  }
-
-  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
-    None
-  }
-
-  fn request_body() -> Option<RequestBody> {
-    None
-  }
-
-  fn parameters() -> Vec<Parameter> {
-    let schema = V::schema().map(|(_, sch)| sch).or_else(Self::raw_schema);
-    parameters_from_hashmap(schema, Some(ParameterStyle::DeepObject))
-  }
-}
-
+impl_query!(QsQuery, Some(ParameterStyle::DeepObject));
 #[cfg(all(feature = "query", feature = "garde"))]
-impl<T> ApiComponent for garde_actix_web::web::Query<T>
-where
-  T: ApiComponent,
-{
-  fn required() -> bool {
-    T::required()
-  }
-
-  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
-    T::child_schemas()
-  }
-
-  fn raw_schema() -> Option<ReferenceOr<Schema>> {
-    T::raw_schema()
-  }
-
-  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
-    None
-  }
-
-  fn request_body() -> Option<RequestBody> {
-    None
-  }
-
-  fn parameters() -> Vec<Parameter> {
-    let schema = T::schema().map(|(_, sch)| sch).or_else(Self::raw_schema);
-    parameters_from_schema(schema, None, &None)
-  }
-}
-
-#[cfg(all(feature = "query", feature = "garde"))]
-impl<K, V> ApiComponent for garde_actix_web::web::Query<HashMap<K, V>>
-where
-  V: ApiComponent,
-{
-  fn required() -> bool {
-    false
-  }
-
-  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
-    V::child_schemas()
-  }
-
-  fn raw_schema() -> Option<ReferenceOr<Schema>> {
-    V::raw_schema()
-  }
-
-  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
-    None
-  }
-
-  fn request_body() -> Option<RequestBody> {
-    None
-  }
-
-  fn parameters() -> Vec<Parameter> {
-    let schema = V::schema().map(|(_, sch)| sch).or_else(Self::raw_schema);
-    parameters_from_hashmap(schema, None)
-  }
-}
-
+impl_query!(GardeQuery);
 #[cfg(all(feature = "qs_query", feature = "garde"))]
-impl<T> ApiComponent for garde_actix_web::web::QsQuery<T>
-where
-  T: ApiComponent,
-{
-  fn required() -> bool {
-    T::required()
-  }
-
-  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
-    T::child_schemas()
-  }
-
-  fn raw_schema() -> Option<ReferenceOr<Schema>> {
-    T::raw_schema()
-  }
-
-  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
-    None
-  }
-
-  fn request_body() -> Option<RequestBody> {
-    None
-  }
-
-  fn parameters() -> Vec<Parameter> {
-    let schema = T::schema().map(|(_, sch)| sch).or_else(Self::raw_schema);
-    parameters_from_schema(schema, None, &None)
-  }
-}
-
-#[cfg(all(feature = "qs_query", feature = "garde"))]
-impl<K, V> ApiComponent for garde_actix_web::web::QsQuery<HashMap<K, V>>
-where
-  V: ApiComponent,
-{
-  fn required() -> bool {
-    false
-  }
-
-  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
-    V::child_schemas()
-  }
-
-  fn raw_schema() -> Option<ReferenceOr<Schema>> {
-    V::raw_schema()
-  }
-
-  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
-    None
-  }
-
-  fn request_body() -> Option<RequestBody> {
-    None
-  }
-
-  fn parameters() -> Vec<Parameter> {
-    let schema = V::schema().map(|(_, sch)| sch).or_else(Self::raw_schema);
-    parameters_from_hashmap(schema, Some(ParameterStyle::DeepObject))
-  }
-}
+impl_query!(GardeQsQuery, Some(ParameterStyle::DeepObject));
+#[cfg(all(feature = "lab_query", feature = "garde"))]
+impl_query!(GardeLabQuery);
 
 fn parameters_from_schema(
   schema: Option<ReferenceOr<Schema>>,
@@ -403,4 +243,199 @@ fn extract_required_from_schema(sch_obj: &SchemaObject, property_name: &str) -> 
     return None;
   }
   Some(false)
+}
+
+#[cfg(test)]
+mod test {
+  use crate::ApiComponent;
+  use actix_web::web::Query;
+  use actix_web_lab::extract::Query as LabQuery;
+  use apistos_models::paths::{Parameter, ParameterDefinition, ParameterIn};
+  use apistos_models::reference_or::ReferenceOr;
+  use schemars::schema::{InstanceType, NumberValidation, RootSchema, Schema, SchemaObject, SingleOrVec};
+  use schemars::JsonSchema;
+  use serde::{Deserialize, Serialize};
+  use serde_qs::actix::QsQuery;
+
+  #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema)]
+  struct Test {
+    id_number: u32,
+    id_string: String,
+  }
+
+  impl ApiComponent for Test {
+    fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
+      vec![]
+    }
+
+    fn schema() -> Option<(String, ReferenceOr<Schema>)> {
+      let (name, schema) = {
+        let schema_name = <Self as JsonSchema>::schema_name();
+        let settings = schemars::gen::SchemaSettings::openapi3();
+        let gen = settings.into_generator();
+        let schema: RootSchema = gen.into_root_schema_for::<Self>();
+        (schema_name, ReferenceOr::Object(Schema::Object(schema.schema)))
+      };
+      Some((name, schema))
+    }
+  }
+
+  #[test]
+  fn test_query_parameter() {
+    let parameters_schema = <Query<Test> as ApiComponent>::parameters();
+    assert_eq!(parameters_schema.len(), 2);
+
+    let id_number_parameter_schema = parameters_schema
+      .iter()
+      .find(|ps| ps.name == *"id_number")
+      .unwrap()
+      .clone();
+    assert_eq!(
+      id_number_parameter_schema,
+      Parameter {
+        name: "id_number".to_string(),
+        _in: ParameterIn::Query,
+        required: Some(true),
+        definition: Some(ParameterDefinition::Schema(ReferenceOr::Object(Schema::Object(
+          SchemaObject {
+            instance_type: Some(SingleOrVec::Single(Box::new(InstanceType::Integer))),
+            format: Some("uint32".to_string()),
+            number: Some(Box::new(NumberValidation {
+              minimum: Some(0.0),
+              ..Default::default()
+            })),
+            ..Default::default()
+          }
+        )))),
+        ..Default::default()
+      }
+    );
+
+    let id_string_parameter_schema = parameters_schema
+      .iter()
+      .find(|ps| ps.name == *"id_string")
+      .unwrap()
+      .clone();
+    assert_eq!(
+      id_string_parameter_schema,
+      Parameter {
+        name: "id_string".to_string(),
+        _in: ParameterIn::Query,
+        required: Some(true),
+        definition: Some(ParameterDefinition::Schema(ReferenceOr::Object(Schema::Object(
+          SchemaObject {
+            instance_type: Some(SingleOrVec::Single(Box::new(InstanceType::String))),
+            ..Default::default()
+          }
+        )))),
+        ..Default::default()
+      }
+    );
+  }
+
+  #[test]
+  fn test_qs_query_parameter() {
+    let parameters_schema = <QsQuery<Test> as ApiComponent>::parameters();
+    assert_eq!(parameters_schema.len(), 2);
+
+    let id_number_parameter_schema = parameters_schema
+      .iter()
+      .find(|ps| ps.name == *"id_number")
+      .unwrap()
+      .clone();
+    assert_eq!(
+      id_number_parameter_schema,
+      Parameter {
+        name: "id_number".to_string(),
+        _in: ParameterIn::Query,
+        required: Some(true),
+        definition: Some(ParameterDefinition::Schema(ReferenceOr::Object(Schema::Object(
+          SchemaObject {
+            instance_type: Some(SingleOrVec::Single(Box::new(InstanceType::Integer))),
+            format: Some("uint32".to_string()),
+            number: Some(Box::new(NumberValidation {
+              minimum: Some(0.0),
+              ..Default::default()
+            })),
+            ..Default::default()
+          }
+        )))),
+        ..Default::default()
+      }
+    );
+
+    let id_string_parameter_schema = parameters_schema
+      .iter()
+      .find(|ps| ps.name == *"id_string")
+      .unwrap()
+      .clone();
+    assert_eq!(
+      id_string_parameter_schema,
+      Parameter {
+        name: "id_string".to_string(),
+        _in: ParameterIn::Query,
+        required: Some(true),
+        definition: Some(ParameterDefinition::Schema(ReferenceOr::Object(Schema::Object(
+          SchemaObject {
+            instance_type: Some(SingleOrVec::Single(Box::new(InstanceType::String))),
+            ..Default::default()
+          }
+        )))),
+        ..Default::default()
+      }
+    );
+  }
+
+  #[test]
+  fn test_lab_query_parameter() {
+    let parameters_schema = <LabQuery<Test> as ApiComponent>::parameters();
+    assert_eq!(parameters_schema.len(), 2);
+
+    let id_number_parameter_schema = parameters_schema
+      .iter()
+      .find(|ps| ps.name == *"id_number")
+      .unwrap()
+      .clone();
+    assert_eq!(
+      id_number_parameter_schema,
+      Parameter {
+        name: "id_number".to_string(),
+        _in: ParameterIn::Query,
+        required: Some(true),
+        definition: Some(ParameterDefinition::Schema(ReferenceOr::Object(Schema::Object(
+          SchemaObject {
+            instance_type: Some(SingleOrVec::Single(Box::new(InstanceType::Integer))),
+            format: Some("uint32".to_string()),
+            number: Some(Box::new(NumberValidation {
+              minimum: Some(0.0),
+              ..Default::default()
+            })),
+            ..Default::default()
+          }
+        )))),
+        ..Default::default()
+      }
+    );
+
+    let id_string_parameter_schema = parameters_schema
+      .iter()
+      .find(|ps| ps.name == *"id_string")
+      .unwrap()
+      .clone();
+    assert_eq!(
+      id_string_parameter_schema,
+      Parameter {
+        name: "id_string".to_string(),
+        _in: ParameterIn::Query,
+        required: Some(true),
+        definition: Some(ParameterDefinition::Schema(ReferenceOr::Object(Schema::Object(
+          SchemaObject {
+            instance_type: Some(SingleOrVec::Single(Box::new(InstanceType::String))),
+            ..Default::default()
+          }
+        )))),
+        ..Default::default()
+      }
+    );
+  }
 }

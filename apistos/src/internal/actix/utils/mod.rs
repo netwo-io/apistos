@@ -40,7 +40,7 @@ impl OperationUpdater for Operation {
 }
 
 #[cfg(test)]
-mod tests {
+mod test {
   use crate::internal::actix::utils::OperationUpdater;
   use apistos_models::paths::{Operation, Parameter, ParameterIn};
   use apistos_models::reference_or::ReferenceOr;

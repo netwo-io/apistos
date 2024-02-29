@@ -121,6 +121,7 @@
 //! |----------------|-----------------------------------------------------------------------------|---------------------------------------------------------------|
 //! | `query` (default) | Enables documenting `actix_web::web::Query`                              |                                                               |
 //! | `actix` (default) | Enables documenting types from `actix`                                   |                                                               |
+//! | `lab_query`       | Enables documenting `actix_web_lab::extract::Query`                      | [`actix-web-lab`](https://crates.io/crates/actix-web-lab)     |
 //! | `garde`           | Enables input validation through `garde`                                 | [`garde`](https://crates.io/crates/garde)                     |
 //! | `qs_query`        | Enables documenting types from `serde_qs`                                | [`serde_qs`](https://crates.io/crates/serde-qs)               |
 //! | `chrono`          | Enables documenting types from `chrono`                                  | [`chrono`](https://crates.io/crates/chrono)                   |
