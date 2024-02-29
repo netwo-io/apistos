@@ -287,7 +287,7 @@ mod test {
 
     let id_number_parameter_schema = parameters_schema
       .iter()
-      .find(|ps| ps.name == "id_number".to_string())
+      .find(|ps| ps.name == *"id_number")
       .unwrap();
     assert_eq!(
       id_number_parameter_schema,
@@ -312,7 +312,7 @@ mod test {
 
     let id_string_parameter_schema = parameters_schema
       .iter()
-      .find(|ps| ps.name == "id_string".to_string())
+      .find(|ps| ps.name == *"id_string")
       .unwrap();
     assert_eq!(
       id_string_parameter_schema,
@@ -338,7 +338,7 @@ mod test {
 
     let id_number_parameter_schema = parameters_schema
       .iter()
-      .find(|ps| ps.name == "id_number".to_string())
+      .find(|ps| ps.name == *"id_number")
       .unwrap();
     assert_eq!(
       id_number_parameter_schema,
@@ -363,7 +363,7 @@ mod test {
 
     let id_string_parameter_schema = parameters_schema
       .iter()
-      .find(|ps| ps.name == "id_string".to_string())
+      .find(|ps| ps.name == *"id_string")
       .unwrap();
     assert_eq!(
       id_string_parameter_schema,
@@ -389,7 +389,7 @@ mod test {
 
     let id_number_parameter_schema = parameters_schema
       .iter()
-      .find(|ps| ps.name == "id_number".to_string())
+      .find(|ps| ps.name == *"id_number")
       .unwrap();
     assert_eq!(
       id_number_parameter_schema,
@@ -414,7 +414,7 @@ mod test {
 
     let id_string_parameter_schema = parameters_schema
       .iter()
-      .find(|ps| ps.name == "id_string".to_string())
+      .find(|ps| ps.name == *"id_string")
       .unwrap();
     assert_eq!(
       id_string_parameter_schema,
