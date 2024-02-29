@@ -8,24 +8,24 @@ use apistos_models::paths::{Parameter, ParameterDefinition, ParameterIn, Request
 use apistos_models::reference_or::ReferenceOr;
 use apistos_models::Schema;
 use apistos_models::{ObjectValidation, SchemaObject};
+#[cfg(all(feature = "lab_query", feature = "garde"))]
+use garde_actix_web::web::LabQuery as GardeLabQuery;
+#[cfg(all(feature = "qs_query", feature = "garde"))]
+use garde_actix_web::web::QsQuery as GardeQsQuery;
+#[cfg(all(feature = "query", feature = "garde"))]
+use garde_actix_web::web::Query as GardeQuery;
 #[cfg(feature = "qs_query")]
 use serde_qs::actix::QsQuery;
 use std::collections::HashMap;
-#[cfg(all(feature = "query", feature = "garde"))]
-use garde_actix_web::web::Query as GardeQuery;
-#[cfg(all(feature = "qs_query", feature = "garde"))]
-use garde_actix_web::web::QsQuery as GardeQsQuery;
-#[cfg(all(feature = "lab_query", feature = "garde"))]
-use garde_actix_web::web::LabQuery as GardeLabQuery;
 
 macro_rules! impl_query {
-  ($ty:ident) => (
-    impl_query!( $ty , None);
-  );
+  ($ty:ident) => {
+    impl_query!($ty, None);
+  };
   ($ty:ident, $ident:expr) => {
-    impl < T > ApiComponent for $ty < T >
-      where
-        T: ApiComponent,
+    impl<T> ApiComponent for $ty<T>
+    where
+      T: ApiComponent,
     {
       fn required() -> bool {
         T::required()
@@ -53,9 +53,9 @@ macro_rules! impl_query {
       }
     }
 
-    impl<K, V> ApiComponent for $ty <HashMap<K, V>>
-      where
-        V: ApiComponent,
+    impl<K, V> ApiComponent for $ty<HashMap<K, V>>
+    where
+      V: ApiComponent,
     {
       fn required() -> bool {
         false
@@ -247,15 +247,15 @@ fn extract_required_from_schema(sch_obj: &SchemaObject, property_name: &str) -> 
 
 #[cfg(test)]
 mod test {
+  use crate::ApiComponent;
   use actix_web::web::Query;
   use actix_web_lab::extract::Query as LabQuery;
-  use schemars::JsonSchema;
-  use schemars::schema::{InstanceType, NumberValidation, RootSchema, Schema, SchemaObject, SingleOrVec};
-  use serde::{Deserialize, Serialize};
-  use serde_qs::actix::QsQuery;
   use apistos_models::paths::{Parameter, ParameterDefinition, ParameterIn};
   use apistos_models::reference_or::ReferenceOr;
-  use crate::ApiComponent;
+  use schemars::schema::{InstanceType, NumberValidation, RootSchema, Schema, SchemaObject, SingleOrVec};
+  use schemars::JsonSchema;
+  use serde::{Deserialize, Serialize};
+  use serde_qs::actix::QsQuery;
 
   #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema)]
   struct Test {
@@ -274,10 +274,7 @@ mod test {
         let settings = schemars::gen::SchemaSettings::openapi3();
         let gen = settings.into_generator();
         let schema: RootSchema = gen.into_root_schema_for::<Self>();
-        (
-          schema_name,
-          ReferenceOr::Object(Schema::Object(schema.schema))
-        )
+        (schema_name, ReferenceOr::Object(Schema::Object(schema.schema)))
       };
       Some((name, schema))
     }
@@ -288,36 +285,50 @@ mod test {
     let parameters_schema = <Query<Test> as ApiComponent>::parameters();
     assert_eq!(parameters_schema.len(), 2);
 
-    let id_number_parameter_schema = parameters_schema.iter().find(|ps| ps.name == "id_number".to_string())
+    let id_number_parameter_schema = parameters_schema
+      .iter()
+      .find(|ps| ps.name == "id_number".to_string())
       .unwrap();
-    assert_eq!(id_number_parameter_schema, &Parameter {
-      name: "id_number".to_string(),
-      _in: ParameterIn::Query,
-      required: Some(true),
-      definition: Some(ParameterDefinition::Schema(ReferenceOr::Object(Schema::Object(SchemaObject {
-        instance_type: Some(SingleOrVec::Single(Box::new(InstanceType::Integer))),
-        format: Some("uint32".to_string()),
-        number: Some(Box::new(NumberValidation {
-          minimum: Some(0.0),
-          ..Default::default()
-        })),
+    assert_eq!(
+      id_number_parameter_schema,
+      &Parameter {
+        name: "id_number".to_string(),
+        _in: ParameterIn::Query,
+        required: Some(true),
+        definition: Some(ParameterDefinition::Schema(ReferenceOr::Object(Schema::Object(
+          SchemaObject {
+            instance_type: Some(SingleOrVec::Single(Box::new(InstanceType::Integer))),
+            format: Some("uint32".to_string()),
+            number: Some(Box::new(NumberValidation {
+              minimum: Some(0.0),
+              ..Default::default()
+            })),
+            ..Default::default()
+          }
+        )))),
         ..Default::default()
-      })))),
-      ..Default::default()
-    });
+      }
+    );
 
-    let id_string_parameter_schema = parameters_schema.iter().find(|ps| ps.name == "id_string".to_string())
+    let id_string_parameter_schema = parameters_schema
+      .iter()
+      .find(|ps| ps.name == "id_string".to_string())
       .unwrap();
-    assert_eq!(id_string_parameter_schema, &Parameter {
-      name: "id_string".to_string(),
-      _in: ParameterIn::Query,
-      required: Some(true),
-      definition: Some(ParameterDefinition::Schema(ReferenceOr::Object(Schema::Object(SchemaObject {
-        instance_type: Some(SingleOrVec::Single(Box::new(InstanceType::String))),
+    assert_eq!(
+      id_string_parameter_schema,
+      &Parameter {
+        name: "id_string".to_string(),
+        _in: ParameterIn::Query,
+        required: Some(true),
+        definition: Some(ParameterDefinition::Schema(ReferenceOr::Object(Schema::Object(
+          SchemaObject {
+            instance_type: Some(SingleOrVec::Single(Box::new(InstanceType::String))),
+            ..Default::default()
+          }
+        )))),
         ..Default::default()
-      })))),
-      ..Default::default()
-    });
+      }
+    );
   }
 
   #[test]
@@ -325,36 +336,50 @@ mod test {
     let parameters_schema = <QsQuery<Test> as ApiComponent>::parameters();
     assert_eq!(parameters_schema.len(), 2);
 
-    let id_number_parameter_schema = parameters_schema.iter().find(|ps| ps.name == "id_number".to_string())
+    let id_number_parameter_schema = parameters_schema
+      .iter()
+      .find(|ps| ps.name == "id_number".to_string())
       .unwrap();
-    assert_eq!(id_number_parameter_schema, &Parameter {
-      name: "id_number".to_string(),
-      _in: ParameterIn::Query,
-      required: Some(true),
-      definition: Some(ParameterDefinition::Schema(ReferenceOr::Object(Schema::Object(SchemaObject {
-        instance_type: Some(SingleOrVec::Single(Box::new(InstanceType::Integer))),
-        format: Some("uint32".to_string()),
-        number: Some(Box::new(NumberValidation {
-          minimum: Some(0.0),
-          ..Default::default()
-        })),
+    assert_eq!(
+      id_number_parameter_schema,
+      &Parameter {
+        name: "id_number".to_string(),
+        _in: ParameterIn::Query,
+        required: Some(true),
+        definition: Some(ParameterDefinition::Schema(ReferenceOr::Object(Schema::Object(
+          SchemaObject {
+            instance_type: Some(SingleOrVec::Single(Box::new(InstanceType::Integer))),
+            format: Some("uint32".to_string()),
+            number: Some(Box::new(NumberValidation {
+              minimum: Some(0.0),
+              ..Default::default()
+            })),
+            ..Default::default()
+          }
+        )))),
         ..Default::default()
-      })))),
-      ..Default::default()
-    });
+      }
+    );
 
-    let id_string_parameter_schema = parameters_schema.iter().find(|ps| ps.name == "id_string".to_string())
+    let id_string_parameter_schema = parameters_schema
+      .iter()
+      .find(|ps| ps.name == "id_string".to_string())
       .unwrap();
-    assert_eq!(id_string_parameter_schema, &Parameter {
-      name: "id_string".to_string(),
-      _in: ParameterIn::Query,
-      required: Some(true),
-      definition: Some(ParameterDefinition::Schema(ReferenceOr::Object(Schema::Object(SchemaObject {
-        instance_type: Some(SingleOrVec::Single(Box::new(InstanceType::String))),
+    assert_eq!(
+      id_string_parameter_schema,
+      &Parameter {
+        name: "id_string".to_string(),
+        _in: ParameterIn::Query,
+        required: Some(true),
+        definition: Some(ParameterDefinition::Schema(ReferenceOr::Object(Schema::Object(
+          SchemaObject {
+            instance_type: Some(SingleOrVec::Single(Box::new(InstanceType::String))),
+            ..Default::default()
+          }
+        )))),
         ..Default::default()
-      })))),
-      ..Default::default()
-    });
+      }
+    );
   }
 
   #[test]
@@ -362,35 +387,49 @@ mod test {
     let parameters_schema = <LabQuery<Test> as ApiComponent>::parameters();
     assert_eq!(parameters_schema.len(), 2);
 
-    let id_number_parameter_schema = parameters_schema.iter().find(|ps| ps.name == "id_number".to_string())
+    let id_number_parameter_schema = parameters_schema
+      .iter()
+      .find(|ps| ps.name == "id_number".to_string())
       .unwrap();
-    assert_eq!(id_number_parameter_schema, &Parameter {
-      name: "id_number".to_string(),
-      _in: ParameterIn::Query,
-      required: Some(true),
-      definition: Some(ParameterDefinition::Schema(ReferenceOr::Object(Schema::Object(SchemaObject {
-        instance_type: Some(SingleOrVec::Single(Box::new(InstanceType::Integer))),
-        format: Some("uint32".to_string()),
-        number: Some(Box::new(NumberValidation {
-          minimum: Some(0.0),
-          ..Default::default()
-        })),
+    assert_eq!(
+      id_number_parameter_schema,
+      &Parameter {
+        name: "id_number".to_string(),
+        _in: ParameterIn::Query,
+        required: Some(true),
+        definition: Some(ParameterDefinition::Schema(ReferenceOr::Object(Schema::Object(
+          SchemaObject {
+            instance_type: Some(SingleOrVec::Single(Box::new(InstanceType::Integer))),
+            format: Some("uint32".to_string()),
+            number: Some(Box::new(NumberValidation {
+              minimum: Some(0.0),
+              ..Default::default()
+            })),
+            ..Default::default()
+          }
+        )))),
         ..Default::default()
-      })))),
-      ..Default::default()
-    });
+      }
+    );
 
-    let id_string_parameter_schema = parameters_schema.iter().find(|ps| ps.name == "id_string".to_string())
+    let id_string_parameter_schema = parameters_schema
+      .iter()
+      .find(|ps| ps.name == "id_string".to_string())
       .unwrap();
-    assert_eq!(id_string_parameter_schema, &Parameter {
-      name: "id_string".to_string(),
-      _in: ParameterIn::Query,
-      required: Some(true),
-      definition: Some(ParameterDefinition::Schema(ReferenceOr::Object(Schema::Object(SchemaObject {
-        instance_type: Some(SingleOrVec::Single(Box::new(InstanceType::String))),
+    assert_eq!(
+      id_string_parameter_schema,
+      &Parameter {
+        name: "id_string".to_string(),
+        _in: ParameterIn::Query,
+        required: Some(true),
+        definition: Some(ParameterDefinition::Schema(ReferenceOr::Object(Schema::Object(
+          SchemaObject {
+            instance_type: Some(SingleOrVec::Single(Box::new(InstanceType::String))),
+            ..Default::default()
+          }
+        )))),
         ..Default::default()
-      })))),
-      ..Default::default()
-    });
+      }
+    );
   }
 }
