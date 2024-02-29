@@ -285,10 +285,14 @@ mod test {
     let parameters_schema = <Query<Test> as ApiComponent>::parameters();
     assert_eq!(parameters_schema.len(), 2);
 
-    let id_number_parameter_schema = parameters_schema.iter().find(|ps| ps.name == *"id_number").unwrap();
+    let id_number_parameter_schema = parameters_schema
+      .iter()
+      .find(|ps| ps.name == *"id_number")
+      .unwrap()
+      .clone();
     assert_eq!(
       id_number_parameter_schema,
-      &Parameter {
+      Parameter {
         name: "id_number".to_string(),
         _in: ParameterIn::Query,
         required: Some(true),
@@ -307,10 +311,14 @@ mod test {
       }
     );
 
-    let id_string_parameter_schema = parameters_schema.iter().find(|ps| ps.name == *"id_string").unwrap();
+    let id_string_parameter_schema = parameters_schema
+      .iter()
+      .find(|ps| ps.name == *"id_string")
+      .unwrap()
+      .clone();
     assert_eq!(
       id_string_parameter_schema,
-      &Parameter {
+      Parameter {
         name: "id_string".to_string(),
         _in: ParameterIn::Query,
         required: Some(true),
@@ -330,10 +338,14 @@ mod test {
     let parameters_schema = <QsQuery<Test> as ApiComponent>::parameters();
     assert_eq!(parameters_schema.len(), 2);
 
-    let id_number_parameter_schema = parameters_schema.iter().find(|ps| ps.name == *"id_number").unwrap();
+    let id_number_parameter_schema = parameters_schema
+      .iter()
+      .find(|ps| ps.name == *"id_number")
+      .unwrap()
+      .clone();
     assert_eq!(
       id_number_parameter_schema,
-      &Parameter {
+      Parameter {
         name: "id_number".to_string(),
         _in: ParameterIn::Query,
         required: Some(true),
@@ -352,10 +364,14 @@ mod test {
       }
     );
 
-    let id_string_parameter_schema = parameters_schema.iter().find(|ps| ps.name == *"id_string").unwrap();
+    let id_string_parameter_schema = parameters_schema
+      .iter()
+      .find(|ps| ps.name == *"id_string")
+      .unwrap()
+      .clone();
     assert_eq!(
       id_string_parameter_schema,
-      &Parameter {
+      Parameter {
         name: "id_string".to_string(),
         _in: ParameterIn::Query,
         required: Some(true),
@@ -375,10 +391,14 @@ mod test {
     let parameters_schema = <LabQuery<Test> as ApiComponent>::parameters();
     assert_eq!(parameters_schema.len(), 2);
 
-    let id_number_parameter_schema = parameters_schema.iter().find(|ps| ps.name == *"id_number").unwrap();
+    let id_number_parameter_schema = parameters_schema
+      .iter()
+      .find(|ps| ps.name == *"id_number")
+      .unwrap()
+      .clone();
     assert_eq!(
       id_number_parameter_schema,
-      &Parameter {
+      Parameter {
         name: "id_number".to_string(),
         _in: ParameterIn::Query,
         required: Some(true),
@@ -397,10 +417,14 @@ mod test {
       }
     );
 
-    let id_string_parameter_schema = parameters_schema.iter().find(|ps| ps.name == *"id_string").unwrap();
+    let id_string_parameter_schema = parameters_schema
+      .iter()
+      .find(|ps| ps.name == *"id_string")
+      .unwrap()
+      .clone();
     assert_eq!(
       id_string_parameter_schema,
-      &Parameter {
+      Parameter {
         name: "id_string".to_string(),
         _in: ParameterIn::Query,
         required: Some(true),
