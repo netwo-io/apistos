@@ -18,6 +18,7 @@ pin-project = { workspace = true }
 schemars = { workspace = true }
 
 actix-web = { workspace = true, optional = true }
+actix-web-lab = { workspace = true, optional = true }
 actix-multipart = { workspace = true, optional = true }
 garde-actix-web = { workspace = true, optional = true }
 chrono = { workspace = true, optional = true }
@@ -37,11 +38,12 @@ serde_json = { workspace = true }
 workspace = true
 
 [features]
-actix = ["actix-web"]
+actix = ["dep:actix-web"]
 
 # query related features
 query = []
 qs_query = ["actix", "dep:serde_qs", "garde-actix-web?/serde_qs"]
+lab_query = ["actix", "dep:actix-web-lab", "garde-actix-web?/lab_query"]
 
 # actix garde feature
 garde = ["actix", "dep:garde-actix-web"]

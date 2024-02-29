@@ -29,7 +29,8 @@ pub trait OpenApiWrapper<T> {
 /// Wrapper for [actix_web::App](https://docs.rs/actix-web/latest/actix_web/struct.App.html) with openapi specification
 pub struct App<T> {
   open_api_spec: Arc<RwLock<OpenApi>>,
-  inner: Option<actix_web::App<T>>, //an option juste to be able to replace it with a default in memory
+  inner: Option<actix_web::App<T>>,
+  //an option juste to be able to replace it with a default in memory
   default_tags: Vec<String>,
   default_parameters: Vec<DefaultParameters>,
 }
@@ -59,8 +60,8 @@ impl<T> OpenApiWrapper<T> for actix_web::App<T> {
 }
 
 impl<T> App<T>
-where
-  T: ServiceFactory<ServiceRequest, Config = (), Error = Error, InitError = ()>,
+  where
+    T: ServiceFactory<ServiceRequest, Config=(), Error=Error, InitError=()>,
 {
   /// Drop in for [`actix_web::App::app_data`](https://docs.rs/actix-web/*/actix_web/struct.App.html#method.app_data)
   pub fn app_data<U: 'static>(mut self, ext: U) -> Self {
@@ -70,11 +71,11 @@ where
 
   /// Drop in for [`actix_web::App::data_factory`](https://docs.rs/actix-web/*/actix_web/struct.App.html#method.data_factory)
   pub fn data_factory<F, Out, D, E>(mut self, data: F) -> Self
-  where
-    F: Fn() -> Out + 'static,
-    Out: Future<Output = Result<D, E>> + 'static,
-    D: 'static,
-    E: fmt::Debug,
+    where
+      F: Fn() -> Out + 'static,
+      Out: Future<Output=Result<D, E>> + 'static,
+      D: 'static,
+      E: fmt::Debug,
   {
     self.inner = self.inner.take().map(|app| app.data_factory(data));
     self
@@ -82,8 +83,8 @@ where
 
   /// Drop in for [`actix_web::App::configure`](https://docs.rs/actix-web/*/actix_web/struct.App.html#method.configure)
   pub fn configure<F>(mut self, f: F) -> Self
-  where
-    F: FnOnce(&mut ServiceConfig),
+    where
+      F: FnOnce(&mut ServiceConfig),
   {
     self.inner = self.inner.take().map(|app| {
       app.configure(|c| {
@@ -105,8 +106,8 @@ where
 
   /// Drop in for [`actix_web::App::service`](https://docs.rs/actix-web/*/actix_web/struct.App.html#method.service)
   pub fn service<F>(mut self, mut factory: F) -> Self
-  where
-    F: DefinitionHolder + HttpServiceFactory + 'static,
+    where
+      F: DefinitionHolder + HttpServiceFactory + 'static,
   {
     self.update_from_def_holder(&mut factory);
     self.inner = self.inner.take().map(|app| app.service(factory));
@@ -115,10 +116,10 @@ where
 
   /// Drop in for [`actix_web::App::default_service`](https://docs.rs/actix-web/*/actix_web/struct.App.html#method.default_service)
   pub fn default_service<F, U>(mut self, svc: F) -> Self
-  where
-    F: IntoServiceFactory<U, ServiceRequest>,
-    U: ServiceFactory<ServiceRequest, Config = (), Response = ServiceResponse, Error = Error> + 'static,
-    U::InitError: fmt::Debug,
+    where
+      F: IntoServiceFactory<U, ServiceRequest>,
+      U: ServiceFactory<ServiceRequest, Config=(), Response=ServiceResponse, Error=Error> + 'static,
+      U::InitError: fmt::Debug,
   {
     self.inner = self.inner.take().map(|app| app.default_service(svc));
     self
@@ -126,9 +127,9 @@ where
 
   /// Drop in for [`actix_web::App::external_resource`](https://docs.rs/actix-web/*/actix_web/struct.App.html#method.external_resource)
   pub fn external_resource<N, U>(mut self, name: N, url: U) -> Self
-  where
-    N: AsRef<str>,
-    U: AsRef<str>,
+    where
+      N: AsRef<str>,
+      U: AsRef<str>,
   {
     self.inner = self.inner.take().map(|app| app.external_resource(name, url));
     self
@@ -138,10 +139,10 @@ where
   pub fn wrap<M, B>(
     mut self,
     mw: M,
-  ) -> App<impl ServiceFactory<ServiceRequest, Config = (), Response = ServiceResponse<B>, Error = Error, InitError = ()>>
-  where
-    M: Transform<T::Service, ServiceRequest, Response = ServiceResponse<B>, Error = Error, InitError = ()> + 'static,
-    B: MessageBody,
+  ) -> App<impl ServiceFactory<ServiceRequest, Config=(), Response=ServiceResponse<B>, Error=Error, InitError=()>>
+    where
+      M: Transform<T::Service, ServiceRequest, Response=ServiceResponse<B>, Error=Error, InitError=()> + 'static,
+      B: MessageBody,
   {
     App {
       open_api_spec: self.open_api_spec,
@@ -155,11 +156,11 @@ where
   pub fn wrap_fn<F, R, B>(
     mut self,
     mw: F,
-  ) -> App<impl ServiceFactory<ServiceRequest, Config = (), Response = ServiceResponse<B>, Error = Error, InitError = ()>>
-  where
-    F: Fn(ServiceRequest, &T::Service) -> R + Clone + 'static,
-    R: Future<Output = Result<ServiceResponse<B>, Error>>,
-    B: MessageBody,
+  ) -> App<impl ServiceFactory<ServiceRequest, Config=(), Response=ServiceResponse<B>, Error=Error, InitError=()>>
+    where
+      F: Fn(ServiceRequest, &T::Service) -> R + Clone + 'static,
+      R: Future<Output=Result<ServiceResponse<B>, Error>>,
+      B: MessageBody,
   {
     App {
       open_api_spec: self.open_api_spec,
@@ -268,11 +269,11 @@ fn build_operation_id(path: &str, operation_type: &OperationType) -> String {
     resource.replace('/', "-"),
     md5::compute(path)
   )
-  .to_lowercase()
+    .to_lowercase()
 }
 
 #[cfg(test)]
-mod tests {
+mod test {
   #![allow(clippy::expect_used)]
 
   use crate::app::{build_operation_id, OpenApiWrapper};
