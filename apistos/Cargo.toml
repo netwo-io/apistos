@@ -25,12 +25,12 @@ schemars = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 
-apistos-core = { path = "../apistos-core", version = "0.1.3" }
-apistos-gen = { path = "../apistos-gen", version = "0.1.3" }
-apistos-models = { path = "../apistos-models", version = "0.1.3" }
+apistos-core = { path = "../apistos-core", version = "0.1.4" }
+apistos-gen = { path = "../apistos-gen", version = "0.1.4" }
+apistos-models = { path = "../apistos-models", version = "0.1.4" }
 
 [dev-dependencies]
-apistos-models = { path = "../apistos-models", version = "0.1.3", features = ["deserialize"] }
+apistos-models = { path = "../apistos-models", version = "0.1.4", features = ["deserialize"] }
 
 [lints]
 workspace = true
