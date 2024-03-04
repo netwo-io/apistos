@@ -20,9 +20,15 @@ use std::collections::HashMap;
 
 macro_rules! impl_query {
   ($ty:ident) => {
-    impl_query!($ty, None);
+    impl_query!($ty, hashmap_style: None, style: None, explode: None);
   };
-  ($ty:ident, $ident:expr) => {
+  ($ty:ident, hashmap_style: $hashmap_style:expr) => {
+    impl_query!($ty, hashmap_style: $hashmap_style, style: None, explode: None);
+  };
+  ($ty:ident, style: $style:expr, explode: $explode:expr) => {
+    impl_query!($ty, hashmap_style: None, style: $style, explode: $explode);
+  };
+  ($ty:ident, hashmap_style: $hashmap_style:expr, style: $style:expr, explode: $explode:expr) => {
     impl<T> ApiComponent for $ty<T>
     where
       T: ApiComponent,
@@ -49,7 +55,7 @@ macro_rules! impl_query {
 
       fn parameters() -> Vec<Parameter> {
         let schema = T::schema().map(|(_, sch)| sch).or_else(Self::raw_schema);
-        parameters_from_schema(schema, None, &None)
+        parameters_from_schema(schema, None, &None, &$style, $explode)
       }
     }
 
@@ -79,7 +85,7 @@ macro_rules! impl_query {
 
       fn parameters() -> Vec<Parameter> {
         let schema = V::schema().map(|(_, sch)| sch).or_else(Self::raw_schema);
-        parameters_from_hashmap(schema, $ident)
+        parameters_from_hashmap(schema, $hashmap_style)
       }
     }
   };
@@ -88,20 +94,22 @@ macro_rules! impl_query {
 #[cfg(feature = "query")]
 impl_query!(Query);
 #[cfg(feature = "lab_query")]
-impl_query!(LabQuery);
+impl_query!(LabQuery, style: Some(ParameterStyle::Form), explode: Some(true));
 #[cfg(feature = "qs_query")]
-impl_query!(QsQuery, Some(ParameterStyle::DeepObject));
+impl_query!(QsQuery, hashmap_style: Some(ParameterStyle::DeepObject));
 #[cfg(all(feature = "query", feature = "garde"))]
 impl_query!(GardeQuery);
 #[cfg(all(feature = "qs_query", feature = "garde"))]
-impl_query!(GardeQsQuery, Some(ParameterStyle::DeepObject));
+impl_query!(GardeQsQuery, hashmap_style: Some(ParameterStyle::DeepObject));
 #[cfg(all(feature = "lab_query", feature = "garde"))]
-impl_query!(GardeLabQuery);
+impl_query!(GardeLabQuery, style: Some(ParameterStyle::Form), explode: Some(true));
 
 fn parameters_from_schema(
   schema: Option<ReferenceOr<Schema>>,
   required: Option<bool>,
   default_description: &Option<String>,
+  style: &Option<ParameterStyle>,
+  explode: Option<bool>,
 ) -> Vec<Parameter> {
   let mut parameters = vec![];
   if let Some(schema) = schema {
@@ -112,7 +120,14 @@ fn parameters_from_schema(
       ReferenceOr::Object(schema) => {
         let sch = schema.into_object();
         if let Some(obj) = &sch.object {
-          parameters.append(&mut parameter_for_obj(obj, &sch, required, default_description));
+          parameters.append(&mut parameter_for_obj(
+            obj,
+            &sch,
+            required,
+            default_description,
+            style,
+            explode,
+          ));
         }
         if let Some(subschema) = &sch.subschemas {
           if let Some(all_of) = &subschema.all_of {
@@ -121,6 +136,8 @@ fn parameters_from_schema(
                 Some(ReferenceOr::Object(sch.clone())),
                 required,
                 default_description,
+                style,
+                explode,
               ));
             }
           }
@@ -140,6 +157,8 @@ fn parameters_from_schema(
                 Some(ReferenceOr::Object(one_of_sch.clone())),
                 Some(false),
                 &Some(description.clone()),
+                style,
+                explode,
               ));
             }
           }
@@ -201,6 +220,8 @@ fn parameter_for_obj(
   sch: &SchemaObject,
   required: Option<bool>,
   default_description: &Option<String>,
+  style: &Option<ParameterStyle>,
+  explode: Option<bool>,
 ) -> Vec<Parameter> {
   obj
     .properties
@@ -220,6 +241,8 @@ fn parameter_for_obj(
         definition: Some(ParameterDefinition::Schema(schema.into())),
         required,
         description,
+        style: style.clone(),
+        explode,
         ..Default::default()
       }
     })
@@ -250,7 +273,7 @@ mod test {
   use crate::ApiComponent;
   use actix_web::web::Query;
   use actix_web_lab::extract::Query as LabQuery;
-  use apistos_models::paths::{Parameter, ParameterDefinition, ParameterIn};
+  use apistos_models::paths::{Parameter, ParameterDefinition, ParameterIn, ParameterStyle};
   use apistos_models::reference_or::ReferenceOr;
   use schemars::schema::{InstanceType, NumberValidation, RootSchema, Schema, SchemaObject, SingleOrVec};
   use schemars::JsonSchema;
@@ -402,6 +425,8 @@ mod test {
         name: "id_number".to_string(),
         _in: ParameterIn::Query,
         required: Some(true),
+        style: Some(ParameterStyle::Form),
+        explode: Some(true),
         definition: Some(ParameterDefinition::Schema(ReferenceOr::Object(Schema::Object(
           SchemaObject {
             instance_type: Some(SingleOrVec::Single(Box::new(InstanceType::Integer))),
@@ -428,6 +453,8 @@ mod test {
         name: "id_string".to_string(),
         _in: ParameterIn::Query,
         required: Some(true),
+        style: Some(ParameterStyle::Form),
+        explode: Some(true),
         definition: Some(ParameterDefinition::Schema(ReferenceOr::Object(Schema::Object(
           SchemaObject {
             instance_type: Some(SingleOrVec::Single(Box::new(InstanceType::String))),
