@@ -3,7 +3,6 @@ use actix_web::http::header::ContentType;
 use actix_web::web::Json;
 use actix_web::HttpResponse;
 use apistos::actix::{AcceptedJson, CreatedJson, NoContent};
-use apistos::paths::RequestBody;
 use apistos_core::PathItemDefinition;
 use apistos_gen::api_operation;
 use assert_json_diff::assert_json_eq;
