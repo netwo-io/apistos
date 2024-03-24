@@ -99,7 +99,7 @@ impl<'a> ToTokens for Operation<'a> {
         use apistos::ApiComponent;
         let mut operation_builder = apistos::paths::Operation::default();
 
-        let mut body_requests = vec![];
+        let mut body_requests: Vec<std::option::Option<apistos::paths::RequestBody>> = vec![];
         #(
           let mut request_body = <#args>::request_body();
           let consumes: Option<String> = #consumes;
