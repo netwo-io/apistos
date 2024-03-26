@@ -88,7 +88,7 @@ where
 
   fn responses(_content_type: Option<String>) -> Option<Responses> {
     let status = StatusCode::ACCEPTED;
-    response_from_schema(status, Self::schema())
+    response_from_schema(status, Self::schema()).or_else(|| response_from_raw_schema(status, Self::raw_schema()))
   }
 }
 
@@ -130,7 +130,7 @@ where
 
   fn responses(_content_type: Option<String>) -> Option<Responses> {
     let status = StatusCode::CREATED;
-    response_from_schema(status, Self::schema())
+    response_from_schema(status, Self::schema()).or_else(|| response_from_raw_schema(status, Self::raw_schema()))
   }
 }
 
@@ -148,6 +148,31 @@ fn response_from_schema(status: StatusCode, schema: Option<(String, ReferenceOr<
             schema: Some(ReferenceOr::Reference {
               _ref: format!("#/components/schemas/{}", name),
             }),
+            ..Default::default()
+          },
+        )]),
+        ..Default::default()
+      };
+      Responses {
+        responses: BTreeMap::from_iter(vec![(status.as_str().to_string(), ReferenceOr::Object(response))]),
+        ..Default::default()
+      }
+    }
+  })
+}
+
+fn response_from_raw_schema(status: StatusCode, raw_schema: Option<ReferenceOr<Schema>>) -> Option<Responses> {
+  raw_schema.map(|schema| match schema {
+    ReferenceOr::Reference { _ref } => Responses {
+      responses: BTreeMap::from_iter(vec![(status.as_str().to_string(), ReferenceOr::Reference { _ref })]),
+      ..Default::default()
+    },
+    schema @ ReferenceOr::Object(_) => {
+      let response = Response {
+        content: BTreeMap::from_iter(vec![(
+          "application/json".to_string(),
+          MediaType {
+            schema: Some(schema),
             ..Default::default()
           },
         )]),

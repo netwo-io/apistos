@@ -19,12 +19,13 @@ actix-web = { workspace = true }
 assert-json-diff = { workspace = true }
 chrono = { workspace = true, features = ["serde"] }
 futures-core = { workspace = true }
-apistos = { path = "../apistos", features = ["multipart"] }
+apistos = { path = "../apistos", features = ["multipart", "uuid"] }
 apistos-core = { path = "../apistos-core", version = "0.1.6" }
 apistos-gen = { path = "../apistos-gen", version = "0.1.6" }
 schemars = { workspace = true }
 serde = { version = "1.0.188", features = ["derive"] }
 serde_json = { workspace = true }
+uuid = { workspace = true, features = ["v4"] }
 
 [lints]
 workspace = true

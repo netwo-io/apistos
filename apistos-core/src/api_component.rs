@@ -265,6 +265,20 @@ where
           ..Default::default()
         }),
       ));
+    } else if let Some(schema) = Self::raw_schema() {
+      responses.push((
+        "200".to_owned(),
+        ReferenceOr::Object(Response {
+          content: BTreeMap::from_iter(vec![(
+            content_type.unwrap_or_else(Self::content_type),
+            MediaType {
+              schema: Some(schema),
+              ..Default::default()
+            },
+          )]),
+          ..Default::default()
+        }),
+      ));
     } else if let Some(content_type) = content_type {
       responses.push((
         "200".to_owned(),
