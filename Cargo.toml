@@ -46,7 +46,7 @@ chrono = "0.4"
 garde = { version = "0.18", features = ["derive", "serde"] }
 rust_decimal = "1"
 serde_qs = "0.12"
-uuid = "1"
+uuid = { version = "1", features = ["serde", "v4"] }
 url = "2"
 
 [workspace.lints.rust]
