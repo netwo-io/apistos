@@ -39,26 +39,27 @@ pub struct App<T> {
   default_parameters: Vec<DefaultParameters>,
 }
 
-#[cfg(any(feature = "swagger-ui", feature = "rapidoc"))]
 /// Build config to pass to `build_with` function,
 /// This enable exposing the generated openapi specification through [Swagger UI](https://swagger.io/tools/swagger-ui/) and/or [RapiDoc](https://rapidocweb.com/) based on the activated features
 /// and provided parameters.
 ///
-/// ```rust
+/// ```rust,ignore
 /// use actix_web::App;
 /// use apistos::app::{BuildConfig, OpenApiWrapper};
+/// use apistos::web::scope;
 /// use apistos::{RapidocConfig, SwaggerUIConfig};
 ///
 /// App::new()
-///   .document(spec)
-///   .service(todo!())
+///   .document(todo!())
+///   .service(scope("/test").service(todo!()))
 ///   .build_with(
 ///     "/openapi.json",
 ///     BuildConfig::default()
-///       .with_swagger(SwaggerUIConfig::new("/swagger".to_string())) // with swagger-ui feature enable
-///       .with_rapidoc(RapidocConfig::new("/rapidoc".to_string())), // with rapidoc feature enable
-///   )
+///       .with_swagger(SwaggerUIConfig::new(&"/swagger")) // with swagger-ui feature enable
+///       .with_rapidoc(RapidocConfig::new(&"/rapidoc")), // with rapidoc feature enable
+///   );
 /// ```
+#[cfg(any(feature = "swagger-ui", feature = "rapidoc"))]
 #[derive(Default)]
 pub struct BuildConfig {
   #[cfg(feature = "swagger-ui")]
@@ -67,6 +68,7 @@ pub struct BuildConfig {
   rapidoc: Option<RapidocConfig>,
 }
 
+#[cfg(any(feature = "swagger-ui", feature = "rapidoc"))]
 impl BuildConfig {
   #[cfg(feature = "swagger-ui")]
   /// Add swagger config to build config.
@@ -230,20 +232,21 @@ where
 
   /// Add a new resource at **`openapi_path`** to expose the generated openapi schema optionnaly exposing it through UIs and return an [actix_web::App](https://docs.rs/actix-web/latest/actix_web/struct.App.html)
   ///
-  /// ```rust
+  /// ```rust,ignore
   /// use actix_web::App;
   /// use apistos::app::{BuildConfig, OpenApiWrapper};
+  /// use apistos::web::scope;
   /// use apistos::{RapidocConfig, SwaggerUIConfig};
   ///
   /// App::new()
-  ///   .document(spec)
-  ///   .service(todo!())
+  ///   .document(todo!())
+  ///   .service(scope("/test").service(todo!()))
   ///   .build_with(
   ///     "/openapi.json",
   ///     BuildConfig::default()
-  ///       .with_swagger(SwaggerUIConfig::new("/swagger".to_string())) // with swagger-ui feature enable
-  ///       .with_rapidoc(RapidocConfig::new("/rapidoc".to_string())), // with rapidoc feature enable
-  ///   )
+  ///       .with_swagger(SwaggerUIConfig::new(&"/swagger")) // with swagger-ui feature enable
+  ///       .with_rapidoc(RapidocConfig::new(&"/rapidoc")), // with rapidoc feature enable
+  ///   );
   /// ```
   #[cfg(any(feature = "swagger-ui", feature = "rapidoc"))]
   #[allow(clippy::unwrap_used, clippy::expect_used)]
@@ -365,7 +368,7 @@ fn build_operation_id(path: &str, operation_type: &OperationType) -> String {
 mod test {
   #![allow(clippy::expect_used)]
 
-  use crate::app::{build_operation_id, OpenApiWrapper};
+  use crate::app::{build_operation_id, BuildConfig, OpenApiWrapper};
   use crate::spec::Spec;
   use actix_web::test::{call_service, init_service, try_read_body_json, TestRequest};
   use actix_web::App;
@@ -373,6 +376,8 @@ mod test {
   use apistos_models::paths::OperationType;
   use apistos_models::tag::Tag;
   use apistos_models::OpenApi;
+  use apistos_rapidoc::RapidocConfig;
+  use apistos_swagger_ui::SwaggerUIConfig;
 
   #[actix_web::test]
   async fn open_api_available() {
@@ -387,6 +392,46 @@ mod test {
 
     let body: OpenApi = try_read_body_json(resp).await.expect("Unable to read body");
     assert_eq!(body, OpenApi::default());
+  }
+
+  #[actix_web::test]
+  async fn open_api_available_through_swagger() {
+    let openapi_path = "/test.json";
+    let swagger_path = "/swagger";
+
+    let app = App::new().document(Spec::default()).build_with(
+      openapi_path,
+      BuildConfig::default().with_swagger(SwaggerUIConfig::new(&swagger_path)),
+    );
+    let app = init_service(app).await;
+
+    let req = TestRequest::get().uri(openapi_path).to_request();
+    let resp = call_service(&app, req).await;
+    assert!(resp.status().is_success());
+
+    let req = TestRequest::get().uri(swagger_path).to_request();
+    let resp = call_service(&app, req).await;
+    assert!(resp.status().is_success());
+  }
+
+  #[actix_web::test]
+  async fn open_api_available_through_rapidoc() {
+    let openapi_path = "/test.json";
+    let rapidoc_path = "/rapidoc";
+
+    let app = App::new().document(Spec::default()).build_with(
+      openapi_path,
+      BuildConfig::default().with_rapidoc(RapidocConfig::new(&rapidoc_path)),
+    );
+    let app = init_service(app).await;
+
+    let req = TestRequest::get().uri(openapi_path).to_request();
+    let resp = call_service(&app, req).await;
+    assert!(resp.status().is_success());
+
+    let req = TestRequest::get().uri(rapidoc_path).to_request();
+    let resp = call_service(&app, req).await;
+    assert!(resp.status().is_success());
   }
 
   #[actix_web::test]

@@ -15,10 +15,10 @@ pub struct RapidocConfig {
 
 impl RapidocConfig {
   /// Create a new [`RapidocConfig`] with the `path` on which to expose the rapidoc ui.
-  pub fn new(path: String) -> Self {
+  pub fn new<T: ToString>(path: &T) -> Self {
     Self {
       html: RAPIDOC_DEFAULT.to_string(),
-      path,
+      path: path.to_string(),
     }
   }
 

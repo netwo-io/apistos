@@ -15,10 +15,10 @@ pub struct SwaggerUIConfig {
 
 impl SwaggerUIConfig {
   /// Create a new [`SwaggerUIConfig`] with the `path` on which to expose the swagger ui.
-  pub fn new(path: String) -> Self {
+  pub fn new<T: ToString>(path: &T) -> Self {
     Self {
       html: SWAGGER_UI_DEFAULT.to_string(),
-      path,
+      path: path.to_string(),
     }
   }
 
