@@ -28,6 +28,8 @@ serde_json = { workspace = true }
 apistos-core = { path = "../apistos-core", version = "0.1.7" }
 apistos-gen = { path = "../apistos-gen", version = "0.1.7" }
 apistos-models = { path = "../apistos-models", version = "0.1.7" }
+apistos-rapidoc = { path = "../apistos-rapidoc", version = "0.1.7", optional = true }
+apistos-swagger-ui = { path = "../apistos-swagger-ui", version = "0.1.7", optional = true }
 
 [dev-dependencies]
 apistos-models = { path = "../apistos-models", version = "0.1.7", features = ["deserialize"] }
@@ -51,5 +53,9 @@ rust_decimal = ["apistos-core/rust_decimal"]
 uuid = ["apistos-core/uuid"]
 url = ["apistos-core/url"]
 extras = ["chrono", "multipart", "rust_decimal", "uuid", "url"]
+
+# ui features
+rapidoc = ["dep:apistos-rapidoc"]
+swagger-ui = ["dep:apistos-swagger-ui"]
 
 default = ["query"]

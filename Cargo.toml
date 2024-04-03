@@ -5,7 +5,9 @@ members = [
     "apistos-core",
     "apistos-gen",
     "apistos-gen-test",
-    "apistos-models"
+    "apistos-models",
+    "apistos-rapidoc",
+    "apistos-swagger-ui"
 ]
 
 [workspace.package]

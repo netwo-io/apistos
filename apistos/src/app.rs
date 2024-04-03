@@ -11,6 +11,10 @@ use actix_web::Error;
 use apistos_models::paths::{OperationType, Parameter};
 use apistos_models::reference_or::ReferenceOr;
 use apistos_models::OpenApi;
+#[cfg(feature = "rapidoc")]
+use apistos_rapidoc::{Rapidoc, RapidocConfig};
+#[cfg(feature = "swagger-ui")]
+use apistos_swagger_ui::{SwaggerUIConfig, SwaggerUi};
 use indexmap::IndexMap;
 use once_cell::sync::Lazy;
 use regex::Regex;
@@ -33,6 +37,50 @@ pub struct App<T> {
   //an option juste to be able to replace it with a default in memory
   default_tags: Vec<String>,
   default_parameters: Vec<DefaultParameters>,
+}
+
+#[cfg(any(feature = "swagger-ui", feature = "rapidoc"))]
+/// Build config to pass to `build_with` function,
+/// This enable exposing the generated openapi specification through [Swagger UI](https://swagger.io/tools/swagger-ui/) and/or [RapiDoc](https://rapidocweb.com/) based on the activated features
+/// and provided parameters.
+///
+/// ```rust
+/// use actix_web::App;
+/// use apistos::app::{BuildConfig, OpenApiWrapper};
+/// use apistos::{RapidocConfig, SwaggerUIConfig};
+///
+/// App::new()
+///   .document(spec)
+///   .service(todo!())
+///   .build_with(
+///     "/openapi.json",
+///     BuildConfig::default()
+///       .with_swagger(SwaggerUIConfig::new("/swagger".to_string())) // with swagger-ui feature enable
+///       .with_rapidoc(RapidocConfig::new("/rapidoc".to_string())), // with rapidoc feature enable
+///   )
+/// ```
+#[derive(Default)]
+pub struct BuildConfig {
+  #[cfg(feature = "swagger-ui")]
+  swagger: Option<SwaggerUIConfig>,
+  #[cfg(feature = "rapidoc")]
+  rapidoc: Option<RapidocConfig>,
+}
+
+impl BuildConfig {
+  #[cfg(feature = "swagger-ui")]
+  /// Add swagger config to build config.
+  pub fn with_swagger(mut self, swagger: SwaggerUIConfig) -> Self {
+    self.swagger = Some(swagger);
+    self
+  }
+
+  #[cfg(feature = "rapidoc")]
+  /// Add rapidoc config to build config.
+  pub fn with_rapidoc(mut self, rapidoc: RapidocConfig) -> Self {
+    self.rapidoc = Some(rapidoc);
+    self
+  }
 }
 
 impl<T> OpenApiWrapper<T> for actix_web::App<T> {
@@ -178,6 +226,47 @@ where
       .inner
       .expect("Missing app")
       .service(resource(openapi_path).route(get().to(OASHandler::new(open_api_spec))))
+  }
+
+  /// Add a new resource at **`openapi_path`** to expose the generated openapi schema optionnaly exposing it through UIs and return an [actix_web::App](https://docs.rs/actix-web/latest/actix_web/struct.App.html)
+  ///
+  /// ```rust
+  /// use actix_web::App;
+  /// use apistos::app::{BuildConfig, OpenApiWrapper};
+  /// use apistos::{RapidocConfig, SwaggerUIConfig};
+  ///
+  /// App::new()
+  ///   .document(spec)
+  ///   .service(todo!())
+  ///   .build_with(
+  ///     "/openapi.json",
+  ///     BuildConfig::default()
+  ///       .with_swagger(SwaggerUIConfig::new("/swagger".to_string())) // with swagger-ui feature enable
+  ///       .with_rapidoc(RapidocConfig::new("/rapidoc".to_string())), // with rapidoc feature enable
+  ///   )
+  /// ```
+  #[cfg(any(feature = "swagger-ui", feature = "rapidoc"))]
+  #[allow(clippy::unwrap_used, clippy::expect_used)]
+  pub fn build_with(self, openapi_path: &str, config: BuildConfig) -> actix_web::App<T> {
+    let open_api_spec = self.open_api_spec.read().unwrap().clone();
+
+    let actix_app = self.inner.expect("Missing app");
+
+    #[cfg(feature = "swagger-ui")]
+    let actix_app = if let Some(swagger) = config.swagger {
+      actix_app.service(SwaggerUi::new(swagger, openapi_path))
+    } else {
+      actix_app
+    };
+
+    #[cfg(feature = "rapidoc")]
+    let actix_app = if let Some(rapidoc) = config.rapidoc {
+      actix_app.service(Rapidoc::new(rapidoc, openapi_path))
+    } else {
+      actix_app
+    };
+
+    actix_app.service(resource(openapi_path).route(get().to(OASHandler::new(open_api_spec))))
   }
 
   /// Updates the underlying spec with definitions and operations from the given definition holder.

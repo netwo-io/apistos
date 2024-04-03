@@ -1,0 +1,20 @@
+[package]
+name = "apistos-rapidoc"
+description = "Actix-web OpenAPI v3.0 documentation generator"
+readme = "README.md"
+keywords = ["actix", "actix-web", "openapi", "oas3", "documentation"]
+categories = ["web-programming"]
+
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+repository.workspace = true
+publish.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+actix-web = { workspace = true }
+
+[lints]
+workspace = true
