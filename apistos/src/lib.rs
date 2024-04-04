@@ -124,8 +124,9 @@
 //! | `lab_query`       | Enables documenting `actix_web_lab::extract::Query`                      | [`actix-web-lab`](https://crates.io/crates/actix-web-lab)     |
 //! | `garde`           | Enables input validation through `garde`                                 | [`garde`](https://crates.io/crates/garde)                     |
 //! | `qs_query`        | Enables documenting types from `serde_qs`                                | [`serde_qs`](https://crates.io/crates/serde-qs)               |
+//! | `rapidoc`         | Enables `RapiDoc` to expose the generated openapi file                   |                                                               |
+//! | `redoc`           | Enables `ReDoc` to expose the generated openapi file                     |                                                               |
 //! | `swagger-ui`      | Enables Swagger UI to expose the generated openapi file                  |                                                               |
-//! | `rapidoc`         | Enables `RapiDoc` to expose the generated openapi file                     |                                                               |
 //! | `chrono`          | Enables documenting types from `chrono`                                  | [`chrono`](https://crates.io/crates/chrono)                   |
 //! | `multipart`       | Enables documenting types from `actix-multipart`                         | [`actix-multipart`](https://crates.io/crates/actix-multipart) |
 //! | `rust_decimal`    | Enables documenting types from `rust_decimal`                            | [`rust_decimal`](https://crates.io/crates/rust-decimal)       |
