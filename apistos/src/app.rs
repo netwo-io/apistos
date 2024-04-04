@@ -13,6 +13,8 @@ use apistos_models::reference_or::ReferenceOr;
 use apistos_models::OpenApi;
 #[cfg(feature = "rapidoc")]
 use apistos_rapidoc::{Rapidoc, RapidocConfig};
+#[cfg(feature = "redoc")]
+use apistos_redoc::{Redoc, RedocConfig};
 #[cfg(feature = "swagger-ui")]
 use apistos_swagger_ui::{SwaggerUIConfig, SwaggerUi};
 use indexmap::IndexMap;
@@ -55,32 +57,42 @@ pub struct App<T> {
 ///   .build_with(
 ///     "/openapi.json",
 ///     BuildConfig::default()
-///       .with_swagger(SwaggerUIConfig::new(&"/swagger")) // with swagger-ui feature enable
-///       .with_rapidoc(RapidocConfig::new(&"/rapidoc")), // with rapidoc feature enable
+///       .with_rapidoc(RapidocConfig::new(&"/rapidoc")) // with rapidoc feature enable
+///       .with_redoc(RedocConfig::new(&"/redoc")) // with redoc feature enable
+///       .with_swagger(SwaggerUIConfig::new(&"/swagger")), // with swagger-ui feature enable
 ///   );
 /// ```
-#[cfg(any(feature = "swagger-ui", feature = "rapidoc"))]
+#[cfg(any(feature = "rapidoc", feature = "redoc", feature = "swagger-ui"))]
 #[derive(Default)]
 pub struct BuildConfig {
-  #[cfg(feature = "swagger-ui")]
-  swagger: Option<SwaggerUIConfig>,
   #[cfg(feature = "rapidoc")]
   rapidoc: Option<RapidocConfig>,
+  #[cfg(feature = "redoc")]
+  redoc: Option<RedocConfig>,
+  #[cfg(feature = "swagger-ui")]
+  swagger: Option<SwaggerUIConfig>,
 }
 
 #[cfg(any(feature = "swagger-ui", feature = "rapidoc"))]
 impl BuildConfig {
-  #[cfg(feature = "swagger-ui")]
-  /// Add swagger config to build config.
-  pub fn with_swagger(mut self, swagger: SwaggerUIConfig) -> Self {
-    self.swagger = Some(swagger);
-    self
-  }
-
   #[cfg(feature = "rapidoc")]
   /// Add rapidoc config to build config.
   pub fn with_rapidoc(mut self, rapidoc: RapidocConfig) -> Self {
     self.rapidoc = Some(rapidoc);
+    self
+  }
+
+  #[cfg(feature = "redoc")]
+  /// Add redoc config to build config.
+  pub fn with_redoc(mut self, redoc: RedocConfig) -> Self {
+    self.redoc = Some(redoc);
+    self
+  }
+
+  #[cfg(feature = "swagger-ui")]
+  /// Add swagger config to build config.
+  pub fn with_swagger(mut self, swagger: SwaggerUIConfig) -> Self {
+    self.swagger = Some(swagger);
     self
   }
 }
@@ -244,8 +256,9 @@ where
   ///   .build_with(
   ///     "/openapi.json",
   ///     BuildConfig::default()
-  ///       .with_swagger(SwaggerUIConfig::new(&"/swagger")) // with swagger-ui feature enable
-  ///       .with_rapidoc(RapidocConfig::new(&"/rapidoc")), // with rapidoc feature enable
+  ///       .with_rapidoc(RapidocConfig::new(&"/rapidoc")) // with rapidoc feature enable
+  ///       .with_redoc(RedocConfig::new(&"/redoc")) // with redoc feature enable
+  ///       .with_swagger(SwaggerUIConfig::new(&"/swagger")), // with swagger-ui feature enable
   ///   );
   /// ```
   #[cfg(any(feature = "swagger-ui", feature = "rapidoc"))]
@@ -255,16 +268,23 @@ where
 
     let actix_app = self.inner.expect("Missing app");
 
-    #[cfg(feature = "swagger-ui")]
-    let actix_app = if let Some(swagger) = config.swagger {
-      actix_app.service(SwaggerUi::new(swagger, openapi_path))
+    #[cfg(feature = "rapidoc")]
+    let actix_app = if let Some(rapidoc) = config.rapidoc {
+      actix_app.service(Rapidoc::new(rapidoc, openapi_path))
     } else {
       actix_app
     };
 
-    #[cfg(feature = "rapidoc")]
-    let actix_app = if let Some(rapidoc) = config.rapidoc {
-      actix_app.service(Rapidoc::new(rapidoc, openapi_path))
+    #[cfg(feature = "redoc")]
+    let actix_app = if let Some(redoc) = config.redoc {
+      actix_app.service(Redoc::new(redoc, openapi_path))
+    } else {
+      actix_app
+    };
+
+    #[cfg(feature = "swagger-ui")]
+    let actix_app = if let Some(swagger) = config.swagger {
+      actix_app.service(SwaggerUi::new(swagger, openapi_path))
     } else {
       actix_app
     };

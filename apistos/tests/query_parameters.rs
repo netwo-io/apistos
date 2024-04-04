@@ -118,6 +118,7 @@ async fn query_parameters_with_flatten_enums() {
 use actix_service as _;
 use apistos_models as _;
 use apistos_rapidoc as _;
+use apistos_redoc as _;
 use apistos_swagger_ui as _;
 use indexmap as _;
 use log as _;

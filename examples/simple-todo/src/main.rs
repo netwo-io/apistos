@@ -6,7 +6,7 @@ use apistos::info::Info;
 use apistos::server::Server;
 use apistos::spec::Spec;
 use apistos::web::{get, post, resource, scope};
-use apistos::{RapidocConfig, SwaggerUIConfig};
+use apistos::{RapidocConfig, RedocConfig, SwaggerUIConfig};
 use std::error::Error;
 use std::net::Ipv4Addr;
 
@@ -43,8 +43,9 @@ async fn main() -> Result<(), impl Error> {
       .build_with(
         "/openapi.json",
         BuildConfig::default()
-          .with_swagger(SwaggerUIConfig::new("/swagger".to_string()))
-          .with_rapidoc(RapidocConfig::new("/rapidoc".to_string())),
+          .with_rapidoc(RapidocConfig::new(&"/rapidoc"))
+          .with_redoc(RedocConfig::new(&"/redoc"))
+          .with_swagger(SwaggerUIConfig::new(&"/swagger")),
       )
   })
   .bind((Ipv4Addr::UNSPECIFIED, 8080))?

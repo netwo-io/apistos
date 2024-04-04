@@ -155,6 +155,8 @@ pub use apistos_gen::{api_operation, ApiComponent, ApiCookie, ApiErrorComponent,
 pub use apistos_models::*;
 #[cfg(feature = "rapidoc")]
 pub use apistos_rapidoc::RapidocConfig;
+#[cfg(feature = "redoc")]
+pub use apistos_redoc::RedocConfig;
 #[cfg(feature = "swagger-ui")]
 pub use apistos_swagger_ui::SwaggerUIConfig;
 

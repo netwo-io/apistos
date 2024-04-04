@@ -29,6 +29,7 @@ apistos-core = { path = "../apistos-core", version = "0.1.7" }
 apistos-gen = { path = "../apistos-gen", version = "0.1.7" }
 apistos-models = { path = "../apistos-models", version = "0.1.7" }
 apistos-rapidoc = { path = "../apistos-rapidoc", version = "0.1.7", optional = true }
+apistos-redoc = { path = "../apistos-redoc", version = "0.1.7", optional = true }
 apistos-swagger-ui = { path = "../apistos-swagger-ui", version = "0.1.7", optional = true }
 
 [dev-dependencies]
@@ -56,6 +57,7 @@ extras = ["chrono", "multipart", "rust_decimal", "uuid", "url"]
 
 # ui features
 rapidoc = ["dep:apistos-rapidoc"]
+redoc = ["dep:apistos-redoc"]
 swagger-ui = ["dep:apistos-swagger-ui"]
 
 default = ["query"]

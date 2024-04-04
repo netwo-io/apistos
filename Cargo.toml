@@ -7,6 +7,7 @@ members = [
     "apistos-gen-test",
     "apistos-models",
     "apistos-rapidoc",
+    "apistos-redoc",
     "apistos-swagger-ui"
 ]
 
