@@ -397,6 +397,7 @@ mod test {
   use apistos_models::tag::Tag;
   use apistos_models::OpenApi;
   use apistos_rapidoc::RapidocConfig;
+  use apistos_redoc::RedocConfig;
   use apistos_swagger_ui::SwaggerUIConfig;
 
   #[actix_web::test]
@@ -450,6 +451,26 @@ mod test {
     assert!(resp.status().is_success());
 
     let req = TestRequest::get().uri(rapidoc_path).to_request();
+    let resp = call_service(&app, req).await;
+    assert!(resp.status().is_success());
+  }
+
+  #[actix_web::test]
+  async fn open_api_available_through_redoc() {
+    let openapi_path = "/test.json";
+    let redoc_path = "/redoc";
+
+    let app = App::new().document(Spec::default()).build_with(
+      openapi_path,
+      BuildConfig::default().with_redoc(RedocConfig::new(&redoc_path)),
+    );
+    let app = init_service(app).await;
+
+    let req = TestRequest::get().uri(openapi_path).to_request();
+    let resp = call_service(&app, req).await;
+    assert!(resp.status().is_success());
+
+    let req = TestRequest::get().uri(redoc_path).to_request();
     let resp = call_service(&app, req).await;
     assert!(resp.status().is_success());
   }
