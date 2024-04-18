@@ -11,12 +11,7 @@ use actix_web::Error;
 use apistos_models::paths::{OperationType, Parameter};
 use apistos_models::reference_or::ReferenceOr;
 use apistos_models::OpenApi;
-#[cfg(feature = "rapidoc")]
-use apistos_rapidoc::{Rapidoc, RapidocConfig};
-#[cfg(feature = "redoc")]
-use apistos_redoc::{Redoc, RedocConfig};
-#[cfg(feature = "swagger-ui")]
-use apistos_swagger_ui::{SwaggerUIConfig, SwaggerUi};
+use apistos_plugins::ui::{UIPluginConfig, UIPluginWrapper};
 use indexmap::IndexMap;
 use once_cell::sync::Lazy;
 use regex::Regex;
@@ -49,7 +44,7 @@ pub struct App<T> {
 /// use actix_web::App;
 /// use apistos::app::{BuildConfig, OpenApiWrapper};
 /// use apistos::web::scope;
-/// use apistos::{RapidocConfig, SwaggerUIConfig};
+/// use apistos::{RapidocConfig, RedocConfig, SwaggerUIConfig};
 ///
 /// App::new()
 ///   .document(todo!())
@@ -57,42 +52,19 @@ pub struct App<T> {
 ///   .build_with(
 ///     "/openapi.json",
 ///     BuildConfig::default()
-///       .with_rapidoc(RapidocConfig::new(&"/rapidoc")) // with rapidoc feature enable
-///       .with_redoc(RedocConfig::new(&"/redoc")) // with redoc feature enable
-///       .with_swagger(SwaggerUIConfig::new(&"/swagger")), // with swagger-ui feature enable
+///       .with(RapidocConfig::new(&"/rapidoc")) // with rapidoc feature enable
+///       .with(RedocConfig::new(&"/redoc")) // with redoc feature enable
+///       .with(SwaggerUIConfig::new(&"/swagger")), // with swagger-ui feature enable
 ///   );
 /// ```
-#[cfg(any(feature = "rapidoc", feature = "redoc", feature = "swagger-ui"))]
 #[derive(Default)]
 pub struct BuildConfig {
-  #[cfg(feature = "rapidoc")]
-  rapidoc: Option<RapidocConfig>,
-  #[cfg(feature = "redoc")]
-  redoc: Option<RedocConfig>,
-  #[cfg(feature = "swagger-ui")]
-  swagger: Option<SwaggerUIConfig>,
+  ui_plugin_configs: Vec<Box<dyn UIPluginConfig>>,
 }
 
-#[cfg(any(feature = "swagger-ui", feature = "rapidoc"))]
 impl BuildConfig {
-  #[cfg(feature = "rapidoc")]
-  /// Add rapidoc config to build config.
-  pub fn with_rapidoc(mut self, rapidoc: RapidocConfig) -> Self {
-    self.rapidoc = Some(rapidoc);
-    self
-  }
-
-  #[cfg(feature = "redoc")]
-  /// Add redoc config to build config.
-  pub fn with_redoc(mut self, redoc: RedocConfig) -> Self {
-    self.redoc = Some(redoc);
-    self
-  }
-
-  #[cfg(feature = "swagger-ui")]
-  /// Add swagger config to build config.
-  pub fn with_swagger(mut self, swagger: SwaggerUIConfig) -> Self {
-    self.swagger = Some(swagger);
+  pub fn with<T: UIPluginConfig + 'static>(mut self, plugin: T) -> Self {
+    self.ui_plugin_configs.push(Box::new(plugin));
     self
   }
 }
@@ -248,7 +220,7 @@ where
   /// use actix_web::App;
   /// use apistos::app::{BuildConfig, OpenApiWrapper};
   /// use apistos::web::scope;
-  /// use apistos::{RapidocConfig, SwaggerUIConfig};
+  /// use apistos::{RapidocConfig, RedocConfig, SwaggerUIConfig};
   ///
   /// App::new()
   ///   .document(todo!())
@@ -256,38 +228,20 @@ where
   ///   .build_with(
   ///     "/openapi.json",
   ///     BuildConfig::default()
-  ///       .with_rapidoc(RapidocConfig::new(&"/rapidoc")) // with rapidoc feature enable
-  ///       .with_redoc(RedocConfig::new(&"/redoc")) // with redoc feature enable
-  ///       .with_swagger(SwaggerUIConfig::new(&"/swagger")), // with swagger-ui feature enable
+  ///       .with(RapidocConfig::new(&"/rapidoc")) // with rapidoc feature enable
+  ///       .with(RedocConfig::new(&"/redoc")) // with redoc feature enable
+  ///       .with(SwaggerUIConfig::new(&"/swagger")), // with swagger-ui feature enable
   ///   );
   /// ```
-  #[cfg(any(feature = "swagger-ui", feature = "rapidoc"))]
   #[allow(clippy::unwrap_used, clippy::expect_used)]
   pub fn build_with(self, openapi_path: &str, config: BuildConfig) -> actix_web::App<T> {
     let open_api_spec = self.open_api_spec.read().unwrap().clone();
 
-    let actix_app = self.inner.expect("Missing app");
+    let mut actix_app = self.inner.expect("Missing app");
 
-    #[cfg(feature = "rapidoc")]
-    let actix_app = if let Some(rapidoc) = config.rapidoc {
-      actix_app.service(Rapidoc::new(rapidoc, openapi_path))
-    } else {
-      actix_app
-    };
-
-    #[cfg(feature = "redoc")]
-    let actix_app = if let Some(redoc) = config.redoc {
-      actix_app.service(Redoc::new(redoc, openapi_path))
-    } else {
-      actix_app
-    };
-
-    #[cfg(feature = "swagger-ui")]
-    let actix_app = if let Some(swagger) = config.swagger {
-      actix_app.service(SwaggerUi::new(swagger, openapi_path))
-    } else {
-      actix_app
-    };
+    for plugin in config.ui_plugin_configs {
+      actix_app = actix_app.service(UIPluginWrapper::from(plugin.build(openapi_path)))
+    }
 
     actix_app.service(resource(openapi_path).route(get().to(OASHandler::new(open_api_spec))))
   }
@@ -422,7 +376,7 @@ mod test {
 
     let app = App::new().document(Spec::default()).build_with(
       openapi_path,
-      BuildConfig::default().with_swagger(SwaggerUIConfig::new(&swagger_path)),
+      BuildConfig::default().with(SwaggerUIConfig::new(&swagger_path)),
     );
     let app = init_service(app).await;
 
@@ -442,7 +396,7 @@ mod test {
 
     let app = App::new().document(Spec::default()).build_with(
       openapi_path,
-      BuildConfig::default().with_rapidoc(RapidocConfig::new(&rapidoc_path)),
+      BuildConfig::default().with(RapidocConfig::new(&rapidoc_path)),
     );
     let app = init_service(app).await;
 
@@ -460,10 +414,9 @@ mod test {
     let openapi_path = "/test.json";
     let redoc_path = "/redoc";
 
-    let app = App::new().document(Spec::default()).build_with(
-      openapi_path,
-      BuildConfig::default().with_redoc(RedocConfig::new(&redoc_path)),
-    );
+    let app = App::new()
+      .document(Spec::default())
+      .build_with(openapi_path, BuildConfig::default().with(RedocConfig::new(&redoc_path)));
     let app = init_service(app).await;
 
     let req = TestRequest::get().uri(openapi_path).to_request();

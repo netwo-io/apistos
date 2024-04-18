@@ -1,13 +1,10 @@
 //! This crate allow to expose the generated openapi specification through [RapiDoc](https://rapidocweb.com/).
 
-use actix_web::dev::{AppService, HttpServiceFactory};
-use actix_web::guard::Get;
-use actix_web::web::Data;
-use actix_web::{HttpResponse, Resource, Responder};
+use apistos_plugins::ui::{UIPlugin, UIPluginConfig};
 
 const RAPIDOC_DEFAULT: &str = include_str!("../assets/index.html");
 
-/// Config for exposing the openapi specification through swagger UI
+/// Config for exposing the openapi specification through RapiDoc
 pub struct RapidocConfig {
   html: String,
   path: String,
@@ -30,6 +27,12 @@ impl RapidocConfig {
   }
 }
 
+impl UIPluginConfig for RapidocConfig {
+  fn build(self: Box<Self>, openapi_path: &str) -> Box<dyn UIPlugin> {
+    Box::new(Rapidoc::new(*self, openapi_path))
+  }
+}
+
 #[doc(hidden)]
 pub struct Rapidoc {
   html: String,
@@ -45,23 +48,14 @@ impl Rapidoc {
       openapi_path: openapi_path.to_string(),
     }
   }
+}
+
+impl UIPlugin for Rapidoc {
+  fn path(&self) -> String {
+    self.path.clone()
+  }
 
   fn to_html(&self) -> String {
     self.html.replace("$specUrl", &self.openapi_path)
-  }
-}
-
-impl HttpServiceFactory for Rapidoc {
-  fn register(self, config: &mut AppService) {
-    async fn rapidoc_handler(rapidoc: Data<String>) -> impl Responder {
-      HttpResponse::Ok().content_type("text/html").body(rapidoc.to_string())
-    }
-
-    let html = self.to_html();
-    Resource::new::<&str>(&self.path)
-      .guard(Get())
-      .app_data(Data::new(html))
-      .to(rapidoc_handler)
-      .register(config);
   }
 }

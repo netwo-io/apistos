@@ -1,13 +1,10 @@
 //! This crate allow to expose the generated openapi specification through [Redoc](https://redocly.com/redoc/).
 
-use actix_web::dev::{AppService, HttpServiceFactory};
-use actix_web::guard::Get;
-use actix_web::web::Data;
-use actix_web::{HttpResponse, Resource, Responder};
+use apistos_plugins::ui::{UIPlugin, UIPluginConfig};
 
 const REDOC_DEFAULT: &str = include_str!("../assets/index.html");
 
-/// Config for exposing the openapi specification through swagger UI
+/// Config for exposing the openapi specification through Redoc
 pub struct RedocConfig {
   html: String,
   path: String,
@@ -30,6 +27,12 @@ impl RedocConfig {
   }
 }
 
+impl UIPluginConfig for RedocConfig {
+  fn build(self: Box<Self>, openapi_path: &str) -> Box<dyn UIPlugin> {
+    Box::new(Redoc::new(*self, openapi_path))
+  }
+}
+
 #[doc(hidden)]
 pub struct Redoc {
   html: String,
@@ -45,23 +48,14 @@ impl Redoc {
       openapi_path: openapi_path.to_string(),
     }
   }
+}
+
+impl UIPlugin for Redoc {
+  fn path(&self) -> String {
+    self.path.clone()
+  }
 
   fn to_html(&self) -> String {
     self.html.replace("$specUrl", &self.openapi_path)
-  }
-}
-
-impl HttpServiceFactory for Redoc {
-  fn register(self, config: &mut AppService) {
-    async fn redoc_handler(redoc: Data<String>) -> impl Responder {
-      HttpResponse::Ok().content_type("text/html").body(redoc.to_string())
-    }
-
-    let html = self.to_html();
-    Resource::new::<&str>(&self.path)
-      .guard(Get())
-      .app_data(Data::new(html))
-      .to(redoc_handler)
-      .register(config);
   }
 }

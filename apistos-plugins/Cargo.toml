@@ -1,5 +1,5 @@
 [package]
-name = "apistos-swagger-ui"
+name = "apistos-plugins"
 description = "Actix-web OpenAPI v3.0 documentation generator"
 readme = "README.md"
 keywords = ["actix", "actix-web", "openapi", "oas3", "documentation"]
@@ -14,7 +14,7 @@ rust-version.workspace = true
 license.workspace = true
 
 [dependencies]
-apistos-plugins = { path = "../apistos-plugins", version = "0.1.7" }
+actix-web = { workspace = true }
 
 [lints]
 workspace = true

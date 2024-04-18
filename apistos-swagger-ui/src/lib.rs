@@ -1,9 +1,6 @@
 //! This crate allow to expose the generated openapi specification through [SwaggerUI](https://swagger.io/tools/swagger-ui/).
 
-use actix_web::dev::{AppService, HttpServiceFactory};
-use actix_web::guard::Get;
-use actix_web::web::Data;
-use actix_web::{HttpResponse, Resource, Responder};
+use apistos_plugins::ui::{UIPlugin, UIPluginConfig};
 
 const SWAGGER_UI_DEFAULT: &str = include_str!("../assets/index.html");
 
@@ -30,6 +27,12 @@ impl SwaggerUIConfig {
   }
 }
 
+impl UIPluginConfig for SwaggerUIConfig {
+  fn build(self: Box<Self>, openapi_path: &str) -> Box<dyn UIPlugin> {
+    Box::new(SwaggerUi::new(*self, openapi_path))
+  }
+}
+
 #[doc(hidden)]
 pub struct SwaggerUi {
   html: String,
@@ -45,25 +48,14 @@ impl SwaggerUi {
       openapi_path: openapi_path.to_string(),
     }
   }
+}
+
+impl UIPlugin for SwaggerUi {
+  fn path(&self) -> String {
+    self.path.clone()
+  }
 
   fn to_html(&self) -> String {
     self.html.replace("$specUrl", &self.openapi_path)
-  }
-}
-
-impl HttpServiceFactory for SwaggerUi {
-  fn register(self, config: &mut AppService) {
-    async fn swagger_handler(swagger_ui: Data<String>) -> impl Responder {
-      HttpResponse::Ok()
-        .content_type("text/html")
-        .body(swagger_ui.to_string())
-    }
-
-    let html = self.to_html();
-    Resource::new::<&str>(&self.path)
-      .guard(Get())
-      .app_data(Data::new(html))
-      .to(swagger_handler)
-      .register(config);
   }
 }
