@@ -21,7 +21,7 @@
 An OpenAPI documentation tool exposing [OAS 3.0][OASv3.md] models as well as an actix-web wrapper similar
 to [paperclip](https://github.com/paperclip-rs/paperclip).
 
-**Apistos** is composed of three crates:
+**Apistos** is composed of these crates:
 
 - [`apistos`](./apistos): [actix-web](https://github.com/actix/actix-web) wrapper to generate an OpenAPI v3.0.3
   documentation file
@@ -30,6 +30,11 @@ to [paperclip](https://github.com/paperclip-rs/paperclip).
 - [`apistos-models`](./apistos-models): [OpenAPI v3.0.3][OASv3.md] models
   with [`Schema`](https://docs.rs/schemars/latest/schemars/schema/enum.Schema.html) based
   on [schemars](https://github.com/GREsau/schemars) definition
+- [`apistos-plugins`](./apistos-plugins): traits and utilities to extend apistos
+- [`apistos-rapidoc`](./apistos-rapidoc): bridge between Apistos and [RapiDoc](https://rapidocweb.com/) for actix.
+- [`apistos-plugins`](./apistos-redoc): bridge between Apistos and [Redoc](https://redocly.com/redoc/) for actix.
+- [`apistos-swagger-ui`](./apistos-swagger-ui): bridge between Apistos
+  and [Swagger UI](https://swagger.io/tools/swagger-ui/) for actix
 
 Check out our [example project](examples/petstore).
 
