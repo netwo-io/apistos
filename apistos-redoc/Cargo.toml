@@ -14,7 +14,7 @@ rust-version.workspace = true
 license.workspace = true
 
 [dependencies]
-actix-web = { workspace = true }
+apistos-plugins = { path = "../apistos-plugins", version = "0.1.7" }
 
 [lints]
 workspace = true
