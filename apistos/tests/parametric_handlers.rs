@@ -12,8 +12,10 @@ use apistos::ApiComponent;
 use apistos_gen::{api_operation, ApiErrorComponent};
 use apistos_models::info::Info;
 use apistos_models::paths::{OperationType, Parameter, ParameterDefinition};
+use apistos_models::reference_or::ReferenceOr;
 use apistos_models::tag::Tag;
 use apistos_models::OpenApi;
+use schemars::schema::{InstanceType, SingleOrVec};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
@@ -179,7 +181,7 @@ async fn path_parameter_replacement() {
 // Imports bellow aim at making clippy happy. Those dependencies are necessary for integration-test.
 use actix_service as _;
 use apistos_core as _;
-use apistos_models::reference_or::ReferenceOr;
+use apistos_plugins as _;
 use apistos_rapidoc as _;
 use apistos_redoc as _;
 use apistos_swagger_ui as _;
@@ -188,5 +190,4 @@ use log as _;
 use md5 as _;
 use once_cell as _;
 use regex as _;
-use schemars::schema::{InstanceType, SingleOrVec};
 use serde_json as _;

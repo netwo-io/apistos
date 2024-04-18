@@ -117,6 +117,7 @@ async fn query_parameters_with_flatten_enums() {
 // Imports bellow aim at making clippy happy. Those dependencies are necessary for integration-test.
 use actix_service as _;
 use apistos_models as _;
+use apistos_plugins as _;
 use apistos_rapidoc as _;
 use apistos_redoc as _;
 use apistos_swagger_ui as _;
