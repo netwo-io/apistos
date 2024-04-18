@@ -124,6 +124,9 @@
 //! | `lab_query`       | Enables documenting `actix_web_lab::extract::Query`                      | [`actix-web-lab`](https://crates.io/crates/actix-web-lab)     |
 //! | `garde`           | Enables input validation through `garde`                                 | [`garde`](https://crates.io/crates/garde)                     |
 //! | `qs_query`        | Enables documenting types from `serde_qs`                                | [`serde_qs`](https://crates.io/crates/serde-qs)               |
+//! | `rapidoc`         | Enables `RapiDoc` to expose the generated openapi file                   |                                                               |
+//! | `redoc`           | Enables `ReDoc` to expose the generated openapi file                     |                                                               |
+//! | `swagger-ui`      | Enables Swagger UI to expose the generated openapi file                  |                                                               |
 //! | `chrono`          | Enables documenting types from `chrono`                                  | [`chrono`](https://crates.io/crates/chrono)                   |
 //! | `multipart`       | Enables documenting types from `actix-multipart`                         | [`actix-multipart`](https://crates.io/crates/actix-multipart) |
 //! | `rust_decimal`    | Enables documenting types from `rust_decimal`                            | [`rust_decimal`](https://crates.io/crates/rust-decimal)       |
@@ -151,6 +154,12 @@ pub use apistos_core::PathItemDefinition;
 pub use apistos_core::{ApiComponent, ApiErrorComponent, TypedSchema};
 pub use apistos_gen::{api_operation, ApiComponent, ApiCookie, ApiErrorComponent, ApiHeader, ApiSecurity, ApiType};
 pub use apistos_models::*;
+#[cfg(feature = "rapidoc")]
+pub use apistos_rapidoc::RapidocConfig;
+#[cfg(feature = "redoc")]
+pub use apistos_redoc::RedocConfig;
+#[cfg(feature = "swagger-ui")]
+pub use apistos_swagger_ui::SwaggerUIConfig;
 
 mod internal;
 

@@ -33,6 +33,10 @@ jobs:
           - apistos-gen
           - apistos-gen-test
           - apistos-models
+          - apistos-plugins
+          - apistos-rapidoc
+          - apistos-redoc
+          - apistos-swagger-ui
       fail-fast: true
 
     runs-on: ubuntu-latest

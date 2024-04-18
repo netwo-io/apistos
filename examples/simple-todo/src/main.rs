@@ -1,11 +1,12 @@
 use crate::api::{add_todo, get_todo};
 use actix_web::middleware::Logger;
 use actix_web::{App, HttpServer};
-use apistos::app::OpenApiWrapper;
+use apistos::app::{BuildConfig, OpenApiWrapper};
 use apistos::info::Info;
 use apistos::server::Server;
 use apistos::spec::Spec;
 use apistos::web::{get, post, resource, scope};
+use apistos::{RapidocConfig, RedocConfig, SwaggerUIConfig};
 use std::error::Error;
 use std::net::Ipv4Addr;
 
@@ -39,7 +40,13 @@ async fn main() -> Result<(), impl Error> {
             .service(resource("").route(post().to(add_todo))),
         ),
       )
-      .build("/openapi.json")
+      .build_with(
+        "/openapi.json",
+        BuildConfig::default()
+          .with(RapidocConfig::new(&"/rapidoc"))
+          .with(RedocConfig::new(&"/redoc"))
+          .with(SwaggerUIConfig::new(&"/swagger")),
+      )
   })
   .bind((Ipv4Addr::UNSPECIFIED, 8080))?
   .run()

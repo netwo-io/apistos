@@ -131,6 +131,10 @@ async fn path_parameter_replacement() {
 // Imports bellow aim at making clippy happy. Those dependencies are necessary for integration-test.
 use actix_service as _;
 use apistos_core as _;
+use apistos_plugins as _;
+use apistos_rapidoc as _;
+use apistos_redoc as _;
+use apistos_swagger_ui as _;
 use indexmap as _;
 use log as _;
 use md5 as _;

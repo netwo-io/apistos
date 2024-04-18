@@ -140,19 +140,19 @@ async fn main() -> Result<(), impl Error> {
     };
 
     App::new()
-      .document(spec)
-      .wrap(Logger::default())
-      .service(scope("/test")
-        .service(
-          resource("")
-            .route(post().to(test))
+        .document(spec)
+        .wrap(Logger::default())
+        .service(scope("/test")
+            .service(
+              resource("")
+                  .route(post().to(test))
+            )
         )
-      )
-      .build("/openapi.json")
+        .build("/openapi.json")
   })
-    .bind((Ipv4Addr::UNSPECIFIED, 8080))?
-    .run()
-    .await
+      .bind((Ipv4Addr::UNSPECIFIED, 8080))?
+      .run()
+      .await
 }
 ```
 
@@ -166,6 +166,9 @@ For a complete example, see [the sample petstore](https://github.com/netwo-io/ap
 | `actix` (default) | Enables documenting types from `actix`                                   |                                                               |
 | `lab_query`       | Enables documenting `actix_web_lab::extract::Query`                      | [`actix-web-lab`](https://crates.io/crates/actix-web-lab)     |
 | `garde`           | Enables input validation through `garde`                                 | [`garde`](https://crates.io/crates/garde)                     |
+| `rapidoc`         | Enables RapiDoc to expose the generated openapi file                     |                                                               |
+| `redoc`           | Enables Redoc to expose the generated openapi file                       |                                                               |
+| `swagger-ui`      | Enables Swagger UI to expose the generated openapi file                  |                                                               |
 | `qs_query`        | Enables documenting types from `serde_qs`                                | [`serde_qs`](https://crates.io/crates/serde-qs)               |
 | `chrono`          | Enables documenting types from `chrono`                                  | [`chrono`](https://crates.io/crates/chrono)                   |
 | `multipart`       | Enables documenting types from `actix-multipart`                         | [`actix-multipart`](https://crates.io/crates/actix-multipart) |
