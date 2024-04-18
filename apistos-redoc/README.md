@@ -23,7 +23,7 @@ This crate is exposed through Apistos `redoc` feature.
 #schemars = "0.8"
 # sadly we currently rely on a fork to fix multiple flatten for enums, related PR can be found here: https://github.com/GREsau/schemars/pull/264
 schemars = { package = "apistos-schemars", version = "0.8" }
-apistos = { version = "0.1", feature = ["redoc"] }
+apistos = { version = "0.2", feature = ["redoc"] }
 ```
 
 ### About us

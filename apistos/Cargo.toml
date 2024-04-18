@@ -25,17 +25,17 @@ schemars = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 
-apistos-core = { path = "../apistos-core", version = "0.1.7" }
-apistos-gen = { path = "../apistos-gen", version = "0.1.7" }
-apistos-models = { path = "../apistos-models", version = "0.1.7" }
-apistos-plugins = { path = "../apistos-plugins", version = "0.1.7" }
-apistos-rapidoc = { path = "../apistos-rapidoc", version = "0.1.7", optional = true }
-apistos-redoc = { path = "../apistos-redoc", version = "0.1.7", optional = true }
-apistos-swagger-ui = { path = "../apistos-swagger-ui", version = "0.1.7", optional = true }
+apistos-core = { path = "../apistos-core", version = "0.2.0" }
+apistos-gen = { path = "../apistos-gen", version = "0.2.0" }
+apistos-models = { path = "../apistos-models", version = "0.2.0" }
+apistos-plugins = { path = "../apistos-plugins", version = "0.2.0" }
+apistos-rapidoc = { path = "../apistos-rapidoc", version = "0.2.0", optional = true }
+apistos-redoc = { path = "../apistos-redoc", version = "0.2.0", optional = true }
+apistos-swagger-ui = { path = "../apistos-swagger-ui", version = "0.2.0", optional = true }
 
 
 [dev-dependencies]
-apistos-models = { path = "../apistos-models", version = "0.1.7", features = ["deserialize"] }
+apistos-models = { path = "../apistos-models", version = "0.2.0", features = ["deserialize"] }
 
 [lints]
 workspace = true
