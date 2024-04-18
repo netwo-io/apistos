@@ -1,18 +1,21 @@
 # Apistos &emsp; [![Documentation]][docs.rs] [![Latest Version]][crates.io] [![Build Status]][build]
 
-
 [docs.rs]: https://docs.rs/apistos/
+
 [crates.io]: https://crates.io/crates/apistos
+
 [build]: https://github.com/netwo-io/apistos/actions/workflows/build.yaml?branch=main
+
 [Documentation]: https://img.shields.io/docsrs/apistos
+
 [Latest Version]: https://img.shields.io/crates/v/apistos.svg
+
 [Build Status]: https://github.com/netwo-io/apistos/actions/workflows/build.yaml/badge.svg?branch=main
 
 [OASv3.md]: https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md
 
-An actix-web wrapper similar to [paperclip](https://github.com/paperclip-rs/paperclip) to generate [OAS 3.0][OASv3.md] documentation.
-
-
+An actix-web wrapper similar to [paperclip](https://github.com/paperclip-rs/paperclip) to generate [OAS 3.0][OASv3.md]
+documentation.
 
 - [Installation](#installation)
 - [Usage example](#usage-example)
@@ -26,12 +29,12 @@ An actix-web wrapper similar to [paperclip](https://github.com/paperclip-rs/pape
 #schemars = "0.8"
 # sadly we currently rely on a fork to fix multiple flatten for enums, related PR can be found here: https://github.com/GREsau/schemars/pull/264
 schemars = { package = "apistos-schemars", version = "0.8" }
-apistos = "0.1"
+apistos = "0.2"
 ```
 
 ### Usage example
 
-Wrap your regular actix-web app using **apistos** types. 
+Wrap your regular actix-web app using **apistos** types.
 
 Most of these types are drop-in types for actix-web one's.
 
@@ -114,21 +117,23 @@ For a complete example, see [the sample petstore](https://github.com/netwo-io/ap
 
 ### Feature flags
 
-| name           | description                                                              | extra dependencies                                             |
-|----------------|--------------------------------------------------------------------------|----------------------------------------------------------------|
-| `chrono`       | Enables documenting types from `chrono`                                  | [`chrono`](https://crates.io/crates/chrono)                    |
-| `multipart`    | Enables documenting types from `actix-multipart`                         | [`actix-multipart`](https://crates.io/crates/actix-multipart)  |
-| `rust_decimal` | Enables documenting types from `rust_decimal`                            | [`rust_decimal`](https://crates.io/crates/rust-decimal) =      |
-| `uuid`         | Enables documenting types from `uuid`                                    | [`uuid`](https://crates.io/crates/uuid)                        |
-| `url`          | Enables documenting types from `url`                                     | [`url`](https://crates.io/crates/url)                          |
-| `extras`       | Enables `chrono`, `multipart`, `rust_decimal`, `uuid` and `url` features | All from previous features                                     |
+| name           | description                                                              | extra dependencies                                            |
+|----------------|--------------------------------------------------------------------------|---------------------------------------------------------------|
+| `chrono`       | Enables documenting types from `chrono`                                  | [`chrono`](https://crates.io/crates/chrono)                   |
+| `multipart`    | Enables documenting types from `actix-multipart`                         | [`actix-multipart`](https://crates.io/crates/actix-multipart) |
+| `rust_decimal` | Enables documenting types from `rust_decimal`                            | [`rust_decimal`](https://crates.io/crates/rust-decimal) =     |
+| `uuid`         | Enables documenting types from `uuid`                                    | [`uuid`](https://crates.io/crates/uuid)                       |
+| `url`          | Enables documenting types from `url`                                     | [`url`](https://crates.io/crates/url)                         |
+| `extras`       | Enables `chrono`, `multipart`, `rust_decimal`, `uuid` and `url` features | All from previous features                                    |
 
 ### About us
 
 apistos is provided by [Netwo](https://www.netwo.io).
 
-We use this crate for our internal needs and therefore are committed to its maintenance, however we cannot provide any additional guaranty. Use it at your own risks.
+We use this crate for our internal needs and therefore are committed to its maintenance, however we cannot provide any
+additional guaranty. Use it at your own risks.
 
 While we won't invest in any feature we don't need, we are open to accept any pull request you might propose.
 
-We are a France based full-remote company operating in the telecom industry. If you are interested in learning more, feel free to visit [our career page](https://www.netwo.io/carriere).
+We are a France based full-remote company operating in the telecom industry. If you are interested in learning more,
+feel free to visit [our career page](https://www.netwo.io/carriere).
