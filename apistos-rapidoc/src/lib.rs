@@ -4,7 +4,7 @@ use apistos_plugins::ui::{UIPlugin, UIPluginConfig};
 
 const RAPIDOC_DEFAULT: &str = include_str!("../assets/index.html");
 
-/// Config for exposing the openapi specification through RapiDoc
+/// Config for exposing the openapi specification through `RapiDoc`
 pub struct RapidocConfig {
   html: String,
   path: String,

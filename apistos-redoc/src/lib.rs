@@ -4,7 +4,7 @@ use apistos_plugins::ui::{UIPlugin, UIPluginConfig};
 
 const REDOC_DEFAULT: &str = include_str!("../assets/index.html");
 
-/// Config for exposing the openapi specification through Redoc
+/// Config for exposing the openapi specification through `Redoc`
 pub struct RedocConfig {
   html: String,
   path: String,
