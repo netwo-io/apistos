@@ -28,6 +28,7 @@ impl UIPlugin for Box<dyn UIPlugin> {
   }
 }
 
+#[doc(hidden)]
 pub struct UIPluginWrapper(Box<dyn UIPlugin>);
 
 impl From<Box<dyn UIPlugin>> for UIPluginWrapper {
