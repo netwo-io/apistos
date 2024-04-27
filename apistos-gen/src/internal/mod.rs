@@ -150,7 +150,7 @@ pub(crate) fn gen_item_ast(
 
           *_type = Box::new(
             match syn::parse2(quote!(
-              impl std::future::Future<Output=apistos::actix::ResponseWrapper<#_type>>
+              impl std::future::Future<Output=apistos::actix::ResponderWrapper<#_type>>
             )) {
               Ok(parsed) => parsed,
               Err(e) => abort!("parsing impl trait: {:?}", e),
@@ -186,7 +186,7 @@ pub(crate) fn gen_item_ast(
 
   let block = item_ast.block;
   let inner_handler = if is_responder {
-    quote!(core::future::ready::ready(apistos::actix::ResponseWrapper((move || #block)())))
+    quote!(core::future::ready(apistos::actix::ResponderWrapper((move || #block)())))
   } else if is_impl_trait {
     quote!((move || #block)())
   } else {
