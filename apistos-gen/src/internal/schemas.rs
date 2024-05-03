@@ -39,7 +39,7 @@ impl ToTokens for Schemas {
         schemars::schema::Schema::Object(sch_obj) => {
           if let Some(obj) = sch_obj.object.as_mut() {
             if obj.properties.len() == 1 {
-              if let Some((prop_name, _)) = obj.properties.first_key_value() {
+              if let Some((prop_name, _)) = obj.properties.iter().next() {
                 #update_metadata_title;
               }
             } else if let Some(enum_values) = obj.properties.iter_mut().find_map(|(_, p)| match p {
