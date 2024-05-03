@@ -18,6 +18,7 @@ use garde_actix_web::web::Query as GardeQuery;
 use serde_qs::actix::QsQuery;
 use std::collections::HashMap;
 
+#[allow(unused_macro_rules)]
 macro_rules! impl_query {
   ($ty:ident) => {
     impl_query!($ty, hashmap_style: None, style: None, explode: None);
@@ -272,12 +273,16 @@ fn extract_required_from_schema(sch_obj: &SchemaObject, property_name: &str) -> 
 mod test {
   use crate::ApiComponent;
   use actix_web::web::Query;
+  #[cfg(feature = "lab_query")]
   use actix_web_lab::extract::Query as LabQuery;
-  use apistos_models::paths::{Parameter, ParameterDefinition, ParameterIn, ParameterStyle};
+  #[cfg(feature = "lab_query")]
+  use apistos_models::paths::ParameterStyle;
+  use apistos_models::paths::{Parameter, ParameterDefinition, ParameterIn};
   use apistos_models::reference_or::ReferenceOr;
   use schemars::schema::{InstanceType, NumberValidation, RootSchema, Schema, SchemaObject, SingleOrVec};
   use schemars::JsonSchema;
   use serde::{Deserialize, Serialize};
+  #[cfg(feature = "qs_query")]
   use serde_qs::actix::QsQuery;
 
   #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema)]
@@ -356,6 +361,7 @@ mod test {
     );
   }
 
+  #[cfg(feature = "qs_query")]
   #[test]
   fn test_qs_query_parameter() {
     let parameters_schema = <QsQuery<Test> as ApiComponent>::parameters();
@@ -409,6 +415,7 @@ mod test {
     );
   }
 
+  #[cfg(feature = "lab_query")]
   #[test]
   fn test_lab_query_parameter() {
     let parameters_schema = <LabQuery<Test> as ApiComponent>::parameters();
