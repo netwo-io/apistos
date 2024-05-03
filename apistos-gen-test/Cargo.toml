@@ -22,7 +22,8 @@ futures-core = { workspace = true }
 apistos = { path = "../apistos", features = ["multipart", "uuid"] }
 apistos-core = { path = "../apistos-core", version = "0.2.1" }
 apistos-gen = { path = "../apistos-gen", version = "0.2.1" }
-schemars = { workspace = true }
+# we use the "preserve_order" feature from schemars here following https://github.com/netwo-io/apistos/pull/78
+schemars = { workspace = true, features = ["preserve_order"] }
 serde = { version = "1.0.188", features = ["derive"] }
 serde_json = { workspace = true }
 uuid = { workspace = true, features = ["v4"] }
