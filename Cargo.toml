@@ -46,7 +46,7 @@ syn = "2.0"
 
 actix-multipart = "0.6"
 garde-actix-web = "0.7"
-chrono = "0.4"
+chrono = "0.4.20"
 garde = { version = "0.18", features = ["derive", "serde"] }
 rust_decimal = "1"
 serde_qs = "0.13"
