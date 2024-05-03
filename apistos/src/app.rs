@@ -31,7 +31,6 @@ pub trait OpenApiWrapper<T> {
 pub struct App<T> {
   open_api_spec: Arc<RwLock<OpenApi>>,
   inner: Option<actix_web::App<T>>,
-  //an option juste to be able to replace it with a default in memory
   default_tags: Vec<String>,
   default_parameters: Vec<DefaultParameters>,
 }
