@@ -519,31 +519,6 @@ fn api_component_derive_named_enums() {
   );
 
   let (child_schema_name, child_schema) = name_child_schemas.first().expect("missing child schema");
-  assert_eq!(child_schema_name, "ActiveOrInactiveQuery");
-  assert_schema(&child_schema.clone());
-  let json = serde_json::to_value(child_schema).expect("Unable to serialize as Json");
-  assert_json_eq!(
-    json,
-    json!({
-      "properties": {
-        "description": {
-          "type": "string"
-        },
-        "id": {
-          "format": "uint32",
-          "minimum": 0.0,
-          "type": "integer"
-        }
-      },
-      "required": [
-        "description",
-        "id"
-      ],
-      "type": "object"
-    })
-  );
-
-  let (child_schema_name, child_schema) = name_child_schemas.last().expect("missing child schema");
   assert_eq!(child_schema_name, "KindQuery");
   assert_schema(&child_schema.clone());
   let json = serde_json::to_value(child_schema).expect("Unable to serialize as Json");
@@ -578,6 +553,31 @@ fn api_component_derive_named_enums() {
           "type": "object"
         }
       ]
+    })
+  );
+
+  let (child_schema_name, child_schema) = name_child_schemas.last().expect("missing child schema");
+  assert_eq!(child_schema_name, "ActiveOrInactiveQuery");
+  assert_schema(&child_schema.clone());
+  let json = serde_json::to_value(child_schema).expect("Unable to serialize as Json");
+  assert_json_eq!(
+    json,
+    json!({
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "id": {
+          "format": "uint32",
+          "minimum": 0.0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "description",
+        "id"
+      ],
+      "type": "object"
     })
   );
 }
