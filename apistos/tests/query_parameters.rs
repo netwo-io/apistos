@@ -2,8 +2,14 @@
 #![allow(clippy::panic)]
 
 use actix_web::web::Query;
+#[cfg(feature = "lab_query")]
+use actix_web_lab::extract::Query as LabQuery;
 use apistos_core::ApiComponent;
 use apistos_gen::ApiComponent;
+#[cfg(all(feature = "lab_query", feature = "garde"))]
+use garde_actix_web::web::LabQuery as GardeLabQuery;
+#[cfg(feature = "garde")]
+use garde_actix_web::web::Query as GardeQuery;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
@@ -30,6 +36,159 @@ async fn query_parameters() {
   }
 
   let parameters = <Query<StructQuery> as ApiComponent>::parameters();
+  assert_eq!(parameters.len(), 4);
+
+  let test_parameter = parameters
+    .iter()
+    .find(|p| p.name == *"test")
+    .expect("Unable to retrieve test parameter");
+  assert_eq!(test_parameter.required, Some(false));
+
+  let status_parameter = parameters
+    .iter()
+    .find(|p| p.name == *"status")
+    .expect("Unable to retrieve status parameter");
+  assert_eq!(status_parameter.required, Some(false));
+
+  let limit_parameter = parameters
+    .iter()
+    .find(|p| p.name == *"limit")
+    .expect("Unable to retrieve limit parameter");
+  assert_eq!(limit_parameter.required, Some(true));
+
+  let offset_parameter = parameters
+    .iter()
+    .find(|p| p.name == *"offset")
+    .expect("Unable to retrieve offset parameter");
+  assert_eq!(offset_parameter.required, Some(false));
+}
+
+#[cfg(feature = "lab_query")]
+#[actix_web::test]
+async fn lab_query_parameters() {
+  #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  pub(crate) enum StatusQuery {
+    Active,
+    Inactive,
+  }
+
+  #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  pub(crate) struct PaginationQuery {
+    pub(crate) limit: u32,
+    pub(crate) offset: Option<u32>,
+  }
+
+  #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  pub(crate) struct StructQuery {
+    pub(crate) test: Option<String>,
+    pub(crate) status: Option<StatusQuery>,
+    #[serde(flatten)]
+    pub(crate) pagination: PaginationQuery,
+  }
+
+  let parameters = <LabQuery<StructQuery> as ApiComponent>::parameters();
+  assert_eq!(parameters.len(), 4);
+
+  let test_parameter = parameters
+    .iter()
+    .find(|p| p.name == *"test")
+    .expect("Unable to retrieve test parameter");
+  assert_eq!(test_parameter.required, Some(false));
+
+  let status_parameter = parameters
+    .iter()
+    .find(|p| p.name == *"status")
+    .expect("Unable to retrieve status parameter");
+  assert_eq!(status_parameter.required, Some(false));
+
+  let limit_parameter = parameters
+    .iter()
+    .find(|p| p.name == *"limit")
+    .expect("Unable to retrieve limit parameter");
+  assert_eq!(limit_parameter.required, Some(true));
+
+  let offset_parameter = parameters
+    .iter()
+    .find(|p| p.name == *"offset")
+    .expect("Unable to retrieve offset parameter");
+  assert_eq!(offset_parameter.required, Some(false));
+}
+
+#[cfg(feature = "garde")]
+#[actix_web::test]
+async fn garde_query_parameters() {
+  #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  pub(crate) enum StatusQuery {
+    Active,
+    Inactive,
+  }
+
+  #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  pub(crate) struct PaginationQuery {
+    pub(crate) limit: u32,
+    pub(crate) offset: Option<u32>,
+  }
+
+  #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  pub(crate) struct StructQuery {
+    pub(crate) test: Option<String>,
+    pub(crate) status: Option<StatusQuery>,
+    #[serde(flatten)]
+    pub(crate) pagination: PaginationQuery,
+  }
+
+  let parameters = <GardeQuery<StructQuery> as ApiComponent>::parameters();
+  assert_eq!(parameters.len(), 4);
+
+  let test_parameter = parameters
+    .iter()
+    .find(|p| p.name == *"test")
+    .expect("Unable to retrieve test parameter");
+  assert_eq!(test_parameter.required, Some(false));
+
+  let status_parameter = parameters
+    .iter()
+    .find(|p| p.name == *"status")
+    .expect("Unable to retrieve status parameter");
+  assert_eq!(status_parameter.required, Some(false));
+
+  let limit_parameter = parameters
+    .iter()
+    .find(|p| p.name == *"limit")
+    .expect("Unable to retrieve limit parameter");
+  assert_eq!(limit_parameter.required, Some(true));
+
+  let offset_parameter = parameters
+    .iter()
+    .find(|p| p.name == *"offset")
+    .expect("Unable to retrieve offset parameter");
+  assert_eq!(offset_parameter.required, Some(false));
+}
+
+#[cfg(all(feature = "lab_query", feature = "garde"))]
+#[actix_web::test]
+async fn garde_lab_query_parameters() {
+  #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  pub(crate) enum StatusQuery {
+    Active,
+    Inactive,
+  }
+
+  #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  pub(crate) struct PaginationQuery {
+    pub(crate) limit: u32,
+    pub(crate) offset: Option<u32>,
+  }
+
+  #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  pub(crate) struct StructQuery {
+    pub(crate) test: Option<String>,
+    pub(crate) status: Option<StatusQuery>,
+    #[serde(flatten)]
+    pub(crate) pagination: PaginationQuery,
+  }
+
+  let parameters = <GardeLabQuery<StructQuery> as ApiComponent>::parameters();
   assert_eq!(parameters.len(), 4);
 
   let test_parameter = parameters

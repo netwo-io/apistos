@@ -168,3 +168,9 @@ pub mod actix;
 pub mod app;
 pub mod spec;
 pub mod web;
+
+#[cfg(test)]
+mod test {
+  use actix_web_lab as _;
+  use garde_actix_web as _;
+}
