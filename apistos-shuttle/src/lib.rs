@@ -1,6 +1,5 @@
 use std::net::SocketAddr;
 
-use actix_web::dev::ServiceFactory;
 use actix_web::App;
 
 use apistos::app::OpenApiWrapper;
@@ -39,4 +38,5 @@ where
   }
 }
 
+#[doc = include_str!("../README.md")]
 pub type ShuttleApistosActixWeb<T> = Result<ApistosActixWebService<T>, shuttle_runtime::Error>;

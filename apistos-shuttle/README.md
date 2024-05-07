@@ -25,6 +25,48 @@ apistos = { version = "0.2" }
 apistos-shuttle = { version = "0.2" }
 ```
 
+### Example
+
+```rust
+use actix_web::web::Json;
+use actix_web::Error;
+
+use apistos::api_operation;
+use apistos::info::Info;
+use apistos::spec::Spec;
+use apistos::web::{get, resource, ServiceConfig};
+use apistos_shuttle::{ApistosActixWebService, ShuttleApistosActixWeb};
+
+#[api_operation(summary = "Say 'Hello world!'")]
+pub(crate) async fn hello_world() -> Result<Json<String>, Error> {
+  Ok(Json("Hello world!".to_string()))
+}
+
+#[shuttle_runtime::main]
+async fn actix_web() -> ShuttleApistosActixWeb<impl FnOnce(&mut ServiceConfig) + Send + Clone + 'static> {
+  let spec = Spec {
+    info: Info {
+      title: "A well documented API running on Shuttle".to_string(),
+      description: Some(
+        "This is an API documented using Apistos,\na wonderful new tool to document your actix API !".to_string(),
+      ),
+      ..Default::default()
+    },
+    ..Default::default()
+  };
+
+  let service_config = move |cfg: &mut ServiceConfig| {
+    cfg.service(resource("/").route(get().to(hello_world)));
+  };
+
+  Ok(ApistosActixWebService {
+    spec,
+    service_config,
+    openapi_path: "/openapi".to_string(),
+  })
+}
+```
+
 ### About us
 
 apistos is provided by [Netwo](https://www.netwo.io).
