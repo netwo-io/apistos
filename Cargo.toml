@@ -8,7 +8,8 @@ members = [
     "apistos-models",
     "apistos-plugins",
     "apistos-rapidoc",
-    "apistos-redoc", "apistos-shuttle",
+    "apistos-redoc",
+    "apistos-shuttle",
     "apistos-swagger-ui"
 ]
 
