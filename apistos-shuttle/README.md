@@ -1,4 +1,4 @@
-# Apistos &emsp; [![Documentation]][docs.rs] [![Latest Version]][crates.io] [![Build Status]][build]
+# Apistos &emsp; [![Documentation]][docs.rs] [![Latest Version]][crates.io] [![Build Status]][build] [![Deps Status]][deps.rs]
 
 [docs.rs]: https://docs.rs/apistos-shuttle/
 
@@ -11,6 +11,10 @@
 [Latest Version]: https://img.shields.io/crates/v/apistos-shuttle.svg
 
 [Build Status]: https://github.com/netwo-io/apistos/actions/workflows/build.yaml/badge.svg?branch=main
+
+[deps.rs]: https://deps.rs/crate/apistos-shuttle
+
+[Deps Status]: https://deps.rs/crate/apistos-shuttle/latest/status.svg
 
 This crate allow you to run an actix-web server documented with Apistos on [Shuttle](https://www.shuttle.rs/).
 
