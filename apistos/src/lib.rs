@@ -158,6 +158,8 @@ pub use apistos_models::*;
 pub use apistos_rapidoc::RapidocConfig;
 #[cfg(feature = "redoc")]
 pub use apistos_redoc::RedocConfig;
+#[cfg(feature = "scalar")]
+pub use apistos_scalar::ScalarConfig;
 #[cfg(feature = "swagger-ui")]
 pub use apistos_swagger_ui::SwaggerUIConfig;
 
