@@ -1,4 +1,4 @@
-# Apistos &emsp; [![Documentation]][docs.rs] [![Latest Version]][crates.io] [![Build Status]][build]
+# Apistos &emsp; [![Documentation]][docs.rs] [![Latest Version]][crates.io] [![Build Status]][build] [![Deps Status]][deps.rs]
 
 [docs.rs]: https://docs.rs/apistos-rapidoc/
 
@@ -11,6 +11,10 @@
 [Latest Version]: https://img.shields.io/crates/v/apistos-rapidoc.svg
 
 [Build Status]: https://github.com/netwo-io/apistos/actions/workflows/build.yaml/badge.svg?branch=main
+
+[deps.rs]: https://deps.rs/crate/apistos-rapidoc
+
+[Deps Status]: https://deps.rs/crate/apistos-rapidoc/latest/status.svg
 
 Bridge between Apistos and [RapiDoc](https://rapidocweb.com/) for actix.
 

@@ -1,4 +1,4 @@
-# Apistos &emsp; [![Documentation]][docs.rs] [![Latest Version]][crates.io] [![Build Status]][build]
+# Apistos &emsp; [![Documentation]][docs.rs] [![Latest Version]][crates.io] [![Build Status]][build] [![Deps Status]][deps.rs]
 
 [docs.rs]: https://docs.rs/apistos/
 
@@ -11,6 +11,10 @@
 [Latest Version]: https://img.shields.io/crates/v/apistos.svg
 
 [Build Status]: https://github.com/netwo-io/apistos/actions/workflows/build.yaml/badge.svg?branch=main
+
+[deps.rs]: https://deps.rs/crate/apistos
+
+[Deps Status]: https://deps.rs/crate/apistos/latest/status.svg
 
 [OASv3.md]: https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md
 
@@ -59,10 +63,10 @@ pub struct Test {
 
 #[derive(Serialize, Deserialize, Clone, ApiErrorComponent)]
 #[openapi_error(
-  status(code = 403),
-  status(code = 404),
-  status(code = 405, description = "Invalid input"),
-  status(code = 409)
+status(code = 403),
+status(code = 404),
+status(code = 405, description = "Invalid input"),
+status(code = 409)
 )]
 pub enum ErrorResponse {
   MethodNotAllowed(String),
@@ -72,11 +76,11 @@ pub enum ErrorResponse {
 }
 
 #[api_operation(
-  tag = "pet",
-  summary = "Add a new pet to the store",
-  description = r###"Add a new pet to the store
+tag = "pet",
+summary = "Add a new pet to the store",
+description = r###"Add a new pet to the store
     Plop"###,
-  error_code = 405
+error_code = 405
 )]
 pub(crate) async fn test(
   body: Json<Test>,
@@ -106,7 +110,7 @@ async fn main() -> Result<(), impl Error> {
         )
       )
       .build("/openapi.json")
-    })
+  })
     .bind((Ipv4Addr::UNSPECIFIED, 8080))?
     .run()
     .await
