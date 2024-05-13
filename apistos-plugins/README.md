@@ -1,4 +1,4 @@
-# Apistos &emsp; [![Documentation]][docs.rs] [![Latest Version]][crates.io] [![Build Status]][build]
+# Apistos &emsp; [![Documentation]][docs.rs] [![Latest Version]][crates.io] [![Build Status]][build] [![Deps Status]][deps.rs]
 
 [docs.rs]: https://docs.rs/apistos-plugins/
 
@@ -11,6 +11,10 @@
 [Latest Version]: https://img.shields.io/crates/v/apistos-plugins.svg
 
 [Build Status]: https://github.com/netwo-io/apistos/actions/workflows/build.yaml/badge.svg?branch=main
+
+[deps.rs]: https://deps.rs/crate/apistos-plugins
+
+[Deps Status]: https://deps.rs/crate/apistos-plugins/latest/status.svg
 
 This crate exposes traits to extend apistos. Currently it allows to expose the generated openapi specification through
 any UI based on an HTML file.

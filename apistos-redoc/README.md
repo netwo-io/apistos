@@ -1,4 +1,4 @@
-# Apistos &emsp; [![Documentation]][docs.rs] [![Latest Version]][crates.io] [![Build Status]][build]
+# Apistos &emsp; [![Documentation]][docs.rs] [![Latest Version]][crates.io] [![Build Status]][build] [![Deps Status]][deps.rs]
 
 [docs.rs]: https://docs.rs/apistos-redoc/
 
@@ -11,6 +11,10 @@
 [Latest Version]: https://img.shields.io/crates/v/apistos-redoc.svg
 
 [Build Status]: https://github.com/netwo-io/apistos/actions/workflows/build.yaml/badge.svg?branch=main
+
+[deps.rs]: https://deps.rs/crate/apistos-redoc
+
+[Deps Status]: https://deps.rs/crate/apistos-redoc/latest/status.svg
 
 Bridge between Apistos and [Redoc](https://redocly.com/redoc/) for actix.
 
