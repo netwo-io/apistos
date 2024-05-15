@@ -16,7 +16,7 @@
 
 [Deps Status]: https://deps.rs/crate/apistos-shuttle/latest/status.svg
 
-This crate allow you to run an actix-web server documented with Apistos on [Shuttle](https://www.shuttle.rs/).
+This crate allows you to run an actix-web server documented with Apistos on [Shuttle](https://www.shuttle.rs/).
 
 ### Installation
 
