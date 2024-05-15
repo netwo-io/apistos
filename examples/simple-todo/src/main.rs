@@ -6,7 +6,7 @@ use apistos::info::Info;
 use apistos::server::Server;
 use apistos::spec::Spec;
 use apistos::web::{get, post, resource, scope};
-use apistos::{RapidocConfig, RedocConfig, SwaggerUIConfig};
+use apistos::{RapidocConfig, RedocConfig, ScalarConfig, SwaggerUIConfig};
 use std::error::Error;
 use std::net::Ipv4Addr;
 
@@ -45,6 +45,7 @@ async fn main() -> Result<(), impl Error> {
         BuildConfig::default()
           .with(RapidocConfig::new(&"/rapidoc"))
           .with(RedocConfig::new(&"/redoc"))
+          .with(ScalarConfig::new(&"/scalar"))
           .with(SwaggerUIConfig::new(&"/swagger")),
       )
   })

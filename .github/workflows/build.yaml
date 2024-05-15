@@ -36,6 +36,7 @@ jobs:
           - apistos-plugins
           - apistos-rapidoc
           - apistos-redoc
+          - apistos-scalar
           - apistos-shuttle
           - apistos-swagger-ui
       fail-fast: true

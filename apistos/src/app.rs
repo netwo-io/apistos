@@ -43,7 +43,7 @@ pub struct App<T> {
 /// use actix_web::App;
 /// use apistos::app::{BuildConfig, OpenApiWrapper};
 /// use apistos::web::scope;
-/// use apistos::{RapidocConfig, RedocConfig, SwaggerUIConfig};
+/// use apistos::{RapidocConfig, RedocConfig, ScalarConfig, SwaggerUIConfig};
 ///
 /// App::new()
 ///   .document(todo!())
@@ -53,6 +53,7 @@ pub struct App<T> {
 ///     BuildConfig::default()
 ///       .with(RapidocConfig::new(&"/rapidoc")) // with rapidoc feature enable
 ///       .with(RedocConfig::new(&"/redoc")) // with redoc feature enable
+///       .with(Scalar::new(&"/scalar")) // with scalar feature enable
 ///       .with(SwaggerUIConfig::new(&"/swagger")), // with swagger-ui feature enable
 ///   );
 /// ```
@@ -219,7 +220,7 @@ where
   /// use actix_web::App;
   /// use apistos::app::{BuildConfig, OpenApiWrapper};
   /// use apistos::web::scope;
-  /// use apistos::{RapidocConfig, RedocConfig, SwaggerUIConfig};
+  /// use apistos::{RapidocConfig, RedocConfig, ScalarConfig, SwaggerUIConfig};
   ///
   /// App::new()
   ///   .document(todo!())
@@ -229,6 +230,7 @@ where
   ///     BuildConfig::default()
   ///       .with(RapidocConfig::new(&"/rapidoc")) // with rapidoc feature enable
   ///       .with(RedocConfig::new(&"/redoc")) // with redoc feature enable
+  ///       .with(ScalarConfig::new(&"/scalar")) // with scalar feature enable
   ///       .with(SwaggerUIConfig::new(&"/swagger")), // with swagger-ui feature enable
   ///   );
   /// ```
@@ -351,6 +353,7 @@ mod test {
   use apistos_models::OpenApi;
   use apistos_rapidoc::RapidocConfig;
   use apistos_redoc::RedocConfig;
+  use apistos_scalar::ScalarConfig;
   use apistos_swagger_ui::SwaggerUIConfig;
 
   #[actix_web::test]
@@ -366,26 +369,6 @@ mod test {
 
     let body: OpenApi = try_read_body_json(resp).await.expect("Unable to read body");
     assert_eq!(body, OpenApi::default());
-  }
-
-  #[actix_web::test]
-  async fn open_api_available_through_swagger() {
-    let openapi_path = "/test.json";
-    let swagger_path = "/swagger";
-
-    let app = App::new().document(Spec::default()).build_with(
-      openapi_path,
-      BuildConfig::default().with(SwaggerUIConfig::new(&swagger_path)),
-    );
-    let app = init_service(app).await;
-
-    let req = TestRequest::get().uri(openapi_path).to_request();
-    let resp = call_service(&app, req).await;
-    assert!(resp.status().is_success());
-
-    let req = TestRequest::get().uri(swagger_path).to_request();
-    let resp = call_service(&app, req).await;
-    assert!(resp.status().is_success());
   }
 
   #[actix_web::test]
@@ -423,6 +406,46 @@ mod test {
     assert!(resp.status().is_success());
 
     let req = TestRequest::get().uri(redoc_path).to_request();
+    let resp = call_service(&app, req).await;
+    assert!(resp.status().is_success());
+  }
+
+  #[actix_web::test]
+  async fn open_api_available_through_scalar() {
+    let openapi_path = "/test.json";
+    let scalar_path = "/scalar";
+
+    let app = App::new().document(Spec::default()).build_with(
+      openapi_path,
+      BuildConfig::default().with(ScalarConfig::new(&scalar_path)),
+    );
+    let app = init_service(app).await;
+
+    let req = TestRequest::get().uri(openapi_path).to_request();
+    let resp = call_service(&app, req).await;
+    assert!(resp.status().is_success());
+
+    let req = TestRequest::get().uri(scalar_path).to_request();
+    let resp = call_service(&app, req).await;
+    assert!(resp.status().is_success());
+  }
+
+  #[actix_web::test]
+  async fn open_api_available_through_swagger() {
+    let openapi_path = "/test.json";
+    let swagger_path = "/swagger";
+
+    let app = App::new().document(Spec::default()).build_with(
+      openapi_path,
+      BuildConfig::default().with(SwaggerUIConfig::new(&swagger_path)),
+    );
+    let app = init_service(app).await;
+
+    let req = TestRequest::get().uri(openapi_path).to_request();
+    let resp = call_service(&app, req).await;
+    assert!(resp.status().is_success());
+
+    let req = TestRequest::get().uri(swagger_path).to_request();
     let resp = call_service(&app, req).await;
     assert!(resp.status().is_success());
   }

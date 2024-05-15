@@ -279,6 +279,7 @@ use apistos_models as _;
 use apistos_plugins as _;
 use apistos_rapidoc as _;
 use apistos_redoc as _;
+use apistos_scalar as _;
 use apistos_swagger_ui as _;
 use indexmap as _;
 use log as _;
@@ -286,3 +287,8 @@ use md5 as _;
 use once_cell as _;
 use regex as _;
 use serde_json as _;
+
+#[cfg(not(feature = "lab_query"))]
+use actix_web_lab as _;
+#[cfg(not(feature = "garde"))]
+use garde_actix_web as _;
