@@ -9,11 +9,8 @@ members = [
     "apistos-plugins",
     "apistos-rapidoc",
     "apistos-redoc",
-<<<<<<< feat-openapi-scalar
     "apistos-scalar",
-=======
     "apistos-shuttle",
->>>>>>> main
     "apistos-swagger-ui"
 ]
 
