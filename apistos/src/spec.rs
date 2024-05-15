@@ -29,12 +29,13 @@ where
 }
 
 /// Defines default parameters with their associated components. Can be built from a type implementing `ApiComponent` using the `DefaultParameterAccessor` trait
+#[derive(Default, Clone)]
 pub struct DefaultParameters {
   pub parameters: Vec<Parameter>,
   pub components: Vec<(String, ReferenceOr<Schema>)>,
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct Spec {
   pub info: Info,
   pub default_tags: Vec<String>,
