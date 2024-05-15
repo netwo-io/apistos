@@ -1,4 +1,4 @@
-# Apisto sCore &emsp; [![Documentation]][docs.rs] [![Latest Version]][crates.io] [![Build Status]][build] [![Deps Status]][deps.rs]
+# Apistos Core &emsp; [![Documentation]][docs.rs] [![Latest Version]][crates.io] [![Build Status]][build] [![Deps Status]][deps.rs]
 
 [docs.rs]: https://docs.rs/apistos-gen/
 
