@@ -9,7 +9,11 @@ members = [
     "apistos-plugins",
     "apistos-rapidoc",
     "apistos-redoc",
+<<<<<<< feat-openapi-scalar
     "apistos-scalar",
+=======
+    "apistos-shuttle",
+>>>>>>> main
     "apistos-swagger-ui"
 ]
 
@@ -19,7 +23,7 @@ edition = "2021"
 repository = "https://github.com/netwo-io/apistos"
 documentation = "https://docs.rs/apistos/"
 license = "MIT OR Apache-2.0"
-rust-version = "1.71"
+rust-version = "1.75"
 publish = true
 version = "0.2.2"
 
@@ -33,6 +37,7 @@ darling = "0.20"
 futures-core = "0.3.28"
 indexmap = "2"
 log = "0.4.20"
+num_cpus = "1.16"
 md5 = "0.7.0"
 once_cell = "1"
 pin-project = "1"
@@ -51,6 +56,7 @@ chrono = "0.4.20"
 garde = { version = "0.18", features = ["derive", "serde"] }
 rust_decimal = "1"
 serde_qs = "0.13"
+shuttle-runtime = { version = "0.44", default-features = false }
 uuid = { version = "1", features = ["serde", "v4"] }
 url = "2"
 
