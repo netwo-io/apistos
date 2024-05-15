@@ -33,7 +33,10 @@ to [paperclip](https://github.com/paperclip-rs/paperclip).
 - [`apistos-plugins`](./apistos-plugins): traits and utilities to extend apistos
 - [`apistos-rapidoc`](./apistos-rapidoc): bridge between Apistos and [RapiDoc](https://rapidocweb.com/) for actix.
 - [`apistos-plugins`](./apistos-redoc): bridge between Apistos and [Redoc](https://redocly.com/redoc/) for actix.
-- [`apistos-swagger-ui`](./apistos-swagger-ui): bridge between Apistos
+- [`apistos-scalar`](./apistos-scalar): bridge between Apistos and [Scalar](https://scalar.com/) for actix.
+- [`apistos-shuttle`](./apistos-shuttle): allows you to run an actix-web server documented with Apistos
+  on [Shuttle](https://www.shuttle.rs/).
+- [`apistos-swagger-ui`](./apistos-swagger-ui): bridge between Apistos§
   and [Swagger UI](https://swagger.io/tools/swagger-ui/) for actix
 
 Check out our [example project](examples/petstore).
@@ -145,19 +148,19 @@ async fn main() -> Result<(), impl Error> {
     };
 
     App::new()
-        .document(spec)
-        .wrap(Logger::default())
-        .service(scope("/test")
-            .service(
-              resource("")
-                  .route(post().to(test))
-            )
+      .document(spec)
+      .wrap(Logger::default())
+      .service(scope("/test")
+        .service(
+          resource("")
+            .route(post().to(test))
         )
-        .build("/openapi.json")
+      )
+      .build("/openapi.json")
   })
-      .bind((Ipv4Addr::UNSPECIFIED, 8080))?
-      .run()
-      .await
+    .bind((Ipv4Addr::UNSPECIFIED, 8080))?
+    .run()
+    .await
 }
 ```
 
