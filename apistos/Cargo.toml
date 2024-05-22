@@ -1,7 +1,7 @@
 [package]
 name = "apistos"
 description = "Actix-web OpenAPI v3.0 documentation generator"
-readme = "README.md"
+readme = "../README.md"
 keywords = ["actix", "actix-web", "openapi", "oas3", "documentation"]
 categories = ["web-programming"]
 

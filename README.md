@@ -36,7 +36,7 @@ to [paperclip](https://github.com/paperclip-rs/paperclip).
 - [`apistos-scalar`](./apistos-scalar): bridge between Apistos and [Scalar](https://scalar.com/) for actix.
 - [`apistos-shuttle`](./apistos-shuttle): allows you to run an actix-web server documented with Apistos
   on [Shuttle](https://www.shuttle.rs/).
-- [`apistos-swagger-ui`](./apistos-swagger-ui): bridge between Apistos§
+- [`apistos-swagger-ui`](./apistos-swagger-ui): bridge between Apistos
   and [Swagger UI](https://swagger.io/tools/swagger-ui/) for actix
 
 Check out our [example project](examples/petstore).
@@ -98,10 +98,10 @@ pub struct Test {
 
 #[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
 #[openapi_error(
-status(code = 403),
-status(code = 404),
-status(code = 405, description = "Invalid input"),
-status(code = 409)
+  status(code = 403),
+  status(code = 404),
+  status(code = 405, description = "Invalid input"),
+  status(code = 409)
 )]
 pub enum ErrorResponse {
   MethodNotAllowed(String),
@@ -123,11 +123,11 @@ impl ResponseError for ErrorResponse {
 }
 
 #[api_operation(
-tag = "pet",
-summary = "Add a new pet to the store",
-description = r###"Add a new pet to the store
+  tag = "pet",
+  summary = "Add a new pet to the store",
+  description = r###"Add a new pet to the store
     Plop"###,
-error_code = 405
+  error_code = 405
 )]
 pub(crate) async fn test(
   body: Json<Test>,
