@@ -1,14 +1,18 @@
-use crate::ApiErrorComponent;
+use std::collections::BTreeMap;
 #[cfg(feature = "actix")]
-use crate::{PathItemDefinition, ResponseWrapper};
+use std::future::Future;
+
+use schemars::json_schema;
+use serde_json::Value;
+
 use apistos_models::paths::{MediaType, Parameter, RequestBody, Response, Responses};
 use apistos_models::reference_or::ReferenceOr;
 use apistos_models::security::SecurityScheme;
 use apistos_models::Schema;
-use schemars::schema::{ArrayValidation, InstanceType, SchemaObject, SingleOrVec};
-use std::collections::BTreeMap;
+
+use crate::ApiErrorComponent;
 #[cfg(feature = "actix")]
-use std::future::Future;
+use crate::{PathItemDefinition, ResponseWrapper};
 
 pub trait ApiComponent {
   fn content_type() -> String {
@@ -126,13 +130,9 @@ where
 
       (
         name,
-        ReferenceOr::Object(Schema::Object(SchemaObject {
-          instance_type: Some(SingleOrVec::Single(Box::new(InstanceType::Array))),
-          array: Some(Box::new(ArrayValidation {
-            items: Some(Schema::new_ref(_ref).into()),
-            ..Default::default()
-          })),
-          ..Default::default()
+        ReferenceOr::Object(json_schema!({
+          "type": "array",
+          "items": Schema::new_ref(_ref)
         })),
       )
     })
@@ -240,15 +240,14 @@ where
           let _ref = ReferenceOr::Reference {
             _ref: format!("#/components/schemas/{}", name),
           };
-          match schema_obj {
-            Schema::Object(obj) => {
-              if obj.instance_type == Some(SingleOrVec::Single(Box::new(InstanceType::Array))) {
-                ReferenceOr::Object(Schema::Object(obj))
-              } else {
-                _ref
-              }
+          if let Some(obj) = schema_obj.as_object() {
+            let value = obj.get("type");
+            match value {
+              Some(Value::String(string)) if string == "array" => ReferenceOr::Object(schema_obj),
+              _ => _ref,
             }
-            Schema::Bool(_) => _ref,
+          } else {
+            _ref
           }
         }
       };
@@ -306,16 +305,19 @@ where
 
 #[cfg(test)]
 mod test {
-  use crate::ApiComponent;
+  use schemars::gen::{SchemaGenerator, SchemaSettings};
+  use schemars::{JsonSchema, Schema};
+  use serde_json::json;
+
   use apistos_models::reference_or::ReferenceOr;
   use assert_json_diff::assert_json_eq;
-  use schemars::schema::{InstanceType, ObjectValidation, Schema, SchemaObject, SingleOrVec};
-  use schemars::{Map, Set};
-  use serde_json::json;
+
+  use crate::ApiComponent;
 
   #[test]
   #[allow(dead_code)]
   fn api_component_schema_vec() {
+    #[derive(JsonSchema)]
     struct TestChild {
       surname: String,
     }
@@ -326,26 +328,12 @@ mod test {
       }
 
       fn schema() -> Option<(String, ReferenceOr<Schema>)> {
-        Some((
-          "TestChild".to_string(),
-          ReferenceOr::Object(Schema::Object(SchemaObject {
-            object: Some(Box::new(ObjectValidation {
-              required: Set::from_iter(vec!["surname".to_string()]),
-              properties: Map::from_iter(vec![(
-                "surname".to_string(),
-                Schema::Object(SchemaObject {
-                  instance_type: Some(SingleOrVec::Single(Box::new(InstanceType::String))),
-                  ..Default::default()
-                }),
-              )]),
-              ..Default::default()
-            })),
-            ..Default::default()
-          })),
-        ))
+        let gen = SchemaGenerator::new(SchemaSettings::openapi3());
+        Some(("TestChild".to_string(), gen.into_root_schema_for::<TestChild>().into()))
       }
     }
 
+    #[derive(JsonSchema)]
     struct Test {
       name: String,
       surname: TestChild,
@@ -357,29 +345,8 @@ mod test {
       }
 
       fn schema() -> Option<(String, ReferenceOr<Schema>)> {
-        Some((
-          "Test".to_string(),
-          ReferenceOr::Object(Schema::Object(SchemaObject {
-            object: Some(Box::new(ObjectValidation {
-              required: Set::from_iter(vec!["name".to_string(), "surname".to_string()]),
-              properties: Map::from_iter(vec![
-                (
-                  "name".to_string(),
-                  Schema::Object(SchemaObject {
-                    instance_type: Some(SingleOrVec::Single(Box::new(InstanceType::String))),
-                    ..Default::default()
-                  }),
-                ),
-                (
-                  "surname".to_string(),
-                  Schema::new_ref("#/components/schemas/TestChild".to_string()),
-                ),
-              ]),
-              ..Default::default()
-            })),
-            ..Default::default()
-          })),
-        ))
+        let gen = SchemaSettings::openapi3().into_generator();
+        Some(("Test".to_string(), gen.into_root_schema_for::<Test>().into()))
       }
     }
 

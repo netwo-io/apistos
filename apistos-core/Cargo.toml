@@ -15,6 +15,7 @@ license.workspace = true
 
 [dependencies]
 pin-project = { workspace = true }
+serde_json = { workspace = true }
 schemars = { workspace = true }
 
 actix-web = { workspace = true, optional = true }
@@ -50,11 +51,11 @@ lab_query = ["actix", "dep:actix-web-lab", "garde-actix-web?/lab_query"]
 garde = ["actix", "dep:garde-actix-web"]
 
 # extra types related features
-chrono = ["dep:chrono", "schemars/chrono"]
+chrono = ["dep:chrono", "schemars/chrono04"]
 multipart = ["actix", "dep:serde", "dep:actix-multipart"]
-rust_decimal = ["dep:rust_decimal", "schemars/rust_decimal"]
+rust_decimal = ["dep:rust_decimal", "schemars/rust_decimal1"]
 uuid = ["dep:uuid", "schemars/uuid1"]
-url = ["dep:url", "schemars/url"]
+url = ["dep:url", "schemars/url2"]
 extras = ["chrono", "multipart", "rust_decimal", "uuid", "url"]
 
 default = ["actix", "query"]

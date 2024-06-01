@@ -15,7 +15,7 @@ use apistos_plugins::ui::{UIPluginConfig, UIPluginWrapper};
 use indexmap::IndexMap;
 use once_cell::sync::Lazy;
 use regex::Regex;
-use schemars::schema::Schema;
+use schemars::Schema;
 use std::collections::BTreeMap;
 use std::future::Future;
 use std::sync::{Arc, RwLock};
