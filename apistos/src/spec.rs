@@ -1,4 +1,4 @@
-use schemars::schema::Schema;
+use schemars::Schema;
 
 use apistos_core::ApiComponent;
 use apistos_models::info::Info;

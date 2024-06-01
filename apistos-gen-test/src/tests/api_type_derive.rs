@@ -1,5 +1,4 @@
 use assert_json_diff::assert_json_eq;
-use schemars::schema::InstanceType;
 use serde_json::json;
 use std::str::FromStr;
 
@@ -14,8 +13,8 @@ fn api_type_derive() {
   struct Name(String);
 
   impl TypedSchema for Name {
-    fn schema_type() -> InstanceType {
-      InstanceType::String
+    fn schema_type() -> String {
+      "string".to_owned()
     }
 
     fn format() -> Option<String> {
@@ -46,8 +45,8 @@ fn api_type_derive_with_format() {
   struct Name(String);
 
   impl TypedSchema for Name {
-    fn schema_type() -> InstanceType {
-      InstanceType::String
+    fn schema_type() -> String {
+      "string".to_owned()
     }
 
     fn format() -> Option<String> {
@@ -84,8 +83,8 @@ fn api_type_derive_with_default_type_parameter() {
   struct Name<T = String>(GenericHolder<T>);
 
   impl<T> TypedSchema for Name<T> {
-    fn schema_type() -> InstanceType {
-      InstanceType::String
+    fn schema_type() -> String {
+      "string".to_owned()
     }
 
     fn format() -> Option<String> {
@@ -122,8 +121,8 @@ fn api_type_derive_with_generic_type_parameter() {
   struct Name<T: FromStr>(GenericHolder<T>);
 
   impl<T: FromStr> TypedSchema for Name<T> {
-    fn schema_type() -> InstanceType {
-      InstanceType::String
+    fn schema_type() -> String {
+      "string".to_owned()
     }
 
     fn format() -> Option<String> {
@@ -160,8 +159,8 @@ fn api_type_derive_with_format_complex_struct() {
   }
 
   impl TypedSchema for Name {
-    fn schema_type() -> InstanceType {
-      InstanceType::String
+    fn schema_type() -> String {
+      "string".to_owned()
     }
 
     fn format() -> Option<String> {

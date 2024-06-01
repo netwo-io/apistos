@@ -2,7 +2,7 @@ use crate::paths::{Callback, Example, Header, Link, Parameter, RequestBody, Resp
 use crate::reference_or::ReferenceOr;
 use crate::security::SecurityScheme;
 use indexmap::IndexMap;
-use schemars::schema::Schema;
+use schemars::Schema;
 use serde::Serialize;
 use serde_json::Value;
 use std::collections::BTreeMap;
