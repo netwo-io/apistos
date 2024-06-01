@@ -23,7 +23,7 @@ pub mod security;
 pub mod server;
 pub mod tag;
 
-pub use schemars::schema::*;
+pub use schemars::*;
 
 #[derive(Serialize, Clone, Debug)]
 #[cfg_attr(any(test, feature = "deserialize"), derive(serde::Deserialize, PartialEq))]

@@ -13,7 +13,7 @@ macro_rules! simple_modifier {
         let gen = schemars::gen::SchemaSettings::openapi3().into_generator();
 
         let schema: apistos_models::reference_or::ReferenceOr<apistos_models::Schema> =
-          apistos_models::Schema::Object(gen.into_root_schema_for::<$ty>().schema).into();
+          gen.into_root_schema_for::<$ty>().into();
         Some(schema)
       }
       fn schema() -> Option<(
@@ -70,7 +70,7 @@ impl<T: chrono::TimeZone> ApiComponent for chrono::DateTime<T> {
     let gen = schemars::gen::SchemaSettings::openapi3().into_generator();
 
     let schema: apistos_models::reference_or::ReferenceOr<apistos_models::Schema> =
-      apistos_models::Schema::Object(gen.into_root_schema_for::<chrono::DateTime<T>>().schema).into();
+      gen.into_root_schema_for::<chrono::DateTime<T>>().into();
     Some(schema)
   }
 

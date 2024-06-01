@@ -1,5 +1,3 @@
-use apistos_models::InstanceType;
-
 mod api_component;
 mod components;
 mod error_component;
@@ -15,6 +13,6 @@ pub use path_item_definition::PathItemDefinition;
 pub use wrappers::{ResponderWrapper, ResponseWrapper};
 
 pub trait TypedSchema {
-  fn schema_type() -> InstanceType;
+  fn schema_type() -> String;
   fn format() -> Option<String>;
 }

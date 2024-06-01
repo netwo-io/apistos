@@ -2,9 +2,8 @@ use crate::ApiComponent;
 use actix_web::web::Path;
 use apistos_models::paths::{Parameter, ParameterDefinition, ParameterIn, RequestBody};
 use apistos_models::reference_or::ReferenceOr;
-use apistos_models::ObjectValidation;
 use apistos_models::Schema;
-use schemars::schema::{InstanceType, SingleOrVec};
+use serde_json::{Map, Value};
 
 impl<T> ApiComponent for Path<T>
 where
@@ -179,25 +178,25 @@ fn parameters_for_schema(schema: ReferenceOr<Schema>, required: bool) -> Vec<Par
       parameters.push(gen_simple_path_parameter(r, required));
     }
     ReferenceOr::Object(schema) => {
-      let sch = schema.clone().into_object();
-      if let Some(subschemas) = sch.subschemas {
-        // any_of and one_of should not exists for path ?
-        if let Some(all_of) = subschemas.all_of {
+      let sch = schema.as_object();
+      if let Some(obj) = sch {
+        // any_of and one_of should not exist for path ?
+        if let Some(all_of) = obj.get("allOf").and_then(|v| v.as_array()) {
           for schema in all_of {
-            parameters.append(&mut parameters_for_schema(schema.into(), required));
+            parameters.append(&mut parameters_for_schema(
+              ReferenceOr::Object(Schema::try_from(schema.clone()).expect("Invalid json schema for parameters")),
+              required,
+            ));
           }
         }
-      }
-      if let Some(obj) = sch.object.clone() {
-        parameters.append(&mut gen_path_parameter_for_object(&schema, &obj, required));
-      }
-      if let Some(instance_type) = sch.instance_type.clone() {
-        let processable_instance_type = match instance_type {
-          SingleOrVec::Single(it) => processable_instance_type(*it),
-          SingleOrVec::Vec(its) => its.first().map(|it| processable_instance_type(*it)).unwrap_or_default(),
-        };
-        if processable_instance_type {
-          parameters.push(gen_simple_path_parameter(schema.into(), required));
+
+        let _type = obj.get("type");
+        if let Some(Value::String(string)) = _type {
+          if string == "object" {
+            parameters.append(&mut gen_path_parameter_for_object(&schema, obj, required))
+          } else if processable_instance_type(string.clone()) {
+            parameters.push(gen_simple_path_parameter(schema.into(), required));
+          }
         }
       }
     }
@@ -206,18 +205,24 @@ fn parameters_for_schema(schema: ReferenceOr<Schema>, required: bool) -> Vec<Par
   parameters
 }
 
-fn gen_path_parameter_for_object(schema: &Schema, obj: &ObjectValidation, required: bool) -> Vec<Parameter> {
-  if obj.properties.is_empty() {
+fn gen_path_parameter_for_object(schema: &Schema, obj: &Map<String, Value>, required: bool) -> Vec<Parameter> {
+  let properties = obj
+    .get("properties")
+    .and_then(|v| v.as_object())
+    .cloned()
+    .unwrap_or_default();
+  if properties.is_empty() {
     vec![gen_simple_path_parameter(schema.clone().into(), required)]
   } else {
-    obj
-      .properties
+    properties
       .clone()
       .into_iter()
       .map(|(name, schema)| Parameter {
         name,
         _in: ParameterIn::Path,
-        definition: Some(ParameterDefinition::Schema(schema.into())),
+        definition: Some(ParameterDefinition::Schema(
+          Schema::try_from(schema).expect("Invalid schema for path").into(),
+        )),
         required: Some(required),
         ..Default::default()
       })
@@ -235,13 +240,10 @@ fn gen_simple_path_parameter(component: ReferenceOr<Schema>, required: bool) -> 
   }
 }
 
-fn processable_instance_type(instance_type: InstanceType) -> bool {
-  match instance_type {
-    InstanceType::Null | InstanceType::Object => false,
-    InstanceType::Boolean
-    | InstanceType::Array
-    | InstanceType::Number
-    | InstanceType::String
-    | InstanceType::Integer => true,
+fn processable_instance_type(instance_type: String) -> bool {
+  if instance_type == "null".to_owned() || instance_type == "object".to_owned() {
+    false
+  } else {
+    true
   }
 }
