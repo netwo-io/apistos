@@ -121,6 +121,7 @@ async fn default_parameters() {
   assert!(resp.status().is_success());
 
   let body: OpenApi = try_read_body_json(resp).await.expect("Unable to read body");
+
   let parameters: Vec<ReferenceOr<Parameter>> = body
     .paths
     .paths
