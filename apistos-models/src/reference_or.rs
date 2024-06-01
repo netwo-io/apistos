@@ -1,5 +1,6 @@
-use schemars::schema::Schema;
+use schemars::Schema;
 use serde::Serialize;
+use serde_json::Value;
 
 #[derive(Serialize, Clone, Debug)]
 #[cfg_attr(any(test, feature = "deserialize"), derive(serde::Deserialize, PartialEq))]
@@ -15,6 +16,12 @@ pub enum ReferenceOr<T: Clone> {
 impl From<Schema> for ReferenceOr<Schema> {
   fn from(value: Schema) -> Self {
     Self::Object(value)
+  }
+}
+
+impl From<Value> for ReferenceOr<Schema> {
+  fn from(value: Value) -> Self {
+    Self::Object(Schema::try_from(value).expect("Invalid json schema from value"))
   }
 }
 
