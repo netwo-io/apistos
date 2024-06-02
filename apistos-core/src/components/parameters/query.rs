@@ -1,13 +1,7 @@
-use crate::ApiComponent;
+use std::collections::HashMap;
+
 #[cfg(feature = "query")]
 use actix_web::web::Query;
-#[cfg(feature = "lab_query")]
-use actix_web_lab::extract::Query as LabQuery;
-use apistos_models::json_schema;
-use apistos_models::paths::ParameterStyle;
-use apistos_models::paths::{Parameter, ParameterDefinition, ParameterIn, RequestBody};
-use apistos_models::reference_or::ReferenceOr;
-use apistos_models::Schema;
 #[cfg(all(feature = "lab_query", feature = "garde"))]
 use garde_actix_web::web::LabQuery as GardeLabQuery;
 #[cfg(all(feature = "qs_query", feature = "garde"))]
@@ -17,7 +11,16 @@ use garde_actix_web::web::Query as GardeQuery;
 use serde_json::{Map, Value};
 #[cfg(feature = "qs_query")]
 use serde_qs::actix::QsQuery;
-use std::collections::HashMap;
+
+#[cfg(feature = "lab_query")]
+use actix_web_lab::extract::Query as LabQuery;
+use apistos_models::json_schema;
+use apistos_models::paths::ParameterStyle;
+use apistos_models::paths::{Parameter, ParameterDefinition, ParameterIn, RequestBody};
+use apistos_models::reference_or::ReferenceOr;
+use apistos_models::Schema;
+
+use crate::ApiComponent;
 
 #[allow(unused_macro_rules)]
 macro_rules! impl_query {
@@ -220,7 +223,7 @@ fn parameter_for_obj(
       .clone()
       .into_iter()
       .map(|(name, schema)| {
-        let required = required.or_else(|| extract_required_from_schema(properties, &name));
+        let required = required.or_else(|| extract_required_from_schema(obj, &name));
         let description = schema
           .clone()
           .as_object()
@@ -254,16 +257,14 @@ fn extract_required_from_schema(sch_props: &Map<String, Value>, property_name: &
       }
     }
   }
-  if obj.get("allOf").is_some()
-    || obj.get("OneOf").is_some()
-    || obj.get("AnyOf").is_some()
-    || obj.get("AnyOf").is_some()
-  {
+  if obj.get("allOf").is_some() || obj.get("oneOf").is_some() || obj.get("anyOf").is_some() {
     return None;
   }
   if let Some(_type) = obj.get("type") {
     match _type {
-      Value::String(string) if string == "array" || string == "string" || string == "number" => None,
+      Value::String(string) if string == "array" || string == "string" || string == "number" || string == "integer" => {
+        None
+      }
       _ => Some(false),
     }
   } else if let Some(_ref) = obj.get("$ref") {
@@ -275,19 +276,21 @@ fn extract_required_from_schema(sch_props: &Map<String, Value>, property_name: &
 
 #[cfg(test)]
 mod test {
-  use crate::ApiComponent;
   use actix_web::web::Query;
+  use schemars::Schema;
+  use schemars::{json_schema, JsonSchema};
+  use serde::{Deserialize, Serialize};
+  #[cfg(feature = "qs_query")]
+  use serde_qs::actix::QsQuery;
+
   #[cfg(feature = "lab_query")]
   use actix_web_lab::extract::Query as LabQuery;
   #[cfg(feature = "lab_query")]
   use apistos_models::paths::ParameterStyle;
   use apistos_models::paths::{Parameter, ParameterDefinition, ParameterIn};
   use apistos_models::reference_or::ReferenceOr;
-  use schemars::Schema;
-  use schemars::{json_schema, JsonSchema};
-  use serde::{Deserialize, Serialize};
-  #[cfg(feature = "qs_query")]
-  use serde_qs::actix::QsQuery;
+
+  use crate::ApiComponent;
 
   #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema)]
   struct Test {

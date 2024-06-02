@@ -139,6 +139,7 @@ fn api_operation() {
       {
         "schemas": {
           "Test": {
+            "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
             "properties": {
               "test": {
                 "type": "string"
@@ -151,10 +152,11 @@ fn api_operation() {
             "type": "object"
           },
           "TestResult": {
+            "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
             "properties": {
               "id": {
                 "format": "uint32",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               }
             },
@@ -245,6 +247,7 @@ fn api_operation_impl_responder() {
       {
         "schemas": {
           "Test": {
+            "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
             "properties": {
               "test": {
                 "type": "string"
@@ -361,6 +364,7 @@ fn api_operation_simple_response() {
       {
         "schemas": {
           "Test": {
+            "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
             "properties": {
               "test": {
                 "type": "string"
@@ -396,6 +400,7 @@ fn api_operation_simple_response() {
           "content": {
             "application/json": {
               "schema": {
+                "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
                 "format": "uuid",
                 "title": "Uuid",
                 "type": "string"
@@ -441,10 +446,11 @@ fn api_operation_without_parameters() {
       {
         "schemas": {
           "TestResult": {
+            "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
             "properties": {
               "id": {
                 "format": "uint32",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               }
             },
@@ -511,6 +517,7 @@ fn api_operation_no_content() {
       {
         "schemas": {
           "Test": {
+            "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
             "properties": {
               "test": {
                 "type": "string"
@@ -584,6 +591,7 @@ fn api_operation_created_json() {
       {
         "schemas": {
           "Test": {
+            "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
             "properties": {
               "test": {
                 "type": "string"
@@ -596,10 +604,11 @@ fn api_operation_created_json() {
             "type": "object"
           },
           "TestResult": {
+            "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
             "properties": {
               "id": {
                 "format": "uint32",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               }
             },
@@ -676,6 +685,7 @@ fn api_operation_created_json_simple_response() {
       {
         "schemas": {
           "Test": {
+            "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
             "properties": {
               "test": {
                 "type": "string"
@@ -711,6 +721,7 @@ fn api_operation_created_json_simple_response() {
           "content": {
             "application/json": {
               "schema": {
+                "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
                 "format": "uuid",
                 "title": "Uuid",
                 "type": "string"
@@ -758,6 +769,7 @@ fn api_operation_accepted_json() {
       {
         "schemas": {
           "Test": {
+            "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
             "properties": {
               "test": {
                 "type": "string"
@@ -770,10 +782,11 @@ fn api_operation_accepted_json() {
             "type": "object"
           },
           "TestResult": {
+            "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
             "properties": {
               "id": {
                 "format": "uint32",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               }
             },
@@ -851,6 +864,7 @@ fn api_operation_deprecated() {
       {
         "schemas": {
           "Test": {
+            "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
             "properties": {
               "test": {
                 "type": "string"
@@ -863,10 +877,11 @@ fn api_operation_deprecated() {
             "type": "object"
           },
           "TestResult": {
+            "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
             "properties": {
               "id": {
                 "format": "uint32",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               }
             },
@@ -941,6 +956,7 @@ fn api_operation_deprecated() {
       {
         "schemas": {
           "Test": {
+            "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
             "properties": {
               "test": {
                 "type": "string"
@@ -953,10 +969,11 @@ fn api_operation_deprecated() {
             "type": "object"
           },
           "TestResult": {
+            "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
             "properties": {
               "id": {
                 "format": "uint32",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               }
             },
@@ -1062,6 +1079,7 @@ fn api_operation_error() {
       {
         "schemas": {
           "Test": {
+            "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
             "properties": {
               "test": {
                 "type": "string"
@@ -1074,10 +1092,11 @@ fn api_operation_error() {
             "type": "object"
           },
           "TestResult": {
+            "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
             "properties": {
               "id": {
                 "format": "uint32",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               }
             },
@@ -1159,6 +1178,7 @@ fn api_operation_security() {
       {
         "schemas": {
           "Test": {
+            "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
             "properties": {
               "test": {
                 "type": "string"
@@ -1171,10 +1191,11 @@ fn api_operation_security() {
             "type": "object"
           },
           "TestResult": {
+            "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
             "properties": {
               "id": {
                 "format": "uint32",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               }
             },
@@ -1281,6 +1302,7 @@ fn api_operation_multipart() {
       {
         "schemas": {
           "Test": {
+            "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
             "properties": {
               "test": {
                 "type": "string"
@@ -1360,6 +1382,7 @@ fn api_operation_consumes_produces() {
       {
         "schemas": {
           "Test": {
+            "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
             "properties": {
               "test": {
                 "type": "string"
@@ -1442,6 +1465,7 @@ fn api_operation_root_vec() {
       {
         "schemas": {
           "Test": {
+            "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
             "properties": {
               "test": {
                 "type": "string"
@@ -1454,10 +1478,11 @@ fn api_operation_root_vec() {
             "type": "object"
           },
           "TestResult": {
+            "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
             "properties": {
               "id": {
                 "format": "uint32",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               }
             },
