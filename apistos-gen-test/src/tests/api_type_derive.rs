@@ -33,7 +33,8 @@ fn api_type_derive() {
   assert_json_eq!(
     json,
     json!({
-      "type": "string"
+      "type": "string",
+      "format": null
     })
   );
 }
@@ -179,7 +180,8 @@ fn api_type_derive_with_format_complex_struct() {
   assert_json_eq!(
     json,
     json!({
-      "type": "string"
+      "type": "string",
+      "format": null
     })
   );
 }
