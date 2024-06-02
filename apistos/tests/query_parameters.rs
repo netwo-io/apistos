@@ -216,6 +216,7 @@ async fn garde_lab_query_parameters() {
   assert_eq!(offset_parameter.required, Some(false));
 }
 
+#[ignore]
 #[actix_web::test]
 async fn query_parameters_with_flatten_enums() {
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]

@@ -48,7 +48,9 @@ impl ToTokens for Schemas {
         let mut schemas: Vec<(String, apistos::reference_or::ReferenceOr<apistos::Schema>)> = vec![];
         let obj = schema.ensure_object();
         for (def_name, mut def) in obj
-          .get("/components/schemas")
+          .get("components")
+          .and_then(|v| v.as_object())
+          .and_then(|v| v.get("schemas"))
           .and_then(|v| v.as_object())
           .cloned()
           .unwrap_or_default()
@@ -69,12 +71,19 @@ impl ToTokens for Schemas {
           let schema_name = <Self as schemars::JsonSchema>::schema_name();
           let settings = schemars::gen::SchemaSettings::openapi3();
           let mut gen = settings.into_generator();
+          let definition_path = gen.settings().definitions_path.clone();
+          let definition_path = definition_path
+            .trim_start_matches('/')
+            .split('/')
+            .next()
+            .unwrap_or_default();
           let mut schema: apistos::Schema = gen.into_root_schema_for::<Self>();
 
           let obj = schema.ensure_object();
           if let Some(mut one_of) = obj.get_mut("oneOf").and_then(|v| v.as_array_mut()) {
             #update_one_of_title;
           }
+          obj.remove(definition_path);
           #deprecated
           let schema = apistos::Schema::try_from(obj.clone()).expect("Invalid schema");
           (

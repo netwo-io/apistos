@@ -31,6 +31,7 @@ fn api_header_derive() {
   assert_json_eq!(
     json,
     json!({
+      "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
       "title": "OrganizationSlug",
       "type": "string"
     })
@@ -47,6 +48,7 @@ fn api_header_derive() {
       "name": "X-Organization-Slug",
       "required": true,
       "schema": {
+        "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
         "title": "OrganizationSlug",
         "type": "string"
       },
