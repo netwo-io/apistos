@@ -346,7 +346,17 @@ mod test {
 
       fn schema() -> Option<(String, ReferenceOr<Schema>)> {
         let gen = SchemaSettings::openapi3().into_generator();
-        Some(("Test".to_string(), gen.into_root_schema_for::<Test>().into()))
+        let definition_path = gen.settings().definitions_path.clone();
+        let definition_path = definition_path
+          .trim_start_matches('/')
+          .split('/')
+          .next()
+          .unwrap_or_default();
+        let mut schema = gen.into_root_schema_for::<Test>();
+        let obj = schema.ensure_object();
+        obj.remove(definition_path);
+        let schema = Schema::try_from(obj.clone()).unwrap();
+        Some(("Test".to_string(), schema.into()))
       }
     }
 
@@ -374,6 +384,9 @@ mod test {
     assert_json_eq!(
       json,
       json!({
+        "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
+        "title": "Test",
+        "type": "object",
         "properties": {
           "name": {
             "type": "string"
@@ -396,7 +409,10 @@ mod test {
       serde_json::to_value(last_child_schema.expect("Missing child schema").1).expect("Unable to serialize as Json");
     assert_json_eq!(
       json,
-      json!( {
+      json!({
+        "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
+        "title": "TestChild",
+        "type": "object",
         "properties": {
           "surname": {
             "type": "string"

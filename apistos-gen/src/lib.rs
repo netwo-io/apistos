@@ -35,14 +35,14 @@ const OPENAPI_STRUCT_PREFIX: &str = "__openapi_";
 /// should not be derived.
 ///
 /// ```rust
-/// use apistos::{ApiType, InstanceType, TypedSchema};
+/// use apistos::{ApiType, TypedSchema};
 ///
 /// #[derive(Debug, Clone, ApiType)]
 /// pub struct Name(String);
 ///
 /// impl TypedSchema for Name {
-///   fn schema_type() -> InstanceType {
-///     InstanceType::String
+///   fn schema_type() -> String {
+///     "string".to_owned()
 ///   }
 ///
 ///   fn format() -> Option<String> {

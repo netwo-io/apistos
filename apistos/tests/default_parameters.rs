@@ -121,7 +121,6 @@ async fn default_parameters() {
   assert!(resp.status().is_success());
 
   let body: OpenApi = try_read_body_json(resp).await.expect("Unable to read body");
-  eprintln!("{:#}", json!(body));
   let parameters: Vec<ReferenceOr<Parameter>> = body
     .paths
     .paths
@@ -190,4 +189,3 @@ use md5 as _;
 use once_cell as _;
 use regex as _;
 use serde_json as _;
-use serde_json::json;
