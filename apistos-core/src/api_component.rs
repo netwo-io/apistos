@@ -2,8 +2,7 @@ use std::collections::BTreeMap;
 #[cfg(feature = "actix")]
 use std::future::Future;
 
-use schemars::json_schema;
-use serde_json::Value;
+use serde_json::{json, Value};
 
 use apistos_models::paths::{MediaType, Parameter, RequestBody, Response, Responses};
 use apistos_models::reference_or::ReferenceOr;
@@ -130,10 +129,16 @@ where
 
       (
         name,
-        ReferenceOr::Object(json_schema!({
+        Schema::try_from(json!({
           "type": "array",
           "items": Schema::new_ref(_ref)
-        })),
+        }))
+        .map_err(|err| {
+          log::warn!("Error generating json schema: {err:?}");
+          err
+        })
+        .unwrap_or_default()
+        .into(),
       )
     })
   }
@@ -355,7 +360,7 @@ mod test {
         let mut schema = gen.into_root_schema_for::<Test>();
         let obj = schema.ensure_object();
         obj.remove(definition_path);
-        let schema = Schema::try_from(obj.clone()).unwrap();
+        let schema = Schema::from(obj.clone());
         Some(("Test".to_string(), schema.into()))
       }
     }

@@ -148,6 +148,7 @@
 //! | [`okapi`](https://crates.io/crates/okapi)         | Pretty similar, based on schemars as well (and maintained by the founder of schemars) but not integrated with actix.                                                                                                                                                                                                                          |
 
 pub use indexmap::IndexMap;
+pub use log;
 
 pub use apistos_core::parameters::header::ApiHeader;
 pub use apistos_core::PathItemDefinition;

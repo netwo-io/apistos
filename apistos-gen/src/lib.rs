@@ -77,10 +77,15 @@ pub fn derive_api_type(input: TokenStream) -> TokenStream {
 
       fn json_schema(_gen: &mut schemars::gen::SchemaGenerator) -> apistos::Schema {
         let instance_type = <Self as TypedSchema>::schema_type();
-        schemars::json_schema!({
+        apistos::Schema::try_from(schemars::_serde_json::json!({
           "type": instance_type,
           "format": <Self as TypedSchema>::format(),
+        }))
+        .map_err(|err| {
+          apistos::log::warn!("Error generating json schema from #ident : {err:?}");
+          err
         })
+        .unwrap_or_default()
       }
     }
 
@@ -93,10 +98,16 @@ pub fn derive_api_type(input: TokenStream) -> TokenStream {
       fn schema() -> Option<(String, apistos::reference_or::ReferenceOr<apistos::Schema>)> {
         Some((
           #component_name.to_string(),
-          schemars::json_schema!({
+          apistos::Schema::try_from(schemars::_serde_json::json!({
             "type": <#ident #ty_generics>::schema_type(),
             "format": <#ident #ty_generics>::format(),
-          }).into()
+          }))
+          .map_err(|err| {
+            apistos::log::warn!("Error generating json schema from #ident : {err:?}");
+            err
+          })
+          .unwrap_or_default()
+          .into(),
         ))
       }
     }

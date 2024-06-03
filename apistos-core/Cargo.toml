@@ -14,6 +14,7 @@ rust-version.workspace = true
 license.workspace = true
 
 [dependencies]
+log = { workspace = true }
 pin-project = { workspace = true }
 serde_json = { workspace = true }
 schemars = { workspace = true }
