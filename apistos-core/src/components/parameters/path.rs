@@ -184,7 +184,13 @@ fn parameters_for_schema(schema: ReferenceOr<Schema>, required: bool) -> Vec<Par
         if let Some(all_of) = obj.get("allOf").and_then(|v| v.as_array()) {
           for schema in all_of {
             parameters.append(&mut parameters_for_schema(
-              ReferenceOr::Object(Schema::try_from(schema.clone()).expect("Invalid json schema for parameters")),
+              Schema::try_from(schema.clone())
+                .map_err(|err| {
+                  log::warn!("Error generating json schema from #ident : {err:?}");
+                  err
+                })
+                .unwrap_or_default()
+                .into(),
               required,
             ));
           }
@@ -194,7 +200,7 @@ fn parameters_for_schema(schema: ReferenceOr<Schema>, required: bool) -> Vec<Par
         if let Some(Value::String(string)) = _type {
           if string == "object" {
             parameters.append(&mut gen_path_parameter_for_object(&schema, obj, required))
-          } else if processable_instance_type(string.clone()) {
+          } else if processable_instance_type(string) {
             parameters.push(gen_simple_path_parameter(schema.into(), required));
           }
         }
@@ -220,9 +226,7 @@ fn gen_path_parameter_for_object(schema: &Schema, obj: &Map<String, Value>, requ
       .map(|(name, schema)| Parameter {
         name,
         _in: ParameterIn::Path,
-        definition: Some(ParameterDefinition::Schema(
-          Schema::try_from(schema).expect("Invalid schema for path").into(),
-        )),
+        definition: Some(ParameterDefinition::Schema(schema.into())),
         required: Some(required),
         ..Default::default()
       })
@@ -240,10 +244,6 @@ fn gen_simple_path_parameter(component: ReferenceOr<Schema>, required: bool) -> 
   }
 }
 
-fn processable_instance_type(instance_type: String) -> bool {
-  if instance_type == "null".to_owned() || instance_type == "object".to_owned() {
-    false
-  } else {
-    true
-  }
+fn processable_instance_type(instance_type: &str) -> bool {
+  !(instance_type == "null" || instance_type == "object")
 }
