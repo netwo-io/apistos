@@ -60,7 +60,11 @@ impl ToTokens for Schemas {
               #update_one_of_title;
             }
           }
-          let schema = apistos::Schema::try_from(def).unwrap();
+          let schema = apistos::Schema::try_from(def)
+                    .map_err(|err| {
+                      apistos::log::warn!("Error generating json schema: {err:?}");
+                      err
+                    }).unwrap_or_default();
           schemas.push((def_name, apistos::reference_or::ReferenceOr::Object(schema)));
         }
         schemas
@@ -85,7 +89,7 @@ impl ToTokens for Schemas {
           }
           obj.remove(definition_path);
           #deprecated
-          let schema = apistos::Schema::try_from(obj.clone()).expect("Invalid schema");
+          let schema = apistos::Schema::from(obj.clone());
           (
             schema_name,
             apistos::reference_or::ReferenceOr::Object(schema)

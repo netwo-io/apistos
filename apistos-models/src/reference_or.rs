@@ -1,3 +1,4 @@
+use log::warn;
 use schemars::Schema;
 use serde::Serialize;
 use serde_json::Value;
@@ -21,7 +22,14 @@ impl From<Schema> for ReferenceOr<Schema> {
 
 impl From<Value> for ReferenceOr<Schema> {
   fn from(value: Value) -> Self {
-    Self::Object(Schema::try_from(value).expect("Invalid json schema from value"))
+    let schema = Schema::try_from(value.clone());
+    match schema {
+      Ok(sch) => Self::Object(sch),
+      Err(e) => {
+        warn!("Error converting value to schema: get {e:?} for value {value:?}");
+        Self::Object(Schema::default())
+      }
+    }
   }
 }
 
