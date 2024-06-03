@@ -14,7 +14,7 @@ use apistos_models::paths::{OperationType, Parameter, ParameterDefinition};
 use apistos_models::reference_or::ReferenceOr;
 use apistos_models::tag::Tag;
 use apistos_models::OpenApi;
-use schemars::{json_schema, JsonSchema};
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
 
@@ -106,7 +106,7 @@ async fn path_parameter_replacement() {
       ParameterDefinition::Schema(ReferenceOr::Object(sch)) => Some(sch),
       _ => None,
     })
-    .unwrap_or_else(|| json_schema!({}));
+    .unwrap_or_default();
   assert_eq!(
     first_parameter_schema
       .as_object()

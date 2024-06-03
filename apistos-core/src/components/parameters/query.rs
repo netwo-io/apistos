@@ -8,13 +8,12 @@ use garde_actix_web::web::LabQuery as GardeLabQuery;
 use garde_actix_web::web::QsQuery as GardeQsQuery;
 #[cfg(all(feature = "query", feature = "garde"))]
 use garde_actix_web::web::Query as GardeQuery;
-use serde_json::{Map, Value};
+use serde_json::{json, Map, Value};
 #[cfg(feature = "qs_query")]
 use serde_qs::actix::QsQuery;
 
 #[cfg(feature = "lab_query")]
 use actix_web_lab::extract::Query as LabQuery;
-use apistos_models::json_schema;
 use apistos_models::paths::ParameterStyle;
 use apistos_models::paths::{Parameter, ParameterDefinition, ParameterIn, RequestBody};
 use apistos_models::reference_or::ReferenceOr;
@@ -135,9 +134,15 @@ fn parameters_from_schema(
           if let Some(all_of) = obj.get("allOf").and_then(|v| v.as_array()) {
             for sch in all_of {
               parameters.append(&mut parameters_from_schema(
-                Some(ReferenceOr::Object(
-                  Schema::try_from(sch.clone()).expect("Invalid json schema for query"),
-                )),
+                Some(
+                  Schema::try_from(sch.clone())
+                    .map_err(|err| {
+                      log::warn!("Error generating json schema: {err:?}");
+                      err
+                    })
+                    .unwrap_or_default()
+                    .into(),
+                ),
                 required,
                 default_description,
                 style,
@@ -157,9 +162,15 @@ fn parameters_from_schema(
             let description = format!("{} are mutually exclusive properties", properties.join(", "));
             for one_of_sch in one_of {
               parameters.append(&mut parameters_from_schema(
-                Some(ReferenceOr::Object(
-                  Schema::try_from(one_of_sch.clone()).expect("Invalid schema for query"),
-                )),
+                Some(
+                  Schema::try_from(one_of_sch.clone())
+                    .map_err(|err| {
+                      log::warn!("Error generating json schema: {err:?}");
+                      err
+                    })
+                    .unwrap_or_default()
+                    .into(),
+                ),
                 Some(false),
                 &Some(description.clone()),
                 style,
@@ -191,10 +202,18 @@ fn parameters_from_hashmap(schema: Option<ReferenceOr<Schema>>, style: Option<Pa
           name: "params".to_string(),
           _in: ParameterIn::Query,
           style,
-          definition: Some(ParameterDefinition::Schema(ReferenceOr::Object(json_schema!({
-            "type": "object",
-            "additionalProperties": schema
-          })))),
+          definition: Some(ParameterDefinition::Schema(
+            Schema::try_from(json!({
+              "type": "object",
+              "additionalProperties": schema
+            }))
+            .map_err(|err| {
+              log::warn!("Error generating json schema: {err:?}");
+              err
+            })
+            .unwrap_or_default()
+            .into(),
+          )),
           ..Default::default()
         }];
       }
