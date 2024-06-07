@@ -1,3 +1,4 @@
+use apistos::OpenApiVersion;
 use assert_json_diff::assert_json_eq;
 use serde_json::json;
 use std::str::FromStr;
@@ -22,8 +23,8 @@ fn api_type_derive() {
     }
   }
 
-  let name_schema = <Name as ApiComponent>::schema();
-  let name_child_schemas = <Name as ApiComponent>::child_schemas();
+  let name_schema = <Name as ApiComponent>::schema(OpenApiVersion::OAS3_0);
+  let name_child_schemas = <Name as ApiComponent>::child_schemas(OpenApiVersion::OAS3_0);
   assert!(name_schema.is_some());
   assert!(name_child_schemas.is_empty());
   let (schema_name, schema) = name_schema.expect("schema should be defined");
@@ -56,8 +57,8 @@ fn api_type_derive_with_format() {
     }
   }
 
-  let name_schema = <Name as ApiComponent>::schema();
-  let name_child_schemas = <Name as ApiComponent>::child_schemas();
+  let name_schema = <Name as ApiComponent>::schema(OpenApiVersion::OAS3_0);
+  let name_child_schemas = <Name as ApiComponent>::child_schemas(OpenApiVersion::OAS3_0);
   assert!(name_schema.is_some());
   assert!(name_child_schemas.is_empty());
   let (schema_name, schema) = name_schema.expect("schema should be defined");
@@ -94,8 +95,8 @@ fn api_type_derive_with_default_type_parameter() {
     }
   }
 
-  let name_schema = <Name as ApiComponent>::schema();
-  let name_child_schemas = <Name as ApiComponent>::child_schemas();
+  let name_schema = <Name as ApiComponent>::schema(OpenApiVersion::OAS3_0);
+  let name_child_schemas = <Name as ApiComponent>::child_schemas(OpenApiVersion::OAS3_0);
   assert!(name_schema.is_some());
   assert!(name_child_schemas.is_empty());
   let (schema_name, schema) = name_schema.expect("schema should be defined");
@@ -132,8 +133,8 @@ fn api_type_derive_with_generic_type_parameter() {
     }
   }
 
-  let name_schema = <Name<String> as ApiComponent>::schema();
-  let name_child_schemas = <Name<String> as ApiComponent>::child_schemas();
+  let name_schema = <Name<String> as ApiComponent>::schema(OpenApiVersion::OAS3_0);
+  let name_child_schemas = <Name<String> as ApiComponent>::child_schemas(OpenApiVersion::OAS3_0);
   assert!(name_schema.is_some());
   assert!(name_child_schemas.is_empty());
   let (schema_name, schema) = name_schema.expect("schema should be defined");
@@ -169,8 +170,8 @@ fn api_type_derive_with_format_complex_struct() {
     }
   }
 
-  let name_schema = <Name as ApiComponent>::schema();
-  let name_child_schemas = <Name as ApiComponent>::child_schemas();
+  let name_schema = <Name as ApiComponent>::schema(OpenApiVersion::OAS3_0);
+  let name_child_schemas = <Name as ApiComponent>::child_schemas(OpenApiVersion::OAS3_0);
   assert!(name_schema.is_some());
   assert!(name_child_schemas.is_empty());
   let (schema_name, schema) = name_schema.expect("schema should be defined");

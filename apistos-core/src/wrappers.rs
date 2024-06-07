@@ -3,7 +3,7 @@ use actix_web::{HttpRequest, HttpResponse, Responder};
 use apistos_models::components::Components;
 use apistos_models::paths::Operation;
 use apistos_models::reference_or::ReferenceOr;
-use apistos_models::Schema;
+use apistos_models::{OpenApiVersion, Schema};
 use pin_project::pin_project;
 use std::future::Future;
 use std::pin::Pin;
@@ -47,23 +47,23 @@ where
     P::is_visible()
   }
 
-  fn operation() -> Operation {
-    P::operation()
+  fn operation(oas_version: OpenApiVersion) -> Operation {
+    P::operation(oas_version)
   }
 
-  fn components() -> Vec<Components> {
-    P::components()
+  fn components(oas_version: OpenApiVersion) -> Vec<Components> {
+    P::components(oas_version)
   }
 }
 
 pub struct ResponderWrapper<T>(pub T);
 
 impl<T: Responder> ApiComponent for ResponderWrapper<T> {
-  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
+  fn child_schemas(_: OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
     vec![]
   }
 
-  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
+  fn schema(_: OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
     None
   }
 }

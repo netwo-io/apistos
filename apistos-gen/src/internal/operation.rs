@@ -95,13 +95,13 @@ impl<'a> ToTokens for Operation<'a> {
       quote!(None)
     };
     tokens.extend(quote!(
-      fn operation() -> apistos::paths::Operation {
+      fn operation(oas_version: apistos::OpenApiVersion) -> apistos::paths::Operation {
         use apistos::ApiComponent;
         let mut operation_builder = apistos::paths::Operation::default();
 
         let mut body_requests: Vec<std::option::Option<apistos::paths::RequestBody>> = vec![];
         #(
-          let mut request_body = <#args>::request_body();
+          let mut request_body = <#args>::request_body(oas_version);
           let consumes: Option<String> = #consumes;
           if let Some(consumes) = consumes {
             request_body
@@ -122,13 +122,13 @@ impl<'a> ToTokens for Operation<'a> {
 
         let mut parameters = vec![];
         #(
-          parameters.append(&mut <#args>::parameters());
+          parameters.append(&mut <#args>::parameters(oas_version));
         )*
         if !parameters.is_empty() {
           operation_builder.parameters = parameters.into_iter().map(apistos::reference_or::ReferenceOr::Object).collect();
         }
 
-        if let Some(responses) = <#responder_wrapper>::responses(#produces) {
+        if let Some(responses) = <#responder_wrapper>::responses(oas_version, #produces) {
           #error_codes_filter
           operation_builder.responses = responses;
         }

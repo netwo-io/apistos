@@ -1,6 +1,7 @@
 use crate::internal::actix::handler::OASHandler;
 use crate::internal::actix::route::{Route, RouteWrapper};
 use crate::internal::definition_holder::DefinitionHolder;
+use crate::internal::set_oas_version;
 use crate::spec::{DefaultParameters, Spec};
 use crate::web::ServiceConfig;
 use actix_service::{IntoServiceFactory, ServiceFactory, Transform};
@@ -84,6 +85,8 @@ impl<T> OpenApiWrapper<T> for actix_web::App<T> {
     if !spec.servers.is_empty() {
       open_api_spec.servers = spec.servers;
     }
+
+    set_oas_version(spec.open_api_version);
     App {
       open_api_spec: Arc::new(RwLock::new(open_api_spec)),
       inner: Some(self),

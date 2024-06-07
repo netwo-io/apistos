@@ -11,12 +11,12 @@ where
     "application/x-www-form-urlencoded".to_string()
   }
 
-  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
-    T::child_schemas()
+  fn child_schemas(oas_version: apistos_models::OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
+    T::child_schemas(oas_version)
   }
 
-  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
-    T::schema()
+  fn schema(oas_version: apistos_models::OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
+    T::schema(oas_version)
   }
 }
 
@@ -29,11 +29,11 @@ where
     "application/x-www-form-urlencoded".to_string()
   }
 
-  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
-    T::child_schemas()
+  fn child_schemas(oas_version: apistos_models::OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
+    T::child_schemas(oas_version)
   }
 
-  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
-    T::schema()
+  fn schema(oas_version: apistos_models::OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
+    T::schema(oas_version)
   }
 }

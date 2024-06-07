@@ -31,12 +31,12 @@ impl ToTokens for OpenapiErrorAttribute {
   fn to_tokens(&self, tokens: &mut TokenStream) {
     let defs = &self.status;
     tokens.extend(quote! {
-      fn error_responses() -> Vec<(String, apistos::paths::Response)> {
+      fn error_responses(_: apistos::OpenApiVersion) -> Vec<(String, apistos::paths::Response)> {
         let responses: Vec<((String, apistos::paths::Response), Option<(String, apistos::reference_or::ReferenceOr<apistos::Schema>)>)> = vec![#(#defs,)*];
         responses.into_iter().map(|v| v.0).collect()
       }
 
-      fn schemas_by_status_code() -> std::collections::BTreeMap<String, (String, apistos::reference_or::ReferenceOr<apistos::Schema>)> {
+      fn schemas_by_status_code(_: apistos::OpenApiVersion) -> std::collections::BTreeMap<String, (String, apistos::reference_or::ReferenceOr<apistos::Schema>)> {
         let mut schemas = std::collections::BTreeMap::default();
         for ((status_code, _), schema) in [#(#defs,)*] {
           if let Some(schema) = schema {

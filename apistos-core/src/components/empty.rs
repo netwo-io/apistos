@@ -7,10 +7,10 @@ use apistos_models::Schema;
 macro_rules! empty_component_impl {
   ($($ty:ty),+) => {
     $(impl ApiComponent for $ty {
-      fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
+      fn child_schemas(_: apistos_models::OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
         vec![]
       }
-      fn schema() -> Option<(String, ReferenceOr<Schema>)> {
+      fn schema(_: apistos_models::OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
         None
       }
     })+

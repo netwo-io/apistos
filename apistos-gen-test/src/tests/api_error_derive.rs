@@ -1,3 +1,4 @@
+use apistos::OpenApiVersion;
 use apistos_core::ApiErrorComponent;
 use apistos_gen::ApiErrorComponent;
 use schemars::JsonSchema;
@@ -21,8 +22,8 @@ fn api_component_derive() {
     Unauthorized(String),
   }
 
-  let error_schemas = <ErrorResponse as ApiErrorComponent>::schemas_by_status_code();
-  let error_responses = <ErrorResponse as ApiErrorComponent>::error_responses();
+  let error_schemas = <ErrorResponse as ApiErrorComponent>::schemas_by_status_code(OpenApiVersion::OAS3_0);
+  let error_responses = <ErrorResponse as ApiErrorComponent>::error_responses(OpenApiVersion::OAS3_0);
   assert!(error_schemas.is_empty());
   assert!(!error_responses.is_empty());
   assert_eq!(error_responses.len(), 4);
@@ -68,8 +69,8 @@ fn api_component_with_schema() {
     Conflict(String),
   }
 
-  let error_schemas = <ErrorResponse as ApiErrorComponent>::schemas_by_status_code();
-  let error_responses = <ErrorResponse as ApiErrorComponent>::error_responses();
+  let error_schemas = <ErrorResponse as ApiErrorComponent>::schemas_by_status_code(OpenApiVersion::OAS3_0);
+  let error_responses = <ErrorResponse as ApiErrorComponent>::error_responses(OpenApiVersion::OAS3_0);
   assert!(error_schemas.is_empty());
   assert!(!error_responses.is_empty());
   assert_eq!(error_responses.len(), 2);
