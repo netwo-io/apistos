@@ -41,24 +41,24 @@ macro_rules! impl_query {
         T::required()
       }
 
-      fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
-        T::child_schemas()
+      fn child_schemas(oas_version: apistos_models::OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
+        T::child_schemas(oas_version)
       }
 
-      fn raw_schema() -> Option<ReferenceOr<Schema>> {
-        T::raw_schema()
+      fn raw_schema(oas_version: apistos_models::OpenApiVersion) -> Option<ReferenceOr<Schema>> {
+        T::raw_schema(oas_version)
       }
 
-      fn schema() -> Option<(String, ReferenceOr<Schema>)> {
+      fn schema(_: apistos_models::OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
         None
       }
 
-      fn request_body() -> Option<RequestBody> {
+      fn request_body(_: apistos_models::OpenApiVersion) -> Option<RequestBody> {
         None
       }
 
-      fn parameters() -> Vec<Parameter> {
-        let schema = T::schema().map(|(_, sch)| sch).or_else(Self::raw_schema);
+      fn parameters(oas_version: apistos_models::OpenApiVersion) -> Vec<Parameter> {
+        let schema = T::schema(oas_version).map(|(_, sch)| sch).or_else(|| Self::raw_schema(oas_version));
         parameters_from_schema(schema, None, &None, &$style, $explode)
       }
     }
@@ -71,24 +71,24 @@ macro_rules! impl_query {
         false
       }
 
-      fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
-        V::child_schemas()
+      fn child_schemas(oas_version: apistos_models::OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
+        V::child_schemas(oas_version)
       }
 
-      fn raw_schema() -> Option<ReferenceOr<Schema>> {
-        V::raw_schema()
+      fn raw_schema(oas_version: apistos_models::OpenApiVersion) -> Option<ReferenceOr<Schema>> {
+        V::raw_schema(oas_version)
       }
 
-      fn schema() -> Option<(String, ReferenceOr<Schema>)> {
+      fn schema(_: apistos_models::OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
         None
       }
 
-      fn request_body() -> Option<RequestBody> {
+      fn request_body(_: apistos_models::OpenApiVersion) -> Option<RequestBody> {
         None
       }
 
-      fn parameters() -> Vec<Parameter> {
-        let schema = V::schema().map(|(_, sch)| sch).or_else(Self::raw_schema);
+      fn parameters(oas_version: apistos_models::OpenApiVersion) -> Vec<Parameter> {
+        let schema = V::schema(oas_version).map(|(_, sch)| sch).or_else(|| Self::raw_schema(oas_version));
         parameters_from_hashmap(schema, $hashmap_style)
       }
     }
@@ -308,6 +308,7 @@ mod test {
   use apistos_models::paths::ParameterStyle;
   use apistos_models::paths::{Parameter, ParameterDefinition, ParameterIn};
   use apistos_models::reference_or::ReferenceOr;
+  use apistos_models::OpenApiVersion::OAS3_0;
 
   use crate::ApiComponent;
 
@@ -318,15 +319,16 @@ mod test {
   }
 
   impl ApiComponent for Test {
-    fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
+    fn child_schemas(_: apistos_models::OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
       vec![]
     }
 
-    fn schema() -> Option<(String, ReferenceOr<Schema>)> {
+    fn schema(oas_version: apistos_models::OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
       let (name, schema) = {
         let schema_name = <Self as JsonSchema>::schema_name().to_string();
-        let settings = schemars::gen::SchemaSettings::openapi3();
-        let gen = settings.into_generator();
+        let gen = match oas_version {
+          OAS3_0 => schemars::gen::SchemaSettings::openapi3().into_generator(),
+        };
         let schema = gen.into_root_schema_for::<Self>();
         (schema_name, schema.into())
       };
@@ -336,7 +338,7 @@ mod test {
 
   #[test]
   fn test_query_parameter() {
-    let parameters_schema = <Query<Test> as ApiComponent>::parameters();
+    let parameters_schema = <Query<Test> as ApiComponent>::parameters(OAS3_0);
     assert_eq!(parameters_schema.len(), 2);
 
     let id_number_parameter_schema = parameters_schema
@@ -381,7 +383,7 @@ mod test {
   #[cfg(feature = "qs_query")]
   #[test]
   fn test_qs_query_parameter() {
-    let parameters_schema = <QsQuery<Test> as ApiComponent>::parameters();
+    let parameters_schema = <QsQuery<Test> as ApiComponent>::parameters(OAS3_0);
     assert_eq!(parameters_schema.len(), 2);
 
     let id_number_parameter_schema = parameters_schema
@@ -432,7 +434,7 @@ mod test {
   #[cfg(feature = "lab_query")]
   #[test]
   fn test_lab_query_parameter() {
-    let parameters_schema = <LabQuery<Test> as ApiComponent>::parameters();
+    let parameters_schema = <LabQuery<Test> as ApiComponent>::parameters(OAS3_0);
     assert_eq!(parameters_schema.len(), 2);
 
     let id_number_parameter_schema = parameters_schema

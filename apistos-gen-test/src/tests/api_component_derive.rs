@@ -1,3 +1,4 @@
+use apistos::OpenApiVersion;
 use assert_json_diff::assert_json_eq;
 use chrono::{DateTime, Utc};
 use schemars::JsonSchema;
@@ -16,8 +17,8 @@ fn api_component_derive() {
     name: String,
   }
 
-  let name_schema = <Name as ApiComponent>::schema();
-  let name_child_schemas = <Name as ApiComponent>::child_schemas();
+  let name_schema = <Name as ApiComponent>::schema(OpenApiVersion::OAS3_0);
+  let name_child_schemas = <Name as ApiComponent>::child_schemas(OpenApiVersion::OAS3_0);
   assert!(name_schema.is_some());
   assert!(name_child_schemas.is_empty());
   let (schema_name, schema) = name_schema.expect("schema should be defined");
@@ -60,8 +61,8 @@ fn api_component_derive_with_generic() {
     id_string: String,
   }
 
-  let name_schema = <Name<Test> as ApiComponent>::schema();
-  let name_child_schemas = <Name<Test> as ApiComponent>::child_schemas();
+  let name_schema = <Name<Test> as ApiComponent>::schema(OpenApiVersion::OAS3_0);
+  let name_child_schemas = <Name<Test> as ApiComponent>::child_schemas(OpenApiVersion::OAS3_0);
   assert!(name_schema.is_some());
   assert_eq!(name_child_schemas.len(), 1);
   let (schema_name, schema) = name_schema.expect("schema should be defined");
@@ -130,8 +131,8 @@ fn api_component_derive_with_flatten() {
     id_string: String,
   }
 
-  let name_schema = <Name as ApiComponent>::schema();
-  let name_child_schemas = <Name as ApiComponent>::child_schemas();
+  let name_schema = <Name as ApiComponent>::schema(OpenApiVersion::OAS3_0);
+  let name_child_schemas = <Name as ApiComponent>::child_schemas(OpenApiVersion::OAS3_0);
   assert!(name_schema.is_some());
   assert!(name_child_schemas.is_empty());
   let (schema_name, schema) = name_schema.expect("schema should be defined");
@@ -175,8 +176,8 @@ fn api_component_derive_with_deprecated_field() {
     new_name: String,
   }
 
-  let name_schema = <Name as ApiComponent>::schema();
-  let name_child_schemas = <Name as ApiComponent>::child_schemas();
+  let name_schema = <Name as ApiComponent>::schema(OpenApiVersion::OAS3_0);
+  let name_child_schemas = <Name as ApiComponent>::child_schemas(OpenApiVersion::OAS3_0);
   assert!(name_schema.is_some());
   assert!(name_child_schemas.is_empty());
   let (schema_name, schema) = name_schema.expect("schema should be defined");
@@ -214,8 +215,8 @@ fn api_component_derive_with_format() {
     usernames: Vec<String>,
   }
 
-  let name_schema = <Name as ApiComponent>::schema();
-  let name_child_schemas = <Name as ApiComponent>::child_schemas();
+  let name_schema = <Name as ApiComponent>::schema(OpenApiVersion::OAS3_0);
+  let name_child_schemas = <Name as ApiComponent>::child_schemas(OpenApiVersion::OAS3_0);
   assert!(name_schema.is_some());
   assert!(name_child_schemas.is_empty());
   let (schema_name, schema) = name_schema.expect("schema should be defined");
@@ -252,8 +253,8 @@ fn api_component_derive_recursive() {
     old_name: Option<Box<Name>>,
   }
 
-  let name_schema = <Name as ApiComponent>::schema();
-  let name_child_schemas = <Name as ApiComponent>::child_schemas();
+  let name_schema = <Name as ApiComponent>::schema(OpenApiVersion::OAS3_0);
+  let name_child_schemas = <Name as ApiComponent>::child_schemas(OpenApiVersion::OAS3_0);
   assert!(name_schema.is_some());
   assert_eq!(name_child_schemas.len(), 1);
   let (schema_name, schema) = name_schema.expect("schema should be defined");
@@ -318,8 +319,8 @@ fn api_component_derive_flatten_algebraic_enums() {
     pub(crate) limit: u32,
   }
 
-  let name_schema = <Query as ApiComponent>::schema();
-  let name_child_schemas = <Query as ApiComponent>::child_schemas();
+  let name_schema = <Query as ApiComponent>::schema(OpenApiVersion::OAS3_0);
+  let name_child_schemas = <Query as ApiComponent>::child_schemas(OpenApiVersion::OAS3_0);
   assert!(name_schema.is_some());
   assert!(name_child_schemas.is_empty());
   let (schema_name, schema) = name_schema.expect("schema should be defined");
@@ -399,8 +400,8 @@ fn api_component_derive_optional_enums() {
     pub(crate) pagination: PaginationQuery,
   }
 
-  let name_schema = <Query as ApiComponent>::schema();
-  let name_child_schemas = <Query as ApiComponent>::child_schemas();
+  let name_schema = <Query as ApiComponent>::schema(OpenApiVersion::OAS3_0);
+  let name_child_schemas = <Query as ApiComponent>::child_schemas(OpenApiVersion::OAS3_0);
   assert!(name_schema.is_some());
   assert_eq!(name_child_schemas.len(), 1);
   let (schema_name, schema) = name_schema.expect("schema should be defined");
@@ -467,8 +468,8 @@ fn api_component_derive_named_enums() {
     pub(crate) kinds: Vec<KindQuery>,
   }
 
-  let name_schema = <Query as ApiComponent>::schema();
-  let name_child_schemas = <Query as ApiComponent>::child_schemas();
+  let name_schema = <Query as ApiComponent>::schema(OpenApiVersion::OAS3_0);
+  let name_child_schemas = <Query as ApiComponent>::child_schemas(OpenApiVersion::OAS3_0);
   assert!(name_schema.is_some());
   assert_eq!(name_child_schemas.len(), 2);
   let (schema_name, schema) = name_schema.expect("schema should be defined");
@@ -606,8 +607,8 @@ fn api_component_derive_named_enums_documented() {
     pub(crate) kind: Kind,
   }
 
-  let name_schema = <Query as ApiComponent>::schema();
-  let name_child_schemas = <Query as ApiComponent>::child_schemas();
+  let name_schema = <Query as ApiComponent>::schema(OpenApiVersion::OAS3_0);
+  let name_child_schemas = <Query as ApiComponent>::child_schemas(OpenApiVersion::OAS3_0);
   assert!(name_schema.is_some());
   assert_eq!(name_child_schemas.len(), 1);
   let (schema_name, schema) = name_schema.expect("schema should be defined");
@@ -710,8 +711,8 @@ fn api_component_derive_named_enums_deep() {
     pub(crate) level2: Level2Query,
   }
 
-  let name_schema = <Query as ApiComponent>::schema();
-  let name_child_schemas = <Query as ApiComponent>::child_schemas();
+  let name_schema = <Query as ApiComponent>::schema(OpenApiVersion::OAS3_0);
+  let name_child_schemas = <Query as ApiComponent>::child_schemas(OpenApiVersion::OAS3_0);
   assert!(name_schema.is_some());
   assert_eq!(name_child_schemas.len(), 5);
   let (schema_name, schema) = name_schema.expect("schema should be defined");

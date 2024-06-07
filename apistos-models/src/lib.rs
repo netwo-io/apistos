@@ -25,7 +25,7 @@ pub mod tag;
 
 pub use schemars::*;
 
-#[derive(Serialize, Clone, Debug)]
+#[derive(Serialize, Clone, Copy, Debug)]
 #[cfg_attr(any(test, feature = "deserialize"), derive(serde::Deserialize, PartialEq))]
 pub enum OpenApiVersion {
   #[serde(rename = "3.0.3")]

@@ -9,6 +9,7 @@ use std::collections::HashSet;
 use uuid::Uuid;
 
 use apistos::actix::{AcceptedJson, CreatedJson, NoContent};
+use apistos::OpenApiVersion;
 use apistos_core::PathItemDefinition;
 use apistos_gen::api_operation;
 
@@ -124,12 +125,12 @@ fn api_operation() {
     Ok(Json(test_models::TestResult { id: 0 }))
   }
 
-  let components = __openapi_test::components();
+  let components = __openapi_test::components(OpenApiVersion::OAS3_0);
   // only one component here because: error does not have schema and Test is used both for query and response
   assert_eq!(components.len(), 1);
   let components = serde_json::to_value(components).expect("Unable to serialize as Json");
 
-  let operation = __openapi_test::operation();
+  let operation = __openapi_test::operation(OpenApiVersion::OAS3_0);
   let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
 
   assert_json_eq!(
@@ -218,12 +219,12 @@ fn api_operation_impl_responder() {
     HttpResponse::Ok()
   }
 
-  let components = __openapi_test::components();
+  let components = __openapi_test::components(OpenApiVersion::OAS3_0);
   // only one component here because: error does not have schema and Test is used both for query and response
   assert_eq!(components.len(), 1);
   let components = serde_json::to_value(components).expect("Unable to serialize as Json");
 
-  let operation = __openapi_test::operation();
+  let operation = __openapi_test::operation(OpenApiVersion::OAS3_0);
   let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
 
   assert_json_eq!(
@@ -283,12 +284,12 @@ fn api_operation_simple_response() {
     Ok(Json(Uuid::new_v4()))
   }
 
-  let components = __openapi_test::components();
+  let components = __openapi_test::components(OpenApiVersion::OAS3_0);
   // only one component here because: error does not have schema and Test is used both for query and response
   assert_eq!(components.len(), 1);
   let components = serde_json::to_value(components).expect("Unable to serialize as Json");
 
-  let operation = __openapi_test::operation();
+  let operation = __openapi_test::operation(OpenApiVersion::OAS3_0);
   let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
 
   assert_json_eq!(
@@ -365,12 +366,12 @@ fn api_operation_without_parameters() {
     Ok(Json(test_models::TestResult { id: 0 }))
   }
 
-  let components = __openapi_test::components();
+  let components = __openapi_test::components(OpenApiVersion::OAS3_0);
   // only one component here because: error does not have schema and Test is used both for query and response
   assert_eq!(components.len(), 1);
   let components = serde_json::to_value(components).expect("Unable to serialize as Json");
 
-  let operation = __openapi_test::operation();
+  let operation = __openapi_test::operation(OpenApiVersion::OAS3_0);
   let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
 
   assert_json_eq!(
@@ -436,12 +437,12 @@ fn api_operation_no_content() {
     Ok(NoContent)
   }
 
-  let components = __openapi_test::components();
+  let components = __openapi_test::components(OpenApiVersion::OAS3_0);
   // only one component here because: error does not have schema and Test is used both for query and response
   assert_eq!(components.len(), 1);
   let components = serde_json::to_value(components).expect("Unable to serialize as Json");
 
-  let operation = __openapi_test::operation();
+  let operation = __openapi_test::operation(OpenApiVersion::OAS3_0);
   let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
 
   assert_json_eq!(
@@ -510,12 +511,12 @@ fn api_operation_created_json() {
     Ok(CreatedJson(test_models::TestResult { id: 1 }))
   }
 
-  let components = __openapi_test::components();
+  let components = __openapi_test::components(OpenApiVersion::OAS3_0);
   // only one component here because: error does not have schema and Test is used both for query and response
   assert_eq!(components.len(), 1);
   let components = serde_json::to_value(components).expect("Unable to serialize as Json");
 
-  let operation = __openapi_test::operation();
+  let operation = __openapi_test::operation(OpenApiVersion::OAS3_0);
   let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
 
   assert_json_eq!(
@@ -604,12 +605,12 @@ fn api_operation_created_json_simple_response() {
     Ok(CreatedJson(Uuid::new_v4()))
   }
 
-  let components = __openapi_test::components();
+  let components = __openapi_test::components(OpenApiVersion::OAS3_0);
   // only one component here because: error does not have schema and Test is used both for query and response
   assert_eq!(components.len(), 1);
   let components = serde_json::to_value(components).expect("Unable to serialize as Json");
 
-  let operation = __openapi_test::operation();
+  let operation = __openapi_test::operation(OpenApiVersion::OAS3_0);
   let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
 
   assert_json_eq!(
@@ -688,12 +689,12 @@ fn api_operation_accepted_json() {
     Ok(AcceptedJson(test_models::TestResult { id: 0 }))
   }
 
-  let components = __openapi_test::components();
+  let components = __openapi_test::components(OpenApiVersion::OAS3_0);
   // only one component here because: error does not have schema and Test is used both for query and response
   assert_eq!(components.len(), 1);
   let components = serde_json::to_value(components).expect("Unable to serialize as Json");
 
-  let operation = __openapi_test::operation();
+  let operation = __openapi_test::operation(OpenApiVersion::OAS3_0);
   let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
 
   assert_json_eq!(
@@ -784,11 +785,11 @@ fn api_operation_deprecated() {
     Ok(CreatedJson(test_models::TestResult { id: 4 }))
   }
 
-  let components = __openapi_test::components();
+  let components = __openapi_test::components(OpenApiVersion::OAS3_0);
   assert_eq!(components.len(), 1);
   let components = serde_json::to_value(components).expect("Unable to serialize as Json");
 
-  let operation = __openapi_test::operation();
+  let operation = __openapi_test::operation(OpenApiVersion::OAS3_0);
   let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
 
   assert_json_eq!(
@@ -876,11 +877,11 @@ fn api_operation_deprecated() {
     Ok(CreatedJson(test_models::TestResult { id: 2 }))
   }
 
-  let components = __openapi_test2::components();
+  let components = __openapi_test2::components(OpenApiVersion::OAS3_0);
   assert_eq!(components.len(), 1);
   let components = serde_json::to_value(components).expect("Unable to serialize as Json");
 
-  let operation = __openapi_test2::operation();
+  let operation = __openapi_test2::operation(OpenApiVersion::OAS3_0);
   let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
 
   assert_json_eq!(
@@ -972,10 +973,10 @@ fn api_operation_skip() {
     Ok(CreatedJson(test_models::TestResult { id: 6 }))
   }
 
-  let components = __openapi_test::components();
+  let components = __openapi_test::components(OpenApiVersion::OAS3_0);
   assert!(components.is_empty());
 
-  let operation = __openapi_test::operation();
+  let operation = __openapi_test::operation(OpenApiVersion::OAS3_0);
   let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
 
   assert_json_eq!(
@@ -999,11 +1000,11 @@ fn api_operation_error() {
     Ok(CreatedJson(test_models::TestResult { id: 1 }))
   }
 
-  let components = __openapi_test::components();
+  let components = __openapi_test::components(OpenApiVersion::OAS3_0);
   assert_eq!(components.len(), 1);
   let components = serde_json::to_value(components).expect("Unable to serialize as Json");
 
-  let operation = __openapi_test::operation();
+  let operation = __openapi_test::operation(OpenApiVersion::OAS3_0);
   let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
 
   assert_json_eq!(
@@ -1098,11 +1099,11 @@ fn api_operation_security() {
     Ok(CreatedJson(test_models::TestResult { id: 0 }))
   }
 
-  let components = __openapi_test::components();
+  let components = __openapi_test::components(OpenApiVersion::OAS3_0);
   assert_eq!(components.len(), 1);
   let components = serde_json::to_value(components).expect("Unable to serialize as Json");
 
-  let operation = __openapi_test::operation();
+  let operation = __openapi_test::operation(OpenApiVersion::OAS3_0);
   let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
 
   assert_json_eq!(
@@ -1221,12 +1222,12 @@ fn api_operation_multipart() {
     Ok(HttpResponse::Ok().content_type(ContentType::plaintext()).json(""))
   }
 
-  let components = __openapi_test::components();
+  let components = __openapi_test::components(OpenApiVersion::OAS3_0);
   // only one component here because: error does not have schema and Test is used both for query and response
   assert_eq!(components.len(), 1);
   let components = serde_json::to_value(components).expect("Unable to serialize as Json");
 
-  let operation = __openapi_test::operation();
+  let operation = __openapi_test::operation(OpenApiVersion::OAS3_0);
   let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
 
   assert_json_eq!(
@@ -1301,12 +1302,12 @@ fn api_operation_consumes_produces() {
     Ok(HttpResponse::Ok().content_type(ContentType::plaintext()).json(""))
   }
 
-  let components = __openapi_test::components();
+  let components = __openapi_test::components(OpenApiVersion::OAS3_0);
   // only one component here because: error does not have schema and Test is used both for query and response
   assert_eq!(components.len(), 1);
   let components = serde_json::to_value(components).expect("Unable to serialize as Json");
 
-  let operation = __openapi_test::operation();
+  let operation = __openapi_test::operation(OpenApiVersion::OAS3_0);
   let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
 
   assert_json_eq!(
@@ -1384,12 +1385,12 @@ fn api_operation_root_vec() {
     Ok(Json(vec![test_models::TestResult { id: 0 }]))
   }
 
-  let components = __openapi_test::components();
+  let components = __openapi_test::components(OpenApiVersion::OAS3_0);
   // only one component here because: error does not have schema and Test is used both for query and response
   assert_eq!(components.len(), 1);
   let components = serde_json::to_value(components).expect("Unable to serialize as Json");
 
-  let operation = __openapi_test::operation();
+  let operation = __openapi_test::operation(OpenApiVersion::OAS3_0);
   let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
 
   assert_json_eq!(

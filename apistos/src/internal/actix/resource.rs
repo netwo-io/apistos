@@ -1,6 +1,7 @@
 use crate::internal::actix::route::{Route, RouteWrapper};
 use crate::internal::actix::utils::OperationUpdater;
 use crate::internal::actix::METHODS;
+use crate::internal::get_oas_version;
 use actix_service::{ServiceFactory, Transform};
 use actix_web::body::MessageBody;
 use actix_web::dev::{AppService, HttpServiceFactory, ServiceRequest, ServiceResponse};
@@ -9,10 +10,12 @@ use actix_web::{Error, FromRequest, Handler, Responder};
 use apistos_core::PathItemDefinition;
 use apistos_models::components::Components;
 use apistos_models::paths::PathItem;
+use apistos_models::OpenApiVersion;
 use std::fmt::Debug;
 use std::future::Future;
 
 pub struct Resource<R = actix_web::Resource> {
+  pub(crate) oas_version: OpenApiVersion,
   pub(crate) path: String,
   pub(crate) item_definition: Option<PathItem>,
   pub(crate) components: Vec<Components>,
@@ -23,7 +26,9 @@ pub struct Resource<R = actix_web::Resource> {
 impl Resource {
   /// Wrapper for [`actix_web::Resource::new`](https://docs.rs/actix-web/*/actix_web/struct.Resource.html#method.new).
   pub fn new(path: &str) -> Resource {
+    let oas_version = get_oas_version();
     Resource {
+      oas_version,
       path: path.to_owned(),
       item_definition: None,
       components: Default::default(),
@@ -35,7 +40,9 @@ impl Resource {
   /// Wrapper for [`actix_web::Resource::new`](https://docs.rs/actix-web/*/actix_web/struct.Resource.html#method.new) with a list of tag names for the given scope.
   /// Tags should exist in `Spec` otherwise documentation might be considered invalid by consumers.
   pub fn new_tagged<T: Into<String>>(path: &str, tags: Vec<T>) -> Resource {
+    let oas_version = get_oas_version();
     Resource {
+      oas_version,
       path: path.to_owned(),
       item_definition: None,
       components: Default::default(),
@@ -109,7 +116,7 @@ where
     F::Future: PathItemDefinition,
   {
     if F::Future::is_visible() {
-      let mut operation = F::Future::operation();
+      let mut operation = F::Future::operation(self.oas_version);
       operation.tags.append(&mut self.tags.clone());
       let mut item_definition = self.item_definition.unwrap_or_default();
       for method in METHODS {
@@ -117,7 +124,7 @@ where
       }
       operation.update_path_parameter_name_from_path(&self.path);
       self.item_definition = Some(item_definition);
-      self.components.extend(F::Future::components());
+      self.components.extend(F::Future::components(self.oas_version));
     }
     self.inner = self.inner.to(handler);
     self
@@ -138,7 +145,9 @@ where
     B: MessageBody,
     M: Transform<T::Service, ServiceRequest, Response = ServiceResponse<B>, Error = Error, InitError = ()> + 'static,
   {
+    let oas_version = get_oas_version();
     Resource {
+      oas_version,
       path: self.path,
       item_definition: self.item_definition,
       components: self.components,
@@ -163,7 +172,9 @@ where
     F: Fn(ServiceRequest, &T::Service) -> R + Clone + 'static,
     R: Future<Output = Result<ServiceResponse<B>, Error>>,
   {
+    let oas_version = get_oas_version();
     Resource {
+      oas_version,
       path: self.path,
       item_definition: self.item_definition,
       components: self.components,

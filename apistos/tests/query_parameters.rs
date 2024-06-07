@@ -35,7 +35,7 @@ async fn query_parameters() {
     pub(crate) pagination: PaginationQuery,
   }
 
-  let parameters = <Query<StructQuery> as ApiComponent>::parameters();
+  let parameters = <Query<StructQuery> as ApiComponent>::parameters(OpenApiVersion::OAS3_0);
   assert_eq!(parameters.len(), 4);
 
   let test_parameter = parameters
@@ -86,7 +86,7 @@ async fn lab_query_parameters() {
     pub(crate) pagination: PaginationQuery,
   }
 
-  let parameters = <LabQuery<StructQuery> as ApiComponent>::parameters();
+  let parameters = <LabQuery<StructQuery> as ApiComponent>::parameters(OpenApiVersion::OAS3_0);
   assert_eq!(parameters.len(), 4);
 
   let test_parameter = parameters
@@ -137,7 +137,7 @@ async fn garde_query_parameters() {
     pub(crate) pagination: PaginationQuery,
   }
 
-  let parameters = <GardeQuery<StructQuery> as ApiComponent>::parameters();
+  let parameters = <GardeQuery<StructQuery> as ApiComponent>::parameters(OpenApiVersion::OAS3_0);
   assert_eq!(parameters.len(), 4);
 
   let test_parameter = parameters
@@ -188,7 +188,7 @@ async fn garde_lab_query_parameters() {
     pub(crate) pagination: PaginationQuery,
   }
 
-  let parameters = <GardeLabQuery<StructQuery> as ApiComponent>::parameters();
+  let parameters = <GardeLabQuery<StructQuery> as ApiComponent>::parameters(OpenApiVersion::OAS3_0);
   assert_eq!(parameters.len(), 4);
 
   let test_parameter = parameters
@@ -240,7 +240,7 @@ async fn query_parameters_with_flatten_enums() {
     pub(crate) kind: KindQuery,
   }
 
-  let parameters = <Query<StructQuery> as ApiComponent>::parameters();
+  let parameters = <Query<StructQuery> as ApiComponent>::parameters(OpenApiVersion::OAS3_0);
   assert_eq!(parameters.len(), 5);
 
   let test_parameter = parameters
@@ -291,5 +291,6 @@ use serde_json as _;
 
 #[cfg(not(feature = "lab_query"))]
 use actix_web_lab as _;
+use apistos_models::OpenApiVersion;
 #[cfg(not(feature = "garde"))]
 use garde_actix_web as _;
