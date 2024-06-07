@@ -16,12 +16,12 @@ where
     "multipart/form-data".to_string()
   }
 
-  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
-    T::child_schemas()
+  fn child_schemas(oas_version: apistos_models::OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
+    T::child_schemas(oas_version)
   }
 
-  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
-    T::schema()
+  fn schema(oas_version: apistos_models::OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
+    T::schema(oas_version)
   }
 }
 
@@ -33,12 +33,12 @@ where
     "multipart/form-data".to_string()
   }
 
-  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
-    T::child_schemas()
+  fn child_schemas(oas_version: apistos_models::OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
+    T::child_schemas(oas_version)
   }
 
-  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
-    T::schema()
+  fn schema(oas_version: apistos_models::OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
+    T::schema(oas_version)
   }
 }
 
@@ -50,12 +50,12 @@ where
     "multipart/form-data".to_string()
   }
 
-  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
-    T::child_schemas()
+  fn child_schemas(oas_version: apistos_models::OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
+    T::child_schemas(oas_version)
   }
 
-  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
-    T::schema()
+  fn schema(oas_version: apistos_models::OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
+    T::schema(oas_version)
   }
 }
 
@@ -64,19 +64,19 @@ impl ApiComponent for Multipart {
     "multipart/form-data".to_string()
   }
 
-  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
+  fn child_schemas(_: apistos_models::OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
     vec![]
   }
 
-  fn raw_schema() -> Option<ReferenceOr<Schema>> {
+  fn raw_schema(_: apistos_models::OpenApiVersion) -> Option<ReferenceOr<Schema>> {
     None
   }
 
-  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
+  fn schema(_: apistos_models::OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
     None
   }
 
-  fn request_body() -> Option<RequestBody> {
+  fn request_body(_: apistos_models::OpenApiVersion) -> Option<RequestBody> {
     Some(RequestBody {
       content: BTreeMap::from_iter(vec![(Self::content_type(), MediaType::default())]),
       required: Some(Self::required()),

@@ -7,7 +7,7 @@ use serde_json::{json, Value};
 use apistos_models::paths::{MediaType, Parameter, RequestBody, Response, Responses};
 use apistos_models::reference_or::ReferenceOr;
 use apistos_models::security::SecurityScheme;
-use apistos_models::Schema;
+use apistos_models::{OpenApiVersion, Schema};
 
 use crate::ApiErrorComponent;
 #[cfg(feature = "actix")]
@@ -24,13 +24,13 @@ pub trait ApiComponent {
 
   /// Contains children schemas for this operation
   /// Each child can also contain child schemas
-  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)>;
+  fn child_schemas(oas_version: OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)>;
 
-  fn raw_schema() -> Option<ReferenceOr<Schema>> {
+  fn raw_schema(_oas_version: OpenApiVersion) -> Option<ReferenceOr<Schema>> {
     None
   }
 
-  fn schema() -> Option<(String, ReferenceOr<Schema>)>;
+  fn schema(oas_version: OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)>;
 
   fn securities() -> BTreeMap<String, SecurityScheme> {
     Default::default()
@@ -40,8 +40,8 @@ pub trait ApiComponent {
     None
   }
 
-  fn request_body() -> Option<RequestBody> {
-    Self::schema().map(|(name, _)| RequestBody {
+  fn request_body(oas_version: OpenApiVersion) -> Option<RequestBody> {
+    Self::schema(oas_version).map(|(name, _)| RequestBody {
       content: BTreeMap::from_iter(vec![(
         Self::content_type(),
         MediaType {
@@ -56,19 +56,19 @@ pub trait ApiComponent {
     })
   }
 
-  fn error_responses() -> Vec<(String, Response)> {
+  fn error_responses(_oas_version: OpenApiVersion) -> Vec<(String, Response)> {
     vec![]
   }
 
-  fn error_schemas() -> BTreeMap<String, (String, ReferenceOr<Schema>)> {
+  fn error_schemas(_oas_version: OpenApiVersion) -> BTreeMap<String, (String, ReferenceOr<Schema>)> {
     BTreeMap::default()
   }
 
-  fn responses(_content_type: Option<String>) -> Option<Responses> {
+  fn responses(_oas_version: OpenApiVersion, _content_type: Option<String>) -> Option<Responses> {
     None
   }
 
-  fn parameters() -> Vec<Parameter> {
+  fn parameters(_oas_version: OpenApiVersion) -> Vec<Parameter> {
     vec![]
   }
 }
@@ -81,16 +81,16 @@ where
     false
   }
 
-  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
-    T::child_schemas()
+  fn child_schemas(oas_version: OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
+    T::child_schemas(oas_version)
   }
 
-  fn raw_schema() -> Option<ReferenceOr<Schema>> {
-    T::raw_schema()
+  fn raw_schema(oas_version: OpenApiVersion) -> Option<ReferenceOr<Schema>> {
+    T::raw_schema(oas_version)
   }
 
-  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
-    T::schema()
+  fn schema(oas_version: OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
+    T::schema(oas_version)
   }
 
   fn securities() -> BTreeMap<String, SecurityScheme> {
@@ -110,18 +110,20 @@ where
     true
   }
 
-  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
-    let mut schemas = T::schema().into_iter().collect::<Vec<(String, ReferenceOr<Schema>)>>();
-    schemas.append(&mut T::child_schemas());
+  fn child_schemas(oas_version: OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
+    let mut schemas = T::schema(oas_version)
+      .into_iter()
+      .collect::<Vec<(String, ReferenceOr<Schema>)>>();
+    schemas.append(&mut T::child_schemas(oas_version));
     schemas
   }
 
-  fn raw_schema() -> Option<ReferenceOr<Schema>> {
-    T::raw_schema()
+  fn raw_schema(oas_version: OpenApiVersion) -> Option<ReferenceOr<Schema>> {
+    T::raw_schema(oas_version)
   }
 
-  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
-    T::schema().map(|(name, schema)| {
+  fn schema(oas_version: OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
+    T::schema(oas_version).map(|(name, schema)| {
       let _ref = match schema {
         ReferenceOr::Reference { _ref } => _ref,
         ReferenceOr::Object(_) => format!("#/components/schemas/{}", name),
@@ -153,51 +155,51 @@ where
     T::required()
   }
 
-  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
-    T::child_schemas()
+  fn child_schemas(oas_version: OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
+    T::child_schemas(oas_version)
   }
 
-  fn raw_schema() -> Option<ReferenceOr<Schema>> {
-    T::raw_schema()
+  fn raw_schema(oas_version: OpenApiVersion) -> Option<ReferenceOr<Schema>> {
+    T::raw_schema(oas_version)
   }
 
-  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
-    T::schema()
-  }
-
-  // We expect error to be present only for response part
-  fn error_responses() -> Vec<(String, Response)> {
-    E::error_responses()
+  fn schema(oas_version: OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
+    T::schema(oas_version)
   }
 
   // We expect error to be present only for response part
-  fn error_schemas() -> BTreeMap<String, (String, ReferenceOr<Schema>)> {
-    E::schemas_by_status_code()
+  fn error_responses(oas_version: OpenApiVersion) -> Vec<(String, Response)> {
+    E::error_responses(oas_version)
   }
 
-  fn responses(content_type: Option<String>) -> Option<Responses> {
-    T::responses(content_type)
+  // We expect error to be present only for response part
+  fn error_schemas(oas_version: OpenApiVersion) -> BTreeMap<String, (String, ReferenceOr<Schema>)> {
+    E::schemas_by_status_code(oas_version)
+  }
+
+  fn responses(oas_version: OpenApiVersion, content_type: Option<String>) -> Option<Responses> {
+    T::responses(oas_version, content_type)
   }
 }
 
 #[cfg(feature = "actix")]
 impl<T> ApiComponent for actix_web::web::Data<T> {
-  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
+  fn child_schemas(_: OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
     vec![]
   }
 
-  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
+  fn schema(_: OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
     None
   }
 }
 
 #[cfg(feature = "actix")]
 impl<T: Clone> ApiComponent for actix_web::web::ReqData<T> {
-  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
+  fn child_schemas(_: OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
     vec![]
   }
 
-  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
+  fn schema(_: OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
     None
   }
 }
@@ -209,36 +211,36 @@ where
   R: actix_web::Responder + ApiComponent,
   P: PathItemDefinition,
 {
-  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
-    R::child_schemas()
+  fn child_schemas(oas_version: OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
+    R::child_schemas(oas_version)
   }
 
-  fn raw_schema() -> Option<ReferenceOr<Schema>> {
-    R::raw_schema()
+  fn raw_schema(oas_version: OpenApiVersion) -> Option<ReferenceOr<Schema>> {
+    R::raw_schema(oas_version)
   }
 
-  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
-    R::schema()
+  fn schema(oas_version: OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
+    R::schema(oas_version)
   }
 
-  fn error_responses() -> Vec<(String, Response)> {
-    R::error_responses()
+  fn error_responses(oas_version: OpenApiVersion) -> Vec<(String, Response)> {
+    R::error_responses(oas_version)
   }
 
-  fn error_schemas() -> BTreeMap<String, (String, ReferenceOr<Schema>)> {
-    R::error_schemas()
+  fn error_schemas(oas_version: OpenApiVersion) -> BTreeMap<String, (String, ReferenceOr<Schema>)> {
+    R::error_schemas(oas_version)
   }
 
-  fn responses(content_type: Option<String>) -> Option<Responses> {
+  fn responses(oas_version: OpenApiVersion, content_type: Option<String>) -> Option<Responses> {
     let mut responses = vec![];
-    if let Some(response) = R::responses(content_type.clone()) {
+    if let Some(response) = R::responses(oas_version, content_type.clone()) {
       responses.append(
         &mut response
           .responses
           .into_iter()
           .collect::<Vec<(String, ReferenceOr<Response>)>>(),
       );
-    } else if let Some((name, schema)) = Self::schema() {
+    } else if let Some((name, schema)) = Self::schema(oas_version) {
       let ref_or = match schema {
         r @ ReferenceOr::Reference { .. } => r,
         ReferenceOr::Object(schema_obj) => {
@@ -269,7 +271,7 @@ where
           ..Default::default()
         }),
       ));
-    } else if let Some(schema) = Self::raw_schema() {
+    } else if let Some(schema) = Self::raw_schema(oas_version) {
       responses.push((
         "200".to_owned(),
         ReferenceOr::Object(Response {
@@ -296,7 +298,7 @@ where
     }
 
     responses.append(
-      &mut Self::error_responses()
+      &mut Self::error_responses(oas_version)
         .into_iter()
         .map(|(status, schema)| (status, ReferenceOr::Object(schema)))
         .collect(),
@@ -310,6 +312,7 @@ where
 
 #[cfg(test)]
 mod test {
+  use apistos_models::OpenApiVersion;
   use schemars::gen::{SchemaGenerator, SchemaSettings};
   use schemars::{JsonSchema, Schema};
   use serde_json::json;
@@ -328,12 +331,15 @@ mod test {
     }
 
     impl ApiComponent for TestChild {
-      fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
+      fn child_schemas(_: OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
         vec![]
       }
 
-      fn schema() -> Option<(String, ReferenceOr<Schema>)> {
-        let gen = SchemaGenerator::new(SchemaSettings::openapi3());
+      fn schema(oas_version: OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
+        let schema_settings = match oas_version {
+          OpenApiVersion::OAS3_0 => SchemaSettings::openapi3(),
+        };
+        let gen = SchemaGenerator::new(schema_settings);
         Some(("TestChild".to_string(), gen.into_root_schema_for::<TestChild>().into()))
       }
     }
@@ -345,12 +351,15 @@ mod test {
     }
 
     impl ApiComponent for Test {
-      fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
-        <TestChild as ApiComponent>::schema().into_iter().collect()
+      fn child_schemas(oas_version: OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
+        <TestChild as ApiComponent>::schema(oas_version).into_iter().collect()
       }
 
-      fn schema() -> Option<(String, ReferenceOr<Schema>)> {
-        let gen = SchemaSettings::openapi3().into_generator();
+      fn schema(oas_version: OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
+        let schema_settings = match oas_version {
+          OpenApiVersion::OAS3_0 => SchemaSettings::openapi3(),
+        };
+        let gen = SchemaGenerator::new(schema_settings);
         let definition_path = gen.settings().definitions_path.clone();
         let definition_path = definition_path
           .trim_start_matches('/')
@@ -365,7 +374,7 @@ mod test {
       }
     }
 
-    let schema = <Vec<Test> as ApiComponent>::schema();
+    let schema = <Vec<Test> as ApiComponent>::schema(OpenApiVersion::OAS3_0);
     assert!(schema.is_some());
 
     let json = serde_json::to_value(schema.expect("Missing schema").1).expect("Unable to serialize as Json");
@@ -379,7 +388,7 @@ mod test {
       })
     );
 
-    let child_schema = <Vec<Test> as ApiComponent>::child_schemas();
+    let child_schema = <Vec<Test> as ApiComponent>::child_schemas(OpenApiVersion::OAS3_0);
     assert_eq!(child_schema.len(), 2);
     let first_child_schema = child_schema.first().cloned();
     assert!(first_child_schema.is_some());

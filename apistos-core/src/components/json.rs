@@ -11,16 +11,16 @@ where
     T::required()
   }
 
-  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
-    T::child_schemas()
+  fn child_schemas(oas_version: apistos_models::OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
+    T::child_schemas(oas_version)
   }
 
-  fn raw_schema() -> Option<ReferenceOr<Schema>> {
-    T::raw_schema()
+  fn raw_schema(oas_version: apistos_models::OpenApiVersion) -> Option<ReferenceOr<Schema>> {
+    T::raw_schema(oas_version)
   }
 
-  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
-    T::schema()
+  fn schema(oas_version: apistos_models::OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
+    T::schema(oas_version)
   }
 }
 
@@ -33,15 +33,15 @@ where
     T::required()
   }
 
-  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
-    T::child_schemas()
+  fn child_schemas(oas_version: apistos_models::OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
+    T::child_schemas(oas_version)
   }
 
-  fn raw_schema() -> Option<ReferenceOr<Schema>> {
-    T::raw_schema()
+  fn raw_schema(oas_version: apistos_models::OpenApiVersion) -> Option<ReferenceOr<Schema>> {
+    T::raw_schema(oas_version)
   }
 
-  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
-    T::schema()
+  fn schema(oas_version: apistos_models::OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
+    T::schema(oas_version)
   }
 }

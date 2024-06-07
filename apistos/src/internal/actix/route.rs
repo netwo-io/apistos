@@ -1,5 +1,6 @@
 use crate::internal::actix::utils::OperationUpdater;
 use crate::internal::actix::METHODS;
+use crate::internal::get_oas_version;
 use actix_service::ServiceFactory;
 use actix_web::dev::ServiceRequest;
 use actix_web::guard::Guard;
@@ -8,6 +9,7 @@ use actix_web::{Error, FromRequest, Handler, Responder};
 use apistos_core::PathItemDefinition;
 use apistos_models::components::Components;
 use apistos_models::paths::{Operation, OperationType, PathItem};
+use apistos_models::OpenApiVersion;
 use indexmap::IndexMap;
 use log::warn;
 
@@ -58,6 +60,7 @@ pub enum OperationTypeDoc {
 }
 
 pub struct Route {
+  oas_version: OpenApiVersion,
   operation: Option<Operation>,
   path_item_type: OperationTypeDoc,
   components: Vec<Components>,
@@ -83,7 +86,9 @@ impl Route {
   /// Wrapper for [`actix_web::Route::new`](https://docs.rs/actix-web/*/actix_web/struct.Route.html#method.new)
   #[allow(clippy::new_without_default)]
   pub fn new() -> Route {
+    let oas_version = get_oas_version();
     Route {
+      oas_version,
       operation: None,
       path_item_type: OperationTypeDoc::AllMethods,
       components: Default::default(),
@@ -129,8 +134,8 @@ impl Route {
     F::Future: PathItemDefinition,
   {
     if F::Future::is_visible() {
-      self.operation = Some(F::Future::operation());
-      self.components = F::Future::components();
+      self.operation = Some(F::Future::operation(self.oas_version));
+      self.components = F::Future::components(self.oas_version);
     }
     self.inner = self.inner.to(handler);
     self

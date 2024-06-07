@@ -1,4 +1,5 @@
 use actix_web::web::Header;
+use apistos::OpenApiVersion;
 use assert_json_diff::assert_json_eq;
 use schemars::JsonSchema;
 use serde_json::json;
@@ -18,9 +19,9 @@ fn api_header_derive() {
   )]
   struct OrganizationSlug(String);
 
-  let schema = <OrganizationSlug as ApiComponent>::schema();
-  let child_schemas = <OrganizationSlug as ApiComponent>::child_schemas();
-  let header_parameter = <Header<OrganizationSlug> as ApiComponent>::parameters();
+  let schema = <OrganizationSlug as ApiComponent>::schema(OpenApiVersion::OAS3_0);
+  let child_schemas = <OrganizationSlug as ApiComponent>::child_schemas(OpenApiVersion::OAS3_0);
+  let header_parameter = <Header<OrganizationSlug> as ApiComponent>::parameters(OpenApiVersion::OAS3_0);
   assert!(schema.is_some());
   assert!(child_schemas.is_empty());
   assert!(!header_parameter.is_empty());
