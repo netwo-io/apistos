@@ -29,7 +29,7 @@ impl<'a> ToTokens for Components<'a> {
       }
     };
     tokens.extend(quote!(
-      fn components() -> Vec<apistos::components::Components> {
+      fn components(oas_version: apistos::OpenApiVersion) -> Vec<apistos::components::Components> {
         use apistos::ApiComponent;
         let mut component_builder = apistos::components::Components::default();
 
@@ -43,15 +43,15 @@ impl<'a> ToTokens for Components<'a> {
 
         let mut schemas = vec![];
         #(
-          schemas.push(<#args>::schema());
+          schemas.push(<#args>::schema(oas_version));
         )*
-        schemas.push(<#responder_wrapper>::schema());
+        schemas.push(<#responder_wrapper>::schema(oas_version));
         let mut schemas = schemas.into_iter().flatten().collect::<Vec<(String, apistos::reference_or::ReferenceOr<apistos::Schema>)>>();
         #(
-          schemas.append(&mut <#args>::child_schemas());
+          schemas.append(&mut <#args>::child_schemas(oas_version));
         )*
-        schemas.append(&mut <#responder_wrapper>::child_schemas());
-        let error_schemas = <#responder_wrapper>::error_schemas();
+        schemas.append(&mut <#responder_wrapper>::child_schemas(oas_version));
+        let error_schemas = <#responder_wrapper>::error_schemas(oas_version);
         #error_codes_filter
         component_builder.schemas = std::collections::BTreeMap::from_iter(schemas);
         vec![component_builder]

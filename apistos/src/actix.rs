@@ -4,7 +4,7 @@ use actix_web::http::StatusCode;
 use actix_web::{HttpRequest, HttpResponse, Responder, ResponseError};
 use apistos_models::paths::{MediaType, RequestBody, Response, Responses};
 use apistos_models::reference_or::ReferenceOr;
-use apistos_models::Schema;
+use apistos_models::{OpenApiVersion, Schema};
 use serde::Serialize;
 use std::collections::BTreeMap;
 use std::fmt::Debug;
@@ -26,15 +26,15 @@ impl Responder for NoContent {
 }
 
 impl ApiComponent for NoContent {
-  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
+  fn child_schemas(_: OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
     vec![]
   }
 
-  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
+  fn schema(_: OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
     None
   }
 
-  fn responses(_content_type: Option<String>) -> Option<Responses> {
+  fn responses(_: OpenApiVersion, _content_type: Option<String>) -> Option<Responses> {
     let status = StatusCode::NO_CONTENT;
     Some(Responses {
       responses: BTreeMap::from_iter(vec![(
@@ -70,25 +70,26 @@ impl<T> ApiComponent for AcceptedJson<T>
 where
   T: Serialize + ApiComponent,
 {
-  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
-    T::child_schemas()
+  fn child_schemas(oas_version: OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
+    T::child_schemas(oas_version)
   }
 
-  fn raw_schema() -> Option<ReferenceOr<Schema>> {
-    T::raw_schema()
+  fn raw_schema(oas_version: OpenApiVersion) -> Option<ReferenceOr<Schema>> {
+    T::raw_schema(oas_version)
   }
 
-  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
-    T::schema()
+  fn schema(oas_version: OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
+    T::schema(oas_version)
   }
 
-  fn request_body() -> Option<RequestBody> {
+  fn request_body(_: OpenApiVersion) -> Option<RequestBody> {
     None
   }
 
-  fn responses(_content_type: Option<String>) -> Option<Responses> {
+  fn responses(oas_version: OpenApiVersion, _content_type: Option<String>) -> Option<Responses> {
     let status = StatusCode::ACCEPTED;
-    response_from_schema(status, Self::schema()).or_else(|| response_from_raw_schema(status, Self::raw_schema()))
+    response_from_schema(status, Self::schema(oas_version))
+      .or_else(|| response_from_raw_schema(status, Self::raw_schema(oas_version)))
   }
 }
 
@@ -116,21 +117,22 @@ impl<T> ApiComponent for CreatedJson<T>
 where
   T: Serialize + ApiComponent,
 {
-  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
-    T::child_schemas()
+  fn child_schemas(oas_version: OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
+    T::child_schemas(oas_version)
   }
 
-  fn raw_schema() -> Option<ReferenceOr<Schema>> {
-    T::raw_schema()
+  fn raw_schema(oas_version: OpenApiVersion) -> Option<ReferenceOr<Schema>> {
+    T::raw_schema(oas_version)
   }
 
-  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
-    T::schema()
+  fn schema(oas_version: OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
+    T::schema(oas_version)
   }
 
-  fn responses(_content_type: Option<String>) -> Option<Responses> {
+  fn responses(oas_version: OpenApiVersion, _content_type: Option<String>) -> Option<Responses> {
     let status = StatusCode::CREATED;
-    response_from_schema(status, Self::schema()).or_else(|| response_from_raw_schema(status, Self::raw_schema()))
+    response_from_schema(status, Self::schema(oas_version))
+      .or_else(|| response_from_raw_schema(status, Self::raw_schema(oas_version)))
   }
 }
 
@@ -196,12 +198,13 @@ mod test {
   use apistos_gen::ApiComponent;
   use apistos_models::paths::Response;
   use apistos_models::reference_or::ReferenceOr;
+  use apistos_models::OpenApiVersion;
   use schemars::JsonSchema;
   use serde::Serialize;
 
   #[test]
   fn no_content_generate_valid_response() {
-    let responses = <NoContent as ApiComponent>::responses(None);
+    let responses = <NoContent as ApiComponent>::responses(OpenApiVersion::OAS3_0, None);
     assert!(responses.is_some());
 
     let responses = responses.expect("missing responses");
@@ -219,7 +222,7 @@ mod test {
       test: String,
     }
 
-    let responses = <AcceptedJson<Test> as ApiComponent>::responses(None);
+    let responses = <AcceptedJson<Test> as ApiComponent>::responses(OpenApiVersion::OAS3_0, None);
     assert!(responses.is_some());
 
     let responses = responses.expect("missing responses");
@@ -234,7 +237,7 @@ mod test {
       test: String,
     }
 
-    let responses = <CreatedJson<Test> as ApiComponent>::responses(None);
+    let responses = <CreatedJson<Test> as ApiComponent>::responses(OpenApiVersion::OAS3_0, None);
     assert!(responses.is_some());
 
     let responses = responses.expect("missing responses");

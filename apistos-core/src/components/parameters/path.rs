@@ -2,7 +2,7 @@ use crate::ApiComponent;
 use actix_web::web::Path;
 use apistos_models::paths::{Parameter, ParameterDefinition, ParameterIn, RequestBody};
 use apistos_models::reference_or::ReferenceOr;
-use apistos_models::Schema;
+use apistos_models::{OpenApiVersion, Schema};
 use serde_json::{Map, Value};
 
 impl<T> ApiComponent for Path<T>
@@ -14,24 +14,26 @@ where
     true
   }
 
-  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
+  fn child_schemas(_: OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
     vec![]
   }
 
-  fn raw_schema() -> Option<ReferenceOr<Schema>> {
-    T::raw_schema()
+  fn raw_schema(oas_version: OpenApiVersion) -> Option<ReferenceOr<Schema>> {
+    T::raw_schema(oas_version)
   }
 
-  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
+  fn schema(_: OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
     None
   }
 
-  fn request_body() -> Option<RequestBody> {
+  fn request_body(_: OpenApiVersion) -> Option<RequestBody> {
     None
   }
 
-  fn parameters() -> Vec<Parameter> {
-    let schema = T::schema().map(|(_, sch)| sch).or_else(Self::raw_schema);
+  fn parameters(oas_version: OpenApiVersion) -> Vec<Parameter> {
+    let schema = T::schema(oas_version)
+      .map(|(_, sch)| sch)
+      .or_else(|| Self::raw_schema(oas_version));
 
     if let Some(schema) = schema {
       parameters_for_schema(schema, Self::required())
@@ -51,24 +53,26 @@ where
     true
   }
 
-  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
+  fn child_schemas(_: OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
     vec![]
   }
 
-  fn raw_schema() -> Option<ReferenceOr<Schema>> {
-    T::raw_schema()
+  fn raw_schema(oas_version: OpenApiVersion) -> Option<ReferenceOr<Schema>> {
+    T::raw_schema(oas_version)
   }
 
-  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
+  fn schema(_: OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
     None
   }
 
-  fn request_body() -> Option<RequestBody> {
+  fn request_body(_: OpenApiVersion) -> Option<RequestBody> {
     None
   }
 
-  fn parameters() -> Vec<Parameter> {
-    let schema = T::schema().map(|(_, sch)| sch).or_else(Self::raw_schema);
+  fn parameters(oas_version: OpenApiVersion) -> Vec<Parameter> {
+    let schema = T::schema(oas_version)
+      .map(|(_, sch)| sch)
+      .or_else(|| Self::raw_schema(oas_version));
     if let Some(schema) = schema {
       parameters_for_schema(schema, Self::required())
     } else {
@@ -87,26 +91,26 @@ macro_rules! impl_path_tuple ({ $($ty:ident),+ } => {
       true
     }
 
-    fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
+    fn child_schemas(_: OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
       vec![]
     }
 
-    fn raw_schema() -> Option<ReferenceOr<Schema>> {
+    fn raw_schema(_: OpenApiVersion) -> Option<ReferenceOr<Schema>> {
       None
     }
 
-    fn schema() -> Option<(String, ReferenceOr<Schema>)> {
+    fn schema(_: OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
       None
     }
 
-    fn request_body() -> Option<RequestBody> {
+    fn request_body(_: OpenApiVersion) -> Option<RequestBody> {
       None
     }
 
-    fn parameters() -> Vec<Parameter> {
+    fn parameters(oas_version: OpenApiVersion) -> Vec<Parameter> {
       let mut parameters = vec![];
       $(
-        let schema = $ty::schema().map(|(_, sch)| sch).or_else($ty::raw_schema);
+        let schema = $ty::schema(oas_version).map(|(_, sch)| sch).or_else(|| $ty::raw_schema(oas_version));
 
         if let Some(schema) = schema {
           parameters.append(&mut parameters_for_schema(schema, Self::required()));
@@ -126,26 +130,26 @@ macro_rules! impl_path_tuple ({ $($ty:ident),+ } => {
       true
     }
 
-    fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
+    fn child_schemas(_: OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
       vec![]
     }
 
-    fn raw_schema() -> Option<ReferenceOr<Schema>> {
+    fn raw_schema(_: OpenApiVersion) -> Option<ReferenceOr<Schema>> {
       None
     }
 
-    fn schema() -> Option<(String, ReferenceOr<Schema>)> {
+    fn schema(_: OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
       None
     }
 
-    fn request_body() -> Option<RequestBody> {
+    fn request_body(_: OpenApiVersion) -> Option<RequestBody> {
       None
     }
 
-    fn parameters() -> Vec<Parameter> {
+    fn parameters(oas_version: OpenApiVersion) -> Vec<Parameter> {
       let mut parameters = vec![];
       $(
-        let schema = $ty::schema().map(|(_, sch)| sch).or_else($ty::raw_schema);
+        let schema = $ty::schema(oas_version).map(|(_, sch)| sch).or_else(|| $ty::raw_schema(oas_version));
 
         if let Some(schema) = schema {
           parameters.append(&mut parameters_for_schema(schema, Self::required()));
