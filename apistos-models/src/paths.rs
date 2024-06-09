@@ -1,19 +1,33 @@
-use crate::reference_or::ReferenceOr;
-use crate::security::SecurityRequirement;
-use crate::server::Server;
+use std::collections::BTreeMap;
+
 use indexmap::IndexMap;
 use schemars::Schema;
 use serde::Serialize;
 use serde_json::Value;
-use std::collections::BTreeMap;
 
+use crate::reference_or::ReferenceOr;
+use crate::security::SecurityRequirement;
+use crate::server::Server;
+use crate::VersionSpecificSchema;
+
+/// # OAS 3.0
+/// Holds the relative paths to the individual endpoints and their operations. The path is appended to the URL from the [Server Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#server-object) in order to construct the full URL. The Paths MAY be empty, due to [ACL constraints](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#security-filtering).
+/// # OAS 3.1
+/// Holds the relative paths to the individual endpoints and their operations. The path is appended to the URL from the [Server Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#server-object) in order to construct the full URL. The Paths MAY be empty, due to [Access Control List (ACL) constraints](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#security-filtering).
 #[derive(Serialize, Clone, Debug, Default)]
 #[cfg_attr(any(test, feature = "deserialize"), derive(serde::Deserialize, PartialEq))]
 #[serde(rename_all = "camelCase")]
 pub struct Paths {
+  /// # OAS 3.0
+  /// A relative path to an individual endpoint. The field name MUST begin with a forward slash (`/`). The path is **appended** (no relative URL resolution) to the expanded URL from the [Server Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#server-object)'s `url` field in order to construct the full URL. [Path templating](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#path-templating) is allowed. When matching URLs, concrete (non-templated) paths would be matched before their templated counterparts. Templated paths with the same hierarchy but different templated names MUST NOT exist as they are identical. In case of ambiguous matching, it's up to the tooling to decide which one to use.
+  /// # OAS 3.1
+  /// A relative path to an individual endpoint. The field name MUST begin with a forward slash (`/`). The path is **appended** (no relative URL resolution) to the expanded URL from the [Server Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#server-object)'s `url` field in order to construct the full URL. [Path templating](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#path-templating) is allowed. When matching URLs, concrete (non-templated) paths would be matched before their templated counterparts. Templated paths with the same hierarchy but different templated names MUST NOT exist as they are identical. In case of ambiguous matching, it's up to the tooling to decide which one to use.
   #[serde(flatten)]
   pub paths: IndexMap<String, PathItem>,
+  /// # OAS 3.0
   /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions).
+  /// # OAS 3.1
+  /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specification-extensions).
   #[serde(flatten, skip_serializing_if = "IndexMap::is_empty", skip_deserializing)]
   pub extensions: IndexMap<String, Value>,
 }
@@ -23,6 +37,12 @@ pub struct Paths {
 #[cfg_attr(any(test, feature = "deserialize"), derive(serde::Deserialize, PartialEq))]
 #[serde(rename_all = "camelCase")]
 pub struct PathItem {
+  /// # OAS 3.0
+  /// Allows for an external definition of this path item. The referenced structure MUST be in the format of a [Path Item Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#path-item-object). In case a Path Item Object field appears both in the defined object and the referenced object, the behavior is undefined.
+  /// # OAS 3.1
+  /// Allows for a referenced definition of this path item. The referenced structure MUST be in the form of a [Path Item Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#path-item-object). In case a Path Item Object field appears both in the defined object and the referenced object, the behavior is undefined. See the rules for resolving [Relative References](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#relative-references-in-uris).
+  #[serde(skip_serializing_if = "Option::is_none", rename = "$ref")]
+  pub _ref: Option<String>,
   /// An optional, string summary, intended to apply to all operations in this path.
   #[serde(skip_serializing_if = "Option::is_none")]
   pub summary: Option<String>,
@@ -34,10 +54,16 @@ pub struct PathItem {
   /// An alternative `server` array to service all operations in this path.
   #[serde(skip_serializing_if = "Vec::is_empty", default)]
   pub server: Vec<Server>,
+  /// # OAS 3.0
   /// A list of parameters that are applicable for all the operations described under this path. These parameters can be overridden at the operation level, but cannot be removed there. The list MUST NOT include duplicated parameters. A unique parameter is defined by a combination of a [name](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameterName) and [location](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameterIn). The list can use the [Reference Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#reference-object) to link to parameters that are defined at the [OpenAPI Object's components/parameters](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#componentsParameters).
+  /// # OAS 3.1
+  /// A list of parameters that are applicable for all the operations described under this path. These parameters can be overridden at the operation level, but cannot be removed there. The list MUST NOT include duplicated parameters. A unique parameter is defined by a combination of a [name](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameterName) and [location](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameterIn). The list can use the [Reference Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#reference-object) to link to parameters that are defined at the [OpenAPI Object's components/parameters](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#componentsParameters).
   #[serde(skip_serializing_if = "Vec::is_empty", default)]
   pub parameters: Vec<ReferenceOr<Parameter>>,
+  /// # OAS 3.0
   /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions).
+  /// # OAS 3.1
+  /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specification-extensions).
   #[serde(flatten, skip_serializing_if = "IndexMap::is_empty", skip_deserializing)]
   pub extensions: IndexMap<String, Value>,
 }
@@ -84,27 +110,42 @@ pub struct Operation {
   /// Unique string used to identify the operation. The id MUST be unique among all operations described in the API. The operationId value is case-sensitive. Tools and libraries MAY use the operationId to uniquely identify an operation, therefore, it is RECOMMENDED to follow common programming naming conventions.
   #[serde(skip_serializing_if = "Option::is_none")]
   pub operation_id: Option<String>,
+  /// # OAS 3.0
   /// A list of parameters that are applicable for this operation. If a parameter is already defined at the [Path Item](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#pathItemParameters), the new definition will override it but can never remove it. The list MUST NOT include duplicated parameters. A unique parameter is defined by a combination of a [name](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameterName) and [location](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameterIn). The list can use the [Reference Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#reference-object) to link to parameters that are defined at the [OpenAPI Object's components/parameters](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#componentsParameters).
+  /// # OAS 3.1
+  /// A list of parameters that are applicable for this operation. If a parameter is already defined at the [Path Item](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#pathItemParameters), the new definition will override it but can never remove it. The list MUST NOT include duplicated parameters. A unique parameter is defined by a combination of a [name](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameterName) and [location](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameterIn). The list can use the [Reference Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#reference-object) to link to parameters that are defined at the [OpenAPI Object's components/parameters](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#componentsParameters).
   #[serde(skip_serializing_if = "Vec::is_empty", default)]
   pub parameters: Vec<ReferenceOr<Parameter>>,
+  /// # OAS 3.0
   /// The request body applicable for this operation. The `requestBody` is only supported in HTTP methods where the HTTP 1.1 specification [RFC7231](https://datatracker.ietf.org/doc/html/rfc7231#section-4.3.1) has explicitly defined semantics for request bodies. In other cases where the HTTP spec is vague, `requestBody` SHALL be ignored by consumers.
+  /// # OAS 3.1
+  /// The request body applicable for this operation. The `requestBody` is fully supported in HTTP methods where the HTTP 1.1 specification [RFC7231](https://datatracker.ietf.org/doc/html/rfc7231#section-4.3.1) has explicitly defined semantics for request bodies. In other cases where the HTTP spec is vague (such as [GET](https://datatracker.ietf.org/doc/html/rfc7231#section-4.3.1), [HEAD](https://datatracker.ietf.org/doc/html/rfc7231#section-4.3.2) and [DELETE](https://datatracker.ietf.org/doc/html/rfc7231#section-4.3.5)), `requestBody` is permitted but does not have well-defined semantics and SHOULD be avoided if possible.
   #[serde(skip_serializing_if = "Option::is_none")]
   pub request_body: Option<ReferenceOr<RequestBody>>,
   /// The list of possible responses as they are returned from executing this operation.
   pub responses: Responses,
+  /// # OAS 3.0
   /// A map of possible out-of band callbacks related to the parent operation. The key is a unique identifier for the [Callback Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#callback-object). Each value in the map is a Callback Object that describes a request that may be initiated by the API provider and the expected responses.
+  /// # OAS 3.1
+  /// A map of possible out-of band callbacks related to the parent operation. The key is a unique identifier for the Callback Object. Each value in the map is a [Callback Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#callback-object) that describes a request that may be initiated by the API provider and the expected responses.
   #[serde(skip_serializing_if = "BTreeMap::is_empty", default)]
   pub callbacks: BTreeMap<String, ReferenceOr<Callback>>,
   /// Declares this operation to be deprecated. Consumers SHOULD refrain from usage of the declared operation. Default value is `false`.
   #[serde(skip_serializing_if = "Option::is_none")]
   pub deprecated: Option<bool>,
+  /// # OAS 3.0
   /// A declaration of which security mechanisms can be used for this operation. The list of values includes alternative security requirement objects that can be used. Only one of the security requirement objects need to be satisfied to authorize a request. To make security optional, an empty security requirement (`{}`) can be included in the array. This definition overrides any declared top-level [`security`](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#oasSecurity). To remove a top-level security declaration, an empty array can be used.
+  /// # OAS 3.1
+  /// A declaration of which security mechanisms can be used for this operation. The list of values includes alternative security requirement objects that can be used. Only one of the security requirement objects need to be satisfied to authorize a request. To make security optional, an empty security requirement (`{}`) can be included in the array. This definition overrides any declared top-level [`security`](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#oasSecurity). To remove a top-level security declaration, an empty array can be used.
   #[serde(skip_serializing_if = "Vec::is_empty", default)]
   pub security: Vec<SecurityRequirement>,
   /// An alternative `server` array to service this operation. If an alternative `server` object is specified at the Path Item Object or Root level, it will be overridden by this value.
   #[serde(skip_serializing_if = "Vec::is_empty", default)]
   pub servers: Vec<Server>,
+  /// # OAS 3.0
   /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions).
+  /// # OAS 3.1
+  /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specification-extensions).
   #[serde(flatten, skip_serializing_if = "IndexMap::is_empty", skip_deserializing)]
   pub extensions: IndexMap<String, Value>,
 }
@@ -119,17 +160,34 @@ pub struct ExternalDocumentation {
   pub description: Option<String>,
   /// The URL for the target documentation. Value MUST be in the format of a URL.
   pub url: String,
+  /// # OAS 3.0
   /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions).
+  /// # OAS 3.1
+  /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specification-extensions).
   #[serde(flatten, skip_serializing_if = "IndexMap::is_empty", skip_deserializing)]
   pub extensions: IndexMap<String, Value>,
 }
 
+/// # OAS 3.0
 /// Describes a single operation parameter.
 /// A unique parameter is defined by a combination of a [name](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameterName) and [location](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameterIn).
-/// Parameter Locations
-/// # There are four possible parameter locations specified by the in field:
+/// ## Parameter Locations
+/// There are four possible parameter locations specified by the in field:
 ///
 /// - path - Used together with [Path Templating](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#path-templating), where the parameter value is actually part of the operation's URL. This does not include the host or base path of the API. For example, in `/items/{itemId}`, the path parameter is `itemId`.
+/// - query - Parameters that are appended to the URL. For example, in `/items?id=###`, the query parameter is `id`.
+/// - header - Custom headers that are expected as part of the request. Note that [RFC7230](https://datatracker.ietf.org/doc/html/rfc7230#page-22) states header names are case insensitive.
+/// - cookie - Used to pass a specific cookie value to the API.
+///
+/// # OAS 3.1
+/// Describes a single operation parameter.
+///
+/// A unique parameter is defined by a combination of a [name](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameterName) and [location](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameterIn).
+///
+/// ## Parameter Locations
+/// There are four possible parameter locations specified by the in field:
+///
+/// - path - Used together with [Path Templating](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#path-templating), where the parameter value is actually part of the operation's URL. This does not include the host or base path of the API. For example, in `/items/{itemId}`, the path parameter is `itemId`.
 /// - query - Parameters that are appended to the URL. For example, in `/items?id=###`, the query parameter is `id`.
 /// - header - Custom headers that are expected as part of the request. Note that [RFC7230](https://datatracker.ietf.org/doc/html/rfc7230#page-22) states header names are case insensitive.
 /// - cookie - Used to pass a specific cookie value to the API.
@@ -137,10 +195,16 @@ pub struct ExternalDocumentation {
 #[cfg_attr(any(test, feature = "deserialize"), derive(serde::Deserialize, PartialEq))]
 #[serde(rename_all = "camelCase")]
 pub struct Parameter {
+  /// # OAS 3.0
   /// The name of the parameter. Parameter names are case sensitive.
   /// - If [`in`](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameterIn) is `"path"`, the `name` field MUST correspond to a template expression occurring within the [path](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#pathsPath) field in the [Paths Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#paths-object). See [Path Templating](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#path-templating) for further information.
   /// - If [`in`](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameterIn) is `"header"` and the `name` field is `"Accept"`, `"Content-Type"` or `"Authorization"`, the parameter definition SHALL be ignored.
   /// - For all other cases, the `name` corresponds to the parameter name used by the [`in`](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameterIn) property.
+  /// # OAS 3.1
+  /// The name of the parameter. Parameter names are case sensitive.
+  /// - If [`in`](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameterIn) is `"path"`, the `name` field MUST correspond to a template expression occurring within the [path](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#pathsPath) field in the [Paths Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#paths-object). See [Path Templating](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#path-templating) for further information.
+  /// - If [`in`](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameterIn) is `"header"` and the `name` field is `"Accept"`, `"Content-Type"` or `"Authorization"`, the parameter definition SHALL be ignored.
+  /// - For all other cases, the `name` corresponds to the parameter name used by the [`in`](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameterIn) property.
   pub name: String,
   /// The location of the parameter. Possible values are `"query"`, `"header"`, `"path"` or `"cookie"`.
   #[serde(rename = "in")]
@@ -148,19 +212,28 @@ pub struct Parameter {
   /// A brief description of the parameter. This could contain examples of use. [CommonMark syntax](https://spec.commonmark.org/) MAY be used for rich text representation.
   #[serde(skip_serializing_if = "Option::is_none")]
   pub description: Option<String>,
+  /// # OAS 3.0
   /// Determines whether this parameter is mandatory. If the [parameter location](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameterIn) is `"path"`, this property is **REQUIRED** and its value MUST be `true`. Otherwise, the property MAY be included and its default value is `false`.
+  /// # OAS 3.1
+  /// Determines whether this parameter is mandatory. If the [parameter location](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameterIn) is `"path"`, this property is **REQUIRED** and its value MUST be `true`. Otherwise, the property MAY be included and its default value is `false`.
   #[serde(skip_serializing_if = "Option::is_none")]
   pub required: Option<bool>,
   /// Specifies that a parameter is deprecated and SHOULD be transitioned out of usage. Default value is `false`.
   #[serde(skip_serializing_if = "Option::is_none")]
   pub deprecated: Option<bool>,
+  /// # OAS 3.0
   /// Sets the ability to pass empty-valued parameters. This is valid only for `query` parameters and allows sending a parameter with an empty value. Default value is `false`. If [`style`](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameterStyle) is used, and if behavior is `n/a` (cannot be serialized), the value of `allowEmptyValue` SHALL be ignored. Use of this property is NOT RECOMMENDED, as it is likely to be removed in a later revision.
+  /// # OAS 3.1
+  /// Sets the ability to pass empty-valued parameters. This is valid only for `query` parameters and allows sending a parameter with an empty value. Default value is `false`. If [`style`](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameterStyle) is used, and if behavior is `n/a` (cannot be serialized), the value of `allowEmptyValue` SHALL be ignored. Use of this property is NOT RECOMMENDED, as it is likely to be removed in a later revision.
   #[serde(skip_serializing_if = "Option::is_none")]
   pub allow_empty_value: Option<bool>,
   /// Describes how the parameter value will be serialized depending on the type of the parameter value. Default values (based on value of `in`): for `query` - `form`; for `path` - `simple`; for `header` - `simple`; for `cookie` - `form`.
   #[serde(skip_serializing_if = "Option::is_none")]
   pub style: Option<ParameterStyle>,
+  /// # OAS 3.0
   /// When this is true, parameter values of type `array` or `object` generate separate parameters for each value of the array or key-value pair of the map. For other types of parameters this property has no effect. When [`style`](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameterStyle) is `form`, the default value is `true`. For all other styles, the default value is `false`.
+  /// # OAS 3.1
+  /// When this is true, parameter values of type `array` or `object` generate separate parameters for each value of the array or key-value pair of the map. For other types of parameters this property has no effect. When [`style`](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameterStyle) is `form`, the default value is `true`. For all other styles, the default value is `false`.
   #[serde(skip_serializing_if = "Option::is_none")]
   pub explode: Option<bool>,
   /// Determines whether the parameter value SHOULD allow reserved characters, as defined by [RFC3986](https://datatracker.ietf.org/doc/html/rfc3986#section-2.2) `:/?#[]@!$&'()*+,;=` to be included without percent-encoding. This property only applies to parameters with an `in` value of `query`. The default value is `false`.
@@ -170,7 +243,10 @@ pub struct Parameter {
   pub definition: Option<ParameterDefinition>,
   #[serde(flatten, skip_serializing_if = "Option::is_none")]
   pub example: Option<Examples>,
+  /// # OAS 3.0
   /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions).
+  /// # OAS 3.1
+  /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specification-extensions).
   #[serde(flatten, skip_serializing_if = "IndexMap::is_empty", skip_deserializing)]
   pub extensions: IndexMap<String, Value>,
 }
@@ -191,14 +267,17 @@ pub enum ParameterDefinition {
 #[serde(rename_all = "camelCase")]
 pub struct MediaType {
   /// The schema defining the content of the request, response, or parameter.
-  #[serde(skip_serializing_if = "Option::is_none")]
-  pub schema: Option<ReferenceOr<Schema>>,
+  #[serde(skip_serializing_if = "Option::is_none", flatten)]
+  pub schema: Option<VersionSpecificSchema>,
   #[serde(flatten)]
   #[serde(skip_serializing_if = "Option::is_none")]
   pub example: Option<Examples>,
   #[serde(skip_serializing_if = "BTreeMap::is_empty", default)]
   pub encoding: BTreeMap<String, Encoding>,
+  /// # OAS 3.0
   /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions).
+  /// # OAS 3.1
+  /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specification-extensions).
   #[serde(flatten, skip_serializing_if = "IndexMap::is_empty", skip_deserializing)]
   pub extensions: IndexMap<String, Value>,
 }
@@ -214,25 +293,44 @@ pub struct Encoding {
   /// A map allowing additional information to be provided as headers, for example `Content-Disposition`. `Content-Type` is described separately and SHALL be ignored in this section. This property SHALL be ignored if the request body media type is not a `multipart`.
   #[serde(skip_serializing_if = "BTreeMap::is_empty", default)]
   pub headers: BTreeMap<String, ReferenceOr<Header>>,
+  /// # OAS 3.0
   /// Describes how a specific property value will be serialized depending on its type. See [Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameter-object) for details on the [`style`](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameterStyle) property. The behavior follows the same values as `query` parameters, including default values. This property SHALL be ignored if the request body media type is not `application/x-www-form-urlencoded`.
+  /// # OAS 3.1
+  /// Describes how a specific property value will be serialized depending on its type. See [Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameter-object) for details on the [`style`](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameterStyle) property. The behavior follows the same values as `query` parameters, including default values. This property SHALL be ignored if the request body media type is not `application/x-www-form-urlencoded` or `multipart/form-data`. If a value is explicitly defined, then the value of [`contentType`](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#encodingContentType) (implicit or explicit) SHALL be ignored.
   #[serde(skip_serializing_if = "Option::is_none")]
   pub style: Option<ParameterStyle>,
+  /// # OAS 3.0
   /// When this is true, property values of type `array` or `object` generate separate parameters for each value of the array, or key-value-pair of the map. For other types of properties this property has no effect. When [`style`](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameterStyle) is `form`, the default value is `true`. For all other styles, the default value is `false`. This property SHALL be ignored if the request body media type is not `application/x-www-form-urlencoded`.
+  /// # OAS 3.1
+  /// When this is true, property values of type `array` or `object` generate separate parameters for each value of the array, or key-value-pair of the map. For other types of properties this property has no effect. When [`style`](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#encodingStyle) is `form`, the default value is `true`. For all other styles, the default value is `false`. This property SHALL be ignored if the request body media type is not `application/x-www-form-urlencoded` or `multipart/form-data`. If a value is explicitly defined, then the value of [`contentType`](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#encodingContentType) (implicit or explicit) SHALL be ignored.
   #[serde(skip_serializing_if = "Option::is_none")]
   pub explode: Option<bool>,
+  /// # OAS 3.0
   /// Determines whether the parameter value SHOULD allow reserved characters, as defined by [RFC3986](https://datatracker.ietf.org/doc/html/rfc3986#section-2.2) `:/?#[]@!$&'()*+,;=` to be included without percent-encoding. The default value is `false`. This property SHALL be ignored if the request body media type is not `application/x-www-form-urlencoded`.
+  /// # OAS 3.1
+  /// Determines whether the parameter value SHOULD allow reserved characters, as defined by [RFC3986](https://datatracker.ietf.org/doc/html/rfc3986#section-2.2) `:/?#[]@!$&'()*+,;=` to be included without percent-encoding. The default value is `false`. This property SHALL be ignored if the request body media type is not `application/x-www-form-urlencoded` or `multipart/form-data`. If a value is explicitly defined, then the value of [`contentType`](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#encodingContentType) (implicit or explicit) SHALL be ignored.
   #[serde(skip_serializing_if = "Option::is_none")]
   pub allow_reserved: Option<bool>,
+  /// # OAS 3.0
   /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions).
+  /// # OAS 3.1
+  /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specification-extensions).
   #[serde(flatten, skip_serializing_if = "IndexMap::is_empty", skip_deserializing)]
   pub extensions: IndexMap<String, Value>,
 }
 
+/// # OAS 3.0
 /// The Header Object follows the structure of the [Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameter-object) with the following changes:
 ///
 /// 1. `name` MUST NOT be specified, it is given in the corresponding `headers` map.
 /// 2. `in` MUST NOT be specified, it is implicitly in header.
 /// 3. All traits that are affected by the location MUST be applicable to a location of `header` (for example, [`style`](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameterStyle)).
+/// # OAS 3.1
+/// The Header Object follows the structure of the [Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameter-object) with the following changes:
+///
+/// 1. `name` MUST NOT be specified, it is given in the corresponding `headers` map.
+/// 2. `in` MUST NOT be specified, it is implicitly in `header`.
+/// 3. All traits that are affected by the location MUST be applicable to a location of `header` (for example, [`style`](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameterStyle)).
 #[derive(Serialize, Clone, Debug, Default)]
 #[cfg_attr(any(test, feature = "deserialize"), derive(serde::Deserialize, PartialEq))]
 #[serde(rename_all = "camelCase")]
@@ -312,7 +410,10 @@ pub struct Example {
   /// Embedded literal example. The `value` field and `externalValue field are mutually exclusive. To represent examples of media types that cannot naturally represented in JSON or YAML, use a string value to contain the example, escaping where necessary.
   #[serde(flatten)]
   pub value: ExampleValue,
+  /// # OAS 3.0
   /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions).
+  /// # OAS 3.1
+  /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specification-extensions).
   #[serde(flatten, skip_serializing_if = "IndexMap::is_empty", skip_deserializing)]
   pub extensions: IndexMap<String, Value>,
 }
@@ -323,7 +424,10 @@ pub struct Example {
 pub enum ExampleValue {
   /// Embedded literal example. The `value` field and `externalValue` field are mutually exclusive. To represent examples of media types that cannot naturally represented in JSON or YAML, use a string value to contain the example, escaping where necessary.
   Value(Value),
+  /// # OAS 3.0
   /// A URL that points to the literal example. This provides the capability to reference examples that cannot easily be included in JSON or YAML documents. The `value` field and `externalValue` field are mutually exclusive.
+  /// # OAS 3.1
+  /// A URI that points to the literal example. This provides the capability to reference examples that cannot easily be included in JSON or YAML documents. The `value` field and `externalValue` field are mutually exclusive. See the rules for resolving [Relative References](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#relative-references-in-uris).
   ExternalValue(String),
 }
 
@@ -341,7 +445,10 @@ pub struct RequestBody {
   /// Determines if the request body is required in the request. Defaults to `false`.
   #[serde(skip_serializing_if = "Option::is_none")]
   pub required: Option<bool>,
+  /// # OAS 3.0
   /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions).
+  /// # OAS 3.1
+  /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specification-extensions).
   #[serde(flatten, skip_serializing_if = "IndexMap::is_empty", skip_deserializing)]
   pub extensions: IndexMap<String, Value>,
 }
@@ -362,7 +469,10 @@ pub struct Responses {
   pub default: Option<ReferenceOr<Response>>,
   #[serde(flatten, skip_serializing_if = "BTreeMap::is_empty")]
   pub responses: BTreeMap<String, ReferenceOr<Response>>,
+  /// # OAS 3.0
   /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions).
+  /// # OAS 3.1
+  /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specification-extensions).
   #[serde(flatten, skip_serializing_if = "IndexMap::is_empty", skip_deserializing)]
   pub extensions: IndexMap<String, Value>,
 }
@@ -377,33 +487,51 @@ pub struct Response {
   /// Maps a header name to its definition. [RFC7230](https://datatracker.ietf.org/doc/html/rfc7230#page-22) states header names are case insensitive. If a response header is defined with the name `"Content-Type"`, it SHALL be ignored.
   #[serde(skip_serializing_if = "BTreeMap::is_empty", default)]
   pub headers: BTreeMap<String, ReferenceOr<Header>>,
-
   /// A map containing descriptions of potential response payloads. The key is a media type or [media type range](https://datatracker.ietf.org/doc/html/rfc7231#appendix-D) and the value describes it. For responses that match multiple keys, only the most specific key is applicable. e.g. text/plain overrides text/*
   #[serde(skip_serializing_if = "BTreeMap::is_empty", default)]
   pub content: BTreeMap<String, MediaType>,
+  /// # OAS 3.0
   /// A map of operations links that can be followed from the response. The key of the map is a short name for the link, following the naming constraints of the names for [Component Objects](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#components-object).
+  /// # OAS 3.1
+  /// A map of operations links that can be followed from the response. The key of the map is a short name for the link, following the naming constraints of the names for [Component Objects](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#components-object).
   #[serde(skip_serializing_if = "BTreeMap::is_empty", default)]
   pub links: BTreeMap<String, ReferenceOr<Link>>,
+  /// # OAS 3.0
   /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions).
+  /// # OAS 3.1
+  /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specification-extensions).
   #[serde(flatten, skip_serializing_if = "IndexMap::is_empty", skip_deserializing)]
   pub extensions: IndexMap<String, Value>,
 }
 
+/// # OAS 3.0
 /// The `Link object` represents a possible design-time link for a response. The presence of a link does not guarantee the caller's ability to successfully invoke it, rather it provides a known relationship and traversal mechanism between responses and other operations.
 ///
 /// Unlike dynamic links (i.e. links provided in the response payload), the OAS linking mechanism does not require link information in the runtime response.
 ///
 /// For computing links, and providing instructions to execute them, a [runtime expression](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#runtime-expressions) is used for accessing values in an operation and using them as parameters while invoking the linked operation.
+/// # OAS 3.1
+/// The `Link object` represents a possible design-time link for a response. The presence of a link does not guarantee the caller's ability to successfully invoke it, rather it provides a known relationship and traversal mechanism between responses and other operations.
+///
+/// Unlike *dynamic* links (i.e. links provided in the response payload), the OAS linking mechanism does not require link information in the runtime response.
+///
+/// For computing links, and providing instructions to execute them, a [runtime expression](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#runtime-expressions) is used for accessing values in an operation and using them as parameters while invoking the linked operation.
 #[derive(Serialize, Clone, Debug, Default)]
 #[cfg_attr(any(test, feature = "deserialize"), derive(serde::Deserialize, PartialEq))]
 #[serde(rename_all = "camelCase")]
 pub struct Link {
   #[serde(flatten, skip_serializing_if = "Option::is_none")]
   pub operation_identifier: Option<OperationIdentifier>,
+  /// # OAS 3.0
   /// A map representing parameters to pass to an operation as specified with `operationId` or identified via `operationRef`. The key is the parameter name to be used, whereas the value can be a constant or an expression to be evaluated and passed to the linked operation. The parameter name can be qualified using the [parameter location](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameterIn) `[{in}.]{name}` for operations that use the same parameter name in different locations (e.g. path.id).
+  /// # OAS 3.1
+  /// A map representing parameters to pass to an operation as specified with `operationId` or identified via `operationRef`. The key is the parameter name to be used, whereas the value can be a constant or an expression to be evaluated and passed to the linked operation. The parameter name can be qualified using the [parameter location](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameterIn) `[{in}.]{name}` for operations that use the same parameter name in different locations (e.g. path.id).
   #[serde(skip_serializing_if = "BTreeMap::is_empty", default)]
   pub parameters: BTreeMap<String, AnyOrExpression>,
-  /// A literal value or [{expression}](/https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#runtime-expressions) to use as a request body when calling the target operation.
+  /// # OAS 3.0
+  /// A literal value or [{expression}](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#runtime-expressions) to use as a request body when calling the target operation.
+  /// # OAS 3.1
+  /// A literal value or [{expression}](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#runtime-expressions) to use as a request body when calling the target operation.
   #[serde(skip_serializing_if = "Option::is_none")]
   pub request_body: Option<AnyOrExpression>,
   /// A description of the link. [CommonMark syntax](https://spec.commonmark.org/) MAY be used for rich text representation.
@@ -412,20 +540,34 @@ pub struct Link {
   /// A server object to be used by the target operation.
   #[serde(skip_serializing_if = "Option::is_none")]
   pub server: Option<Server>,
+  /// # OAS 3.0
   /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions).
+  /// # OAS 3.1
+  /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specification-extensions).
   #[serde(flatten, skip_serializing_if = "IndexMap::is_empty", skip_deserializing)]
   pub extensions: IndexMap<String, Value>,
 }
 
+/// # OAS 3.0
 /// A map of possible out-of band callbacks related to the parent operation. Each value in the map is a [Path Item Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#path-item-object) that describes a set of requests that may be initiated by the API provider and the expected responses. The key value used to identify the path item object is an expression, evaluated at runtime, that identifies a URL to use for the callback operation.
+/// # OAS 3.1
+/// A map of possible out-of band callbacks related to the parent operation. Each value in the map is a [Path Item Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#path-item-object) that describes a set of requests that may be initiated by the API provider and the expected responses. The key value used to identify the path item object is an expression, evaluated at runtime, that identifies a URL to use for the callback operation.
+///
+/// To describe incoming requests from the API provider independent from another API call, use the [`webhooks`](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#oasWebhooks) field.
 #[derive(Serialize, Clone, Debug, Default)]
 #[cfg_attr(any(test, feature = "deserialize"), derive(serde::Deserialize, PartialEq))]
 #[serde(rename_all = "camelCase")]
 pub struct Callback {
+  /// # OAS 3.0
   /// A Path Item Object used to define a callback request and expected responses. A [complete example](https://github.com/OAI/OpenAPI-Specification/blob/main/examples/v3.0/callback-example.yaml) is available.
+  /// # OAS 3.1
+  /// A Path Item Object, or a reference to one, used to define a callback request and expected responses. A [complete example](https://github.com/OAI/OpenAPI-Specification/blob/main/examples/v3.0/callback-example.yaml) is available.
   #[serde(flatten, skip_serializing_if = "BTreeMap::is_empty")]
   pub callbacks: BTreeMap<String, PathItem>,
+  /// # OAS 3.0
   /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions).
+  /// # OAS 3.1
+  /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specification-extensions).
   #[serde(flatten, skip_serializing_if = "IndexMap::is_empty", skip_deserializing)]
   pub extensions: IndexMap<String, Value>,
 }
@@ -435,7 +577,10 @@ pub struct Callback {
 #[serde(untagged)]
 pub enum AnyOrExpression {
   Any(Value),
-  /// [{expression}](/https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#runtime-expressions)
+  /// # OAS 3.0
+  /// [{expression}](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#runtime-expressions)
+  /// # OAS 3.1
+  /// [{expression}](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#runtime-expressions)
   Expression(String),
 }
 
@@ -443,8 +588,11 @@ pub enum AnyOrExpression {
 #[cfg_attr(any(test, feature = "deserialize"), derive(serde::Deserialize, PartialEq))]
 #[serde(rename_all = "camelCase")]
 pub enum OperationIdentifier {
+  /// # OAS 3.0
   /// A relative or absolute URI reference to an OAS operation. This field is mutually exclusive of the `operationId` field, and MUST point to an [Operation Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#operation-object). Relative `operationRef` values MAY be used to locate an existing [Operation Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#operation-object) in the OpenAPI definition.
+  /// # OAS 3.1
+  /// A relative or absolute URI reference to an OAS operation. This field is mutually exclusive of the `operationId` field, and MUST point to an [Operation Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#operation-object). Relative `operationRef` values MAY be used to locate an existing [Operation Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#operation-object) in the OpenAPI definition. See the rules for resolving [Relative References](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#relative-references-in-uris).
   OperationRef(String),
-  /// The name of an existing, resolvable OAS operation, as defined with a unique `operationId. This field is mutually exclusive of the `operationRef` field.
+  /// The name of an existing, resolvable OAS operation, as defined with a unique `operationId`. This field is mutually exclusive of the `operationRef` field.
   OperationId(String),
 }
