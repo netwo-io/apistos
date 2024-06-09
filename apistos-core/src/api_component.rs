@@ -7,7 +7,7 @@ use serde_json::{json, Value};
 use apistos_models::paths::{MediaType, Parameter, RequestBody, Response, Responses};
 use apistos_models::reference_or::ReferenceOr;
 use apistos_models::security::SecurityScheme;
-use apistos_models::{OpenApiVersion, Schema};
+use apistos_models::{OpenApiVersion, Schema, VersionSpecificSchema};
 
 use crate::ApiErrorComponent;
 #[cfg(feature = "actix")]
@@ -41,18 +41,28 @@ pub trait ApiComponent {
   }
 
   fn request_body(oas_version: OpenApiVersion) -> Option<RequestBody> {
-    Self::schema(oas_version).map(|(name, _)| RequestBody {
-      content: BTreeMap::from_iter(vec![(
-        Self::content_type(),
-        MediaType {
-          schema: Some(ReferenceOr::Reference {
-            _ref: format!("#/components/schemas/{}", name),
-          }),
-          ..Default::default()
+    Self::schema(oas_version).map(|(name, sch)| {
+      let schema = match oas_version {
+        OpenApiVersion::OAS3_0 => VersionSpecificSchema::OAS3_0(ReferenceOr::Reference {
+          _ref: format!("#/components/schemas/{}", name),
+        }),
+        OpenApiVersion::OAS3_1 => match sch {
+          ReferenceOr::Object(schema) => VersionSpecificSchema::OAS3_1(schema),
+          ReferenceOr::Reference { .. } => todo!(),
         },
-      )]),
-      required: Some(Self::required()),
-      ..Default::default()
+      };
+
+      RequestBody {
+        content: BTreeMap::from_iter(vec![(
+          Self::content_type(),
+          MediaType {
+            schema: Some(schema),
+            ..Default::default()
+          },
+        )]),
+        required: Some(Self::required()),
+        ..Default::default()
+      }
     })
   }
 
@@ -338,6 +348,7 @@ mod test {
       fn schema(oas_version: OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
         let schema_settings = match oas_version {
           OpenApiVersion::OAS3_0 => SchemaSettings::openapi3(),
+          OpenApiVersion::OAS3_1 => SchemaSettings::draft2020_12(),
         };
         let gen = SchemaGenerator::new(schema_settings);
         Some(("TestChild".to_string(), gen.into_root_schema_for::<TestChild>().into()))
@@ -358,6 +369,7 @@ mod test {
       fn schema(oas_version: OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
         let schema_settings = match oas_version {
           OpenApiVersion::OAS3_0 => SchemaSettings::openapi3(),
+          OpenApiVersion::OAS3_1 => SchemaSettings::draft2020_12(),
         };
         let gen = SchemaGenerator::new(schema_settings);
         let definition_path = gen.settings().definitions_path.clone();
