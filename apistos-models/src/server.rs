@@ -16,7 +16,10 @@ pub struct Server {
   /// A map between a variable name and its value. The value is used for substitution in the server's URL template.
   #[serde(skip_serializing_if = "BTreeMap::is_empty", default)]
   pub variables: BTreeMap<String, ServerVariable>,
+  /// # OAS 3.0
   /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions).
+  /// # OAS 3.1
+  /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specification-extensions).
   #[serde(flatten, skip_serializing_if = "IndexMap::is_empty", skip_deserializing)]
   pub extensions: IndexMap<String, Value>,
 }
@@ -29,9 +32,18 @@ pub struct ServerVariable {
   /// An enumeration of string values to be used if the substitution options are from a limited set. The array SHOULD NOT be empty.
   #[serde(rename = "enum")]
   pub _enum: Vec<String>,
+  /// # OAS 3.0
   /// The default value to use for substitution, which SHALL be sent if an alternate value is not supplied. Note this behavior is different than the [Schema Object's](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-object) treatment of default values, because in those cases parameter values are optional. If the [`enum`](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#serverVariableEnum) is defined, the value SHOULD exist in the enum's values.
+  /// # OAS 3.1
+  /// The default value to use for substitution, which SHALL be sent if an alternate value is not supplied. Note this behavior is different than the [Schema Object's](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schema-object) treatment of default values, because in those cases parameter values are optional. If the [`enum`](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#serverVariableEnum) is defined, the value MUST exist in the enum's values.
   pub default: String,
   /// An optional description for the server variable. [CommonMark syntax](https://spec.commonmark.org/) MAY be used for rich text representation.
   #[serde(skip_serializing_if = "Option::is_none")]
   pub description: Option<String>,
+  /// # OAS 3.0
+  /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions).
+  /// # OAS 3.1
+  /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specification-extensions).
+  #[serde(flatten, skip_serializing_if = "IndexMap::is_empty", skip_deserializing)]
+  pub extensions: IndexMap<String, Value>,
 }
