@@ -267,7 +267,7 @@ pub enum ParameterDefinition {
 #[serde(rename_all = "camelCase")]
 pub struct MediaType {
   /// The schema defining the content of the request, response, or parameter.
-  #[serde(skip_serializing_if = "Option::is_none")]
+  #[serde(skip_serializing_if = "Option::is_none", flatten)]
   pub schema: Option<VersionSpecificSchema>,
   #[serde(flatten)]
   #[serde(skip_serializing_if = "Option::is_none")]
