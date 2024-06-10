@@ -1,11 +1,11 @@
 use std::collections::BTreeMap;
 
 use indexmap::IndexMap;
-use schemars::Schema;
 use serde::Serialize;
 use serde_json::Value;
 
 use crate::reference_or::ReferenceOr;
+use crate::schema::ApistosSchema;
 use crate::security::SecurityRequirement;
 use crate::server::Server;
 use crate::VersionSpecificSchema;
@@ -256,7 +256,7 @@ pub struct Parameter {
 #[serde(rename_all = "lowercase")]
 pub enum ParameterDefinition {
   /// The schema defining the type used for the parameter.
-  Schema(ReferenceOr<Schema>),
+  Schema(ReferenceOr<ApistosSchema>),
   /// A map containing the representations for the parameter. The key is the media type and the value describes it. The map MUST only contain one entry.
   Content(BTreeMap<String, MediaType>),
 }

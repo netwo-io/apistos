@@ -4,7 +4,7 @@ use actix_web::http::StatusCode;
 use actix_web::{HttpRequest, HttpResponse, Responder, ResponseError};
 use apistos_models::paths::{MediaType, RequestBody, Response, Responses};
 use apistos_models::reference_or::ReferenceOr;
-use apistos_models::{OpenApiVersion, Schema, VersionSpecificSchema};
+use apistos_models::{ApistosSchema, OpenApiVersion, VersionSpecificSchema};
 use serde::Serialize;
 use std::collections::BTreeMap;
 use std::fmt::Debug;
@@ -26,11 +26,11 @@ impl Responder for NoContent {
 }
 
 impl ApiComponent for NoContent {
-  fn child_schemas(_: OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
+  fn child_schemas(_: OpenApiVersion) -> Vec<(String, ReferenceOr<ApistosSchema>)> {
     vec![]
   }
 
-  fn schema(_: OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
+  fn schema(_: OpenApiVersion) -> Option<(String, ReferenceOr<ApistosSchema>)> {
     None
   }
 
@@ -70,15 +70,15 @@ impl<T> ApiComponent for AcceptedJson<T>
 where
   T: Serialize + ApiComponent,
 {
-  fn child_schemas(oas_version: OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
+  fn child_schemas(oas_version: OpenApiVersion) -> Vec<(String, ReferenceOr<ApistosSchema>)> {
     T::child_schemas(oas_version)
   }
 
-  fn raw_schema(oas_version: OpenApiVersion) -> Option<ReferenceOr<Schema>> {
+  fn raw_schema(oas_version: OpenApiVersion) -> Option<ReferenceOr<ApistosSchema>> {
     T::raw_schema(oas_version)
   }
 
-  fn schema(oas_version: OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
+  fn schema(oas_version: OpenApiVersion) -> Option<(String, ReferenceOr<ApistosSchema>)> {
     T::schema(oas_version)
   }
 
@@ -117,15 +117,15 @@ impl<T> ApiComponent for CreatedJson<T>
 where
   T: Serialize + ApiComponent,
 {
-  fn child_schemas(oas_version: OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
+  fn child_schemas(oas_version: OpenApiVersion) -> Vec<(String, ReferenceOr<ApistosSchema>)> {
     T::child_schemas(oas_version)
   }
 
-  fn raw_schema(oas_version: OpenApiVersion) -> Option<ReferenceOr<Schema>> {
+  fn raw_schema(oas_version: OpenApiVersion) -> Option<ReferenceOr<ApistosSchema>> {
     T::raw_schema(oas_version)
   }
 
-  fn schema(oas_version: OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
+  fn schema(oas_version: OpenApiVersion) -> Option<(String, ReferenceOr<ApistosSchema>)> {
     T::schema(oas_version)
   }
 
@@ -139,7 +139,7 @@ where
 fn response_from_schema(
   oas_version: OpenApiVersion,
   status: StatusCode,
-  schema: Option<(String, ReferenceOr<Schema>)>,
+  schema: Option<(String, ReferenceOr<ApistosSchema>)>,
 ) -> Option<Responses> {
   schema.map(|(name, schema)| match schema {
     ReferenceOr::Reference { _ref } => Responses {
@@ -174,7 +174,7 @@ fn response_from_schema(
 fn response_from_raw_schema(
   oas_version: OpenApiVersion,
   status: StatusCode,
-  raw_schema: Option<ReferenceOr<Schema>>,
+  raw_schema: Option<ReferenceOr<ApistosSchema>>,
 ) -> Option<Responses> {
   raw_schema.map(|schema| match schema {
     ReferenceOr::Reference { _ref } => Responses {

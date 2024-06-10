@@ -40,7 +40,7 @@ impl ToTokens for Schemas {
     });
 
     tokens.extend(quote! {
-      fn child_schemas(oas_version: apistos::OpenApiVersion) -> Vec<(String, apistos::reference_or::ReferenceOr<apistos::Schema>)> {
+      fn child_schemas(oas_version: apistos::OpenApiVersion) -> Vec<(String, apistos::reference_or::ReferenceOr<apistos::ApistosSchema>)> {
         let settings = match oas_version {
           apistos::OpenApiVersion::OAS3_0 => schemars::gen::SchemaSettings::openapi3(),
           apistos::OpenApiVersion::OAS3_1 => schemars::gen::SchemaSettings::draft2020_12(),
@@ -48,7 +48,7 @@ impl ToTokens for Schemas {
         let mut gen = settings.into_generator();
         let mut schema: apistos::Schema = gen.into_root_schema_for::<Self>();
 
-        let mut schemas: Vec<(String, apistos::reference_or::ReferenceOr<apistos::Schema>)> = vec![];
+        let mut schemas: Vec<(String, apistos::reference_or::ReferenceOr<apistos::ApistosSchema>)> = vec![];
         let obj = schema.ensure_object();
         for (def_name, mut def) in obj
           .get("components")
@@ -67,13 +67,15 @@ impl ToTokens for Schemas {
                     .map_err(|err| {
                       apistos::log::warn!("Error generating json schema: {err:?}");
                       err
-                    }).unwrap_or_default();
+                    })
+                    .map(|sch| apistos::ApistosSchema::new(sch, oas_version))
+                    .unwrap_or_default();
           schemas.push((def_name, apistos::reference_or::ReferenceOr::Object(schema)));
         }
         schemas
       }
 
-      fn schema(oas_version: apistos::OpenApiVersion) -> Option<(String, apistos::reference_or::ReferenceOr<apistos::Schema>)> {
+      fn schema(oas_version: apistos::OpenApiVersion) -> Option<(String, apistos::reference_or::ReferenceOr<apistos::ApistosSchema>)> {
         let (name, schema) = {
           let schema_name = <Self as schemars::JsonSchema>::schema_name();
           let settings = match oas_version {
@@ -95,7 +97,7 @@ impl ToTokens for Schemas {
           }
           obj.remove(definition_path);
           #deprecated
-          let schema = apistos::Schema::from(obj.clone());
+          let schema = apistos::ApistosSchema::new(apistos::Schema::from(obj.clone()), oas_version);
           (
             schema_name,
             apistos::reference_or::ReferenceOr::Object(schema)

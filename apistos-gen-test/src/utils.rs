@@ -1,6 +1,6 @@
 use apistos::reference_or::ReferenceOr;
-use schemars::Schema;
+use apistos::ApistosSchema;
 
-pub(crate) fn assert_schema(v: &ReferenceOr<Schema>) {
+pub(crate) fn assert_schema(v: &ReferenceOr<ApistosSchema>) {
   assert!(matches!(v, &ReferenceOr::Object { .. }), "Not a schema");
 }

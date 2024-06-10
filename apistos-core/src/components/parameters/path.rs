@@ -2,7 +2,8 @@ use crate::ApiComponent;
 use actix_web::web::Path;
 use apistos_models::paths::{Parameter, ParameterDefinition, ParameterIn, RequestBody};
 use apistos_models::reference_or::ReferenceOr;
-use apistos_models::{OpenApiVersion, Schema};
+use apistos_models::{ApistosSchema, OpenApiVersion};
+use schemars::Schema;
 use serde_json::{Map, Value};
 
 impl<T> ApiComponent for Path<T>
@@ -14,15 +15,15 @@ where
     true
   }
 
-  fn child_schemas(_: OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
+  fn child_schemas(_: OpenApiVersion) -> Vec<(String, ReferenceOr<ApistosSchema>)> {
     vec![]
   }
 
-  fn raw_schema(oas_version: OpenApiVersion) -> Option<ReferenceOr<Schema>> {
+  fn raw_schema(oas_version: OpenApiVersion) -> Option<ReferenceOr<ApistosSchema>> {
     T::raw_schema(oas_version)
   }
 
-  fn schema(_: OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
+  fn schema(_: OpenApiVersion) -> Option<(String, ReferenceOr<ApistosSchema>)> {
     None
   }
 
@@ -36,7 +37,7 @@ where
       .or_else(|| Self::raw_schema(oas_version));
 
     if let Some(schema) = schema {
-      parameters_for_schema(schema, Self::required())
+      parameters_for_schema(oas_version, schema, Self::required())
     } else {
       vec![]
     }
@@ -53,15 +54,15 @@ where
     true
   }
 
-  fn child_schemas(_: OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
+  fn child_schemas(_: OpenApiVersion) -> Vec<(String, ReferenceOr<ApistosSchema>)> {
     vec![]
   }
 
-  fn raw_schema(oas_version: OpenApiVersion) -> Option<ReferenceOr<Schema>> {
+  fn raw_schema(oas_version: OpenApiVersion) -> Option<ReferenceOr<ApistosSchema>> {
     T::raw_schema(oas_version)
   }
 
-  fn schema(_: OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
+  fn schema(_: OpenApiVersion) -> Option<(String, ReferenceOr<ApistosSchema>)> {
     None
   }
 
@@ -74,7 +75,7 @@ where
       .map(|(_, sch)| sch)
       .or_else(|| Self::raw_schema(oas_version));
     if let Some(schema) = schema {
-      parameters_for_schema(schema, Self::required())
+      parameters_for_schema(oas_version, schema, Self::required())
     } else {
       vec![]
     }
@@ -91,15 +92,15 @@ macro_rules! impl_path_tuple ({ $($ty:ident),+ } => {
       true
     }
 
-    fn child_schemas(_: OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
+    fn child_schemas(_: OpenApiVersion) -> Vec<(String, ReferenceOr<ApistosSchema>)> {
       vec![]
     }
 
-    fn raw_schema(_: OpenApiVersion) -> Option<ReferenceOr<Schema>> {
+    fn raw_schema(_: OpenApiVersion) -> Option<ReferenceOr<ApistosSchema>> {
       None
     }
 
-    fn schema(_: OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
+    fn schema(_: OpenApiVersion) -> Option<(String, ReferenceOr<ApistosSchema>)> {
       None
     }
 
@@ -113,7 +114,7 @@ macro_rules! impl_path_tuple ({ $($ty:ident),+ } => {
         let schema = $ty::schema(oas_version).map(|(_, sch)| sch).or_else(|| $ty::raw_schema(oas_version));
 
         if let Some(schema) = schema {
-          parameters.append(&mut parameters_for_schema(schema, Self::required()));
+          parameters.append(&mut parameters_for_schema(oas_version, schema, Self::required()));
         }
       )+
       parameters
@@ -130,15 +131,15 @@ macro_rules! impl_path_tuple ({ $($ty:ident),+ } => {
       true
     }
 
-    fn child_schemas(_: OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
+    fn child_schemas(_: OpenApiVersion) -> Vec<(String, ReferenceOr<ApistosSchema>)> {
       vec![]
     }
 
-    fn raw_schema(_: OpenApiVersion) -> Option<ReferenceOr<Schema>> {
+    fn raw_schema(_: OpenApiVersion) -> Option<ReferenceOr<ApistosSchema>> {
       None
     }
 
-    fn schema(_: OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
+    fn schema(_: OpenApiVersion) -> Option<(String, ReferenceOr<ApistosSchema>)> {
       None
     }
 
@@ -152,7 +153,7 @@ macro_rules! impl_path_tuple ({ $($ty:ident),+ } => {
         let schema = $ty::schema(oas_version).map(|(_, sch)| sch).or_else(|| $ty::raw_schema(oas_version));
 
         if let Some(schema) = schema {
-          parameters.append(&mut parameters_for_schema(schema, Self::required()));
+          parameters.append(&mut parameters_for_schema(oas_version, schema, Self::required()));
         }
       )+
       parameters
@@ -174,7 +175,11 @@ impl_path_tuple!(A, B, C, D, E, F, G, H, I, J, K);
 impl_path_tuple!(A, B, C, D, E, F, G, H, I, J, K, L);
 impl_path_tuple!(A, B, C, D, E, F, G, H, I, J, K, L, M);
 
-fn parameters_for_schema(schema: ReferenceOr<Schema>, required: bool) -> Vec<Parameter> {
+fn parameters_for_schema(
+  oas_version: OpenApiVersion,
+  schema: ReferenceOr<ApistosSchema>,
+  required: bool,
+) -> Vec<Parameter> {
   let mut parameters = vec![];
 
   match schema {
@@ -182,17 +187,19 @@ fn parameters_for_schema(schema: ReferenceOr<Schema>, required: bool) -> Vec<Par
       parameters.push(gen_simple_path_parameter(r, required));
     }
     ReferenceOr::Object(schema) => {
-      let sch = schema.as_object();
+      let sch = schema.inner().as_object();
       if let Some(obj) = sch {
         // any_of and one_of should not exist for path ?
         if let Some(all_of) = obj.get("allOf").and_then(|v| v.as_array()) {
-          for schema in all_of {
+          for schema_value in all_of {
             parameters.append(&mut parameters_for_schema(
-              Schema::try_from(schema.clone())
+              oas_version,
+              Schema::try_from(schema_value.clone())
                 .map_err(|err| {
                   log::warn!("Error generating json schema from #ident : {err:?}");
                   err
                 })
+                .map(|sch| ApistosSchema::new(sch, oas_version))
                 .unwrap_or_default()
                 .into(),
               required,
@@ -203,7 +210,7 @@ fn parameters_for_schema(schema: ReferenceOr<Schema>, required: bool) -> Vec<Par
         let _type = obj.get("type");
         if let Some(Value::String(string)) = _type {
           if string == "object" {
-            parameters.append(&mut gen_path_parameter_for_object(&schema, obj, required))
+            parameters.append(&mut gen_path_parameter_for_object(oas_version, &schema, obj, required))
           } else if processable_instance_type(string) {
             parameters.push(gen_simple_path_parameter(schema.into(), required));
           }
@@ -215,7 +222,12 @@ fn parameters_for_schema(schema: ReferenceOr<Schema>, required: bool) -> Vec<Par
   parameters
 }
 
-fn gen_path_parameter_for_object(schema: &Schema, obj: &Map<String, Value>, required: bool) -> Vec<Parameter> {
+fn gen_path_parameter_for_object(
+  oas_version: OpenApiVersion,
+  schema: &ApistosSchema,
+  obj: &Map<String, Value>,
+  required: bool,
+) -> Vec<Parameter> {
   let properties = obj
     .get("properties")
     .and_then(|v| v.as_object())
@@ -230,7 +242,9 @@ fn gen_path_parameter_for_object(schema: &Schema, obj: &Map<String, Value>, requ
       .map(|(name, schema)| Parameter {
         name,
         _in: ParameterIn::Path,
-        definition: Some(ParameterDefinition::Schema(schema.into())),
+        definition: Some(ParameterDefinition::Schema(
+          ApistosSchema::from_value(schema, oas_version).into(),
+        )),
         required: Some(required),
         ..Default::default()
       })
@@ -238,7 +252,7 @@ fn gen_path_parameter_for_object(schema: &Schema, obj: &Map<String, Value>, requ
   }
 }
 
-fn gen_simple_path_parameter(component: ReferenceOr<Schema>, required: bool) -> Parameter {
+fn gen_simple_path_parameter(component: ReferenceOr<ApistosSchema>, required: bool) -> Parameter {
   Parameter {
     name: "".to_string(), // this name is overridden later because it is contained in the path
     _in: ParameterIn::Path,
