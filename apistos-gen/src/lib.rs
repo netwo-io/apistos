@@ -160,6 +160,7 @@ pub fn derive_api_type(input: TokenStream) -> TokenStream {
               apistos::log::warn!("Error generating json schema from #ident : {err:?}");
               err
             })
+          .map(|sch| apistos::ApistosSchema::new(sch, oas_version))
             .map(|sch| apistos::ApistosSchema::new(sch, oas_version))
             .unwrap_or_default()
             .into(),
