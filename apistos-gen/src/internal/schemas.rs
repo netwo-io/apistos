@@ -15,30 +15,6 @@ impl ToTokens for Schemas {
       quote!()
     };
 
-    let update_metadata_title = quote!(
-      sch_obj.entry("title").or_insert_with(|| prop_name.clone().into());
-    );
-    let update_single_enum_value = quote!(if enum_values.len() == 1 {
-      if let Some(schemars::_serde_json::Value::String(prop_name)) = enum_values.first() {
-        #update_metadata_title
-      }
-    });
-    let update_one_of_title = quote!(for s in one_of {
-      if let Some(sch_obj) = s.as_object_mut() {
-        if let Some(props) = sch_obj.clone().get("properties").and_then(|v| v.as_object()) {
-          if props.len() == 1 {
-            if let Some((prop_name, _)) = props.iter().next() {
-              #update_metadata_title;
-            }
-          } else if let Some(enum_values) = props.iter().find_map(|(_, p)| p.as_object().and_then(|sch_obj| sch_obj.get("enum").and_then(|v| v.as_array()))) {
-            #update_single_enum_value
-          }
-        } else if let Some(enum_values) = sch_obj.clone().get_mut("enum").and_then(|v| v.as_array_mut()) {
-          #update_single_enum_value
-        }
-      }
-    });
-
     tokens.extend(quote! {
       fn child_schemas(oas_version: apistos::OpenApiVersion) -> Vec<(String, apistos::reference_or::ReferenceOr<apistos::ApistosSchema>)> {
         let settings = match oas_version {
@@ -58,11 +34,6 @@ impl ToTokens for Schemas {
           .cloned()
           .unwrap_or_default()
         {
-          if let Some(schema) = def.as_object_mut() {
-            if let Some(one_of) = schema.get_mut("oneOf").and_then(|v| v.as_array_mut()) {
-              #update_one_of_title;
-            }
-          }
           let schema = apistos::Schema::try_from(def)
                     .map_err(|err| {
                       apistos::log::warn!("Error generating json schema: {err:?}");
@@ -83,19 +54,9 @@ impl ToTokens for Schemas {
             apistos::OpenApiVersion::OAS3_1 => schemars::gen::SchemaSettings::draft2020_12(),
           };
           let mut gen = settings.into_generator();
-          let definition_path = gen.settings().definitions_path.clone();
-          let definition_path = definition_path
-            .trim_start_matches('/')
-            .split('/')
-            .next()
-            .unwrap_or_default();
           let mut schema: apistos::Schema = gen.into_root_schema_for::<Self>();
 
           let obj = schema.ensure_object();
-          if let Some(mut one_of) = obj.get_mut("oneOf").and_then(|v| v.as_array_mut()) {
-            #update_one_of_title;
-          }
-          obj.remove(definition_path);
           #deprecated
           let schema = apistos::ApistosSchema::new(apistos::Schema::from(obj.clone()), oas_version);
           (
