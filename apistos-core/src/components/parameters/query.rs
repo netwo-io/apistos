@@ -308,7 +308,7 @@ mod test {
   use apistos_models::paths::ParameterStyle;
   use apistos_models::paths::{Parameter, ParameterDefinition, ParameterIn};
   use apistos_models::reference_or::ReferenceOr;
-  use apistos_models::OpenApiVersion::OAS3_0;
+  use apistos_models::OpenApiVersion;
 
   use crate::ApiComponent;
 
@@ -319,15 +319,16 @@ mod test {
   }
 
   impl ApiComponent for Test {
-    fn child_schemas(_: apistos_models::OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
+    fn child_schemas(_: OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
       vec![]
     }
 
-    fn schema(oas_version: apistos_models::OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
+    fn schema(oas_version: OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
       let (name, schema) = {
         let schema_name = <Self as JsonSchema>::schema_name().to_string();
         let gen = match oas_version {
-          OAS3_0 => schemars::gen::SchemaSettings::openapi3().into_generator(),
+          OpenApiVersion::OAS3_0 => schemars::gen::SchemaSettings::openapi3().into_generator(),
+          OpenApiVersion::OAS3_1 => schemars::gen::SchemaSettings::draft2020_12().into_generator(),
         };
         let schema = gen.into_root_schema_for::<Self>();
         (schema_name, schema.into())
@@ -338,7 +339,7 @@ mod test {
 
   #[test]
   fn test_query_parameter() {
-    let parameters_schema = <Query<Test> as ApiComponent>::parameters(OAS3_0);
+    let parameters_schema = <Query<Test> as ApiComponent>::parameters(OpenApiVersion::OAS3_0);
     assert_eq!(parameters_schema.len(), 2);
 
     let id_number_parameter_schema = parameters_schema
@@ -383,7 +384,7 @@ mod test {
   #[cfg(feature = "qs_query")]
   #[test]
   fn test_qs_query_parameter() {
-    let parameters_schema = <QsQuery<Test> as ApiComponent>::parameters(OAS3_0);
+    let parameters_schema = <QsQuery<Test> as ApiComponent>::parameters(OpenApiVersion::OAS3_0);
     assert_eq!(parameters_schema.len(), 2);
 
     let id_number_parameter_schema = parameters_schema
@@ -434,7 +435,7 @@ mod test {
   #[cfg(feature = "lab_query")]
   #[test]
   fn test_lab_query_parameter() {
-    let parameters_schema = <LabQuery<Test> as ApiComponent>::parameters(OAS3_0);
+    let parameters_schema = <LabQuery<Test> as ApiComponent>::parameters(OpenApiVersion::OAS3_0);
     assert_eq!(parameters_schema.len(), 2);
 
     let id_number_parameter_schema = parameters_schema
