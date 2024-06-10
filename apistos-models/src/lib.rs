@@ -9,6 +9,7 @@ use std::collections::BTreeMap;
 use std::fmt::Debug;
 
 use indexmap::IndexMap;
+pub use schema::ApistosSchema;
 pub use schemars::*;
 use serde::Serialize;
 use serde_json::Value;
@@ -28,6 +29,8 @@ pub mod reference_or;
 pub mod security;
 pub mod server;
 pub mod tag;
+
+mod schema;
 
 #[derive(Serialize, Clone, Copy, Debug)]
 #[cfg_attr(any(test, feature = "deserialize"), derive(serde::Deserialize, PartialEq))]
@@ -98,8 +101,8 @@ pub struct OpenApi {
 #[cfg_attr(any(test, feature = "deserialize"), derive(serde::Deserialize, PartialEq))]
 #[serde(untagged)]
 pub enum VersionSpecificSchema {
-  OAS3_0(ReferenceOr<Schema>),
-  OAS3_1(Schema),
+  OAS3_0(ReferenceOr<ApistosSchema>),
+  OAS3_1(ApistosSchema),
 }
 
 #[cfg(test)]

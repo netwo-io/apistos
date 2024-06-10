@@ -46,7 +46,7 @@ impl<'a> ToTokens for Components<'a> {
           schemas.push(<#args>::schema(oas_version));
         )*
         schemas.push(<#responder_wrapper>::schema(oas_version));
-        let mut schemas = schemas.into_iter().flatten().collect::<Vec<(String, apistos::reference_or::ReferenceOr<apistos::Schema>)>>();
+        let mut schemas = schemas.into_iter().flatten().collect::<Vec<(String, apistos::reference_or::ReferenceOr<apistos::ApistosSchema>)>>();
         #(
           schemas.append(&mut <#args>::child_schemas(oas_version));
         )*
