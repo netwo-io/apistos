@@ -96,6 +96,7 @@ pub struct OpenApi {
 
 #[derive(Serialize, Clone, Debug)]
 #[cfg_attr(any(test, feature = "deserialize"), derive(serde::Deserialize, PartialEq))]
+#[serde(untagged)]
 pub enum VersionSpecificSchema {
   OAS3_0(ReferenceOr<Schema>),
   OAS3_1(Schema),
