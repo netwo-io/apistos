@@ -1,7 +1,6 @@
-use log::warn;
-use schemars::Schema;
 use serde::Serialize;
-use serde_json::Value;
+
+use crate::schema::ApistosSchema;
 
 #[derive(Serialize, Clone, Debug)]
 #[cfg_attr(any(test, feature = "deserialize"), derive(serde::Deserialize, PartialEq))]
@@ -14,22 +13,9 @@ pub enum ReferenceOr<T: Clone> {
   },
 }
 
-impl From<Schema> for ReferenceOr<Schema> {
-  fn from(value: Schema) -> Self {
+impl From<ApistosSchema> for ReferenceOr<ApistosSchema> {
+  fn from(value: ApistosSchema) -> Self {
     Self::Object(value)
-  }
-}
-
-impl From<Value> for ReferenceOr<Schema> {
-  fn from(value: Value) -> Self {
-    let schema = Schema::try_from(value.clone());
-    match schema {
-      Ok(sch) => Self::Object(sch),
-      Err(e) => {
-        warn!("Error converting value to schema: get {e:?} for value {value:?}");
-        Self::Object(Schema::default())
-      }
-    }
   }
 }
 

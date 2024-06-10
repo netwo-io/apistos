@@ -1,12 +1,10 @@
-use schemars::Schema;
-
 use apistos_core::ApiComponent;
 use apistos_models::info::Info;
 use apistos_models::paths::{ExternalDocumentation, Parameter};
 use apistos_models::reference_or::ReferenceOr;
 use apistos_models::server::Server;
 use apistos_models::tag::Tag;
-use apistos_models::OpenApiVersion;
+use apistos_models::{ApistosSchema, OpenApiVersion};
 
 /// Defines an accessor for `DefaultParameters`
 pub trait DefaultParameterAccessor {
@@ -33,7 +31,7 @@ where
 #[derive(Default, Clone)]
 pub struct DefaultParameters {
   pub parameters: Vec<Parameter>,
-  pub components: Vec<(String, ReferenceOr<Schema>)>,
+  pub components: Vec<(String, ReferenceOr<ApistosSchema>)>,
 }
 
 #[derive(Default, Clone)]

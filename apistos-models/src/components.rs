@@ -1,8 +1,8 @@
 use crate::paths::{Callback, Example, Header, Link, Parameter, PathItem, RequestBody, Response};
 use crate::reference_or::ReferenceOr;
+use crate::schema::ApistosSchema;
 use crate::security::SecurityScheme;
 use indexmap::IndexMap;
-use schemars::Schema;
 use serde::Serialize;
 use serde_json::Value;
 use std::collections::BTreeMap;
@@ -17,7 +17,7 @@ pub struct Components {
   /// # OAS 3.1
   /// An object to hold reusable [Schema Objects](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schema-object).
   #[serde(skip_serializing_if = "BTreeMap::is_empty", default)]
-  pub schemas: BTreeMap<String, ReferenceOr<Schema>>,
+  pub schemas: BTreeMap<String, ReferenceOr<ApistosSchema>>,
   /// # OAS 3.0
   /// An object to hold reusable [Response Objects](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#response-object).
   /// # OAS 3.1
