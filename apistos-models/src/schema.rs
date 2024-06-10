@@ -23,6 +23,11 @@ impl ApistosSchema {
     match obj {
       None => Self(schema),
       Some(obj) => {
+        // set title for each one_of if not set
+        if let Some(one_of) = obj.get_mut("oneOf").and_then(|v| v.as_array_mut()) {
+          Self::set_title_for_enum_variants(one_of);
+        }
+
         match oas_version {
           OpenApiVersion::OAS3_0 => {
             // remove definitions from schema
@@ -72,6 +77,35 @@ impl ApistosSchema {
       .next()
       .unwrap_or_default();
     obj.remove(definition_path);
+  }
+
+  fn set_title_for_enum_variants(one_of: &mut Vec<Value>) {
+    for s in one_of {
+      if let Some(sch_obj) = s.as_object_mut() {
+        if let Some(props) = sch_obj.clone().get("properties").and_then(|v| v.as_object()) {
+          if props.len() == 1 {
+            if let Some((prop_name, _)) = props.iter().next() {
+              sch_obj.entry("title").or_insert_with(|| prop_name.clone().into());
+            }
+          } else if let Some(enum_values) = props.iter().find_map(|(_, p)| {
+            p.as_object()
+              .and_then(|sch_obj| sch_obj.get("enum").and_then(|v| v.as_array()))
+          }) {
+            if enum_values.len() == 1 {
+              if let Some(Value::String(prop_name)) = enum_values.first() {
+                sch_obj.entry("title").or_insert_with(|| prop_name.clone().into());
+              }
+            }
+          }
+        } else if let Some(enum_values) = sch_obj.clone().get_mut("enum").and_then(|v| v.as_array_mut()) {
+          if enum_values.len() == 1 {
+            if let Some(Value::String(prop_name)) = enum_values.first() {
+              sch_obj.entry("title").or_insert_with(|| prop_name.clone().into());
+            }
+          }
+        }
+      }
+    }
   }
 }
 
