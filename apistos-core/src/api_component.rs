@@ -48,7 +48,10 @@ pub trait ApiComponent {
         }),
         OpenApiVersion::OAS3_1 => match sch {
           ReferenceOr::Object(schema) => VersionSpecificSchema::OAS3_1(schema),
-          ReferenceOr::Reference { .. } => todo!(),
+          ReferenceOr::Reference { .. } => {
+            log::warn!("Unexpected reference for request schema with oas 3.1");
+            VersionSpecificSchema::OAS3_1(Schema::default())
+          }
         },
       };
 
@@ -251,22 +254,34 @@ where
           .collect::<Vec<(String, ReferenceOr<Response>)>>(),
       );
     } else if let Some((name, schema)) = Self::schema(oas_version) {
-      let ref_or = match schema {
-        r @ ReferenceOr::Reference { .. } => r,
-        ReferenceOr::Object(schema_obj) => {
-          let _ref = ReferenceOr::Reference {
-            _ref: format!("#/components/schemas/{}", name),
-          };
-          if let Some(obj) = schema_obj.as_object() {
-            let value = obj.get("type");
-            match value {
-              Some(Value::String(string)) if string == "array" => ReferenceOr::Object(schema_obj),
-              _ => _ref,
+      let response_schema = match oas_version {
+        OpenApiVersion::OAS3_0 => {
+          let schema_ref = match schema {
+            r @ ReferenceOr::Reference { .. } => r,
+            ReferenceOr::Object(schema_obj) => {
+              let _ref = ReferenceOr::Reference {
+                _ref: format!("#/components/schemas/{}", name),
+              };
+              if let Some(obj) = schema_obj.as_object() {
+                let value = obj.get("type");
+                match value {
+                  Some(Value::String(string)) if string == "array" => ReferenceOr::Object(schema_obj),
+                  _ => _ref,
+                }
+              } else {
+                _ref
+              }
             }
-          } else {
-            _ref
-          }
+          };
+          VersionSpecificSchema::OAS3_0(schema_ref)
         }
+        OpenApiVersion::OAS3_1 => match schema {
+          ReferenceOr::Object(schema) => VersionSpecificSchema::OAS3_1(schema),
+          ReferenceOr::Reference { .. } => {
+            log::warn!("Unexpected reference for response schema with oas 3.1");
+            VersionSpecificSchema::OAS3_1(Schema::default())
+          }
+        },
       };
       responses.push((
         "200".to_owned(),
@@ -274,7 +289,7 @@ where
           content: BTreeMap::from_iter(vec![(
             content_type.unwrap_or_else(Self::content_type),
             MediaType {
-              schema: Some(ref_or),
+              schema: Some(response_schema),
               ..Default::default()
             },
           )]),
@@ -282,6 +297,16 @@ where
         }),
       ));
     } else if let Some(schema) = Self::raw_schema(oas_version) {
+      let schema = match oas_version {
+        OpenApiVersion::OAS3_0 => VersionSpecificSchema::OAS3_0(schema),
+        OpenApiVersion::OAS3_1 => match schema {
+          ReferenceOr::Object(sch) => VersionSpecificSchema::OAS3_1(sch),
+          ReferenceOr::Reference { .. } => {
+            log::warn!("Unexpected reference for response schema with oas 3.1");
+            VersionSpecificSchema::OAS3_1(Schema::default())
+          }
+        },
+      };
       responses.push((
         "200".to_owned(),
         ReferenceOr::Object(Response {
