@@ -1,5 +1,6 @@
 use crate::OpenApiVersion;
 use log::warn;
+use schemars::gen::SchemaSettings;
 use schemars::{Schema, SchemaGenerator};
 use serde::Serialize;
 use serde_json::Value;
@@ -8,6 +9,12 @@ use serde_json::Value;
 #[cfg_attr(any(test, feature = "deserialize"), derive(serde::Deserialize, PartialEq))]
 #[serde(transparent)]
 pub struct ApistosSchema(Schema);
+
+impl Default for ApistosSchema {
+  fn default() -> Self {
+    Self(Schema::default())
+  }
+}
 
 impl ApistosSchema {
   pub fn new(mut schema: Schema, oas_version: OpenApiVersion) -> Self {
@@ -25,6 +32,8 @@ impl ApistosSchema {
         Self::remove_definition_from_schema(obj, &oas_version.get_schema_settings().into_generator());
         match oas_version {
           OpenApiVersion::OAS3_0 => {
+            // remove definitions from schema
+            Self::remove_definition_from_schema(obj, SchemaSettings::openapi3().into_generator());
             // remove $schema property
             obj.remove("$schema");
             Self(schemars::Schema::from(obj.clone()))
