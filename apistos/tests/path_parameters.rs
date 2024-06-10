@@ -109,6 +109,7 @@ async fn path_parameter_replacement() {
     .unwrap_or_default();
   assert_eq!(
     first_parameter_schema
+      .inner()
       .as_object()
       .and_then(|obj| obj.get("type"))
       .and_then(|_type| _type.as_str()),
@@ -126,6 +127,7 @@ async fn path_parameter_replacement() {
     .unwrap_or_default();
   assert_eq!(
     last_parameter_schema
+      .inner()
       .as_object()
       .and_then(|obj| obj.get("type"))
       .and_then(|_type| _type.as_str()),

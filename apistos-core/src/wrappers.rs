@@ -3,7 +3,7 @@ use actix_web::{HttpRequest, HttpResponse, Responder};
 use apistos_models::components::Components;
 use apistos_models::paths::Operation;
 use apistos_models::reference_or::ReferenceOr;
-use apistos_models::{OpenApiVersion, Schema};
+use apistos_models::{ApistosSchema, OpenApiVersion};
 use pin_project::pin_project;
 use std::future::Future;
 use std::pin::Pin;
@@ -59,11 +59,11 @@ where
 pub struct ResponderWrapper<T>(pub T);
 
 impl<T: Responder> ApiComponent for ResponderWrapper<T> {
-  fn child_schemas(_: OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
+  fn child_schemas(_: OpenApiVersion) -> Vec<(String, ReferenceOr<ApistosSchema>)> {
     vec![]
   }
 
-  fn schema(_: OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
+  fn schema(_: OpenApiVersion) -> Option<(String, ReferenceOr<ApistosSchema>)> {
     None
   }
 }

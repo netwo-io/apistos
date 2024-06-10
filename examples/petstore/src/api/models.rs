@@ -2,7 +2,6 @@ use actix_web::dev::Payload;
 use actix_web::error::ParseError;
 use actix_web::http::header::{Header, HeaderName, HeaderValue, InvalidHeaderValue, TryIntoHeaderValue};
 use actix_web::{Error, FromRequest, HttpMessage, HttpRequest};
-use apistos::InstanceType;
 use apistos::{ApiComponent, ApiCookie, ApiHeader, ApiType, TypedSchema};
 use num_traits::Float;
 use rust_decimal::Decimal;
@@ -38,8 +37,8 @@ pub struct Finite<N: Float> {
 }
 
 impl<N: Float> TypedSchema for Finite<N> {
-  fn schema_type() -> InstanceType {
-    InstanceType::Number
+  fn schema_type() -> String {
+    "number".to_string()
   }
 
   fn format() -> Option<String> {
@@ -51,8 +50,8 @@ impl<N: Float> TypedSchema for Finite<N> {
 pub struct Name(String);
 
 impl TypedSchema for Name {
-  fn schema_type() -> InstanceType {
-    InstanceType::String
+  fn schema_type() -> String {
+    "string".to_string()
   }
 
   fn format() -> Option<String> {

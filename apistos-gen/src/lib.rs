@@ -77,10 +77,15 @@ pub fn derive_api_type(input: TokenStream) -> TokenStream {
 
       fn json_schema(_gen: &mut schemars::gen::SchemaGenerator) -> apistos::Schema {
         let instance_type = <Self as TypedSchema>::schema_type();
-        apistos::Schema::try_from(schemars::_serde_json::json!({
-          "type": instance_type,
-          "format": <Self as TypedSchema>::format(),
-        }))
+        match <Self as TypedSchema>::format() {
+          Some(format) => apistos::Schema::try_from(schemars::_serde_json::json!({
+            "type": instance_type,
+            "format": format,
+          })),
+          None => apistos::Schema::try_from(schemars::_serde_json::json!({
+            "type": instance_type,
+          }))
+        }
         .map_err(|err| {
           apistos::log::warn!("Error generating json schema from #ident : {err:?}");
           err
@@ -91,11 +96,11 @@ pub fn derive_api_type(input: TokenStream) -> TokenStream {
 
     #[automatically_derived]
     impl #impl_generics apistos::ApiComponent for #ident #ty_generics #where_clause {
-      fn child_schemas(_: apistos::OpenApiVersion) -> Vec<(String, apistos::reference_or::ReferenceOr<apistos::Schema>)> {
+      fn child_schemas(_: apistos::OpenApiVersion) -> Vec<(String, apistos::reference_or::ReferenceOr<apistos::ApistosSchema>)> {
         vec![]
       }
 
-      fn schema(_: apistos::OpenApiVersion) -> Option<(String, apistos::reference_or::ReferenceOr<apistos::Schema>)> {
+      fn schema(oas_version: apistos::OpenApiVersion) -> Option<(String, apistos::reference_or::ReferenceOr<apistos::ApistosSchema>)> {
         Some((
           #component_name.to_string(),
           apistos::Schema::try_from(schemars::_serde_json::json!({
@@ -106,6 +111,7 @@ pub fn derive_api_type(input: TokenStream) -> TokenStream {
             apistos::log::warn!("Error generating json schema from #ident : {err:?}");
             err
           })
+          .map(|sch| apistos::ApistosSchema::new(sch, oas_version))
           .unwrap_or_default()
           .into(),
         ))
@@ -254,11 +260,11 @@ pub fn derive_api_security(input: TokenStream) -> TokenStream {
   quote!(
     #[automatically_derived]
     impl #impl_generics apistos::ApiComponent for #ident #ty_generics #where_clause {
-      fn child_schemas(_: apistos::OpenApiVersion) -> Vec<(String, apistos::reference_or::ReferenceOr<apistos::Schema>)> {
+      fn child_schemas(_: apistos::OpenApiVersion) -> Vec<(String, apistos::reference_or::ReferenceOr<apistos::ApistosSchema>)> {
         vec![]
       }
 
-      fn schema(_: apistos::OpenApiVersion) -> Option<(String, apistos::reference_or::ReferenceOr<apistos::Schema>)> {
+      fn schema(_: apistos::OpenApiVersion) -> Option<(String, apistos::reference_or::ReferenceOr<apistos::ApistosSchema>)> {
         None
       }
 

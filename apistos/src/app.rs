@@ -11,12 +11,11 @@ use actix_web::web::{get, resource};
 use actix_web::Error;
 use apistos_models::paths::{OperationType, Parameter};
 use apistos_models::reference_or::ReferenceOr;
-use apistos_models::OpenApi;
+use apistos_models::{ApistosSchema, OpenApi};
 use apistos_plugins::ui::{UIPluginConfig, UIPluginWrapper};
 use indexmap::IndexMap;
 use once_cell::sync::Lazy;
 use regex::Regex;
-use schemars::Schema;
 use std::collections::BTreeMap;
 use std::future::Future;
 use std::sync::{Arc, RwLock};
@@ -285,7 +284,7 @@ where
         .map(|p| (p.name.clone(), ReferenceOr::Object(p.clone())))
         .collect();
 
-      let mut schema_components: BTreeMap<String, ReferenceOr<Schema>> = self
+      let mut schema_components: BTreeMap<String, ReferenceOr<ApistosSchema>> = self
         .default_parameters
         .iter()
         .flat_map(|p| p.components.clone())
