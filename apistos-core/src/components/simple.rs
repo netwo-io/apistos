@@ -14,10 +14,7 @@ macro_rules! simple_modifier {
       fn raw_schema(
         oas_version: apistos_models::OpenApiVersion,
       ) -> Option<apistos_models::reference_or::ReferenceOr<apistos_models::ApistosSchema>> {
-        let schema_settings = match oas_version {
-          apistos_models::OpenApiVersion::OAS3_0 => schemars::gen::SchemaSettings::openapi3(),
-          apistos_models::OpenApiVersion::OAS3_1 => schemars::gen::SchemaSettings::draft2020_12(),
-        };
+        let schema_settings = oas_version.get_schema_settings();
         let gen = schema_settings.into_generator();
 
         let schema: apistos_models::reference_or::ReferenceOr<apistos_models::ApistosSchema> =
@@ -81,10 +78,7 @@ impl<T: chrono::TimeZone> ApiComponent for chrono::DateTime<T> {
   fn raw_schema(
     oas_version: apistos_models::OpenApiVersion,
   ) -> Option<apistos_models::reference_or::ReferenceOr<apistos_models::ApistosSchema>> {
-    let schema_settings = match oas_version {
-      apistos_models::OpenApiVersion::OAS3_0 => schemars::gen::SchemaSettings::openapi3(),
-      apistos_models::OpenApiVersion::OAS3_1 => schemars::gen::SchemaSettings::draft2020_12(),
-    };
+    let schema_settings = oas_version.get_schema_settings();
     let gen = schema_settings.into_generator();
 
     let schema: apistos_models::reference_or::ReferenceOr<apistos_models::ApistosSchema> =

@@ -349,7 +349,7 @@ where
 #[cfg(test)]
 mod test {
   use apistos_models::{ApistosSchema, OpenApiVersion};
-  use schemars::gen::{SchemaGenerator, SchemaSettings};
+  use schemars::gen::SchemaGenerator;
   use schemars::JsonSchema;
   use serde_json::json;
 
@@ -360,7 +360,7 @@ mod test {
 
   #[test]
   #[allow(dead_code)]
-  fn api_component_schema_vec() {
+  fn api_component_schema_vec_oas_3_0() {
     #[derive(JsonSchema)]
     struct TestChild {
       surname: String,
@@ -372,10 +372,7 @@ mod test {
       }
 
       fn schema(oas_version: OpenApiVersion) -> Option<(String, ReferenceOr<ApistosSchema>)> {
-        let schema_settings = match oas_version {
-          OpenApiVersion::OAS3_0 => SchemaSettings::openapi3(),
-          OpenApiVersion::OAS3_1 => SchemaSettings::draft2020_12(),
-        };
+        let schema_settings = oas_version.get_schema_settings();
         let gen = SchemaGenerator::new(schema_settings);
         Some((
           "TestChild".to_string(),
@@ -396,10 +393,7 @@ mod test {
       }
 
       fn schema(oas_version: OpenApiVersion) -> Option<(String, ReferenceOr<ApistosSchema>)> {
-        let schema_settings = match oas_version {
-          OpenApiVersion::OAS3_0 => SchemaSettings::openapi3(),
-          OpenApiVersion::OAS3_1 => SchemaSettings::draft2020_12(),
-        };
+        let schema_settings = oas_version.get_schema_settings();
         let gen = SchemaGenerator::new(schema_settings);
         let schema = gen.into_root_schema_for::<Test>();
         Some(("Test".to_string(), ApistosSchema::new(schema, oas_version).into()))
@@ -457,6 +451,113 @@ mod test {
       json!({
         "title": "TestChild",
         "type": "object",
+        "properties": {
+          "surname": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "surname"
+        ]
+      })
+    );
+  }
+
+  #[test]
+  #[allow(dead_code)]
+  fn api_component_schema_vec_oas_3_1() {
+    #[derive(JsonSchema)]
+    struct TestChild {
+      surname: String,
+    }
+
+    impl ApiComponent for TestChild {
+      fn child_schemas(_: OpenApiVersion) -> Vec<(String, ReferenceOr<ApistosSchema>)> {
+        vec![]
+      }
+
+      fn schema(oas_version: OpenApiVersion) -> Option<(String, ReferenceOr<ApistosSchema>)> {
+        let schema_settings = oas_version.get_schema_settings();
+        let gen = SchemaGenerator::new(schema_settings);
+        Some((
+          "TestChild".to_string(),
+          ApistosSchema::new(gen.into_root_schema_for::<TestChild>(), oas_version).into(),
+        ))
+      }
+    }
+
+    #[derive(JsonSchema)]
+    struct Test {
+      name: String,
+      surname: TestChild,
+    }
+
+    impl ApiComponent for Test {
+      fn child_schemas(oas_version: OpenApiVersion) -> Vec<(String, ReferenceOr<ApistosSchema>)> {
+        <TestChild as ApiComponent>::schema(oas_version).into_iter().collect()
+      }
+
+      fn schema(oas_version: OpenApiVersion) -> Option<(String, ReferenceOr<ApistosSchema>)> {
+        let schema_settings = oas_version.get_schema_settings();
+        let gen = SchemaGenerator::new(schema_settings);
+        let schema = gen.into_root_schema_for::<Test>();
+        Some(("Test".to_string(), ApistosSchema::new(schema, oas_version).into()))
+      }
+    }
+
+    let schema = <Vec<Test> as ApiComponent>::schema(OpenApiVersion::OAS3_1);
+    assert!(schema.is_some());
+
+    let json = serde_json::to_value(schema.expect("Missing schema").1).expect("Unable to serialize as Json");
+    assert_json_eq!(
+      json,
+      json!({
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Test"
+        }
+      })
+    );
+
+    let child_schema = <Vec<Test> as ApiComponent>::child_schemas(OpenApiVersion::OAS3_1);
+    assert_eq!(child_schema.len(), 2);
+    let first_child_schema = child_schema.first().cloned();
+    assert!(first_child_schema.is_some());
+
+    let json =
+      serde_json::to_value(first_child_schema.expect("Missing child schema").1).expect("Unable to serialize as Json");
+    assert_json_eq!(
+      json,
+      json!({
+        "title": "Test",
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "surname": {
+            "$ref": "#/components/schemas/TestChild"
+          }
+        },
+        "required": [
+          "name",
+          "surname"
+        ]
+      })
+    );
+
+    let last_child_schema = child_schema.last().cloned();
+    assert!(last_child_schema.is_some());
+
+    let json =
+      serde_json::to_value(last_child_schema.expect("Missing child schema").1).expect("Unable to serialize as Json");
+    assert_json_eq!(
+      json,
+      json!({
+        "title": "TestChild",
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
         "properties": {
           "surname": {
             "type": "string"
