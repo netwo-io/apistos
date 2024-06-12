@@ -75,6 +75,7 @@ impl<T> OpenApiWrapper<T> for actix_web::App<T> {
   fn document(self, spec: Spec) -> Self::Wrapper {
     let mut open_api_spec = OpenApi {
       info: spec.info,
+      openapi: spec.openapi,
       ..Default::default()
     };
     if !spec.tags.is_empty() {
@@ -85,7 +86,7 @@ impl<T> OpenApiWrapper<T> for actix_web::App<T> {
       open_api_spec.servers = spec.servers;
     }
 
-    set_oas_version(spec.open_api_version);
+    set_oas_version(spec.openapi);
     App {
       open_api_spec: Arc::new(RwLock::new(open_api_spec)),
       inner: Some(self),

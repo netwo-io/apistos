@@ -6,7 +6,7 @@ use apistos::info::Info;
 use apistos::server::Server;
 use apistos::spec::Spec;
 use apistos::web::{get, post, resource, scope};
-use apistos::{RapidocConfig, RedocConfig, ScalarConfig, SwaggerUIConfig};
+use apistos::{OpenApiVersion, RapidocConfig, RedocConfig, ScalarConfig, SwaggerUIConfig};
 use std::error::Error;
 use std::net::Ipv4Addr;
 
@@ -16,6 +16,7 @@ mod api;
 async fn main() -> Result<(), impl Error> {
   HttpServer::new(move || {
     let spec = Spec {
+      openapi: OpenApiVersion::OAS3_1,
       info: Info {
         title: "A well documented API".to_string(),
         description: Some(

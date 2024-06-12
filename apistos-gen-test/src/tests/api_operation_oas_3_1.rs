@@ -1,11 +1,9 @@
 use actix_multipart::form::MultipartForm;
-use actix_web::dev::ServiceRequest;
 use actix_web::http::header::ContentType;
 use actix_web::web::Json;
-use actix_web::{Error, HttpResponse, Responder};
+use actix_web::{HttpResponse, Responder};
 use assert_json_diff::assert_json_eq;
 use schemars::_serde_json::json;
-use std::collections::HashSet;
 use uuid::Uuid;
 
 use apistos::actix::{AcceptedJson, CreatedJson, NoContent};
@@ -31,6 +29,11 @@ mod test_models {
   #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
   pub(crate) struct Test {
     pub(crate) test: String,
+  }
+
+  #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
+  pub(crate) struct TestWrapper {
+    pub(crate) test: Test,
   }
 
   #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
@@ -75,7 +78,6 @@ mod test_models {
     }
   }
 
-  #[allow(clippy::duplicated_attributes)]
   #[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
   #[openapi_error(status(code = 401), status(code = 403), status(code = 404), status(code = 405))]
   pub(crate) enum MultipleErrorResponse {
@@ -126,59 +128,38 @@ fn api_operation() {
     Ok(Json(test_models::TestResult { id: 0 }))
   }
 
-  let components = __openapi_test::components(OpenApiVersion::OAS3_0);
+  let components = __openapi_test::components(OpenApiVersion::OAS3_1);
   // only one component here because: error does not have schema and Test is used both for query and response
   assert_eq!(components.len(), 1);
   let components = serde_json::to_value(components).expect("Unable to serialize as Json");
 
-  let operation = __openapi_test::operation(OpenApiVersion::OAS3_0);
+  let operation = __openapi_test::operation(OpenApiVersion::OAS3_1);
   let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
 
-  assert_json_eq!(
-    components,
-    json!([
-      {
-        "schemas": {
-          "Test": {
-            "properties": {
-              "test": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "test"
-            ],
-            "title": "Test",
-            "type": "object"
-          },
-          "TestResult": {
-            "properties": {
-              "id": {
-                "format": "uint32",
-                "minimum": 0,
-                "type": "integer"
-              }
-            },
-            "required": [
-              "id"
-            ],
-            "title": "TestResult",
-            "type": "object"
-          }
-        }
-      }
-    ])
-  );
+  assert_json_eq!(components, json!([{}]));
   assert_json_eq!(
     operation,
     json!({
-      "deprecated": false,
+      "tags": [
+        "pet"
+      ],
+      "summary": "Add a new pet to the store",
       "description": "Add a new pet to the store\\\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/Test"
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "title": "Test",
+              "type": "object",
+              "properties": {
+                "test": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "test"
+              ]
             }
           }
         },
@@ -186,23 +167,32 @@ fn api_operation() {
       },
       "responses": {
         "200": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/TestResult"
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "title": "TestResult",
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "format": "uint32",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "id"
+                ]
               }
             }
-          },
-          "description": ""
+          }
         },
         "405": {
           "description": "Invalid input"
         }
       },
-      "summary": "Add a new pet to the store",
-      "tags": [
-        "pet"
-      ]
+      "deprecated": false
     })
   );
 }
@@ -218,121 +208,45 @@ fn api_operation_impl_responder() {
     HttpResponse::Ok()
   }
 
-  #[allow(clippy::todo, clippy::unused_async)]
-  async fn plop() {
-    todo!()
-  }
-
-  /// Add a new pet to the store
-  /// Add a new pet to the store
-  /// Plop
-  #[api_operation(tag = "pet")]
-  pub(crate) async fn test_async(_body: Json<test_models::Test>) -> impl Responder {
-    plop().await;
-    HttpResponse::Ok()
-  }
-
-  let components = __openapi_test::components(OpenApiVersion::OAS3_0);
+  let components = __openapi_test::components(OpenApiVersion::OAS3_1);
   // only one component here because: error does not have schema and Test is used both for query and response
   assert_eq!(components.len(), 1);
   let components = serde_json::to_value(components).expect("Unable to serialize as Json");
 
-  let operation = __openapi_test::operation(OpenApiVersion::OAS3_0);
+  let operation = __openapi_test::operation(OpenApiVersion::OAS3_1);
   let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
 
-  assert_json_eq!(
-    components,
-    json!([
-      {
-        "schemas": {
-          "Test": {
-            "properties": {
-              "test": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "test"
-            ],
-            "title": "Test",
-            "type": "object"
-          }
-        }
-      }
-    ])
-  );
+  assert_json_eq!(components, json!([{}]));
   assert_json_eq!(
     operation,
     json!({
-      "deprecated": false,
+      "tags": [
+        "pet"
+      ],
+      "summary": "Add a new pet to the store",
       "description": "Add a new pet to the store\\\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/Test"
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "title": "Test",
+              "type": "object",
+              "properties": {
+                "test": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "test"
+              ]
             }
           }
         },
         "required": true
       },
       "responses": {},
-      "summary": "Add a new pet to the store",
-      "tags": [
-        "pet"
-      ]
-    })
-  );
-
-  let components = __openapi_test_async::components();
-  // only one component here because: error does not have schema and Test is used both for query and response
-  assert_eq!(components.len(), 1);
-  let components = serde_json::to_value(components).expect("Unable to serialize as Json");
-
-  let operation = __openapi_test_async::operation();
-  let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
-
-  assert_json_eq!(
-    components,
-    json!([
-      {
-        "schemas": {
-          "Test": {
-            "properties": {
-              "test": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "test"
-            ],
-            "title": "Test",
-            "type": "object"
-          }
-        }
-      }
-    ])
-  );
-  assert_json_eq!(
-    operation,
-    json!({
-      "deprecated": false,
-      "description": "Add a new pet to the store\\\nPlop",
-      "requestBody": {
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/Test"
-            }
-          }
-        },
-        "required": true
-      },
-      "responses": {},
-      "summary": "Add a new pet to the store",
-      "tags": [
-        "pet"
-      ]
+      "deprecated": false
     })
   );
 }
@@ -348,45 +262,38 @@ fn api_operation_simple_response() {
     Ok(Json(Uuid::new_v4()))
   }
 
-  let components = __openapi_test::components(OpenApiVersion::OAS3_0);
+  let components = __openapi_test::components(OpenApiVersion::OAS3_1);
   // only one component here because: error does not have schema and Test is used both for query and response
   assert_eq!(components.len(), 1);
   let components = serde_json::to_value(components).expect("Unable to serialize as Json");
 
-  let operation = __openapi_test::operation(OpenApiVersion::OAS3_0);
+  let operation = __openapi_test::operation(OpenApiVersion::OAS3_1);
   let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
 
-  assert_json_eq!(
-    components,
-    json!([
-      {
-        "schemas": {
-          "Test": {
-            "properties": {
-              "test": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "test"
-            ],
-            "title": "Test",
-            "type": "object"
-          }
-        }
-      }
-    ])
-  );
+  assert_json_eq!(components, json!([{}]));
   assert_json_eq!(
     operation,
     json!({
-      "deprecated": false,
+      "tags": [
+        "pet"
+      ],
+      "summary": "Add a new pet to the store",
       "description": "Add a new pet to the store\\\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/Test"
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "title": "Test",
+              "type": "object",
+              "properties": {
+                "test": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "test"
+              ]
             }
           }
         },
@@ -394,25 +301,23 @@ fn api_operation_simple_response() {
       },
       "responses": {
         "200": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
-                "format": "uuid",
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "title": "Uuid",
-                "type": "string"
+                "type": "string",
+                "format": "uuid"
               }
             }
-          },
-          "description": ""
+          }
         },
         "405": {
           "description": "Invalid input"
         }
       },
-      "summary": "Add a new pet to the store",
-      "tags": [
-        "pet"
-      ]
+      "deprecated": false
     })
   );
 }
@@ -428,61 +333,51 @@ fn api_operation_without_parameters() {
     Ok(Json(test_models::TestResult { id: 0 }))
   }
 
-  let components = __openapi_test::components(OpenApiVersion::OAS3_0);
+  let components = __openapi_test::components(OpenApiVersion::OAS3_1);
   // only one component here because: error does not have schema and Test is used both for query and response
   assert_eq!(components.len(), 1);
   let components = serde_json::to_value(components).expect("Unable to serialize as Json");
 
-  let operation = __openapi_test::operation(OpenApiVersion::OAS3_0);
+  let operation = __openapi_test::operation(OpenApiVersion::OAS3_1);
   let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
 
-  assert_json_eq!(
-    components,
-    json!([
-      {
-        "schemas": {
-          "TestResult": {
-            "properties": {
-              "id": {
-                "format": "uint32",
-                "minimum": 0,
-                "type": "integer"
-              }
-            },
-            "required": [
-              "id"
-            ],
-            "title": "TestResult",
-            "type": "object"
-          }
-        }
-      }
-    ])
-  );
+  assert_json_eq!(components, json!([{}]));
   assert_json_eq!(
     operation,
     json!({
-      "deprecated": false,
+      "tags": [
+        "pet"
+      ],
+      "summary": "Add a new pet to the store",
       "description": "Add a new pet to the store\\\nPlop",
       "responses": {
         "200": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/TestResult"
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "title": "TestResult",
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "format": "uint32",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "id"
+                ]
               }
             }
-          },
-          "description": ""
+          }
         },
         "405": {
           "description": "Invalid input"
         }
       },
-      "summary": "Add a new pet to the store",
-      "tags": [
-        "pet"
-      ]
+      "deprecated": false
     })
   );
 }
@@ -498,45 +393,38 @@ fn api_operation_no_content() {
     Ok(NoContent)
   }
 
-  let components = __openapi_test::components(OpenApiVersion::OAS3_0);
+  let components = __openapi_test::components(OpenApiVersion::OAS3_1);
   // only one component here because: error does not have schema and Test is used both for query and response
   assert_eq!(components.len(), 1);
   let components = serde_json::to_value(components).expect("Unable to serialize as Json");
 
-  let operation = __openapi_test::operation(OpenApiVersion::OAS3_0);
+  let operation = __openapi_test::operation(OpenApiVersion::OAS3_1);
   let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
 
-  assert_json_eq!(
-    components,
-    json!([
-      {
-        "schemas": {
-          "Test": {
-            "properties": {
-              "test": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "test"
-            ],
-            "title": "Test",
-            "type": "object"
-          }
-        }
-      }
-    ])
-  );
+  assert_json_eq!(components, json!([{}]));
   assert_json_eq!(
     operation,
     json!({
-      "deprecated": false,
+      "tags": [
+        "pet"
+      ],
+      "summary": "Add a new pet to the store",
       "description": "Add a new pet to the store\\\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/Test"
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "title": "Test",
+              "type": "object",
+              "properties": {
+                "test": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "test"
+              ]
             }
           }
         },
@@ -550,10 +438,7 @@ fn api_operation_no_content() {
           "description": "Invalid input"
         }
       },
-      "summary": "Add a new pet to the store",
-      "tags": [
-        "pet"
-      ]
+      "deprecated": false
     })
   );
 }
@@ -566,17 +451,17 @@ fn api_operation_created_json() {
   /// Plop
   #[api_operation(tag = "pet")]
   pub(crate) async fn test(
-    _body: Json<test_models::Test>,
+    _body: Json<test_models::TestWrapper>,
   ) -> Result<CreatedJson<test_models::TestResult>, test_models::ErrorResponse> {
     Ok(CreatedJson(test_models::TestResult { id: 1 }))
   }
 
-  let components = __openapi_test::components(OpenApiVersion::OAS3_0);
+  let components = __openapi_test::components(OpenApiVersion::OAS3_1);
   // only one component here because: error does not have schema and Test is used both for query and response
   assert_eq!(components.len(), 1);
   let components = serde_json::to_value(components).expect("Unable to serialize as Json");
 
-  let operation = __openapi_test::operation(OpenApiVersion::OAS3_0);
+  let operation = __openapi_test::operation(OpenApiVersion::OAS3_1);
   let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
 
   assert_json_eq!(
@@ -585,6 +470,7 @@ fn api_operation_created_json() {
       {
         "schemas": {
           "Test": {
+            "type": "object",
             "properties": {
               "test": {
                 "type": "string"
@@ -592,23 +478,7 @@ fn api_operation_created_json() {
             },
             "required": [
               "test"
-            ],
-            "title": "Test",
-            "type": "object"
-          },
-          "TestResult": {
-            "properties": {
-              "id": {
-                "format": "uint32",
-                "minimum": 0,
-                "type": "integer"
-              }
-            },
-            "required": [
-              "id"
-            ],
-            "title": "TestResult",
-            "type": "object"
+            ]
           }
         }
       }
@@ -617,13 +487,26 @@ fn api_operation_created_json() {
   assert_json_eq!(
     operation,
     json!({
-      "deprecated": false,
+      "tags": [
+        "pet"
+      ],
+      "summary": "Add a new pet to the store",
       "description": "Add a new pet to the store\\\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/Test"
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "title": "TestWrapper",
+              "type": "object",
+              "properties": {
+                "test": {
+                  "$ref": "#/components/schemas/Test"
+                }
+              },
+              "required": [
+                "test"
+              ]
             }
           }
         },
@@ -631,23 +514,32 @@ fn api_operation_created_json() {
       },
       "responses": {
         "201": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/TestResult"
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "title": "TestResult",
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "format": "uint32",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "id"
+                ]
               }
             }
-          },
-          "description": ""
+          }
         },
         "405": {
           "description": "Invalid input"
         }
       },
-      "summary": "Add a new pet to the store",
-      "tags": [
-        "pet"
-      ]
+      "deprecated": false
     })
   );
 }
@@ -663,45 +555,38 @@ fn api_operation_created_json_simple_response() {
     Ok(CreatedJson(Uuid::new_v4()))
   }
 
-  let components = __openapi_test::components(OpenApiVersion::OAS3_0);
+  let components = __openapi_test::components(OpenApiVersion::OAS3_1);
   // only one component here because: error does not have schema and Test is used both for query and response
   assert_eq!(components.len(), 1);
   let components = serde_json::to_value(components).expect("Unable to serialize as Json");
 
-  let operation = __openapi_test::operation(OpenApiVersion::OAS3_0);
+  let operation = __openapi_test::operation(OpenApiVersion::OAS3_1);
   let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
 
-  assert_json_eq!(
-    components,
-    json!([
-      {
-        "schemas": {
-          "Test": {
-            "properties": {
-              "test": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "test"
-            ],
-            "title": "Test",
-            "type": "object"
-          }
-        }
-      }
-    ])
-  );
+  assert_json_eq!(components, json!([{}]));
   assert_json_eq!(
     operation,
     json!({
-      "deprecated": false,
+      "tags": [
+        "pet"
+      ],
+      "summary": "Add a new pet to the store",
       "description": "Add a new pet to the store\\\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/Test"
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "title": "Test",
+              "type": "object",
+              "properties": {
+                "test": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "test"
+              ]
             }
           }
         },
@@ -709,25 +594,23 @@ fn api_operation_created_json_simple_response() {
       },
       "responses": {
         "201": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
-                "format": "uuid",
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "title": "Uuid",
-                "type": "string"
+                "type": "string",
+                "format": "uuid"
               }
             }
-          },
-          "description": ""
+          }
         },
         "405": {
           "description": "Invalid input"
         }
       },
-      "summary": "Add a new pet to the store",
-      "tags": [
-        "pet"
-      ]
+      "deprecated": false
     })
   );
 }
@@ -745,59 +628,38 @@ fn api_operation_accepted_json() {
     Ok(AcceptedJson(test_models::TestResult { id: 0 }))
   }
 
-  let components = __openapi_test::components(OpenApiVersion::OAS3_0);
+  let components = __openapi_test::components(OpenApiVersion::OAS3_1);
   // only one component here because: error does not have schema and Test is used both for query and response
   assert_eq!(components.len(), 1);
   let components = serde_json::to_value(components).expect("Unable to serialize as Json");
 
-  let operation = __openapi_test::operation(OpenApiVersion::OAS3_0);
+  let operation = __openapi_test::operation(OpenApiVersion::OAS3_1);
   let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
 
-  assert_json_eq!(
-    components,
-    json!([
-      {
-        "schemas": {
-          "Test": {
-            "properties": {
-              "test": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "test"
-            ],
-            "title": "Test",
-            "type": "object"
-          },
-          "TestResult": {
-            "properties": {
-              "id": {
-                "format": "uint32",
-                "minimum": 0,
-                "type": "integer"
-              }
-            },
-            "required": [
-              "id"
-            ],
-            "title": "TestResult",
-            "type": "object"
-          }
-        }
-      }
-    ])
-  );
+  assert_json_eq!(components, json!([{}]));
   assert_json_eq!(
     operation,
     json!({
-      "deprecated": false,
+      "tags": [
+        "pet"
+      ],
+      "summary": "Add a new pet to the store",
       "description": "Add a new pet to the store\\\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/Test"
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "title": "Test",
+              "type": "object",
+              "properties": {
+                "test": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "test"
+              ]
             }
           }
         },
@@ -805,23 +667,32 @@ fn api_operation_accepted_json() {
       },
       "responses": {
         "202": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/TestResult"
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "title": "TestResult",
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "format": "uint32",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "id"
+                ]
               }
             }
-          },
-          "description": ""
+          }
         },
         "405": {
           "description": "Invalid input"
         }
       },
-      "summary": "Add a new pet to the store",
-      "tags": [
-        "pet"
-      ]
+      "deprecated": false
     })
   );
 }
@@ -839,58 +710,37 @@ fn api_operation_deprecated() {
     Ok(CreatedJson(test_models::TestResult { id: 4 }))
   }
 
-  let components = __openapi_test::components(OpenApiVersion::OAS3_0);
+  let components = __openapi_test::components(OpenApiVersion::OAS3_1);
   assert_eq!(components.len(), 1);
   let components = serde_json::to_value(components).expect("Unable to serialize as Json");
 
-  let operation = __openapi_test::operation(OpenApiVersion::OAS3_0);
+  let operation = __openapi_test::operation(OpenApiVersion::OAS3_1);
   let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
 
-  assert_json_eq!(
-    components,
-    json!([
-      {
-        "schemas": {
-          "Test": {
-            "properties": {
-              "test": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "test"
-            ],
-            "title": "Test",
-            "type": "object"
-          },
-          "TestResult": {
-            "properties": {
-              "id": {
-                "format": "uint32",
-                "minimum": 0,
-                "type": "integer"
-              }
-            },
-            "required": [
-              "id"
-            ],
-            "title": "TestResult",
-            "type": "object"
-          }
-        }
-      }
-    ])
-  );
+  assert_json_eq!(components, json!([{}]));
   assert_json_eq!(
     operation,
     json!({
-      "deprecated": true,
+      "tags": [
+        "pet"
+      ],
+      "summary": "Add a new pet to the store",
       "description": "Add a new pet to the store\\\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/Test"
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "title": "Test",
+              "type": "object",
+              "properties": {
+                "test": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "test"
+              ]
             }
           }
         },
@@ -898,23 +748,32 @@ fn api_operation_deprecated() {
       },
       "responses": {
         "201": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/TestResult"
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "title": "TestResult",
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "format": "uint32",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "id"
+                ]
               }
             }
-          },
-          "description": ""
+          }
         },
         "405": {
           "description": "Invalid input"
         }
       },
-      "summary": "Add a new pet to the store",
-      "tags": [
-        "pet"
-      ]
+      "deprecated": true
     })
   );
 
@@ -929,59 +788,38 @@ fn api_operation_deprecated() {
     Ok(CreatedJson(test_models::TestResult { id: 2 }))
   }
 
-  let components = __openapi_test2::components(OpenApiVersion::OAS3_0);
+  let components = __openapi_test2::components(OpenApiVersion::OAS3_1);
   assert_eq!(components.len(), 1);
   let components = serde_json::to_value(components).expect("Unable to serialize as Json");
 
-  let operation = __openapi_test2::operation(OpenApiVersion::OAS3_0);
+  let operation = __openapi_test2::operation(OpenApiVersion::OAS3_1);
   let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
 
-  assert_json_eq!(
-    components,
-    json!([
-      {
-        "schemas": {
-          "Test": {
-            "properties": {
-              "test": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "test"
-            ],
-            "title": "Test",
-            "type": "object"
-          },
-          "TestResult": {
-            "properties": {
-              "id": {
-                "format": "uint32",
-                "minimum": 0,
-                "type": "integer"
-              }
-            },
-            "required": [
-              "id"
-            ],
-            "title": "TestResult",
-            "type": "object"
-          }
-        }
-      }
-    ])
-  );
+  assert_json_eq!(components, json!([{}]));
   assert_json_eq!(
     operation,
     json!({
-      "deprecated": true,
+      "tags": [
+        "pet"
+      ],
+      "summary": "Add a new pet to the store",
       "description": "Add a new pet to the store\\\nPlop",
       "operationId": "test2",
       "requestBody": {
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/Test"
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "title": "Test",
+              "type": "object",
+              "properties": {
+                "test": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "test"
+              ]
             }
           }
         },
@@ -989,23 +827,32 @@ fn api_operation_deprecated() {
       },
       "responses": {
         "201": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/TestResult"
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "title": "TestResult",
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "format": "uint32",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "id"
+                ]
               }
             }
-          },
-          "description": ""
+          }
         },
         "405": {
           "description": "Invalid input"
         }
       },
-      "summary": "Add a new pet to the store",
-      "tags": [
-        "pet"
-      ]
+      "deprecated": true
     })
   );
 }
@@ -1023,10 +870,10 @@ fn api_operation_skip() {
     Ok(CreatedJson(test_models::TestResult { id: 6 }))
   }
 
-  let components = __openapi_test::components(OpenApiVersion::OAS3_0);
+  let components = __openapi_test::components(OpenApiVersion::OAS3_1);
   assert!(components.is_empty());
 
-  let operation = __openapi_test::operation(OpenApiVersion::OAS3_0);
+  let operation = __openapi_test::operation(OpenApiVersion::OAS3_1);
   let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
 
   assert_json_eq!(
@@ -1050,58 +897,37 @@ fn api_operation_error() {
     Ok(CreatedJson(test_models::TestResult { id: 1 }))
   }
 
-  let components = __openapi_test::components(OpenApiVersion::OAS3_0);
+  let components = __openapi_test::components(OpenApiVersion::OAS3_1);
   assert_eq!(components.len(), 1);
   let components = serde_json::to_value(components).expect("Unable to serialize as Json");
 
-  let operation = __openapi_test::operation(OpenApiVersion::OAS3_0);
+  let operation = __openapi_test::operation(OpenApiVersion::OAS3_1);
   let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
 
-  assert_json_eq!(
-    components,
-    json!([
-      {
-        "schemas": {
-          "Test": {
-            "properties": {
-              "test": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "test"
-            ],
-            "title": "Test",
-            "type": "object"
-          },
-          "TestResult": {
-            "properties": {
-              "id": {
-                "format": "uint32",
-                "minimum": 0,
-                "type": "integer"
-              }
-            },
-            "required": [
-              "id"
-            ],
-            "title": "TestResult",
-            "type": "object"
-          }
-        }
-      }
-    ])
-  );
+  assert_json_eq!(components, json!([{}]));
   assert_json_eq!(
     operation,
     json!({
-      "deprecated": false,
+      "tags": [
+        "pet"
+      ],
+      "summary": "Add a new pet to the store",
       "description": "Add a new pet to the store\\\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/Test"
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "title": "Test",
+              "type": "object",
+              "properties": {
+                "test": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "test"
+              ]
             }
           }
         },
@@ -1109,14 +935,26 @@ fn api_operation_error() {
       },
       "responses": {
         "201": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/TestResult"
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "title": "TestResult",
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "format": "uint32",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "id"
+                ]
               }
             }
-          },
-          "description": ""
+          }
         },
         "401": {
           "description": "Unauthorized"
@@ -1125,10 +963,7 @@ fn api_operation_error() {
           "description": "Not Found"
         }
       },
-      "summary": "Add a new pet to the store",
-      "tags": [
-        "pet"
-      ]
+      "deprecated": false
     })
   );
 }
@@ -1147,45 +982,17 @@ fn api_operation_security() {
     Ok(CreatedJson(test_models::TestResult { id: 0 }))
   }
 
-  let components = __openapi_test::components(OpenApiVersion::OAS3_0);
+  let components = __openapi_test::components(OpenApiVersion::OAS3_1);
   assert_eq!(components.len(), 1);
   let components = serde_json::to_value(components).expect("Unable to serialize as Json");
 
-  let operation = __openapi_test::operation(OpenApiVersion::OAS3_0);
+  let operation = __openapi_test::operation(OpenApiVersion::OAS3_1);
   let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
 
   assert_json_eq!(
     components,
     json!([
       {
-        "schemas": {
-          "Test": {
-            "properties": {
-              "test": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "test"
-            ],
-            "title": "Test",
-            "type": "object"
-          },
-          "TestResult": {
-            "properties": {
-              "id": {
-                "format": "uint32",
-                "minimum": 0,
-                "type": "integer"
-              }
-            },
-            "required": [
-              "id"
-            ],
-            "title": "TestResult",
-            "type": "object"
-          }
-        },
         "securitySchemes": {
           "api_key": {
             "flows": {
@@ -1207,13 +1014,23 @@ fn api_operation_security() {
   assert_json_eq!(
     operation,
     json!({
-      "deprecated": false,
+      "summary": "Add a new pet to the store",
       "description": "Add a new pet to the store\\\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/Test"
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "title": "Test",
+              "type": "object",
+              "properties": {
+                "test": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "test"
+              ]
             }
           }
         },
@@ -1221,14 +1038,26 @@ fn api_operation_security() {
       },
       "responses": {
         "201": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/TestResult"
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "title": "TestResult",
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "format": "uint32",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "id"
+                ]
               }
             }
-          },
-          "description": ""
+          }
         },
         "401": {
           "description": "Unauthorized"
@@ -1243,14 +1072,14 @@ fn api_operation_security() {
           "description": "Method Not Allowed"
         }
       },
+      "deprecated": false,
       "security": [
         {
           "api_key": [
             "read:pets"
           ]
         }
-      ],
-      "summary": "Add a new pet to the store"
+      ]
     })
   );
 }
@@ -1268,45 +1097,35 @@ fn api_operation_multipart() {
     Ok(HttpResponse::Ok().content_type(ContentType::plaintext()).json(""))
   }
 
-  let components = __openapi_test::components(OpenApiVersion::OAS3_0);
+  let components = __openapi_test::components(OpenApiVersion::OAS3_1);
   // only one component here because: error does not have schema and Test is used both for query and response
   assert_eq!(components.len(), 1);
   let components = serde_json::to_value(components).expect("Unable to serialize as Json");
 
-  let operation = __openapi_test::operation(OpenApiVersion::OAS3_0);
+  let operation = __openapi_test::operation(OpenApiVersion::OAS3_1);
   let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
 
-  assert_json_eq!(
-    components,
-    json!([
-      {
-        "schemas": {
-          "Test": {
-            "properties": {
-              "test": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "test"
-            ],
-            "title": "Test",
-            "type": "object"
-          }
-        }
-      }
-    ])
-  );
+  assert_json_eq!(components, json!([{}]));
   assert_json_eq!(
     operation,
     json!({
-      "deprecated": false,
+      "summary": "Add a new pet to the store",
       "description": "Add a new pet to the store\\\nPlop",
       "requestBody": {
         "content": {
           "multipart/form-data": {
             "schema": {
-              "$ref": "#/components/schemas/Test"
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "title": "Test",
+              "type": "object",
+              "properties": {
+                "test": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "test"
+              ]
             }
           }
         },
@@ -1329,7 +1148,7 @@ fn api_operation_multipart() {
           "description": "Method Not Allowed"
         }
       },
-      "summary": "Add a new pet to the store"
+      "deprecated": false
     })
   );
 }
@@ -1347,45 +1166,35 @@ fn api_operation_consumes_produces() {
     Ok(HttpResponse::Ok().content_type(ContentType::plaintext()).json(""))
   }
 
-  let components = __openapi_test::components(OpenApiVersion::OAS3_0);
+  let components = __openapi_test::components(OpenApiVersion::OAS3_1);
   // only one component here because: error does not have schema and Test is used both for query and response
   assert_eq!(components.len(), 1);
   let components = serde_json::to_value(components).expect("Unable to serialize as Json");
 
-  let operation = __openapi_test::operation(OpenApiVersion::OAS3_0);
+  let operation = __openapi_test::operation(OpenApiVersion::OAS3_1);
   let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
 
-  assert_json_eq!(
-    components,
-    json!([
-      {
-        "schemas": {
-          "Test": {
-            "properties": {
-              "test": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "test"
-            ],
-            "title": "Test",
-            "type": "object"
-          }
-        }
-      }
-    ])
-  );
+  assert_json_eq!(components, json!([{}]));
   assert_json_eq!(
     operation,
     json!({
-      "deprecated": false,
+      "summary": "Add a new pet to the store",
       "description": "Add a new pet to the store\\\nPlop",
       "requestBody": {
         "content": {
           "application/problem+json": {
             "schema": {
-              "$ref": "#/components/schemas/Test"
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "title": "Test",
+              "type": "object",
+              "properties": {
+                "test": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "test"
+              ]
             }
           }
         },
@@ -1393,10 +1202,10 @@ fn api_operation_consumes_produces() {
       },
       "responses": {
         "200": {
+          "description": "",
           "content": {
             "text/plain": {}
-          },
-          "description": ""
+          }
         },
         "401": {
           "description": "Unauthorized"
@@ -1411,7 +1220,7 @@ fn api_operation_consumes_produces() {
           "description": "Method Not Allowed"
         }
       },
-      "summary": "Add a new pet to the store"
+      "deprecated": false
     })
   );
 }
@@ -1429,12 +1238,12 @@ fn api_operation_root_vec() {
     Ok(Json(vec![test_models::TestResult { id: 0 }]))
   }
 
-  let components = __openapi_test::components(OpenApiVersion::OAS3_0);
+  let components = __openapi_test::components(OpenApiVersion::OAS3_1);
   // only one component here because: error does not have schema and Test is used both for query and response
   assert_eq!(components.len(), 1);
   let components = serde_json::to_value(components).expect("Unable to serialize as Json");
 
-  let operation = __openapi_test::operation(OpenApiVersion::OAS3_0);
+  let operation = __openapi_test::operation(OpenApiVersion::OAS3_1);
   let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
 
   assert_json_eq!(
@@ -1442,19 +1251,8 @@ fn api_operation_root_vec() {
     json!([
       {
         "schemas": {
-          "Test": {
-            "properties": {
-              "test": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "test"
-            ],
-            "title": "Test",
-            "type": "object"
-          },
           "TestResult": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
             "properties": {
               "id": {
                 "format": "uint32",
@@ -1475,13 +1273,26 @@ fn api_operation_root_vec() {
   assert_json_eq!(
     operation,
     json!({
-      "deprecated": false,
+      "tags": [
+        "pet"
+      ],
+      "summary": "Add a new pet to the store",
       "description": "Add a new pet to the store\\\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/Test"
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "title": "Test",
+              "type": "object",
+              "properties": {
+                "test": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "test"
+              ]
             }
           }
         },
@@ -1489,6 +1300,7 @@ fn api_operation_root_vec() {
       },
       "responses": {
         "200": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
@@ -1498,119 +1310,13 @@ fn api_operation_root_vec() {
                 }
               }
             }
-          },
-          "description": ""
+          }
         },
         "405": {
           "description": "Invalid input"
         }
       },
-      "summary": "Add a new pet to the store",
-      "tags": [
-        "pet"
-      ]
-    })
-  );
-}
-
-#[test]
-fn api_operation_actix_web_grant() {
-  #[allow(clippy::unused_async)]
-  async fn extract(_req: &ServiceRequest) -> Result<HashSet<String>, Error> {
-    Ok(Default::default())
-  }
-
-  /// Add a new pet to the store
-  /// Add a new pet to the store
-  /// Plop
-  #[actix_web_grants::protect("ADMIN")]
-  #[api_operation(tag = "pet")]
-  pub(crate) async fn test(
-    _body: Json<test_models::Test>,
-  ) -> Result<Json<Vec<test_models::TestResult>>, test_models::ErrorResponse> {
-    Ok(Json(vec![test_models::TestResult { id: 0 }]))
-  }
-
-  let components = __openapi_test::components();
-  // only one component here because: error does not have schema and Test is used both for query and response
-  assert_eq!(components.len(), 1);
-  let components = serde_json::to_value(components).expect("Unable to serialize as Json");
-
-  let operation = __openapi_test::operation();
-  let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
-
-  assert_json_eq!(
-    components,
-    json!([
-      {
-        "schemas": {
-          "Test": {
-            "properties": {
-              "test": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "test"
-            ],
-            "title": "Test",
-            "type": "object"
-          },
-          "TestResult": {
-            "properties": {
-              "id": {
-                "format": "uint32",
-                "minimum": 0.0,
-                "type": "integer"
-              }
-            },
-            "required": [
-              "id"
-            ],
-            "title": "TestResult",
-            "type": "object"
-          }
-        }
-      }
-    ])
-  );
-  assert_json_eq!(
-    operation,
-    json!({
-      "deprecated": false,
-      "description": "Add a new pet to the store\\\nPlop",
-      "requestBody": {
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/Test"
-            }
-          }
-        },
-        "required": true
-      },
-      "responses": {
-        "200": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/TestResult"
-                }
-              }
-            }
-          },
-          "description": ""
-        },
-        "405": {
-          "description": "Invalid input"
-        }
-      },
-      "summary": "Add a new pet to the store",
-      "tags": [
-        "pet"
-      ]
+      "deprecated": false
     })
   );
 }

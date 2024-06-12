@@ -219,7 +219,7 @@ mod test {
   use serde::Serialize;
 
   #[test]
-  fn no_content_generate_valid_response() {
+  fn no_content_generate_valid_response_oas_3_0() {
     let responses = <NoContent as ApiComponent>::responses(OpenApiVersion::OAS3_0, None);
     assert!(responses.is_some());
 
@@ -232,7 +232,20 @@ mod test {
   }
 
   #[test]
-  fn accepted_json_generate_valid_response() {
+  fn no_content_generate_valid_response_oas_3_1() {
+    let responses = <NoContent as ApiComponent>::responses(OpenApiVersion::OAS3_1, None);
+    assert!(responses.is_some());
+
+    let responses = responses.expect("missing responses");
+    let no_content_response = responses.responses.get("204");
+    assert!(no_content_response.is_some());
+
+    let no_content_response = no_content_response.expect("missing responses").clone();
+    assert!(matches!(no_content_response, ReferenceOr::Object(obj) if obj == Response::default()));
+  }
+
+  #[test]
+  fn accepted_json_generate_valid_response_oas_3_0() {
     #[derive(Serialize, ApiComponent, JsonSchema)]
     struct Test {
       test: String,
@@ -247,13 +260,43 @@ mod test {
   }
 
   #[test]
-  fn created_json_generate_valid_response() {
+  fn accepted_json_generate_valid_response_oas_3_1() {
+    #[derive(Serialize, ApiComponent, JsonSchema)]
+    struct Test {
+      test: String,
+    }
+
+    let responses = <AcceptedJson<Test> as ApiComponent>::responses(OpenApiVersion::OAS3_1, None);
+    assert!(responses.is_some());
+
+    let responses = responses.expect("missing responses");
+    let accepted_json_response = responses.responses.get("202");
+    assert!(accepted_json_response.is_some());
+  }
+
+  #[test]
+  fn created_json_generate_valid_response_oas_3_0() {
     #[derive(Serialize, ApiComponent, JsonSchema)]
     struct Test {
       test: String,
     }
 
     let responses = <CreatedJson<Test> as ApiComponent>::responses(OpenApiVersion::OAS3_0, None);
+    assert!(responses.is_some());
+
+    let responses = responses.expect("missing responses");
+    let accepted_json_response = responses.responses.get("201");
+    assert!(accepted_json_response.is_some());
+  }
+
+  #[test]
+  fn created_json_generate_valid_response_oas_3_1() {
+    #[derive(Serialize, ApiComponent, JsonSchema)]
+    struct Test {
+      test: String,
+    }
+
+    let responses = <CreatedJson<Test> as ApiComponent>::responses(OpenApiVersion::OAS3_1, None);
     assert!(responses.is_some());
 
     let responses = responses.expect("missing responses");
