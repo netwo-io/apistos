@@ -482,6 +482,57 @@ mod test {
         _in: ParameterIn::Query,
         required: Some(true),
         definition: Some(ParameterDefinition::Schema(
+          json_schema!({
+            "type": "integer",
+            "format": "uint32",
+            "minimum": 0
+          })
+          .into()
+        )),
+        ..Default::default()
+      }
+    );
+
+    let id_string_parameter_schema = parameters_schema
+      .iter()
+      .find(|ps| ps.name == *"id_string")
+      .unwrap()
+      .clone();
+    assert_eq!(
+      id_string_parameter_schema,
+      Parameter {
+        name: "id_string".to_string(),
+        _in: ParameterIn::Query,
+        required: Some(true),
+        definition: Some(ParameterDefinition::Schema(
+          json_schema!({
+            "type": "string",
+          })
+          .into()
+        )),
+        ..Default::default()
+      }
+    );
+  }
+
+  #[cfg(feature = "qs_query")]
+  #[test]
+  fn test_qs_query_parameter_oas_3_1() {
+    let parameters_schema = <QsQuery<Test> as ApiComponent>::parameters(OpenApiVersion::OAS3_1);
+    assert_eq!(parameters_schema.len(), 2);
+
+    let id_number_parameter_schema = parameters_schema
+      .iter()
+      .find(|ps| ps.name == *"id_number")
+      .unwrap()
+      .clone();
+    assert_eq!(
+      id_number_parameter_schema,
+      Parameter {
+        name: "id_number".to_string(),
+        _in: ParameterIn::Query,
+        required: Some(true),
+        definition: Some(ParameterDefinition::Schema(
           ApistosSchema::new(
             json_schema!({
               "type": "integer",
@@ -582,6 +633,61 @@ mod test {
   #[test]
   fn test_lab_query_parameter_os_3_0() {
     let parameters_schema = <LabQuery<Test> as ApiComponent>::parameters(OpenApiVersion::OAS3_0);
+    assert_eq!(parameters_schema.len(), 2);
+
+    let id_number_parameter_schema = parameters_schema
+      .iter()
+      .find(|ps| ps.name == *"id_number")
+      .unwrap()
+      .clone();
+    assert_eq!(
+      id_number_parameter_schema,
+      Parameter {
+        name: "id_number".to_string(),
+        _in: ParameterIn::Query,
+        required: Some(true),
+        style: Some(ParameterStyle::Form),
+        explode: Some(true),
+        definition: Some(ParameterDefinition::Schema(
+          json_schema!({
+            "type": "integer",
+            "format": "uint32",
+            "minimum": 0
+          })
+          .into()
+        )),
+        ..Default::default()
+      }
+    );
+
+    let id_string_parameter_schema = parameters_schema
+      .iter()
+      .find(|ps| ps.name == *"id_string")
+      .unwrap()
+      .clone();
+    assert_eq!(
+      id_string_parameter_schema,
+      Parameter {
+        name: "id_string".to_string(),
+        _in: ParameterIn::Query,
+        required: Some(true),
+        style: Some(ParameterStyle::Form),
+        explode: Some(true),
+        definition: Some(ParameterDefinition::Schema(
+          json_schema!({
+            "type": "string",
+          })
+          .into()
+        )),
+        ..Default::default()
+      }
+    );
+  }
+
+  #[cfg(feature = "lab_query")]
+  #[test]
+  fn test_lab_query_parameter_os_3_1() {
+    let parameters_schema = <LabQuery<Test> as ApiComponent>::parameters(OpenApiVersion::OAS3_1);
     assert_eq!(parameters_schema.len(), 2);
 
     let id_number_parameter_schema = parameters_schema

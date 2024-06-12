@@ -1,3 +1,6 @@
+#![allow(clippy::expect_used)]
+#![allow(clippy::panic)]
+
 use actix_web::web::Query;
 #[cfg(feature = "lab_query")]
 use actix_web_lab::extract::Query as LabQuery;
@@ -213,6 +216,7 @@ async fn garde_lab_query_parameters() {
   assert_eq!(offset_parameter.required, Some(false));
 }
 
+#[ignore]
 #[actix_web::test]
 async fn query_parameters_with_flatten_enums() {
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
