@@ -42,11 +42,15 @@ impl<'a> ToTokens for Components<'a> {
         )*
 
         let mut schemas = vec![];
-        #(
-          schemas.push(<#args>::schema(oas_version));
-        )*
-        schemas.push(<#responder_wrapper>::schema(oas_version));
-        let mut schemas = schemas.into_iter().flatten().collect::<Vec<(String, apistos::reference_or::ReferenceOr<apistos::ApistosSchema>)>>();
+        let mut schemas = if oas_version == apistos::OpenApiVersion::OAS3_0 {
+          #(
+            schemas.push(<#args>::schema(oas_version));
+          )*
+          schemas.push(<#responder_wrapper>::schema(oas_version));
+          schemas.into_iter().flatten().collect::<Vec<(String, apistos::reference_or::ReferenceOr<apistos::ApistosSchema>)>>()
+        } else {
+          vec![]
+        };
         #(
           schemas.append(&mut <#args>::child_schemas(oas_version));
         )*

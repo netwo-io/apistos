@@ -37,7 +37,7 @@ pub struct DefaultParameters {
 #[derive(Default, Clone)]
 pub struct Spec {
   pub info: Info,
-  pub open_api_version: OpenApiVersion,
+  pub openapi: OpenApiVersion,
   pub default_tags: Vec<String>,
   /// See more details at <https://spec.openapis.org/oas/latest.html#tagObject>.
   pub tags: Vec<Tag>,
