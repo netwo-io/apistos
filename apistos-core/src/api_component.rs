@@ -560,7 +560,6 @@ mod test {
     assert_json_eq!(
       json,
       json!({
-        "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
         "title": "Test",
         "type": "object",
         "properties": {
@@ -586,7 +585,6 @@ mod test {
     assert_json_eq!(
       json,
       json!({
-        "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
         "title": "TestChild",
         "type": "object",
         "properties": {

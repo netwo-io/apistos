@@ -31,7 +31,6 @@ fn api_cookie_derive() {
   assert_json_eq!(
     json,
     json!({
-      "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
       "title": "OrganizationSlugCookie",
       "type": "string"
     })
@@ -48,7 +47,6 @@ fn api_cookie_derive() {
       "name": "X-Organization-Slug",
       "required": true,
       "schema": {
-        "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
         "title": "OrganizationSlugCookie",
         "type": "string"
       }
@@ -82,7 +80,6 @@ fn api_cookie_derive_deprecated() {
   assert_json_eq!(
     json,
     json!({
-      "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
       "title": "OrganizationSlugCookie",
       "type": "string",
       "deprecated": true
@@ -100,7 +97,6 @@ fn api_cookie_derive_deprecated() {
       "name": "X-Organization-Slug",
       "required": true,
       "schema": {
-        "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
         "title": "OrganizationSlugCookie",
         "type": "string",
         "deprecated": true
@@ -134,7 +130,6 @@ fn api_cookie_derive_deprecated_attribute() {
   assert_json_eq!(
     json,
     json!({
-      "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
       "title": "OrganizationSlugCookie2",
       "type": "string",
       "deprecated": true
@@ -152,7 +147,6 @@ fn api_cookie_derive_deprecated_attribute() {
       "name": "X-Organization-Slug",
       "required": true,
       "schema": {
-        "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
         "title": "OrganizationSlugCookie2",
         "type": "string",
         "deprecated": true
