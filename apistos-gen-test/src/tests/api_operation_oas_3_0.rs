@@ -34,6 +34,11 @@ mod test_models {
   }
 
   #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
+  pub(crate) struct TestWrapper {
+    pub(crate) test: Test,
+  }
+
+  #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
   pub(crate) struct TestResult {
     pub(crate) id: u32,
   }
@@ -499,7 +504,7 @@ fn api_operation_created_json() {
   /// Plop
   #[api_operation(tag = "pet")]
   pub(crate) async fn test(
-    _body: Json<test_models::Test>,
+    _body: Json<test_models::TestWrapper>,
   ) -> Result<CreatedJson<test_models::TestResult>, test_models::ErrorResponse> {
     Ok(CreatedJson(test_models::TestResult { id: 1 }))
   }
@@ -518,6 +523,7 @@ fn api_operation_created_json() {
       {
         "schemas": {
           "Test": {
+            "type": "object",
             "properties": {
               "test": {
                 "type": "string"
@@ -525,23 +531,33 @@ fn api_operation_created_json() {
             },
             "required": [
               "test"
-            ],
-            "title": "Test",
-            "type": "object"
+            ]
           },
           "TestResult": {
+            "title": "TestResult",
+            "type": "object",
             "properties": {
               "id": {
+                "type": "integer",
                 "format": "uint32",
-                "minimum": 0,
-                "type": "integer"
+                "minimum": 0
               }
             },
             "required": [
               "id"
-            ],
-            "title": "TestResult",
-            "type": "object"
+            ]
+          },
+          "TestWrapper": {
+            "title": "TestWrapper",
+            "type": "object",
+            "properties": {
+              "test": {
+                "$ref": "#/components/schemas/Test"
+              }
+            },
+            "required": [
+              "test"
+            ]
           }
         }
       }
@@ -556,7 +572,7 @@ fn api_operation_created_json() {
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/Test"
+              "$ref": "#/components/schemas/TestWrapper"
             }
           }
         },

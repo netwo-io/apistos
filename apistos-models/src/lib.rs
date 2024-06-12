@@ -10,6 +10,7 @@ use std::fmt::Debug;
 
 use indexmap::IndexMap;
 pub use schema::ApistosSchema;
+use schemars::gen::SchemaSettings;
 pub use schemars::*;
 use serde::Serialize;
 use serde_json::Value;
@@ -37,13 +38,24 @@ mod schema;
 pub enum OpenApiVersion {
   #[serde(rename = "3.0.3")]
   OAS3_0,
-  #[serde(rename = "3.1")]
+  #[serde(rename = "3.1.0")]
   OAS3_1,
 }
 
 impl Default for OpenApiVersion {
   fn default() -> Self {
     Self::OAS3_0
+  }
+}
+
+impl OpenApiVersion {
+  pub fn get_schema_settings(self) -> SchemaSettings {
+    match self {
+      OpenApiVersion::OAS3_0 => SchemaSettings::openapi3(),
+      OpenApiVersion::OAS3_1 => {
+        SchemaSettings::draft2020_12().with(|s| s.definitions_path = "/components/schemas".to_owned())
+      }
+    }
   }
 }
 

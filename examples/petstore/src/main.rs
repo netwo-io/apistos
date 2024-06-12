@@ -8,6 +8,7 @@ use apistos::server::Server;
 use apistos::spec::Spec;
 use apistos::tag::Tag;
 use apistos::web::scope;
+use apistos::OpenApiVersion;
 use std::error::Error;
 use std::net::Ipv4Addr;
 
@@ -19,6 +20,7 @@ async fn main() -> Result<(), impl Error> {
 
   HttpServer::new(move || {
     let spec = Spec {
+      openapi: OpenApiVersion::OAS3_1,
       default_tags: vec!["api".to_owned()],
       tags: vec![
         Tag {
@@ -74,6 +76,7 @@ async fn main() -> Result<(), impl Error> {
       .build("/openapi.json")
   })
     .bind((Ipv4Addr::UNSPECIFIED, 8080))?
+      .workers(1)
     .run()
     .await
 }

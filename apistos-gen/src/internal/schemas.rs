@@ -17,10 +17,7 @@ impl ToTokens for Schemas {
 
     tokens.extend(quote! {
       fn child_schemas(oas_version: apistos::OpenApiVersion) -> Vec<(String, apistos::reference_or::ReferenceOr<apistos::ApistosSchema>)> {
-        let settings = match oas_version {
-          apistos::OpenApiVersion::OAS3_0 => schemars::gen::SchemaSettings::openapi3(),
-          apistos::OpenApiVersion::OAS3_1 => schemars::gen::SchemaSettings::draft2020_12(),
-        };
+        let settings = oas_version.get_schema_settings();
         let mut gen = settings.into_generator();
         let mut schema: apistos::Schema = gen.into_root_schema_for::<Self>();
 
@@ -49,10 +46,7 @@ impl ToTokens for Schemas {
       fn schema(oas_version: apistos::OpenApiVersion) -> Option<(String, apistos::reference_or::ReferenceOr<apistos::ApistosSchema>)> {
         let (name, schema) = {
           let schema_name = <Self as schemars::JsonSchema>::schema_name();
-          let settings = match oas_version {
-            apistos::OpenApiVersion::OAS3_0 => schemars::gen::SchemaSettings::openapi3(),
-            apistos::OpenApiVersion::OAS3_1 => schemars::gen::SchemaSettings::draft2020_12(),
-          };
+          let settings = oas_version.get_schema_settings();
           let mut gen = settings.into_generator();
           let mut schema: apistos::Schema = gen.into_root_schema_for::<Self>();
 
