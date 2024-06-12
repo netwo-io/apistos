@@ -28,6 +28,7 @@ fn api_component_derive() {
   assert_json_eq!(
     json,
     json!({
+      "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
       "properties": {
         "name": {
           "type": "string"
@@ -71,6 +72,7 @@ fn api_component_derive_with_generic() {
   assert_json_eq!(
     json,
     json!({
+      "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
       "properties": {
         "id": {
           "$ref": "#/components/schemas/Test"
@@ -140,6 +142,7 @@ fn api_component_derive_with_flatten() {
   assert_json_eq!(
     json,
     json!({
+      "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
       "properties": {
         "id_number": {
           "format": "uint32",
@@ -184,6 +187,7 @@ fn api_component_derive_with_deprecated_field() {
   assert_json_eq!(
     json,
     json!({
+      "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
       "properties": {
         "name": {
           "type": "string",
@@ -222,6 +226,7 @@ fn api_component_derive_with_format() {
   assert_json_eq!(
     json,
     json!({
+      "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
       "properties": {
         "usernames": {
           "items": {
@@ -259,6 +264,7 @@ fn api_component_derive_recursive() {
   assert_json_eq!(
     json,
     json!({
+      "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
       "properties": {
         "old_name": {
           "allOf": [
@@ -324,6 +330,7 @@ fn api_component_derive_flatten_algebraic_enums() {
   assert_json_eq!(
     json,
     json!({
+      "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
       "oneOf": [
         {
           "additionalProperties": false,
@@ -404,6 +411,7 @@ fn api_component_derive_optional_enums() {
   assert_json_eq!(
     json,
     json!({
+      "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
       "properties": {
         "limit": {
           "format": "uint32",
@@ -471,6 +479,7 @@ fn api_component_derive_named_enums() {
   assert_json_eq!(
     json,
     json!({
+      "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
       "oneOf": [
         {
           "additionalProperties": false,
@@ -609,6 +618,7 @@ fn api_component_derive_named_enums_documented() {
   assert_json_eq!(
     json,
     json!({
+      "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
       "properties": {
         "kind": {
           "$ref": "#/components/schemas/Kind"
@@ -712,6 +722,7 @@ fn api_component_derive_named_enums_deep() {
   assert_json_eq!(
     json,
     json!({
+      "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
       "properties": {
         "level2": {
           "$ref": "#/components/schemas/Level2Query"
