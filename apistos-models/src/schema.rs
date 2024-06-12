@@ -29,7 +29,14 @@ impl ApistosSchema {
 
         // remove definitions from schema
         Self::remove_definition_from_schema(obj, oas_version.get_schema_settings().into_generator());
-        Self(schemars::Schema::from(obj.clone()))
+        match oas_version {
+          OpenApiVersion::OAS3_0 => {
+            // remove $schema property
+            obj.remove("$schema");
+            Self(schemars::Schema::from(obj.clone()))
+          }
+          OpenApiVersion::OAS3_1 => Self(schemars::Schema::from(obj.clone())),
+        }
       }
     }
   }
