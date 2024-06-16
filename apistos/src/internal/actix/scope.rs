@@ -181,7 +181,8 @@ where
     for (path, mut path_item) in item_map {
       let p = [self.path.clone(), path]
         .iter()
-        .map(|p| p.trim_matches('/'))
+        .filter(|p| !p.is_empty())
+        .map(|p| p.trim_start_matches('/'))
         .collect::<Vec<&str>>()
         .join("/");
 
