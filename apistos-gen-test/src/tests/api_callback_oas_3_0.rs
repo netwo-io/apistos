@@ -83,6 +83,7 @@ mod test_models {
 }
 
 #[test]
+#[allow(dead_code)]
 fn api_callback() {
   use actix_web::web::Header;
   use test_models::OrganizationSlug;

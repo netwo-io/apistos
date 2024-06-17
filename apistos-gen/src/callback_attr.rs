@@ -86,6 +86,7 @@ impl CallbackAttr {
         quote!(operation_builder.description = Some(#d.to_string());)
       }
     };
+
     let mut responses = vec![];
     for response in &self.responses {
       let status = response.code;

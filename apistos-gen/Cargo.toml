@@ -15,6 +15,7 @@ license.workspace = true
 
 [dependencies]
 actix-web = { workspace = true }
+apistos-core = { path = "../apistos-core", version = "0.2.4" }
 convert_case = { workspace = true }
 darling = { workspace = true }
 proc-macro2 = { workspace = true }
