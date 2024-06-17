@@ -524,9 +524,11 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
 ///   - `error_code = 00` an optional list of error codes to document only theses
 ///   - `consumes = "..."` allow to override body content type
 ///   - `produces = "..."` allow to override response content type
-///   - `callbacks(...)` an optional list @TODO
-///       - `name = "..."` a mandatory name for @TODO
-///       - `callback_fn = "..."` a mandatory function available in the scope decorated with [api_callback](attr.api_callback.html)
+///   - `callbacks(...)` an optional list of callbacks attached to this operation
+///       - `name = "..."` a mandatory name for a set of callbacks
+///       - `callback(...)` a list of callback operation
+///         - `path = "..."` URL to use for the callback operation
+///         - `[verb] = ...` any of the http verbs with an associated function. The given function should be available in scope and be annotated with `api_operation`
 ///
 /// If `summary` or `description` are not provided, a default value will be extracted from the comments. The first line will be used as summary while the rest will be part of the description.
 ///
@@ -697,15 +699,6 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
     &responder_wrapper,
   );
 
-  // eprintln!(
-  //   "{:#}",
-  //   quote!(
-  //     #open_api_def
-  //
-  //     #generated_item_ast
-  //   )
-  // );
-
   quote!(
     #open_api_def
 
@@ -714,6 +707,79 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
   .into()
 }
 
+/// Callback operation attribute macro implementing [PathItemDefinition](path_item_definition/trait.PathItemDefinition.html) for the decorated handler function.
+///
+/// ```rust
+/// use std::fmt::Display;
+/// use actix_web::web::Json;
+/// use actix_web::http::StatusCode;
+/// use actix_web::ResponseError;
+/// use core::fmt::Formatter;
+/// use apistos::actix::CreatedJson;
+/// use apistos::{api_operation, api_callback, ApiComponent, ApiErrorComponent};
+/// use schemars::JsonSchema;
+/// use serde::{Serialize, Deserialize};
+///
+/// #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
+/// pub struct Test {
+///   pub test: String
+/// }
+///
+/// #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
+///  pub(crate) struct TestCallbackResult {
+///   pub(crate) id: u32,
+/// }
+///
+/// #[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
+/// #[openapi_error(
+///   status(code = 405, description = "Invalid input"),
+/// )]
+/// pub enum ErrorResponse {
+///   MethodNotAllowed(String),
+/// }
+///
+/// impl Display for ErrorResponse {
+///   fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+///     todo!()
+///   }
+/// }
+///
+/// impl ResponseError for ErrorResponse {
+///   fn status_code(&self) -> StatusCode {
+///     todo!()
+///   }
+/// }
+///
+/// #[api_callback(
+///   response(code = 200, component = "TestCallbackResult")
+/// )]
+/// pub(crate) async fn callback_test(
+///   body: Json<Test>,
+/// ) -> Result<CreatedJson<Test>, ErrorResponse> {
+///   Ok(CreatedJson(body.0))
+/// }
+///
+/// #[api_operation(
+///   callbacks(name = "onData", callback(path = "{$request.body.test}/data", post = callback_test))
+/// )]
+/// pub(crate) async fn test(
+///   body: Json<Test>,
+/// ) -> Result<CreatedJson<Test>, ErrorResponse> {
+///   Ok(CreatedJson(body.0))
+/// }
+/// ```
+///
+/// # `#[api_callback(...)]` options:
+///   - `deprecated` a bool indicating the operation is deprecated. Deprecation can also be declared
+///  with rust `#[deprecated]` decorator.
+///   - `summary = "..."` an optional summary
+///   - `description = "..."` an optional description
+///   - `component = "..."` an optional list of components attached to this callback operation (parameters, body...)
+///   - `response(...)` an optional list of responses attached to this callback operation
+///     - `code = "..."` Http response code
+///     - `component = "..."` a component attached to the given callback response. Must derive [ApiComponent] and [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
+///
+/// If `summary` or `description` are not provided, a default value will be extracted from the comments. The first line will be used as summary while the rest will be part of the description.
 #[proc_macro_error]
 #[proc_macro_attribute]
 pub fn api_callback(attr: TokenStream, item: TokenStream) -> TokenStream {

@@ -9,14 +9,16 @@ use apistos_gen::{api_callback, api_operation, ApiComponent};
 
 #[allow(clippy::todo)]
 mod test_models {
+  use actix_web::http::header::{Header, HeaderName, HeaderValue, InvalidHeaderValue, TryIntoHeaderValue};
   use std::fmt::{Display, Formatter};
 
+  use actix_web::error::ParseError;
   use actix_web::http::StatusCode;
-  use actix_web::ResponseError;
+  use actix_web::{HttpMessage, ResponseError};
   use schemars::JsonSchema;
   use serde::{Deserialize, Serialize};
 
-  use apistos_gen::{ApiComponent, ApiErrorComponent};
+  use apistos_gen::{ApiComponent, ApiErrorComponent, ApiHeader};
 
   #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
   pub(crate) struct Test {
@@ -45,11 +47,47 @@ mod test_models {
       todo!()
     }
   }
+
+  #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiHeader)]
+  #[openapi_header(
+    name = "X-Organization-Slug",
+    description = "Organization of the current caller",
+    required = true
+  )]
+  pub(crate) struct OrganizationSlug(String);
+
+  impl TryIntoHeaderValue for OrganizationSlug {
+    type Error = InvalidHeaderValue;
+
+    fn try_into_value(self) -> Result<HeaderValue, Self::Error> {
+      HeaderValue::from_str(&self.0)
+    }
+  }
+
+  impl Header for OrganizationSlug {
+    fn name() -> HeaderName {
+      HeaderName::from_static("X-Organization-Slug")
+    }
+
+    fn parse<M: HttpMessage>(msg: &M) -> Result<Self, ParseError> {
+      msg
+        .headers()
+        .get(<Self as Header>::name())
+        .map(|value| value.to_str())
+        .transpose()
+        .map_err(|_e| ParseError::Header)?
+        .map(|value| OrganizationSlug(value.to_string()))
+        .ok_or_else(|| ParseError::Header)
+    }
+  }
 }
 
 #[test]
 #[allow(dead_code)]
 fn api_callback() {
+  use actix_web::web::Header;
+  use test_models::OrganizationSlug;
+
   /// Add a new pet to the store
   /// Add a new pet to the store
   /// Plop
@@ -68,7 +106,10 @@ fn api_callback() {
   /// Add a new pet to the store
   /// Add a new pet to the store
   /// Plop
-  #[api_callback(response(code = 200, component = TestCallbackResult))]
+  #[api_callback(
+    component = "Header<OrganizationSlug>",
+    response(code = 200, component = "TestCallbackResult")
+  )]
   pub(crate) async fn test_callback(
     _body: Json<test_models::Test>,
   ) -> Result<Json<test_models::TestResult>, test_models::ErrorResponse> {
@@ -169,6 +210,20 @@ fn api_callback() {
         "onData": {
           "{$request.body.test}/data": {
             "post": {
+              "parameters": [
+                {
+                  "name": "X-Organization-Slug",
+                  "in": "header",
+                  "description": "Organization of the current caller",
+                  "required": true,
+                  "deprecated": false,
+                  "style": "simple",
+                  "schema": {
+                    "title": "OrganizationSlug",
+                    "type": "string"
+                  }
+                }
+              ],
               "responses": {
                 "200": {
                   "description": "",
