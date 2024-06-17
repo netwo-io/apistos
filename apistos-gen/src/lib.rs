@@ -17,7 +17,6 @@ use darling::Error;
 use proc_macro::TokenStream;
 use proc_macro_error::{abort, proc_macro_error, OptionExt};
 use quote::quote;
-use std::collections::BTreeMap;
 use syn::{DeriveInput, Ident, ItemFn};
 
 mod callback_attr;
