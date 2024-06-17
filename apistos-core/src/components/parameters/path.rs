@@ -243,7 +243,7 @@ fn gen_path_parameter_for_object(
         name,
         _in: ParameterIn::Path,
         definition: Some(ParameterDefinition::Schema(
-          ApistosSchema::from_value(schema, oas_version).into(),
+          ApistosSchema::from_value(&schema, oas_version).into(),
         )),
         required: Some(required),
         ..Default::default()

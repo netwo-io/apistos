@@ -269,7 +269,7 @@ fn parameter_for_obj(
           name,
           _in: ParameterIn::Query,
           definition: Some(ParameterDefinition::Schema(
-            ApistosSchema::from_value(schema, oas_version).into(),
+            ApistosSchema::from_value(&schema, oas_version).into(),
           )),
           required,
           description,
