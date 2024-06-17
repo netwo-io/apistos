@@ -5,6 +5,8 @@ mod path_item_definition;
 #[cfg(feature = "actix")]
 mod wrappers;
 
+pub mod __internal;
+
 pub use api_component::ApiComponent;
 pub use components::*;
 pub use error_component::ApiErrorComponent;
