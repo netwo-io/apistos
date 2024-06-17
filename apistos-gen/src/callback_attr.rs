@@ -1,8 +1,9 @@
 use darling::ast::NestedMeta;
 use darling::FromMeta;
-use proc_macro2::{Ident, Span, TokenStream};
+use proc_macro2::{Span, TokenStream};
 use proc_macro_error::abort;
 use quote::{quote, ToTokens};
+use syn::Type;
 
 pub(crate) fn parse_openapi_callback_attrs(attrs: &[NestedMeta]) -> CallbackAttr {
   match CallbackAttrInternal::from_list(attrs) {
@@ -20,8 +21,8 @@ struct CallbackAttrInternal {
   deprecated: Option<bool>,
   summary: Option<String>,
   description: Option<String>,
-  #[darling(default, multiple)]
-  components: Vec<Ident>,
+  #[darling(default, multiple, rename = "component")]
+  components: Vec<Type>,
   #[darling(multiple, rename = "response")]
   responses: Vec<CallbackResponseDefinition>,
 }
@@ -29,7 +30,7 @@ struct CallbackAttrInternal {
 #[derive(FromMeta, Clone)]
 pub(crate) struct CallbackResponseDefinition {
   pub(crate) code: u16,
-  pub(crate) component: Ident,
+  pub(crate) component: Type,
 }
 
 #[derive(Clone)]
@@ -37,7 +38,7 @@ pub(crate) struct CallbackAttr {
   deprecated: Option<bool>,
   summary: Option<String>,
   description: Option<String>,
-  components: Vec<Ident>,
+  components: Vec<Type>,
   responses: Vec<CallbackResponseDefinition>,
 }
 
@@ -88,8 +89,8 @@ impl ToTokens for CallbackAttr {
       let response_type = &response.component;
 
       responses.push(quote!({
-        apistos_core::__internal::response_from_schema(oas_version, #status.to_string().as_str(), <#response_type>::schema(oas_version))
-            .or_else(|| apistos_core::__internal::response_from_raw_schema(oas_version, #status.to_string().as_str(), <#response_type>::raw_schema(oas_version)))
+        apistos::__internal::response_from_schema(oas_version, #status.to_string().as_str(), <#response_type>::schema(oas_version))
+            .or_else(|| apistos::__internal::response_from_raw_schema(oas_version, #status.to_string().as_str(), <#response_type>::raw_schema(oas_version)))
       }));
     }
 
