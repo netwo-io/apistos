@@ -20,7 +20,6 @@ use proc_macro::TokenStream;
 use proc_macro_error2::{OptionExt, abort, proc_macro_error};
 use proc_macro2::Span;
 use quote::{format_ident, quote};
-use std::collections::BTreeMap;
 use syn::{DeriveInput, GenericParam, Ident, ItemFn};
 
 mod callback_attr;
