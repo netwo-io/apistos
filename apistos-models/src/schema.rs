@@ -4,16 +4,10 @@ use schemars::{Schema, SchemaGenerator};
 use serde::Serialize;
 use serde_json::Value;
 
-#[derive(Serialize, Clone, Debug)]
+#[derive(Serialize, Clone, Debug, Default)]
 #[cfg_attr(any(test, feature = "deserialize"), derive(serde::Deserialize, PartialEq))]
 #[serde(transparent)]
 pub struct ApistosSchema(Schema);
-
-impl Default for ApistosSchema {
-  fn default() -> Self {
-    Self(Schema::default())
-  }
-}
 
 impl ApistosSchema {
   pub fn new(mut schema: Schema, oas_version: OpenApiVersion) -> Self {
@@ -28,7 +22,7 @@ impl ApistosSchema {
         }
 
         // remove definitions from schema
-        Self::remove_definition_from_schema(obj, oas_version.get_schema_settings().into_generator());
+        Self::remove_definition_from_schema(obj, &oas_version.get_schema_settings().into_generator());
         match oas_version {
           OpenApiVersion::OAS3_0 => {
             // remove $schema property
@@ -41,7 +35,7 @@ impl ApistosSchema {
     }
   }
 
-  pub fn from_value(value: Value, oas_version: OpenApiVersion) -> Self {
+  pub fn from_value(value: &Value, oas_version: OpenApiVersion) -> Self {
     let schema = schemars::Schema::try_from(value.clone());
     match schema {
       Ok(sch) => Self::new(sch, oas_version),
@@ -64,7 +58,7 @@ impl ApistosSchema {
     &mut self.0
   }
 
-  fn remove_definition_from_schema(obj: &mut serde_json::Map<String, Value>, gen: SchemaGenerator) {
+  fn remove_definition_from_schema(obj: &mut serde_json::Map<String, Value>, gen: &SchemaGenerator) {
     let definition_path = gen.settings().definitions_path.clone();
     let definition_path = definition_path
       .trim_start_matches('/')
