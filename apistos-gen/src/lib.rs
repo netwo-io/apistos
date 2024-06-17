@@ -2,6 +2,7 @@
 //!
 //! ⚠️ This crate is not indented to be used by itself. Please use [**apistos**](https://crates.io/crates/apistos) instead.
 
+use crate::callback_attr::parse_openapi_callback_attrs;
 use crate::internal::schemas::Schemas;
 use crate::internal::utils::extract_deprecated_from_attr;
 use crate::internal::{gen_item_ast, gen_open_api_impl};
@@ -16,8 +17,10 @@ use darling::Error;
 use proc_macro::TokenStream;
 use proc_macro_error::{abort, proc_macro_error, OptionExt};
 use quote::quote;
+use std::collections::BTreeMap;
 use syn::{DeriveInput, Ident, ItemFn};
 
+mod callback_attr;
 mod internal;
 mod openapi_cookie_attr;
 mod openapi_error_attr;
@@ -26,6 +29,7 @@ mod openapi_security_attr;
 mod operation_attr;
 
 const OPENAPI_STRUCT_PREFIX: &str = "__openapi_";
+const OPENAPI_CALLBACK_STRUCT_PREFIX: &str = "__openapi_callback_";
 
 /// Generates a custom OpenAPI type.
 ///
@@ -518,6 +522,9 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
 ///   - `error_code = 00` an optional list of error codes to document only theses
 ///   - `consumes = "..."` allow to override body content type
 ///   - `produces = "..."` allow to override response content type
+///   - `callbacks(...)` an optional list @TODO
+///       - `name = "..."` a mandatory name for @TODO
+///       - `callback_fn = "..."` a mandatory function available in the scope decorated with [api_callback](attr.api_callback.html)
 ///
 /// If `summary` or `description` are not provided, a default value will be extracted from the comments. The first line will be used as summary while the rest will be part of the description.
 ///
@@ -669,10 +676,60 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
     &responder_wrapper,
   );
 
+  // eprintln!(
+  //   "{:#}",
+  //   quote!(
+  //     #open_api_def
+  //
+  //     #generated_item_ast
+  //   )
+  // );
+
   quote!(
     #open_api_def
 
     #generated_item_ast
+  )
+  .into()
+}
+
+#[proc_macro_error]
+#[proc_macro_attribute]
+pub fn api_callback(attr: TokenStream, item: TokenStream) -> TokenStream {
+  let attr_args = match NestedMeta::parse_meta_list(attr.into()) {
+    Ok(v) => v,
+    Err(e) => {
+      return TokenStream::from(Error::from(e).write_errors());
+    }
+  };
+
+  let callback_operation_attribute = parse_openapi_callback_attrs(&attr_args);
+
+  let default_span = proc_macro2::Span::call_site();
+  let item_ast = match syn::parse::<ItemFn>(item) {
+    Ok(v) => v,
+    Err(e) => abort!(e.span(), format!("{e}")),
+  };
+
+  let s_name = format!("{OPENAPI_CALLBACK_STRUCT_PREFIX}{}", item_ast.sig.ident);
+  let openapi_callback_struct = Ident::new(&s_name, default_span);
+
+  let generics = &item_ast.sig.generics.clone();
+  let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+  let openapi_struct_def = if !generics.params.is_empty() {
+    quote!(struct #openapi_callback_struct #impl_generics #where_clause { p: std::marker::PhantomData #ty_generics } )
+  } else {
+    quote!(struct #openapi_callback_struct;)
+  };
+
+  quote!(
+    #[allow(non_camel_case_types)]
+    #[doc(hidden)]
+    #openapi_struct_def
+    #[automatically_derived]
+    impl #impl_generics apistos::PathItemDefinition for #openapi_callback_struct #ty_generics #where_clause {
+      #callback_operation_attribute
+    }
   )
   .into()
 }
