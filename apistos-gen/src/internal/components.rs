@@ -18,12 +18,14 @@ impl<'a> ToTokens for Components<'a> {
     let callback_operations_types: Vec<Ident> = self
       .callbacks
       .iter()
-      .flat_map(|c| {
+      .map(|c| {
         c.callbacks
           .iter()
-          .flat_map(|(_, ops)| ops.values().cloned().collect::<Vec<Ident>>())
+          .map(|(_, ops)| ops.values().cloned().collect::<Vec<Ident>>())
+          .flatten()
           .collect::<Vec<_>>()
       })
+      .flatten()
       .collect();
     let error_codes_filter = if self.error_codes.is_empty() {
       quote!()
