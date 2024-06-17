@@ -1,3 +1,5 @@
+mod api_callback_oas_3_0;
+mod api_callback_oas_3_1;
 mod api_component_derive_oas_3_0;
 mod api_component_derive_oas_3_1;
 mod api_cookie_derive_oas_3_0;
