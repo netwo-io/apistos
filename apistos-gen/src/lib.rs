@@ -830,15 +830,6 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
     &responder_wrapper,
   );
 
-  // eprintln!(
-  //   "{:#}",
-  //   quote!(
-  //     #open_api_def
-  //
-  //     #generated_item_ast
-  //   )
-  // );
-
   quote!(
     #open_api_def
 
