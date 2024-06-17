@@ -1,15 +1,18 @@
-use crate::ApiComponent;
-use actix_web::body::BoxBody;
-use actix_web::http::StatusCode;
-use actix_web::{HttpRequest, HttpResponse, Responder, ResponseError};
-use apistos_models::paths::{MediaType, RequestBody, Response, Responses};
-use apistos_models::reference_or::ReferenceOr;
-use apistos_models::{ApistosSchema, OpenApiVersion, VersionSpecificSchema};
-use serde::Serialize;
 use std::collections::BTreeMap;
 use std::fmt::Debug;
 
+use actix_web::body::BoxBody;
+use actix_web::http::StatusCode;
+use actix_web::{HttpRequest, HttpResponse, Responder, ResponseError};
+use serde::Serialize;
+
+use apistos_core::__internal::{response_from_raw_schema, response_from_schema};
 pub use apistos_core::{ResponderWrapper, ResponseWrapper};
+use apistos_models::paths::{RequestBody, Response, Responses};
+use apistos_models::reference_or::ReferenceOr;
+use apistos_models::{ApistosSchema, OpenApiVersion};
+
+use crate::ApiComponent;
 
 /// Empty struct to represent a 204 empty response
 #[derive(Debug)]
@@ -88,8 +91,8 @@ where
 
   fn responses(oas_version: OpenApiVersion, _content_type: Option<String>) -> Option<Responses> {
     let status = StatusCode::ACCEPTED;
-    response_from_schema(oas_version, status, Self::schema(oas_version))
-      .or_else(|| response_from_raw_schema(oas_version, status, Self::raw_schema(oas_version)))
+    response_from_schema(oas_version, status.as_str(), Self::schema(oas_version))
+      .or_else(|| response_from_raw_schema(oas_version, status.as_str(), Self::raw_schema(oas_version)))
   }
 }
 
@@ -131,92 +134,26 @@ where
 
   fn responses(oas_version: OpenApiVersion, _content_type: Option<String>) -> Option<Responses> {
     let status = StatusCode::CREATED;
-    response_from_schema(oas_version, status, Self::schema(oas_version))
-      .or_else(|| response_from_raw_schema(oas_version, status, Self::raw_schema(oas_version)))
+    response_from_schema(oas_version, status.as_str(), Self::schema(oas_version))
+      .or_else(|| response_from_raw_schema(oas_version, status.as_str(), Self::raw_schema(oas_version)))
   }
-}
-
-fn response_from_schema(
-  oas_version: OpenApiVersion,
-  status: StatusCode,
-  schema: Option<(String, ReferenceOr<ApistosSchema>)>,
-) -> Option<Responses> {
-  schema.map(|(name, schema)| match schema {
-    ReferenceOr::Reference { _ref } => Responses {
-      responses: BTreeMap::from_iter(vec![(status.as_str().to_string(), ReferenceOr::Reference { _ref })]),
-      ..Default::default()
-    },
-    ReferenceOr::Object(sch) => {
-      let schema = match oas_version {
-        OpenApiVersion::OAS3_0 => VersionSpecificSchema::OAS3_0(ReferenceOr::Reference {
-          _ref: format!("#/components/schemas/{}", name),
-        }),
-        OpenApiVersion::OAS3_1 => VersionSpecificSchema::OAS3_1(sch),
-      };
-      let response = Response {
-        content: BTreeMap::from_iter(vec![(
-          "application/json".to_string(),
-          MediaType {
-            schema: Some(schema),
-            ..Default::default()
-          },
-        )]),
-        ..Default::default()
-      };
-      Responses {
-        responses: BTreeMap::from_iter(vec![(status.as_str().to_string(), ReferenceOr::Object(response))]),
-        ..Default::default()
-      }
-    }
-  })
-}
-
-fn response_from_raw_schema(
-  oas_version: OpenApiVersion,
-  status: StatusCode,
-  raw_schema: Option<ReferenceOr<ApistosSchema>>,
-) -> Option<Responses> {
-  raw_schema.map(|schema| match schema {
-    ReferenceOr::Reference { _ref } => Responses {
-      responses: BTreeMap::from_iter(vec![(status.as_str().to_string(), ReferenceOr::Reference { _ref })]),
-      ..Default::default()
-    },
-    ReferenceOr::Object(sch) => {
-      let schema = match oas_version {
-        OpenApiVersion::OAS3_0 => VersionSpecificSchema::OAS3_0(sch.into()),
-        OpenApiVersion::OAS3_1 => VersionSpecificSchema::OAS3_1(sch),
-      };
-      let response = Response {
-        content: BTreeMap::from_iter(vec![(
-          "application/json".to_string(),
-          MediaType {
-            schema: Some(schema),
-            ..Default::default()
-          },
-        )]),
-        ..Default::default()
-      };
-      Responses {
-        responses: BTreeMap::from_iter(vec![(status.as_str().to_string(), ReferenceOr::Object(response))]),
-        ..Default::default()
-      }
-    }
-  })
 }
 
 #[cfg(test)]
 mod test {
   #![allow(clippy::expect_used)]
 
-  use crate as apistos;
-  use crate::actix::{AcceptedJson, CreatedJson, NoContent};
+  use serde::Serialize;
+
   use apistos_core::ApiComponent;
   use apistos_gen::ApiComponent;
   use apistos_models::paths::Response;
   use apistos_models::reference_or::ReferenceOr;
   use apistos_models::OpenApiVersion;
   use schemars::JsonSchema;
-  use serde::Serialize;
+
+  use crate as apistos;
+  use crate::actix::{AcceptedJson, CreatedJson, NoContent};
 
   #[test]
   fn no_content_generate_valid_response_oas_3_0() {

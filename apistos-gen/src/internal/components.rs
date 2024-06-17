@@ -1,3 +1,5 @@
+use crate::operation_attr::OperationCallbacks;
+use proc_macro2::Ident;
 use proc_macro2::TokenStream;
 use quote::{quote, ToTokens};
 use syn::Type;
@@ -6,12 +8,25 @@ pub(crate) struct Components<'a> {
   pub(crate) args: &'a [Type],
   pub(crate) responder_wrapper: &'a TokenStream,
   pub(crate) error_codes: &'a [u16],
+  pub(crate) callbacks: &'a [OperationCallbacks],
 }
 
 impl<'a> ToTokens for Components<'a> {
   fn to_tokens(&self, tokens: &mut TokenStream) {
     let args = self.args;
     let responder_wrapper = self.responder_wrapper;
+    let callback_operations_types: Vec<Ident> = self
+      .callbacks
+      .iter()
+      .map(|c| {
+        c.callbacks
+          .iter()
+          .map(|(_, ops)| ops.values().cloned().collect::<Vec<Ident>>())
+          .flatten()
+          .collect::<Vec<_>>()
+      })
+      .flatten()
+      .collect();
     let error_codes_filter = if self.error_codes.is_empty() {
       quote!()
     } else {
@@ -54,10 +69,17 @@ impl<'a> ToTokens for Components<'a> {
         #(
           schemas.append(&mut <#args>::child_schemas(oas_version));
         )*
+
         schemas.append(&mut <#responder_wrapper>::child_schemas(oas_version));
         let error_schemas = <#responder_wrapper>::error_schemas(oas_version);
         #error_codes_filter
-        component_builder.schemas = std::collections::BTreeMap::from_iter(schemas);
+
+        let mut schemas = std::collections::BTreeMap::from_iter(schemas);
+        #(
+          schemas.append(&mut <#callback_operations_types>::components(oas_version).into_iter().map(|c| c.schemas).flatten().collect());
+        )*
+        component_builder.schemas = schemas;
+
         vec![component_builder]
       }
     ))
