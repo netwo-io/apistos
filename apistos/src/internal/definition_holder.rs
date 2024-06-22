@@ -34,7 +34,7 @@ impl DefinitionHolder for RouteWrapper {
   }
 }
 
-impl DefinitionHolder for Resource {
+impl<T> DefinitionHolder for Resource<T> {
   fn path(&self) -> &str {
     &self.path
   }
