@@ -9,12 +9,6 @@ use serde_json::Value;
 #[serde(transparent)]
 pub struct ApistosSchema(Schema);
 
-impl Default for ApistosSchema {
-  fn default() -> Self {
-    Self(Schema::default())
-  }
-}
-
 impl ApistosSchema {
   pub fn new(mut schema: Schema, oas_version: OpenApiVersion) -> Self {
     let obj = schema.as_object_mut();
