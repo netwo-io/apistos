@@ -2,7 +2,7 @@ use actix_web::dev::Payload;
 use actix_web::error::ParseError;
 use actix_web::http::header::{Header, HeaderName, HeaderValue, InvalidHeaderValue, TryIntoHeaderValue};
 use actix_web::{Error, FromRequest, HttpMessage, HttpRequest};
-use apistos::{ApiComponent, ApiCookie, ApiHeader, ApiType, TypedSchema};
+use apistos::{ApiComponent, ApiCookie, ApiHeader, ApiType, ApiWebhookComponent, TypedSchema};
 use num_traits::Float;
 use rust_decimal::Decimal;
 use schemars::JsonSchema;
@@ -135,4 +135,12 @@ impl FromRequest for Realm {
   fn from_request(_req: &HttpRequest, _payload: &mut Payload) -> Self::Future {
     todo!()
   }
+}
+
+#[derive(ApiWebhookComponent)]
+pub(crate) enum WebhookHolder {
+  #[openapi_webhook(name = "PetCreated", response(code = 200))]
+  PetCreated,
+  #[openapi_webhook(skip)]
+  AnotherWebhook,
 }
