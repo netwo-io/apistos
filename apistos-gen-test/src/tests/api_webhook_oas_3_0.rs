@@ -80,6 +80,7 @@ mod test_models {
 }
 
 #[test]
+#[allow(dead_code)]
 fn api_webhook() {
   use actix_web::web::Header;
   use test_models::OrganizationSlug;

@@ -586,6 +586,69 @@ pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
   .into()
 }
 
+/// # ⚠️ OAS 3.1 only
+/// Generates a reusable OpenAPI Webhook.
+///
+/// ```rust
+/// use apistos::{ApiWebhookComponent, ApiComponent};
+/// use schemars::JsonSchema;
+///
+/// #[derive(ApiComponent, JsonSchema)]
+/// pub struct Test {
+///   pub id: u32
+/// }
+///
+/// #[derive(Clone, ApiWebhookComponent)]
+/// #[openapi_webhook(name = "TestWebhook", component = "actix_web::web::Json<Test>", response(code = 200))]
+/// pub struct WebhookStruct {}
+///
+/// // Or
+/// #[derive(Clone, ApiWebhookComponent)]
+/// pub enum WebhookEnum {
+///   #[openapi_webhook(name = "TestWebhook", component = "actix_web::web::Json<Test>", response(code = 200))]
+///   VisibleWebhook,
+///   #[openapi_webhook(skip)]
+///   SkippedWebhook
+/// }
+///
+/// ```
+///
+/// # `#[api_webhook(...)]` options:
+/// - `skip` allow to skip an enum variant (for enum only)
+/// - `name = "..."` a **required** name for the webhook
+/// - `deprecated` a bool indicating the operation is deprecated. Deprecation can also be declared
+///  with rust `#[deprecated]` decorator.
+/// - `summary = "..."` an optional summary
+/// - `description = "..."` an optional description
+/// - `component = "..."` an optional list of components attached to this callback operation (parameters, body...)
+/// - `response(...)` an optional list of responses attached to this callback operation
+///   - `code = "..."` Http response code
+///   - `component = "..."` a component attached to the given callback response. Must derive [ApiComponent] and [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
+#[proc_macro_error]
+#[proc_macro_derive(ApiWebhookComponent, attributes(openapi_webhook))]
+pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
+  let input = syn::parse_macro_input!(input as DeriveInput);
+  let DeriveInput {
+    attrs,
+    ident,
+    data,
+    generics,
+    vis: _vis,
+  } = input;
+
+  let webhook_operation_attribute = parse_openapi_derive_webhook_attrs(&attrs, &data);
+
+  let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+
+  quote!(
+    #[automatically_derived]
+    impl #impl_generics apistos::ApiWebhook for #ident #ty_generics #where_clause {
+      #webhook_operation_attribute
+    }
+  )
+  .into()
+}
+
 /// Operation attribute macro implementing [PathItemDefinition](path_item_definition/trait.PathItemDefinition.html) for the decorated handler function.
 ///
 /// ```rust

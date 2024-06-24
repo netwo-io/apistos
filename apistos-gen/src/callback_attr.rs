@@ -86,7 +86,6 @@ impl CallbackAttr {
         quote!(operation_builder.description = Some(#d.to_string());)
       }
     };
-
     let mut responses = vec![];
     for response in &self.responses {
       let status = response.code;
@@ -138,9 +137,7 @@ impl CallbackAttr {
 
       operation_builder.deprecated = #deprecated;
 
-      operation_builder.tags = vec![#(#tags.to_string(),)*];
-
-      #summary
+      operation_builder.tags = vec![#(#tags.to_string(),)*];#summary
       #description
 
       operation_builder
