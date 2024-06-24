@@ -11,6 +11,7 @@ use crate::openapi_error_attr::parse_openapi_error_attrs;
 use crate::openapi_header_attr::parse_openapi_header_attrs;
 use crate::openapi_security_attr::parse_openapi_security_attrs;
 use crate::operation_attr::parse_openapi_operation_attrs;
+use crate::webhook_attr::parse_openapi_derive_webhook_attrs;
 use convert_case::{Case, Casing};
 use darling::ast::NestedMeta;
 use darling::Error;
@@ -26,6 +27,7 @@ mod openapi_error_attr;
 mod openapi_header_attr;
 mod openapi_security_attr;
 mod operation_attr;
+mod webhook_attr;
 
 const OPENAPI_STRUCT_PREFIX: &str = "__openapi_";
 const OPENAPI_CALLBACK_STRUCT_PREFIX: &str = "__openapi_callback_";
@@ -449,6 +451,69 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
     #[automatically_derived]
     impl #impl_generics apistos::ApiErrorComponent for #ident #ty_generics #where_clause {
       #openapi_error_attributes
+    }
+  )
+  .into()
+}
+
+/// # ⚠️ OAS 3.1 only
+/// Generates a reusable OpenAPI Webhook.
+///
+/// ```rust
+/// use apistos::{ApiWebhookComponent, ApiComponent};
+/// use schemars::JsonSchema;
+///
+/// #[derive(ApiComponent, JsonSchema)]
+/// pub struct Test {
+///   pub id: u32
+/// }
+///
+/// #[derive(Clone, ApiWebhookComponent)]
+/// #[openapi_webhook(name = "TestWebhook", component = "actix_web::web::Json<Test>", response(code = 200))]
+/// pub struct WebhookStruct {}
+///
+/// // Or
+/// #[derive(Clone, ApiWebhookComponent)]
+/// pub enum WebhookEnum {
+///   #[openapi_webhook(name = "TestWebhook", component = "actix_web::web::Json<Test>", response(code = 200))]
+///   VisibleWebhook,
+///   #[openapi_webhook(skip)]
+///   SkippedWebhook
+/// }
+///
+/// ```
+///
+/// # `#[api_webhook(...)]` options:
+/// - `skip` allow to skip an enum variant (for enum only)
+/// - `name = "..."` a **required** name for the webhook
+/// - `deprecated` a bool indicating the operation is deprecated. Deprecation can also be declared
+///  with rust `#[deprecated]` decorator.
+/// - `summary = "..."` an optional summary
+/// - `description = "..."` an optional description
+/// - `component = "..."` an optional list of components attached to this callback operation (parameters, body...)
+/// - `response(...)` an optional list of responses attached to this callback operation
+///   - `code = "..."` Http response code
+///   - `component = "..."` a component attached to the given callback response. Must derive [ApiComponent] and [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
+#[proc_macro_error]
+#[proc_macro_derive(ApiWebhookComponent, attributes(openapi_webhook))]
+pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
+  let input = syn::parse_macro_input!(input as DeriveInput);
+  let DeriveInput {
+    attrs,
+    ident,
+    data,
+    generics,
+    vis: _vis,
+  } = input;
+
+  let webhook_operation_attribute = parse_openapi_derive_webhook_attrs(&attrs, &data);
+
+  let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+
+  quote!(
+    #[automatically_derived]
+    impl #impl_generics apistos::ApiWebhook for #ident #ty_generics #where_clause {
+      #webhook_operation_attribute
     }
   )
   .into()
