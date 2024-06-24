@@ -1,3 +1,4 @@
+use crate::api::models::WebhookHolder;
 use crate::api::routes::routes;
 use actix_web::middleware::Logger;
 use actix_web::{App, HttpServer};
@@ -73,10 +74,11 @@ async fn main() -> Result<(), impl Error> {
       .document(spec)
       .wrap(Logger::default())
       .service(scope("/test").service(routes()))
+      .webhook::<WebhookHolder>()
       .build("/openapi.json")
   })
     .bind((Ipv4Addr::UNSPECIFIED, 8080))?
-      .workers(1)
+    .workers(1)
     .run()
     .await
 }

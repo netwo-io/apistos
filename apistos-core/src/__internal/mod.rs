@@ -71,3 +71,10 @@ pub fn response_from_raw_schema(
     }
   })
 }
+
+pub fn response_for_status(status: &str) -> Responses {
+  Responses {
+    responses: BTreeMap::from_iter(vec![(status.to_string(), ReferenceOr::Object(Default::default()))]),
+    ..Default::default()
+  }
+}
