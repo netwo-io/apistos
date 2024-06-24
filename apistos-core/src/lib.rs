@@ -2,6 +2,7 @@ mod api_component;
 mod components;
 mod error_component;
 mod path_item_definition;
+mod webhook;
 #[cfg(feature = "actix")]
 mod wrappers;
 
@@ -11,6 +12,7 @@ pub use api_component::ApiComponent;
 pub use components::*;
 pub use error_component::ApiErrorComponent;
 pub use path_item_definition::PathItemDefinition;
+pub use webhook::ApiWebhook;
 #[cfg(feature = "actix")]
 pub use wrappers::{ResponderWrapper, ResponseWrapper};
 
