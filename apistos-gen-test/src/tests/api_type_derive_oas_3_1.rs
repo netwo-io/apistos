@@ -35,7 +35,6 @@ fn api_type_derive() {
     json,
     json!({
       "type": "string",
-      "format": null
     })
   );
 }
@@ -182,7 +181,6 @@ fn api_type_derive_with_format_complex_struct() {
     json,
     json!({
       "type": "string",
-      "format": null
     })
   );
 }
