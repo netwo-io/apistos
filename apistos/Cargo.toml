@@ -61,11 +61,12 @@ actix-web-grants = ["apistos-core/actix-web-grants"]
 
 # extra types related features
 chrono = ["apistos-core/chrono"]
+ipnetwork = ["apistos-core/ipnetwork"]
 multipart = ["apistos-core/multipart"]
 rust_decimal = ["apistos-core/rust_decimal"]
 uuid = ["apistos-core/uuid"]
 url = ["apistos-core/url"]
-extras = ["chrono", "multipart", "rust_decimal", "uuid", "url"]
+extras = ["chrono", "ipnetwork", "multipart", "rust_decimal", "uuid", "url"]
 
 # ui features
 rapidoc = ["dep:apistos-rapidoc"]
