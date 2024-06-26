@@ -4,7 +4,7 @@ use actix_multipart::form::{MultipartCollect, MultipartForm};
 use actix_multipart::Multipart;
 use apistos_models::paths::{MediaType, RequestBody};
 use apistos_models::reference_or::ReferenceOr;
-use apistos_models::Schema;
+use apistos_models::ApistosSchema;
 use serde::de::DeserializeOwned;
 use std::collections::BTreeMap;
 
@@ -16,11 +16,11 @@ where
     "multipart/form-data".to_string()
   }
 
-  fn child_schemas(oas_version: apistos_models::OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
+  fn child_schemas(oas_version: apistos_models::OpenApiVersion) -> Vec<(String, ReferenceOr<ApistosSchema>)> {
     T::child_schemas(oas_version)
   }
 
-  fn schema(oas_version: apistos_models::OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
+  fn schema(oas_version: apistos_models::OpenApiVersion) -> Option<(String, ReferenceOr<ApistosSchema>)> {
     T::schema(oas_version)
   }
 }
@@ -33,11 +33,11 @@ where
     "multipart/form-data".to_string()
   }
 
-  fn child_schemas(oas_version: apistos_models::OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
+  fn child_schemas(oas_version: apistos_models::OpenApiVersion) -> Vec<(String, ReferenceOr<ApistosSchema>)> {
     T::child_schemas(oas_version)
   }
 
-  fn schema(oas_version: apistos_models::OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
+  fn schema(oas_version: apistos_models::OpenApiVersion) -> Option<(String, ReferenceOr<ApistosSchema>)> {
     T::schema(oas_version)
   }
 }
@@ -50,11 +50,11 @@ where
     "multipart/form-data".to_string()
   }
 
-  fn child_schemas(oas_version: apistos_models::OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
+  fn child_schemas(oas_version: apistos_models::OpenApiVersion) -> Vec<(String, ReferenceOr<ApistosSchema>)> {
     T::child_schemas(oas_version)
   }
 
-  fn schema(oas_version: apistos_models::OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
+  fn schema(oas_version: apistos_models::OpenApiVersion) -> Option<(String, ReferenceOr<ApistosSchema>)> {
     T::schema(oas_version)
   }
 }
@@ -64,15 +64,15 @@ impl ApiComponent for Multipart {
     "multipart/form-data".to_string()
   }
 
-  fn child_schemas(_: apistos_models::OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
+  fn child_schemas(_: apistos_models::OpenApiVersion) -> Vec<(String, ReferenceOr<ApistosSchema>)> {
     vec![]
   }
 
-  fn raw_schema(_: apistos_models::OpenApiVersion) -> Option<ReferenceOr<Schema>> {
+  fn raw_schema(_: apistos_models::OpenApiVersion) -> Option<ReferenceOr<ApistosSchema>> {
     None
   }
 
-  fn schema(_: apistos_models::OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
+  fn schema(_: apistos_models::OpenApiVersion) -> Option<(String, ReferenceOr<ApistosSchema>)> {
     None
   }
 

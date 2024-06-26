@@ -2,6 +2,7 @@
 //!
 //! ⚠️ This crate is not indented to be used by itself. Please use [**apistos**](https://crates.io/crates/apistos) instead.
 
+use crate::callback_attr::parse_openapi_callback_attrs;
 use crate::internal::schemas::Schemas;
 use crate::internal::utils::extract_deprecated_from_attr;
 use crate::internal::{gen_item_ast, gen_open_api_impl};
@@ -10,6 +11,7 @@ use crate::openapi_error_attr::parse_openapi_error_attrs;
 use crate::openapi_header_attr::parse_openapi_header_attrs;
 use crate::openapi_security_attr::parse_openapi_security_attrs;
 use crate::operation_attr::parse_openapi_operation_attrs;
+use crate::webhook_attr::parse_openapi_derive_webhook_attrs;
 use convert_case::{Case, Casing};
 use darling::ast::NestedMeta;
 use darling::Error;
@@ -18,14 +20,17 @@ use proc_macro_error::{abort, proc_macro_error, OptionExt};
 use quote::quote;
 use syn::{DeriveInput, Ident, ItemFn};
 
+mod callback_attr;
 mod internal;
 mod openapi_cookie_attr;
 mod openapi_error_attr;
 mod openapi_header_attr;
 mod openapi_security_attr;
 mod operation_attr;
+mod webhook_attr;
 
 const OPENAPI_STRUCT_PREFIX: &str = "__openapi_";
+const OPENAPI_CALLBACK_STRUCT_PREFIX: &str = "__openapi_callback_";
 
 /// Generates a custom OpenAPI type.
 ///
@@ -77,10 +82,15 @@ pub fn derive_api_type(input: TokenStream) -> TokenStream {
 
       fn json_schema(_gen: &mut schemars::gen::SchemaGenerator) -> apistos::Schema {
         let instance_type = <Self as TypedSchema>::schema_type();
-        apistos::Schema::try_from(schemars::_serde_json::json!({
-          "type": instance_type,
-          "format": <Self as TypedSchema>::format(),
-        }))
+        match <Self as TypedSchema>::format() {
+          Some(format) => apistos::Schema::try_from(schemars::_serde_json::json!({
+            "type": instance_type,
+            "format": format,
+          })),
+          None => apistos::Schema::try_from(schemars::_serde_json::json!({
+            "type": instance_type,
+          }))
+        }
         .map_err(|err| {
           apistos::log::warn!("Error generating json schema from #ident : {err:?}");
           err
@@ -91,11 +101,11 @@ pub fn derive_api_type(input: TokenStream) -> TokenStream {
 
     #[automatically_derived]
     impl #impl_generics apistos::ApiComponent for #ident #ty_generics #where_clause {
-      fn child_schemas(_: apistos::OpenApiVersion) -> Vec<(String, apistos::reference_or::ReferenceOr<apistos::Schema>)> {
+      fn child_schemas(_: apistos::OpenApiVersion) -> Vec<(String, apistos::reference_or::ReferenceOr<apistos::ApistosSchema>)> {
         vec![]
       }
 
-      fn schema(_: apistos::OpenApiVersion) -> Option<(String, apistos::reference_or::ReferenceOr<apistos::Schema>)> {
+      fn schema(oas_version: apistos::OpenApiVersion) -> Option<(String, apistos::reference_or::ReferenceOr<apistos::ApistosSchema>)> {
         Some((
           #component_name.to_string(),
           apistos::Schema::try_from(schemars::_serde_json::json!({
@@ -106,6 +116,7 @@ pub fn derive_api_type(input: TokenStream) -> TokenStream {
             apistos::log::warn!("Error generating json schema from #ident : {err:?}");
             err
           })
+          .map(|sch| apistos::ApistosSchema::new(sch, oas_version))
           .unwrap_or_default()
           .into(),
         ))
@@ -254,11 +265,11 @@ pub fn derive_api_security(input: TokenStream) -> TokenStream {
   quote!(
     #[automatically_derived]
     impl #impl_generics apistos::ApiComponent for #ident #ty_generics #where_clause {
-      fn child_schemas(_: apistos::OpenApiVersion) -> Vec<(String, apistos::reference_or::ReferenceOr<apistos::Schema>)> {
+      fn child_schemas(_: apistos::OpenApiVersion) -> Vec<(String, apistos::reference_or::ReferenceOr<apistos::ApistosSchema>)> {
         vec![]
       }
 
-      fn schema(_: apistos::OpenApiVersion) -> Option<(String, apistos::reference_or::ReferenceOr<apistos::Schema>)> {
+      fn schema(_: apistos::OpenApiVersion) -> Option<(String, apistos::reference_or::ReferenceOr<apistos::ApistosSchema>)> {
         None
       }
 
@@ -445,6 +456,78 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
   .into()
 }
 
+/// # ⚠️ OAS 3.1 only
+/// Generates a reusable OpenAPI Webhook.
+///
+/// ```rust
+/// use apistos::{ApiWebhookComponent, ApiComponent};
+/// use schemars::JsonSchema;
+///
+/// #[derive(ApiComponent, JsonSchema)]
+/// pub struct Test {
+///   pub id: u32
+/// }
+///
+/// #[derive(Clone, ApiWebhookComponent)]
+/// #[openapi_webhook(name = "TestWebhook", component = "actix_web::web::Json<Test>", response(code = 200))]
+/// pub struct WebhookStruct {}
+///
+/// // Or
+/// #[derive(Clone, ApiWebhookComponent)]
+/// pub enum WebhookEnum {
+///   #[openapi_webhook(name = "TestWebhook", component = "actix_web::web::Json<Test>", response(code = 200))]
+///   VisibleWebhook,
+///   #[openapi_webhook(skip)]
+///   SkippedWebhook
+/// }
+///
+/// // Or
+/// #[derive(Clone, ApiWebhookComponent)]
+/// #[openapi_webhook(component = "actix_web::web::Json<Test>", response(code = 200))]
+/// pub enum WebhookEnumWithDefault {
+///   VisibleWebhook,
+///   #[openapi_webhook(skip)]
+///   SkippedWebhook
+/// }
+///
+/// ```
+///
+/// # `#[api_webhook(...)]` options:
+/// - `skip` allow to skip an enum variant (for enum only)
+/// - `name = "..."` an optional name for the webhook. Default to the Struct or Variant name
+/// - `deprecated` a bool indicating the operation is deprecated. Deprecation can also be declared
+///  with rust `#[deprecated]` decorator.
+/// - `summary = "..."` an optional summary
+/// - `description = "..."` an optional description
+/// - `component = "..."` an optional list of components attached to this callback operation (parameters, body...)
+/// - `response(...)` an optional list of responses attached to this callback operation
+///   - `code = "..."` Http response code
+///   - `component = "..."` a component attached to the given callback response. Must derive [ApiComponent] and [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
+#[proc_macro_error]
+#[proc_macro_derive(ApiWebhookComponent, attributes(openapi_webhook))]
+pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
+  let input = syn::parse_macro_input!(input as DeriveInput);
+  let DeriveInput {
+    attrs,
+    ident,
+    data,
+    generics,
+    vis: _vis,
+  } = input;
+
+  let webhook_operation_attribute = parse_openapi_derive_webhook_attrs(&attrs, &data, &ident);
+
+  let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+
+  quote!(
+    #[automatically_derived]
+    impl #impl_generics apistos::ApiWebhook for #ident #ty_generics #where_clause {
+      #webhook_operation_attribute
+    }
+  )
+  .into()
+}
+
 /// Operation attribute macro implementing [PathItemDefinition](path_item_definition/trait.PathItemDefinition.html) for the decorated handler function.
 ///
 /// ```rust
@@ -512,6 +595,11 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
 ///   - `error_code = 00` an optional list of error codes to document only theses
 ///   - `consumes = "..."` allow to override body content type
 ///   - `produces = "..."` allow to override response content type
+///   - `callbacks(...)` an optional list of callbacks attached to this operation
+///       - `name = "..."` a mandatory name for a set of callbacks
+///       - `callback(...)` a list of callback operation
+///         - `path = "..."` URL to use for the callback operation
+///         - `[verb] = ...` any of the http verbs with an associated function. The given function should be available in scope and be annotated with `api_operation`
 ///
 /// If `summary` or `description` are not provided, a default value will be extracted from the comments. The first line will be used as summary while the rest will be part of the description.
 ///
@@ -667,6 +755,120 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
     #open_api_def
 
     #generated_item_ast
+  )
+  .into()
+}
+
+/// Callback operation attribute macro implementing [PathItemDefinition](path_item_definition/trait.PathItemDefinition.html) for the decorated handler function.
+///
+/// ```rust
+/// use std::fmt::Display;
+/// use actix_web::web::Json;
+/// use actix_web::http::StatusCode;
+/// use actix_web::ResponseError;
+/// use core::fmt::Formatter;
+/// use apistos::actix::CreatedJson;
+/// use apistos::{api_operation, api_callback, ApiComponent, ApiErrorComponent};
+/// use schemars::JsonSchema;
+/// use serde::{Serialize, Deserialize};
+///
+/// #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
+/// pub struct Test {
+///   pub test: String
+/// }
+///
+/// #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
+///  pub(crate) struct TestCallbackResult {
+///   pub(crate) id: u32,
+/// }
+///
+/// #[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
+/// #[openapi_error(
+///   status(code = 405, description = "Invalid input"),
+/// )]
+/// pub enum ErrorResponse {
+///   MethodNotAllowed(String),
+/// }
+///
+/// impl Display for ErrorResponse {
+///   fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+///     todo!()
+///   }
+/// }
+///
+/// impl ResponseError for ErrorResponse {
+///   fn status_code(&self) -> StatusCode {
+///     todo!()
+///   }
+/// }
+///
+/// #[api_callback(
+///   response(code = 200, component = "TestCallbackResult")
+/// )]
+/// pub(crate) async fn callback_test(
+///   body: Json<Test>,
+/// ) -> Result<CreatedJson<Test>, ErrorResponse> {
+///   Ok(CreatedJson(body.0))
+/// }
+///
+/// #[api_operation(
+///   callbacks(name = "onData", callback(path = "{$request.body.test}/data", post = callback_test))
+/// )]
+/// pub(crate) async fn test(
+///   body: Json<Test>,
+/// ) -> Result<CreatedJson<Test>, ErrorResponse> {
+///   Ok(CreatedJson(body.0))
+/// }
+/// ```
+///
+/// # `#[api_callback(...)]` options:
+///   - `deprecated` a bool indicating the operation is deprecated. Deprecation can also be declared
+///  with rust `#[deprecated]` decorator.
+///   - `summary = "..."` an optional summary
+///   - `description = "..."` an optional description
+///   - `component = "..."` an optional list of components attached to this callback operation (parameters, body...)
+///   - `response(...)` an optional list of responses attached to this callback operation
+///     - `code = "..."` Http response code
+///     - `component = "..."` a component attached to the given callback response. Must derive [ApiComponent] and [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
+///
+/// If `summary` or `description` are not provided, a default value will be extracted from the comments. The first line will be used as summary while the rest will be part of the description.
+#[proc_macro_error]
+#[proc_macro_attribute]
+pub fn api_callback(attr: TokenStream, item: TokenStream) -> TokenStream {
+  let attr_args = match NestedMeta::parse_meta_list(attr.into()) {
+    Ok(v) => v,
+    Err(e) => {
+      return TokenStream::from(Error::from(e).write_errors());
+    }
+  };
+
+  let callback_operation_attribute = parse_openapi_callback_attrs(&attr_args);
+
+  let default_span = proc_macro2::Span::call_site();
+  let item_ast = match syn::parse::<ItemFn>(item) {
+    Ok(v) => v,
+    Err(e) => abort!(e.span(), format!("{e}")),
+  };
+
+  let s_name = format!("{OPENAPI_CALLBACK_STRUCT_PREFIX}{}", item_ast.sig.ident);
+  let openapi_callback_struct = Ident::new(&s_name, default_span);
+
+  let generics = &item_ast.sig.generics.clone();
+  let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+  let openapi_struct_def = if !generics.params.is_empty() {
+    quote!(struct #openapi_callback_struct #impl_generics #where_clause { p: std::marker::PhantomData #ty_generics } )
+  } else {
+    quote!(struct #openapi_callback_struct;)
+  };
+
+  quote!(
+    #[allow(non_camel_case_types)]
+    #[doc(hidden)]
+    #openapi_struct_def
+    #[automatically_derived]
+    impl #impl_generics apistos::PathItemDefinition for #openapi_callback_struct #ty_generics #where_clause {
+      #callback_operation_attribute
+    }
   )
   .into()
 }

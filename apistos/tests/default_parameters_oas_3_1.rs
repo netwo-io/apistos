@@ -3,23 +3,23 @@
 
 use actix_web::http::StatusCode;
 use actix_web::test::{call_service, init_service, try_read_body_json, TestRequest};
-use actix_web::web::{Json, Path};
+use actix_web::web::{Header, Json, Path};
 use actix_web::{App, ResponseError};
 use apistos::app::OpenApiWrapper;
-use apistos::spec::Spec;
+use apistos::spec::{DefaultParameterAccessor, DefaultParameters, Spec};
 use apistos::web::{get, resource, scope};
-use apistos_gen::{api_operation, ApiComponent, ApiErrorComponent};
+use apistos_gen::{api_operation, ApiComponent, ApiErrorComponent, ApiHeader};
 use apistos_models::info::Info;
-use apistos_models::paths::{OperationType, Parameter, ParameterDefinition};
+use apistos_models::paths::{OperationType, Parameter, ParameterIn};
 use apistos_models::reference_or::ReferenceOr;
 use apistos_models::tag::Tag;
-use apistos_models::OpenApi;
+use apistos_models::{OpenApi, OpenApiVersion};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
 
 #[actix_web::test]
-async fn path_parameter_replacement() {
+async fn default_parameters() {
   #[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
   #[openapi_error(status(code = 405, description = "Invalid input"))]
   pub(crate) enum ErrorResponse {
@@ -44,6 +44,30 @@ async fn path_parameter_replacement() {
     id_string: String,
   }
 
+  #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
+  struct TestHeaderStruct {
+    plop: u32,
+    plap: String,
+  }
+
+  #[allow(unused_tuple_struct_fields)]
+  #[derive(Clone, Debug, JsonSchema, ApiHeader)]
+  #[openapi_header(
+    name = "X-Env-Complex",
+    description = "`X-Env-Complx` header should contain the current env",
+    required = true
+  )]
+  struct SomeComplexHeader(TestHeaderStruct);
+
+  #[allow(unused_tuple_struct_fields)]
+  #[derive(Clone, Debug, JsonSchema, ApiHeader)]
+  #[openapi_header(
+    name = "X-Env",
+    description = "`X-Env` header should contain the current env",
+    required = true
+  )]
+  struct SomeHeader(String);
+
   #[api_operation(tag = "pet")]
   pub(crate) async fn test(_params: Path<(u32, String)>) -> Result<Json<Test>, ErrorResponse> {
     panic!()
@@ -62,9 +86,29 @@ async fn path_parameter_replacement() {
     name: "A super tag".to_owned(),
     ..Default::default()
   }];
+
+  let default_parameters_macro =
+    <Header<SomeHeader> as DefaultParameterAccessor>::get_default_parameter(OpenApiVersion::OAS3_1);
+  let default_complex_parameters_macro =
+    <Header<SomeComplexHeader> as DefaultParameterAccessor>::get_default_parameter(OpenApiVersion::OAS3_1);
+  let simple_default_parameters = DefaultParameters {
+    parameters: vec![Parameter {
+      name: "X-SomeParam".to_string(),
+      _in: ParameterIn::Header,
+      required: Some(true),
+      ..Default::default()
+    }],
+    components: vec![],
+  };
+  let default_parameters = vec![
+    default_parameters_macro,
+    default_complex_parameters_macro,
+    simple_default_parameters,
+  ];
   let spec = Spec {
     info: info.clone(),
     tags: tags.clone(),
+    default_parameters,
     ..Default::default()
   };
   let app = App::new()
@@ -78,7 +122,7 @@ async fn path_parameter_replacement() {
   assert!(resp.status().is_success());
 
   let body: OpenApi = try_read_body_json(resp).await.expect("Unable to read body");
-  let parameters: Vec<Parameter> = body
+  let parameters: Vec<ReferenceOr<Parameter>> = body
     .paths
     .paths
     .get(&operation_path.to_string())
@@ -88,50 +132,45 @@ async fn path_parameter_replacement() {
     .get(&OperationType::Get)
     .cloned()
     .unwrap_or_default()
-    .parameters
+    .parameters;
+
+  assert_eq!(parameters.len(), 5);
+
+  let parameters_name = parameters
     .iter()
-    .filter_map(|p| match p {
-      ReferenceOr::Reference { .. } => None,
-      ReferenceOr::Object(obj) => Some(obj.clone()),
+    .map(|p| match p {
+      ReferenceOr::Object(obj) => obj.name.clone(),
+      ReferenceOr::Reference { _ref } => _ref.split('/').last().unwrap_or_default().to_string(),
     })
-    .collect();
+    .collect::<Vec<String>>();
 
-  assert_eq!(parameters.len(), 2);
-
-  let first_parameter = parameters.first().cloned().unwrap_or_default();
-  assert_eq!(first_parameter.name, "plop_id");
-  let first_parameter_schema = first_parameter
-    .definition
-    .and_then(|p| match p {
-      ParameterDefinition::Schema(ReferenceOr::Object(sch)) => Some(sch),
-      _ => None,
-    })
-    .unwrap_or_default();
   assert_eq!(
-    first_parameter_schema
-      .inner()
-      .as_object()
-      .and_then(|obj| obj.get("type"))
-      .and_then(|_type| _type.as_str()),
-    Some("integer")
+    parameters_name,
+    vec![
+      "plop_id".to_string(),
+      "clap_name".to_string(),
+      "X-Env".to_string(),
+      "X-Env-Complex".to_string(),
+      "X-SomeParam".to_string()
+    ]
   );
 
-  let last_parameter = parameters.last().cloned().unwrap_or_default();
-  assert_eq!(last_parameter.name, "clap_name");
-  let last_parameter_schema = last_parameter
-    .definition
-    .and_then(|p| match p {
-      ParameterDefinition::Schema(ReferenceOr::Object(sch)) => Some(sch),
-      _ => None,
-    })
-    .unwrap_or_default();
+  let parameter_components = body.components.clone().map(|c| c.parameters).unwrap_or_default();
+  assert_eq!(parameter_components.len(), 3);
   assert_eq!(
-    last_parameter_schema
-      .inner()
-      .as_object()
-      .and_then(|obj| obj.get("type"))
-      .and_then(|_type| _type.as_str()),
-    Some("string")
+    parameter_components.keys().cloned().collect::<Vec<String>>(),
+    vec![
+      "X-Env".to_string(),
+      "X-Env-Complex".to_string(),
+      "X-SomeParam".to_string()
+    ]
+  );
+
+  let schema_components = body.components.map(|c| c.schemas).unwrap_or_default();
+  assert_eq!(schema_components.len(), 2);
+  assert_eq!(
+    schema_components.keys().cloned().collect::<Vec<String>>(),
+    vec!["Test".to_string(), "TestHeaderStruct".to_string(),]
   );
 }
 

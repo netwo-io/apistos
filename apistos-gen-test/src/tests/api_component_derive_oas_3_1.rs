@@ -17,8 +17,8 @@ fn api_component_derive() {
     name: String,
   }
 
-  let name_schema = <Name as ApiComponent>::schema(OpenApiVersion::OAS3_0);
-  let name_child_schemas = <Name as ApiComponent>::child_schemas(OpenApiVersion::OAS3_0);
+  let name_schema = <Name as ApiComponent>::schema(OpenApiVersion::OAS3_1);
+  let name_child_schemas = <Name as ApiComponent>::child_schemas(OpenApiVersion::OAS3_1);
   assert!(name_schema.is_some());
   assert!(name_child_schemas.is_empty());
   let (schema_name, schema) = name_schema.expect("schema should be defined");
@@ -28,7 +28,7 @@ fn api_component_derive() {
   assert_json_eq!(
     json,
     json!({
-      "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "properties": {
         "name": {
           "type": "string"
@@ -61,8 +61,8 @@ fn api_component_derive_with_generic() {
     id_string: String,
   }
 
-  let name_schema = <Name<Test> as ApiComponent>::schema(OpenApiVersion::OAS3_0);
-  let name_child_schemas = <Name<Test> as ApiComponent>::child_schemas(OpenApiVersion::OAS3_0);
+  let name_schema = <Name<Test> as ApiComponent>::schema(OpenApiVersion::OAS3_1);
+  let name_child_schemas = <Name<Test> as ApiComponent>::child_schemas(OpenApiVersion::OAS3_1);
   assert!(name_schema.is_some());
   assert_eq!(name_child_schemas.len(), 1);
   let (schema_name, schema) = name_schema.expect("schema should be defined");
@@ -72,7 +72,7 @@ fn api_component_derive_with_generic() {
   assert_json_eq!(
     json,
     json!({
-      "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "properties": {
         "id": {
           "$ref": "#/components/schemas/Test"
@@ -131,8 +131,8 @@ fn api_component_derive_with_flatten() {
     id_string: String,
   }
 
-  let name_schema = <Name as ApiComponent>::schema(OpenApiVersion::OAS3_0);
-  let name_child_schemas = <Name as ApiComponent>::child_schemas(OpenApiVersion::OAS3_0);
+  let name_schema = <Name as ApiComponent>::schema(OpenApiVersion::OAS3_1);
+  let name_child_schemas = <Name as ApiComponent>::child_schemas(OpenApiVersion::OAS3_1);
   assert!(name_schema.is_some());
   assert!(name_child_schemas.is_empty());
   let (schema_name, schema) = name_schema.expect("schema should be defined");
@@ -142,7 +142,7 @@ fn api_component_derive_with_flatten() {
   assert_json_eq!(
     json,
     json!({
-      "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "properties": {
         "id_number": {
           "format": "uint32",
@@ -176,8 +176,8 @@ fn api_component_derive_with_deprecated_field() {
     new_name: String,
   }
 
-  let name_schema = <Name as ApiComponent>::schema(OpenApiVersion::OAS3_0);
-  let name_child_schemas = <Name as ApiComponent>::child_schemas(OpenApiVersion::OAS3_0);
+  let name_schema = <Name as ApiComponent>::schema(OpenApiVersion::OAS3_1);
+  let name_child_schemas = <Name as ApiComponent>::child_schemas(OpenApiVersion::OAS3_1);
   assert!(name_schema.is_some());
   assert!(name_child_schemas.is_empty());
   let (schema_name, schema) = name_schema.expect("schema should be defined");
@@ -187,12 +187,16 @@ fn api_component_derive_with_deprecated_field() {
   assert_json_eq!(
     json,
     json!({
-      "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "title": "Name",
+      "type": "object",
       "properties": {
         "name": {
-          "type": "string",
-          "deprecated": true,
-          "nullable": true
+          "type": [
+            "string",
+            "null"
+          ],
+          "deprecated": true
         },
         "new_name": {
           "type": "string"
@@ -200,9 +204,7 @@ fn api_component_derive_with_deprecated_field() {
       },
       "required": [
         "new_name"
-      ],
-      "title": "Name",
-      "type": "object"
+      ]
     })
   );
 }
@@ -215,8 +217,8 @@ fn api_component_derive_with_format() {
     usernames: Vec<String>,
   }
 
-  let name_schema = <Name as ApiComponent>::schema(OpenApiVersion::OAS3_0);
-  let name_child_schemas = <Name as ApiComponent>::child_schemas(OpenApiVersion::OAS3_0);
+  let name_schema = <Name as ApiComponent>::schema(OpenApiVersion::OAS3_1);
+  let name_child_schemas = <Name as ApiComponent>::child_schemas(OpenApiVersion::OAS3_1);
   assert!(name_schema.is_some());
   assert!(name_child_schemas.is_empty());
   let (schema_name, schema) = name_schema.expect("schema should be defined");
@@ -226,7 +228,7 @@ fn api_component_derive_with_format() {
   assert_json_eq!(
     json,
     json!({
-      "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "properties": {
         "usernames": {
           "items": {
@@ -253,8 +255,8 @@ fn api_component_derive_recursive() {
     old_name: Option<Box<Name>>,
   }
 
-  let name_schema = <Name as ApiComponent>::schema(OpenApiVersion::OAS3_0);
-  let name_child_schemas = <Name as ApiComponent>::child_schemas(OpenApiVersion::OAS3_0);
+  let name_schema = <Name as ApiComponent>::schema(OpenApiVersion::OAS3_1);
+  let name_child_schemas = <Name as ApiComponent>::child_schemas(OpenApiVersion::OAS3_1);
   assert!(name_schema.is_some());
   assert_eq!(name_child_schemas.len(), 1);
   let (schema_name, schema) = name_schema.expect("schema should be defined");
@@ -264,19 +266,21 @@ fn api_component_derive_recursive() {
   assert_json_eq!(
     json,
     json!({
-      "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "title": "Name",
+      "type": "object",
       "properties": {
         "old_name": {
-          "allOf": [
+          "anyOf": [
             {
               "$ref": "#/components/schemas/Name"
+            },
+            {
+              "type": "null"
             }
-          ],
-          "nullable": true
+          ]
         }
-      },
-      "title": "Name",
-      "type": "object"
+      }
     })
   );
 
@@ -287,17 +291,19 @@ fn api_component_derive_recursive() {
   assert_json_eq!(
     json,
     json!({
+      "type": "object",
       "properties": {
         "old_name": {
-          "allOf": [
+          "anyOf": [
             {
               "$ref": "#/components/schemas/Name"
+            },
+            {
+              "type": "null"
             }
-          ],
-          "nullable": true
+          ]
         }
-      },
-      "type": "object"
+      }
     })
   );
 }
@@ -319,8 +325,8 @@ fn api_component_derive_flatten_algebraic_enums() {
     pub(crate) limit: u32,
   }
 
-  let name_schema = <Query as ApiComponent>::schema(OpenApiVersion::OAS3_0);
-  let name_child_schemas = <Query as ApiComponent>::child_schemas(OpenApiVersion::OAS3_0);
+  let name_schema = <Query as ApiComponent>::schema(OpenApiVersion::OAS3_1);
+  let name_child_schemas = <Query as ApiComponent>::child_schemas(OpenApiVersion::OAS3_1);
   assert!(name_schema.is_some());
   assert!(name_child_schemas.is_empty());
   let (schema_name, schema) = name_schema.expect("schema should be defined");
@@ -330,50 +336,50 @@ fn api_component_derive_flatten_algebraic_enums() {
   assert_json_eq!(
     json,
     json!({
-      "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "title": "Query",
+      "type": "object",
+      "properties": {
+        "limit": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
       "oneOf": [
         {
-          "additionalProperties": false,
+          "title": "after_id",
+          "type": "object",
           "properties": {
             "after_id": {
+              "type": "integer",
               "format": "uint64",
-              "minimum": 0,
-              "type": "integer"
+              "minimum": 0
             }
           },
           "required": [
             "after_id"
           ],
-          "title": "after_id",
-          "type": "object"
+          "additionalProperties": false
         },
         {
-          "additionalProperties": false,
+          "title": "after_date",
+          "type": "object",
           "properties": {
             "after_date": {
-              "format": "date-time",
-              "type": "string"
+              "type": "string",
+              "format": "date-time"
             }
           },
           "required": [
             "after_date"
           ],
-          "title": "after_date",
-          "type": "object"
+          "additionalProperties": false
         }
       ],
-      "properties": {
-        "limit": {
-          "format": "uint32",
-          "minimum": 0,
-          "type": "integer"
-        }
-      },
       "required": [
         "limit"
-      ],
-      "title": "Query",
-      "type": "object"
+      ]
     })
   );
 }
@@ -400,8 +406,8 @@ fn api_component_derive_optional_enums() {
     pub(crate) pagination: PaginationQuery,
   }
 
-  let name_schema = <Query as ApiComponent>::schema(OpenApiVersion::OAS3_0);
-  let name_child_schemas = <Query as ApiComponent>::child_schemas(OpenApiVersion::OAS3_0);
+  let name_schema = <Query as ApiComponent>::schema(OpenApiVersion::OAS3_1);
+  let name_child_schemas = <Query as ApiComponent>::child_schemas(OpenApiVersion::OAS3_1);
   assert!(name_schema.is_some());
   assert_eq!(name_child_schemas.len(), 1);
   let (schema_name, schema) = name_schema.expect("schema should be defined");
@@ -411,37 +417,43 @@ fn api_component_derive_optional_enums() {
   assert_json_eq!(
     json,
     json!({
-      "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "title": "Query",
+      "type": "object",
       "properties": {
-        "limit": {
-          "format": "uint32",
-          "minimum": 0,
-          "type": "integer"
-        },
-        "offset": {
-          "format": "uint32",
-          "minimum": 0,
-          "nullable": true,
-          "type": "integer"
+        "test": {
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "status": {
-          "allOf": [
+          "anyOf": [
             {
               "$ref": "#/components/schemas/StatusQuery"
+            },
+            {
+              "type": "null"
             }
-          ],
-          "nullable": true
+          ]
         },
-        "test": {
-          "nullable": true,
-          "type": "string"
+        "limit": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "offset": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint32",
+          "minimum": 0
         }
       },
       "required": [
         "limit"
-      ],
-      "title": "Query",
-      "type": "object"
+      ]
     })
   );
 }
@@ -468,8 +480,8 @@ fn api_component_derive_named_enums() {
     pub(crate) kinds: Vec<KindQuery>,
   }
 
-  let name_schema = <Query as ApiComponent>::schema(OpenApiVersion::OAS3_0);
-  let name_child_schemas = <Query as ApiComponent>::child_schemas(OpenApiVersion::OAS3_0);
+  let name_schema = <Query as ApiComponent>::schema(OpenApiVersion::OAS3_1);
+  let name_child_schemas = <Query as ApiComponent>::child_schemas(OpenApiVersion::OAS3_1);
   assert!(name_schema.is_some());
   assert_eq!(name_child_schemas.len(), 2);
   let (schema_name, schema) = name_schema.expect("schema should be defined");
@@ -479,7 +491,7 @@ fn api_component_derive_named_enums() {
   assert_json_eq!(
     json,
     json!({
-      "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "oneOf": [
         {
           "additionalProperties": false,
@@ -607,8 +619,8 @@ fn api_component_derive_named_enums_documented() {
     pub(crate) kind: Kind,
   }
 
-  let name_schema = <Query as ApiComponent>::schema(OpenApiVersion::OAS3_0);
-  let name_child_schemas = <Query as ApiComponent>::child_schemas(OpenApiVersion::OAS3_0);
+  let name_schema = <Query as ApiComponent>::schema(OpenApiVersion::OAS3_1);
+  let name_child_schemas = <Query as ApiComponent>::child_schemas(OpenApiVersion::OAS3_1);
   assert!(name_schema.is_some());
   assert_eq!(name_child_schemas.len(), 1);
   let (schema_name, schema) = name_schema.expect("schema should be defined");
@@ -618,7 +630,7 @@ fn api_component_derive_named_enums_documented() {
   assert_json_eq!(
     json,
     json!({
-      "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "properties": {
         "kind": {
           "$ref": "#/components/schemas/Kind"
@@ -647,19 +659,16 @@ fn api_component_derive_named_enums_documented() {
     json!({
       "oneOf": [
         {
+          "title": "Complex",
+          "type": "string",
           "enum": [
             "Complex"
-          ],
-          "title": "Complex",
-          "type": "string"
+          ]
         },
         {
           "description": "A simple stuff",
-          "enum": [
-            "Simple"
-          ],
-          "title": "Simple",
-          "type": "string"
+          "type": "string",
+          "const": "Simple"
         }
       ]
     })
@@ -711,8 +720,8 @@ fn api_component_derive_named_enums_deep() {
     pub(crate) level2: Level2Query,
   }
 
-  let name_schema = <Query as ApiComponent>::schema(OpenApiVersion::OAS3_0);
-  let name_child_schemas = <Query as ApiComponent>::child_schemas(OpenApiVersion::OAS3_0);
+  let name_schema = <Query as ApiComponent>::schema(OpenApiVersion::OAS3_1);
+  let name_child_schemas = <Query as ApiComponent>::child_schemas(OpenApiVersion::OAS3_1);
   assert!(name_schema.is_some());
   assert_eq!(name_child_schemas.len(), 5);
   let (schema_name, schema) = name_schema.expect("schema should be defined");
@@ -722,7 +731,7 @@ fn api_component_derive_named_enums_deep() {
   assert_json_eq!(
     json,
     json!({
-      "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "properties": {
         "level2": {
           "$ref": "#/components/schemas/Level2Query"
@@ -867,42 +876,36 @@ fn api_component_derive_named_enums_deep() {
     json!({
       "oneOf": [
         {
+          "type": "object",
           "properties": {
-            "name": {
-              "type": "string"
-            },
             "type": {
-              "enum": [
-                "something"
-              ],
+              "type": "string",
+              "const": "something"
+            },
+            "name": {
               "type": "string"
             }
           },
           "required": [
             "type",
             "name"
-          ],
-          "title": "something",
-          "type": "object"
+          ]
         },
         {
+          "type": "object",
           "properties": {
-            "name": {
-              "type": "string"
-            },
             "type": {
-              "enum": [
-                "other"
-              ],
+              "type": "string",
+              "const": "other"
+            },
+            "name": {
               "type": "string"
             }
           },
           "required": [
             "type",
             "name"
-          ],
-          "title": "other",
-          "type": "object"
+          ]
         }
       ]
     })

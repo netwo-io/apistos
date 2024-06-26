@@ -2,7 +2,7 @@ use crate::ApiComponent;
 use actix_web::web::Header;
 use apistos_models::paths::{Parameter, ParameterDefinition, ParameterIn, ParameterStyle, RequestBody};
 use apistos_models::reference_or::ReferenceOr;
-use apistos_models::{OpenApiVersion, Schema};
+use apistos_models::{ApistosSchema, OpenApiVersion};
 
 pub trait ApiHeader {
   fn name() -> String;
@@ -21,15 +21,15 @@ impl<T> ApiComponent for Header<T>
 where
   T: ApiComponent + ApiHeader,
 {
-  fn child_schemas(oas_version: OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
+  fn child_schemas(oas_version: OpenApiVersion) -> Vec<(String, ReferenceOr<ApistosSchema>)> {
     T::child_schemas(oas_version)
   }
 
-  fn raw_schema(oas_version: OpenApiVersion) -> Option<ReferenceOr<Schema>> {
+  fn raw_schema(oas_version: OpenApiVersion) -> Option<ReferenceOr<ApistosSchema>> {
     T::raw_schema(oas_version)
   }
 
-  fn schema(_: OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
+  fn schema(_: OpenApiVersion) -> Option<(String, ReferenceOr<ApistosSchema>)> {
     None
   }
 
@@ -59,15 +59,15 @@ impl<T> ApiComponent for garde_actix_web::web::Header<T>
 where
   T: ApiComponent + ApiHeader,
 {
-  fn child_schemas(oas_version: OpenApiVersion) -> Vec<(String, ReferenceOr<Schema>)> {
+  fn child_schemas(oas_version: OpenApiVersion) -> Vec<(String, ReferenceOr<ApistosSchema>)> {
     T::child_schemas(oas_version)
   }
 
-  fn raw_schema(oas_version: OpenApiVersion) -> Option<ReferenceOr<Schema>> {
+  fn raw_schema(oas_version: OpenApiVersion) -> Option<ReferenceOr<ApistosSchema>> {
     T::raw_schema(oas_version)
   }
 
-  fn schema(_: OpenApiVersion) -> Option<(String, ReferenceOr<Schema>)> {
+  fn schema(_: OpenApiVersion) -> Option<(String, ReferenceOr<ApistosSchema>)> {
     None
   }
 

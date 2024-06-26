@@ -7,27 +7,25 @@ macro_rules! simple_modifier {
         _: apistos_models::OpenApiVersion,
       ) -> Vec<(
         String,
-        apistos_models::reference_or::ReferenceOr<apistos_models::Schema>,
+        apistos_models::reference_or::ReferenceOr<apistos_models::ApistosSchema>,
       )> {
         vec![]
       }
       fn raw_schema(
         oas_version: apistos_models::OpenApiVersion,
-      ) -> Option<apistos_models::reference_or::ReferenceOr<apistos_models::Schema>> {
-        let schema_settings = match oas_version {
-          apistos_models::OpenApiVersion::OAS3_0 => schemars::gen::SchemaSettings::openapi3(),
-        };
+      ) -> Option<apistos_models::reference_or::ReferenceOr<apistos_models::ApistosSchema>> {
+        let schema_settings = oas_version.get_schema_settings();
         let gen = schema_settings.into_generator();
 
-        let schema: apistos_models::reference_or::ReferenceOr<apistos_models::Schema> =
-          gen.into_root_schema_for::<$ty>().into();
+        let schema: apistos_models::reference_or::ReferenceOr<apistos_models::ApistosSchema> =
+          apistos_models::ApistosSchema::new(gen.into_root_schema_for::<$ty>(), oas_version).into();
         Some(schema)
       }
       fn schema(
         _: apistos_models::OpenApiVersion,
       ) -> Option<(
         String,
-        apistos_models::reference_or::ReferenceOr<apistos_models::Schema>,
+        apistos_models::reference_or::ReferenceOr<apistos_models::ApistosSchema>,
       )> {
         None
       }
@@ -72,21 +70,19 @@ impl<T: chrono::TimeZone> ApiComponent for chrono::DateTime<T> {
     _: apistos_models::OpenApiVersion,
   ) -> Vec<(
     String,
-    apistos_models::reference_or::ReferenceOr<apistos_models::Schema>,
+    apistos_models::reference_or::ReferenceOr<apistos_models::ApistosSchema>,
   )> {
     vec![]
   }
 
   fn raw_schema(
     oas_version: apistos_models::OpenApiVersion,
-  ) -> Option<apistos_models::reference_or::ReferenceOr<apistos_models::Schema>> {
-    let schema_settings = match oas_version {
-      apistos_models::OpenApiVersion::OAS3_0 => schemars::gen::SchemaSettings::openapi3(),
-    };
+  ) -> Option<apistos_models::reference_or::ReferenceOr<apistos_models::ApistosSchema>> {
+    let schema_settings = oas_version.get_schema_settings();
     let gen = schema_settings.into_generator();
 
-    let schema: apistos_models::reference_or::ReferenceOr<apistos_models::Schema> =
-      gen.into_root_schema_for::<chrono::DateTime<T>>().into();
+    let schema: apistos_models::reference_or::ReferenceOr<apistos_models::ApistosSchema> =
+      apistos_models::ApistosSchema::new(gen.into_root_schema_for::<chrono::DateTime<T>>(), oas_version).into();
     Some(schema)
   }
 
@@ -94,7 +90,7 @@ impl<T: chrono::TimeZone> ApiComponent for chrono::DateTime<T> {
     _: apistos_models::OpenApiVersion,
   ) -> Option<(
     String,
-    apistos_models::reference_or::ReferenceOr<apistos_models::Schema>,
+    apistos_models::reference_or::ReferenceOr<apistos_models::ApistosSchema>,
   )> {
     None
   }
