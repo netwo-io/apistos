@@ -649,11 +649,14 @@ mod test {
         style: Some(ParameterStyle::Form),
         explode: Some(true),
         definition: Some(ParameterDefinition::Schema(
-          json_schema!({
-            "type": "integer",
-            "format": "uint32",
-            "minimum": 0
-          })
+          ApistosSchema::new(
+            json_schema!({
+              "type": "integer",
+              "format": "uint32",
+              "minimum": 0
+            }),
+            OpenApiVersion::OAS3_0
+          )
           .into()
         )),
         ..Default::default()
@@ -674,9 +677,12 @@ mod test {
         style: Some(ParameterStyle::Form),
         explode: Some(true),
         definition: Some(ParameterDefinition::Schema(
-          json_schema!({
-            "type": "string",
-          })
+          ApistosSchema::new(
+            json_schema!({
+              "type": "string",
+            }),
+            OpenApiVersion::OAS3_0
+          )
           .into()
         )),
         ..Default::default()
