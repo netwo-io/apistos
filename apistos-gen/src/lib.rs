@@ -108,10 +108,15 @@ pub fn derive_api_type(input: TokenStream) -> TokenStream {
       fn schema(oas_version: apistos::OpenApiVersion) -> Option<(String, apistos::reference_or::ReferenceOr<apistos::ApistosSchema>)> {
         Some((
           #component_name.to_string(),
-          apistos::Schema::try_from(schemars::_serde_json::json!({
-            "type": <#ident #ty_generics>::schema_type(),
-            "format": <#ident #ty_generics>::format(),
-          }))
+          apistos::Schema::try_from(match <#ident #ty_generics>::format() {
+            Some(format) => schemars::_serde_json::json!({
+              "type": <#ident #ty_generics>::schema_type(),
+              "format": format,
+            }),
+            None => schemars::_serde_json::json!({
+              "type": <#ident #ty_generics>::schema_type(),
+            }),
+          })
           .map_err(|err| {
             apistos::log::warn!("Error generating json schema from #ident : {err:?}");
             err
