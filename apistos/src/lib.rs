@@ -128,6 +128,7 @@
 //! | `redoc`           | Enables `ReDoc` to expose the generated openapi file                     |                                                               |
 //! | `swagger-ui`      | Enables Swagger UI to expose the generated openapi file                  |                                                               |
 //! | `chrono`          | Enables documenting types from `chrono`                                  | [`chrono`](https://crates.io/crates/chrono)                   |
+//! | `ipnetwork`       | Enables documenting types from `ipnetwork`                               | [`ipnetwork`](https://crates.io/crates/ipnetwork)             |
 //! | `multipart`       | Enables documenting types from `actix-multipart`                         | [`actix-multipart`](https://crates.io/crates/actix-multipart) |
 //! | `rust_decimal`    | Enables documenting types from `rust_decimal`                            | [`rust_decimal`](https://crates.io/crates/rust-decimal)       |
 //! | `uuid`            | Enables documenting types from `uuid`                                    | [`uuid`](https://crates.io/crates/uuid)                       |
