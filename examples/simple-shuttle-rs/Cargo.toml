@@ -10,7 +10,8 @@ authors = ["Netwo <oss@netwo.com>"]
 actix-web = "4"
 apistos = { path = "../../apistos", features = ["extras", "qs_query", "rapidoc", "redoc", "swagger-ui"] }
 apistos-shuttle = { path = "../../apistos-shuttle" }
-schemars = { package = "apistos-schemars", version = "0.8", features = ["chrono", "uuid1", "url", "rust_decimal"] }
+schemars = { package = "apistos-schemars", git = "https://github.com/netwo-io/apistos-schemars.git", branch = "v1", features = ["chrono04", "uuid1", "url2", "rust_decimal1"] }
+#schemars = { package = "apistos-schemars", version = "0.8", features = ["chrono", "uuid1", "url", "rust_decimal"] }
 serde = { version = "1.0", features = ["derive"] }
 shuttle-runtime = { version = "0.44", default-features = false }
 uuid = { version = "1", features = ["serde", "v4"] }
