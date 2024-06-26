@@ -481,11 +481,20 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
 ///   SkippedWebhook
 /// }
 ///
+/// // Or
+/// #[derive(Clone, ApiWebhookComponent)]
+/// #[openapi_webhook(component = "actix_web::web::Json<Test>", response(code = 200))]
+/// pub enum WebhookEnumWithDefault {
+///   VisibleWebhook,
+///   #[openapi_webhook(skip)]
+///   SkippedWebhook
+/// }
+///
 /// ```
 ///
 /// # `#[api_webhook(...)]` options:
 /// - `skip` allow to skip an enum variant (for enum only)
-/// - `name = "..."` a **required** name for the webhook
+/// - `name = "..."` an optional name for the webhook. Default to the Struct or Variant name
 /// - `deprecated` a bool indicating the operation is deprecated. Deprecation can also be declared
 ///  with rust `#[deprecated]` decorator.
 /// - `summary = "..."` an optional summary
@@ -506,7 +515,7 @@ pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
     vis: _vis,
   } = input;
 
-  let webhook_operation_attribute = parse_openapi_derive_webhook_attrs(&attrs, &data);
+  let webhook_operation_attribute = parse_openapi_derive_webhook_attrs(&attrs, &data, &ident);
 
   let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
 
