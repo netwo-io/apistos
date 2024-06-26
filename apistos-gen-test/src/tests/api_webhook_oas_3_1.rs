@@ -128,7 +128,13 @@ fn api_webhook() {
       }
     })
   );
+}
 
+#[test]
+#[allow(dead_code)]
+fn api_webhook_enum() {
+  use actix_web::web::Header;
+  use test_models::OrganizationSlug;
   #[derive(ApiWebhookComponent)]
   enum TestEnum {
     #[openapi_webhook(name = "TestWebhook", component = "Header<OrganizationSlug>", response(code = 200))]
@@ -151,6 +157,168 @@ fn api_webhook() {
     webhooks,
     json!({
       "TestWebhook": {
+        "post": {
+          "parameters": [
+            {
+              "name": "X-Organization-Slug",
+              "in": "header",
+              "description": "Organization of the current caller",
+              "required": true,
+              "deprecated": false,
+              "style": "simple",
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "title": "OrganizationSlug",
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          }
+        }
+      },
+      "TestWebhook2": {
+        "post": {
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "title": "Test",
+                  "type": "object",
+                  "properties": {
+                    "test": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "test"
+                  ]
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          }
+        }
+      }
+    })
+  );
+}
+
+#[test]
+#[allow(dead_code)]
+fn api_webhook_enum_default() {
+  use actix_web::web::Header;
+  use test_models::OrganizationSlug;
+
+  #[derive(ApiWebhookComponent)]
+  #[openapi_webhook(component = "Header<OrganizationSlug>", response(code = 200))]
+  enum TestEnum {
+    Test,
+    #[openapi_webhook(skip)]
+    TestSkipped,
+    Test2,
+  }
+
+  let components = TestEnum::components(OpenApiVersion::OAS3_1);
+  assert_eq!(components.len(), 2);
+  let components = serde_json::to_value(components).expect("Unable to serialize as Json");
+
+  let webhooks = TestEnum::webhooks(OpenApiVersion::OAS3_1);
+  let webhooks = serde_json::to_value(webhooks).expect("Unable to serialize as Json");
+
+  assert_json_eq!(components, json!([{}, {}]));
+  assert_json_eq!(
+    webhooks,
+    json!({
+      "Test": {
+        "post": {
+          "parameters": [
+            {
+              "name": "X-Organization-Slug",
+              "in": "header",
+              "description": "Organization of the current caller",
+              "required": true,
+              "deprecated": false,
+              "style": "simple",
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "title": "OrganizationSlug",
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          }
+        }
+      },
+      "Test2": {
+        "post": {
+          "parameters": [
+            {
+              "name": "X-Organization-Slug",
+              "in": "header",
+              "description": "Organization of the current caller",
+              "required": true,
+              "deprecated": false,
+              "style": "simple",
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "title": "OrganizationSlug",
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          }
+        }
+      }
+    })
+  );
+}
+
+#[test]
+#[allow(dead_code)]
+fn api_webhook_enum_default_and_override() {
+  use actix_web::web::Header;
+  use test_models::OrganizationSlug;
+
+  #[derive(ApiWebhookComponent)]
+  #[openapi_webhook(component = "Header<OrganizationSlug>", response(code = 200))]
+  enum TestEnum {
+    Test,
+    #[openapi_webhook(skip)]
+    TestSkipped,
+    #[openapi_webhook(name = "TestWebhook2", component = "Json<Test>", response(code = 200))]
+    Test2,
+  }
+
+  let components = TestEnum::components(OpenApiVersion::OAS3_1);
+  assert_eq!(components.len(), 2);
+  let components = serde_json::to_value(components).expect("Unable to serialize as Json");
+
+  let webhooks = TestEnum::webhooks(OpenApiVersion::OAS3_1);
+  let webhooks = serde_json::to_value(webhooks).expect("Unable to serialize as Json");
+
+  assert_json_eq!(components, json!([{}, {}]));
+  assert_json_eq!(
+    webhooks,
+    json!({
+      "Test": {
         "post": {
           "parameters": [
             {

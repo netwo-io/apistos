@@ -1,17 +1,24 @@
 use std::collections::BTreeMap;
 
 use darling::FromMeta;
-use proc_macro2::{Span, TokenStream};
+use proc_macro2::{Ident, Span, TokenStream};
 use proc_macro_error::{abort, OptionExt};
 use quote::{quote, ToTokens};
-use syn::{Attribute, Data, DataEnum};
+use syn::{Attribute, Data, DataEnum, Error};
 
 use crate::callback_attr::{CallbackAttr, CallbackAttrInternal};
 
-pub(crate) fn parse_openapi_derive_webhook_attrs(attrs: &[Attribute], data: &Data) -> WebhookAttr {
+pub(crate) fn parse_openapi_derive_webhook_attrs(attrs: &[Attribute], data: &Data, ident: &Ident) -> WebhookAttr {
   match data {
-    Data::Struct(_) => parse_openapi_derive_struct_webhook_attrs(attrs),
-    Data::Enum(_enum) => parse_openapi_derive_enum_webhook_attrs(_enum),
+    Data::Struct(_) => parse_openapi_derive_struct_webhook_attrs(attrs, ident).expect_or_abort(
+      "expected #[openapi_webhook(...)] attribute to be present when used with ApiWebhookComponent derive trait",
+    ),
+    Data::Enum(_enum) => {
+      let struct_attrs = parse_openapi_derive_struct_webhook_attrs(attrs, ident)
+        .map(|w| w.0.clone())
+        .and_then(|w| w.first_key_value().map(|(_, struct_attrs)| struct_attrs).cloned());
+      parse_openapi_derive_enum_webhook_attrs(_enum, struct_attrs.as_ref())
+    }
     Data::Union(_) => abort!(
       Span::call_site(),
       "Union are not supported by ApiWebhookComponent derive"
@@ -19,7 +26,7 @@ pub(crate) fn parse_openapi_derive_webhook_attrs(attrs: &[Attribute], data: &Dat
   }
 }
 
-fn parse_openapi_derive_struct_webhook_attrs(attrs: &[Attribute]) -> WebhookAttr {
+fn parse_openapi_derive_struct_webhook_attrs(attrs: &[Attribute], ident: &Ident) -> Option<WebhookAttr> {
   let webhook_attribute = attrs
     .iter()
     .filter(|attribute| attribute.path().is_ident("openapi_webhook"))
@@ -33,10 +40,10 @@ fn parse_openapi_derive_struct_webhook_attrs(attrs: &[Attribute]) -> WebhookAttr
     Ok(webhook_attribute) => {
       let webhook_attribute = webhook_attribute.first().cloned();
 
-      let webhook_attribute = webhook_attribute.expect_or_abort(
-        "expected #[openapi_webhook(...)] attribute to be present when used with ApiWebhookComponent derive trait",
-      );
-      match webhook_attribute.try_into() {
+      match webhook_attribute
+        .map(|w| w.into_webhook_attr(ident.to_string()))
+        .transpose()
+      {
         Ok(webhook) => webhook,
         Err(e) => abort!(e.span(), "Error parsing openapi_webhook attributes: {}", e),
       }
@@ -45,11 +52,12 @@ fn parse_openapi_derive_struct_webhook_attrs(attrs: &[Attribute]) -> WebhookAttr
   }
 }
 
-fn parse_openapi_derive_enum_webhook_attrs(_enum: &DataEnum) -> WebhookAttr {
+fn parse_openapi_derive_enum_webhook_attrs(_enum: &DataEnum, struct_attrs: Option<&CallbackAttr>) -> WebhookAttr {
   _enum
     .variants
     .iter()
     .map(|v| {
+      let variant_name = v.ident.to_string();
       let webhook_attribute = v
         .attrs
         .iter()
@@ -63,11 +71,21 @@ fn parse_openapi_derive_enum_webhook_attrs(_enum: &DataEnum) -> WebhookAttr {
         }
         Ok(webhook_attribute) => {
           let webhook_attribute = webhook_attribute.first().cloned();
+          let webhook_attribute = webhook_attribute.map(|w| w.into_webhook_attr(struct_attrs, variant_name.clone()))
+            .transpose()
+            .map(|attrs| attrs.or_else(||
+              struct_attrs.map(|struct_webhook_attrs| {
+                let mut webhook = BTreeMap::default();
+                webhook.insert(variant_name.clone(), struct_webhook_attrs.clone());
+                WebhookAttr(webhook)
+              })
+            ))
+            .transpose()
+            .expect_or_abort(
+              "expected #[openapi_webhook(...)] attribute to be present when used with ApiWebhookComponent derive trait",
+            );
 
-          let webhook_attribute = webhook_attribute.expect_or_abort(
-            "expected #[openapi_webhook(...)] attribute to be present when used with ApiWebhookComponent derive trait",
-          );
-          match WebhookAttr::try_from(webhook_attribute) {
+          match webhook_attribute {
             Ok(webhook) => webhook,
             Err(e) => abort!(e.span(), "Error parsing openapi_webhook attributes: {}", e),
           }
@@ -87,7 +105,7 @@ fn parse_openapi_derive_enum_webhook_attrs(_enum: &DataEnum) -> WebhookAttr {
 
 #[derive(FromMeta, Clone)]
 struct WebhookAttrInternal {
-  name: String,
+  name: Option<String>,
   #[darling(flatten)]
   attr: CallbackAttrInternal,
 }
@@ -104,47 +122,52 @@ struct WebhookAttrEnumInternal {
 #[derive(Clone)]
 pub(crate) struct WebhookAttr(BTreeMap<String, CallbackAttr>);
 
-impl TryFrom<WebhookAttrInternal> for WebhookAttr {
-  type Error = syn::Error;
-
-  fn try_from(value: WebhookAttrInternal) -> Result<Self, Self::Error> {
-    if value.attr.responses.is_empty() {
-      return Err(syn::Error::new(
+impl WebhookAttrInternal {
+  pub(crate) fn into_webhook_attr(self, default_name: String) -> Result<WebhookAttr, Error> {
+    if self.attr.responses.is_empty() {
+      return Err(Error::new(
         Span::call_site(),
         "Webhook should define at least one response",
       ));
     }
 
-    Ok(Self(BTreeMap::from_iter(vec![(value.name, value.attr.try_into()?)])))
+    Ok(WebhookAttr(BTreeMap::from_iter(vec![(
+      self.name.unwrap_or(default_name),
+      self.attr.try_into()?,
+    )])))
   }
 }
 
-impl TryFrom<WebhookAttrEnumInternal> for WebhookAttr {
-  type Error = syn::Error;
-
-  fn try_from(value: WebhookAttrEnumInternal) -> Result<Self, Self::Error> {
-    if value.skip {
+impl WebhookAttrEnumInternal {
+  pub(crate) fn into_webhook_attr(
+    mut self,
+    struct_attrs: Option<&CallbackAttr>,
+    default_name: String,
+  ) -> Result<WebhookAttr, Error> {
+    if self.skip {
       return Ok(WebhookAttr(Default::default()));
     }
 
-    match value.name {
-      None => {
-        return Err(syn::Error::new(
-          Span::call_site(),
-          "Missing name for webhook definition.",
-        ))
+    if let Some(struct_attrs) = struct_attrs {
+      if self.attr.responses.is_empty() {
+        self.attr.responses = struct_attrs.responses.clone();
       }
-      Some(name) => {
-        if value.attr.responses.is_empty() {
-          return Err(syn::Error::new(
-            Span::call_site(),
-            "Webhook should define at least one response.",
-          ));
-        }
-
-        Ok(Self(BTreeMap::from_iter(vec![(name, value.attr.try_into()?)])))
+      if self.attr.components.is_empty() {
+        self.attr.components = struct_attrs.components.clone();
       }
     }
+
+    if self.attr.responses.is_empty() {
+      return Err(Error::new(
+        Span::call_site(),
+        "Webhook should define at least one response.",
+      ));
+    }
+
+    Ok(WebhookAttr(BTreeMap::from_iter(vec![(
+      self.name.unwrap_or(default_name),
+      self.attr.try_into()?,
+    )])))
   }
 }
 

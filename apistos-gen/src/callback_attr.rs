@@ -36,11 +36,11 @@ pub(crate) struct CallbackResponseDefinition {
 
 #[derive(Clone)]
 pub(crate) struct CallbackAttr {
-  deprecated: Option<bool>,
-  summary: Option<String>,
-  description: Option<String>,
-  components: Vec<Type>,
-  responses: Vec<CallbackResponseDefinition>,
+  pub(crate) deprecated: Option<bool>,
+  pub(crate) summary: Option<String>,
+  pub(crate) description: Option<String>,
+  pub(crate) components: Vec<Type>,
+  pub(crate) responses: Vec<CallbackResponseDefinition>,
 }
 
 impl TryFrom<CallbackAttrInternal> for CallbackAttr {
