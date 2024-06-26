@@ -368,14 +368,17 @@ mod test {
         name: "id_number".to_string(),
         _in: ParameterIn::Query,
         required: Some(true),
-        definition: Some(ParameterDefinition::Schema(ReferenceOr::Object(
-          json_schema!({
-            "type": "integer",
-            "format": "uint32",
-            "minimum": 0
-          })
+        definition: Some(ParameterDefinition::Schema(
+          ApistosSchema::new(
+            json_schema!({
+              "type": "integer",
+              "format": "uint32",
+              "minimum": 0
+            }),
+            OpenApiVersion::OAS3_0
+          )
           .into()
-        ))),
+        )),
         ..Default::default()
       }
     );
@@ -391,12 +394,15 @@ mod test {
         name: "id_string".to_string(),
         _in: ParameterIn::Query,
         required: Some(true),
-        definition: Some(ParameterDefinition::Schema(ReferenceOr::Object(
-          json_schema!({
-            "type": "string",
-          })
+        definition: Some(ParameterDefinition::Schema(
+          ApistosSchema::new(
+            json_schema!({
+              "type": "string",
+            }),
+            OpenApiVersion::OAS3_0
+          )
           .into()
-        ))),
+        )),
         ..Default::default()
       }
     );
@@ -418,14 +424,17 @@ mod test {
         name: "id_number".to_string(),
         _in: ParameterIn::Query,
         required: Some(true),
-        definition: Some(ParameterDefinition::Schema(ReferenceOr::Object(
-          json_schema!({
-            "type": "integer",
-            "format": "uint32",
-            "minimum": 0
-          })
+        definition: Some(ParameterDefinition::Schema(
+          ApistosSchema::new(
+            json_schema!({
+              "type": "integer",
+              "format": "uint32",
+              "minimum": 0
+            }),
+            OpenApiVersion::OAS3_1
+          )
           .into(),
-        ))),
+        )),
         ..Default::default()
       }
     );
@@ -441,12 +450,15 @@ mod test {
         name: "id_string".to_string(),
         _in: ParameterIn::Query,
         required: Some(true),
-        definition: Some(ParameterDefinition::Schema(ReferenceOr::Object(
-          json_schema!({
-            "type": "string",
-          })
+        definition: Some(ParameterDefinition::Schema(
+          ApistosSchema::new(
+            json_schema!({
+              "type": "string",
+            }),
+            OpenApiVersion::OAS3_1
+          )
           .into()
-        ))),
+        )),
         ..Default::default()
       }
     );
@@ -470,11 +482,14 @@ mod test {
         _in: ParameterIn::Query,
         required: Some(true),
         definition: Some(ParameterDefinition::Schema(
-          json_schema!({
-            "type": "integer",
-            "format": "uint32",
-            "minimum": 0
-          })
+          ApistosSchema::new(
+            json_schema!({
+              "type": "integer",
+              "format": "uint32",
+              "minimum": 0
+            }),
+            OpenApiVersion::OAS3_0
+          )
           .into()
         )),
         ..Default::default()
@@ -493,9 +508,12 @@ mod test {
         _in: ParameterIn::Query,
         required: Some(true),
         definition: Some(ParameterDefinition::Schema(
-          json_schema!({
-            "type": "string",
-          })
+          ApistosSchema::new(
+            json_schema!({
+              "type": "string",
+            }),
+            OpenApiVersion::OAS3_0
+          )
           .into()
         )),
         ..Default::default()
@@ -521,11 +539,14 @@ mod test {
         _in: ParameterIn::Query,
         required: Some(true),
         definition: Some(ParameterDefinition::Schema(
-          json_schema!({
-            "type": "integer",
-            "format": "uint32",
-            "minimum": 0
-          })
+          ApistosSchema::new(
+            json_schema!({
+              "type": "integer",
+              "format": "uint32",
+              "minimum": 0
+            }),
+            OpenApiVersion::OAS3_1
+          )
           .into()
         )),
         ..Default::default()
@@ -544,9 +565,12 @@ mod test {
         _in: ParameterIn::Query,
         required: Some(true),
         definition: Some(ParameterDefinition::Schema(
-          json_schema!({
-            "type": "string",
-          })
+          ApistosSchema::new(
+            json_schema!({
+              "type": "string",
+            }),
+            OpenApiVersion::OAS3_1
+          )
           .into()
         )),
         ..Default::default()
@@ -574,11 +598,14 @@ mod test {
         style: Some(ParameterStyle::Form),
         explode: Some(true),
         definition: Some(ParameterDefinition::Schema(
-          json_schema!({
-            "type": "integer",
-            "format": "uint32",
-            "minimum": 0
-          })
+          ApistosSchema::new(
+            json_schema!({
+              "type": "integer",
+              "format": "uint32",
+              "minimum": 0
+            }),
+            OpenApiVersion::OAS3_0
+          )
           .into()
         )),
         ..Default::default()
@@ -599,9 +626,12 @@ mod test {
         style: Some(ParameterStyle::Form),
         explode: Some(true),
         definition: Some(ParameterDefinition::Schema(
-          json_schema!({
-            "type": "string",
-          })
+          ApistosSchema::new(
+            json_schema!({
+              "type": "string",
+            }),
+            OpenApiVersion::OAS3_0
+          )
           .into()
         )),
         ..Default::default()
@@ -629,11 +659,14 @@ mod test {
         style: Some(ParameterStyle::Form),
         explode: Some(true),
         definition: Some(ParameterDefinition::Schema(
-          json_schema!({
-            "type": "integer",
-            "format": "uint32",
-            "minimum": 0
-          })
+          ApistosSchema::new(
+            json_schema!({
+              "type": "integer",
+              "format": "uint32",
+              "minimum": 0
+            }),
+            OpenApiVersion::OAS3_1
+          )
           .into()
         )),
         ..Default::default()
@@ -654,9 +687,12 @@ mod test {
         style: Some(ParameterStyle::Form),
         explode: Some(true),
         definition: Some(ParameterDefinition::Schema(
-          json_schema!({
-            "type": "string",
-          })
+          ApistosSchema::new(
+            json_schema!({
+              "type": "string",
+            }),
+            OpenApiVersion::OAS3_1
+          )
           .into()
         )),
         ..Default::default()
