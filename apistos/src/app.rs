@@ -17,7 +17,6 @@ use apistos_models::components::Components;
 use apistos_models::paths::{OperationType, Parameter, PathItem};
 use apistos_models::reference_or::ReferenceOr;
 use apistos_models::{ApistosSchema, OpenApi, OpenApiVersion};
-use apistos_models::components::Components;
 use apistos_plugins::ui::{UIPluginConfig, UIPluginWrapper};
 
 use crate::internal::actix::handler::OASHandler;
