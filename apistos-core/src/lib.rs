@@ -12,7 +12,7 @@ pub use api_component::ApiComponent;
 pub use components::*;
 pub use error_component::ApiErrorComponent;
 pub use path_item_definition::PathItemDefinition;
-pub use webhook::ApiWebhook;
+pub use webhook::{ApiWebhook, ApiWebhookDef};
 #[cfg(feature = "actix")]
 pub use wrappers::{ResponderWrapper, ResponseWrapper};
 
