@@ -153,7 +153,7 @@ pub use log;
 
 pub use apistos_core::parameters::header::ApiHeader;
 pub use apistos_core::PathItemDefinition;
-pub use apistos_core::{ApiComponent, ApiErrorComponent, ApiWebhook, TypedSchema, __internal};
+pub use apistos_core::{ApiComponent, ApiErrorComponent, ApiWebhook, ApiWebhookDef, TypedSchema, __internal};
 pub use apistos_gen::{
   api_callback, api_operation, ApiComponent, ApiCookie, ApiErrorComponent, ApiHeader, ApiSecurity, ApiType,
   ApiWebhookComponent,

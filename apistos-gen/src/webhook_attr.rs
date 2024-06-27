@@ -216,6 +216,28 @@ impl ToTokens for WebhookAttr {
         )*
         components
       }
+
+      fn get_def(oas_version: apistos::OpenApiVersion) -> apistos::ApiWebhookDef {
+        if matches!(oas_version, apistos::OpenApiVersion::OAS3_0) {
+          return Default::default();
+        }
+
+        let mut components: Vec<apistos::components::Components> = vec![];
+        #(
+        let operation_components = {
+          #components
+        };
+        components.extend(operation_components);
+        )*
+
+        let mut webhooks = vec![];
+        #(webhooks.push(#operations);)*
+
+        apistos::ApiWebhookDef {
+          components,
+          webhooks: std::collections::BTreeMap::from_iter(webhooks)
+        }
+      }
     ))
   }
 }

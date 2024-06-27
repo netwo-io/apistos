@@ -12,10 +12,11 @@ use indexmap::IndexMap;
 use once_cell::sync::Lazy;
 use regex::Regex;
 
-use apistos_core::ApiWebhook;
-use apistos_models::paths::{OperationType, Parameter};
+use apistos_core::{ApiWebhook, ApiWebhookDef};
+use apistos_models::paths::{OperationType, Parameter, PathItem};
 use apistos_models::reference_or::ReferenceOr;
 use apistos_models::{ApistosSchema, OpenApi, OpenApiVersion};
+use apistos_models::components::Components;
 use apistos_plugins::ui::{UIPluginConfig, UIPluginWrapper};
 
 use crate::internal::actix::handler::OASHandler;
@@ -215,31 +216,21 @@ where
   #[allow(clippy::unwrap_used)]
   pub fn webhook<W: ApiWebhook>(self, webhook: &W) -> Self {
     let oas_version = get_oas_version();
-    if matches!(oas_version, OpenApiVersion::OAS3_0) {
-      return self;
-    }
+    self.register_webhook_components(webhook.components(oas_version), webhook.webhooks(oas_version))
+  }
 
-    let open_api_spec = self.open_api_spec.clone();
-    let mut open_api_spec = open_api_spec.write().unwrap();
-    let mut components = webhook
-      .components(oas_version)
-      .into_iter()
-      .reduce(|mut acc, component| {
-        acc.schemas.extend(component.schemas);
-        acc.responses.extend(component.responses);
-        acc.security_schemes.extend(component.security_schemes);
-        acc
-      })
-      .unwrap_or_default();
+  /// Register webhooks to the OAS spec. This only have effect in 3.1.x
+  #[allow(clippy::unwrap_used)]
+  pub fn webhook_from_def(self, webhook_def: ApiWebhookDef) -> Self {
+    self.register_webhook_components(webhook_def.components, webhook_def.webhooks)
+  }
 
-    if let Some(c) = &mut open_api_spec.components {
-      c.parameters.append(&mut components.parameters);
-      c.responses.append(&mut components.responses);
-      c.schemas.append(&mut components.schemas);
-    }
-
-    open_api_spec.webhooks = webhook.webhooks(oas_version);
-    self
+  /// Register webhooks to the OAS spec. This only have effect in 3.1.x
+  #[allow(clippy::unwrap_used)]
+  pub fn webhook_from_type<W: ApiWebhook>(self) -> Self {
+    let oas_version = get_oas_version();
+    let webhook_def = W::get_def(oas_version);
+    self.register_webhook_components(webhook_def.components, webhook_def.webhooks)
   }
 
   /// Add a new resource at **`openapi_path`** to expose the generated openapi schema and return an [actix_web::App](https://docs.rs/actix-web/latest/actix_web/struct.App.html)
@@ -283,6 +274,35 @@ where
     }
 
     actix_app.service(resource(openapi_path).route(get().to(OASHandler::new(open_api_spec))))
+  }
+
+  #[allow(clippy::unwrap_used)]
+  fn register_webhook_components(self, components: Vec<Components>, webhooks: BTreeMap<String, ReferenceOr<PathItem>>) -> Self {
+    let oas_version = get_oas_version();
+    if matches!(oas_version, OpenApiVersion::OAS3_0) {
+      return self;
+    }
+
+    let open_api_spec = self.open_api_spec.clone();
+    let mut open_api_spec = open_api_spec.write().unwrap();
+    let mut components = components
+      .into_iter()
+      .reduce(|mut acc, component| {
+        acc.schemas.extend(component.schemas);
+        acc.responses.extend(component.responses);
+        acc.security_schemes.extend(component.security_schemes);
+        acc
+      })
+      .unwrap_or_default();
+
+    if let Some(c) = &mut open_api_spec.components {
+      c.parameters.append(&mut components.parameters);
+      c.responses.append(&mut components.responses);
+      c.schemas.append(&mut components.schemas);
+    }
+
+    open_api_spec.webhooks = webhooks;
+    self
   }
 
   /// Updates the underlying spec with definitions and operations from the given definition holder.
