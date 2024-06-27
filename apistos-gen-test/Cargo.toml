@@ -20,8 +20,8 @@ assert-json-diff = { workspace = true }
 chrono = { workspace = true, features = ["serde"] }
 futures-core = { workspace = true }
 apistos = { path = "../apistos", features = ["multipart", "uuid"] }
-apistos-core = { path = "../apistos-core", version = "1.0.0-pre-release+1" }
-apistos-gen = { path = "../apistos-gen", version = "1.0.0-pre-release+1" }
+apistos-core = { path = "../apistos-core", version = "1.0.0-pre-release.1" }
+apistos-gen = { path = "../apistos-gen", version = "1.0.0-pre-release.1" }
 # we use the "preserve_order" feature from schemars here following https://github.com/netwo-io/apistos/pull/78
 schemars = { workspace = true, features = ["preserve_order"] }
 serde = { version = "1.0.188", features = ["derive"] }
