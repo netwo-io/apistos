@@ -74,7 +74,7 @@ async fn main() -> Result<(), impl Error> {
       .document(spec)
       .wrap(Logger::default())
       .service(scope("/test").service(routes()))
-      .webhook::<WebhookHolder>()
+      .webhook(&WebhookHolder::PetCreated)
       .build("/openapi.json")
   })
     .bind((Ipv4Addr::UNSPECIFIED, 8080))?

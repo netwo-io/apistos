@@ -89,12 +89,12 @@ fn api_webhook() {
   #[openapi_webhook(name = "TestWebhook", component = "Header<OrganizationSlug>", response(code = 200))]
   struct TestStruct {}
 
-  let components = TestStruct::components(OpenApiVersion::OAS3_0);
+  let components = TestStruct {}.components(OpenApiVersion::OAS3_0);
   // only one component here because: error does not have schema and Test is used both for query and response
   assert_eq!(components.len(), 0);
   let components = serde_json::to_value(components).expect("Unable to serialize as Json");
 
-  let webhooks = TestStruct::webhooks(OpenApiVersion::OAS3_0);
+  let webhooks = TestStruct {}.webhooks(OpenApiVersion::OAS3_0);
   let webhooks = serde_json::to_value(webhooks).expect("Unable to serialize as Json");
 
   assert_json_eq!(components, json!([]));

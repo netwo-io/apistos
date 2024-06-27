@@ -191,7 +191,7 @@ impl ToTokens for WebhookAttr {
     }
 
     tokens.extend(quote!(
-      fn webhooks(oas_version: apistos::OpenApiVersion) -> std::collections::BTreeMap<String, apistos::reference_or::ReferenceOr<apistos::paths::PathItem>> {
+      fn webhooks(&self, oas_version: apistos::OpenApiVersion) -> std::collections::BTreeMap<String, apistos::reference_or::ReferenceOr<apistos::paths::PathItem>> {
         if matches!(oas_version, apistos::OpenApiVersion::OAS3_0) {
           return Default::default();
         }
@@ -202,7 +202,7 @@ impl ToTokens for WebhookAttr {
         std::collections::BTreeMap::from_iter(webhooks)
       }
 
-      fn components(oas_version: apistos::OpenApiVersion) -> Vec<apistos::components::Components> {
+      fn components(&self, oas_version: apistos::OpenApiVersion) -> Vec<apistos::components::Components> {
         if matches!(oas_version, apistos::OpenApiVersion::OAS3_0) {
           return vec![];
         }
