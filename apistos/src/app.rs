@@ -213,7 +213,7 @@ where
 
   /// Register webhooks to the OAS spec. This only have effect in 3.1.x
   #[allow(clippy::unwrap_used)]
-  pub fn webhook<W: ApiWebhook>(self) -> Self {
+  pub fn webhook<W: ApiWebhook>(self, webhook: &W) -> Self {
     let oas_version = get_oas_version();
     if matches!(oas_version, OpenApiVersion::OAS3_0) {
       return self;
@@ -221,7 +221,8 @@ where
 
     let open_api_spec = self.open_api_spec.clone();
     let mut open_api_spec = open_api_spec.write().unwrap();
-    let mut components = W::components(oas_version)
+    let mut components = webhook
+      .components(oas_version)
       .into_iter()
       .reduce(|mut acc, component| {
         acc.schemas.extend(component.schemas);
@@ -237,7 +238,7 @@ where
       c.schemas.append(&mut components.schemas);
     }
 
-    open_api_spec.webhooks = W::webhooks(oas_version);
+    open_api_spec.webhooks = webhook.webhooks(oas_version);
     self
   }
 
