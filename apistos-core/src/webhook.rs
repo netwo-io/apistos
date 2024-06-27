@@ -8,7 +8,7 @@ use apistos_models::OpenApiVersion;
 #[derive(Clone, Debug, Default)]
 pub struct ApiWebhookDef {
   pub components: Vec<Components>,
-  pub webhooks: BTreeMap<String, ReferenceOr<PathItem>>
+  pub webhooks: BTreeMap<String, ReferenceOr<PathItem>>,
 }
 
 pub trait ApiWebhook {
