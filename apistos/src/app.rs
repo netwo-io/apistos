@@ -13,10 +13,10 @@ use once_cell::sync::Lazy;
 use regex::Regex;
 
 use apistos_core::{ApiWebhook, ApiWebhookDef};
+use apistos_models::components::Components;
 use apistos_models::paths::{OperationType, Parameter, PathItem};
 use apistos_models::reference_or::ReferenceOr;
 use apistos_models::{ApistosSchema, OpenApi, OpenApiVersion};
-use apistos_models::components::Components;
 use apistos_plugins::ui::{UIPluginConfig, UIPluginWrapper};
 
 use crate::internal::actix::handler::OASHandler;
@@ -277,7 +277,11 @@ where
   }
 
   #[allow(clippy::unwrap_used)]
-  fn register_webhook_components(self, components: Vec<Components>, webhooks: BTreeMap<String, ReferenceOr<PathItem>>) -> Self {
+  fn register_webhook_components(
+    self,
+    components: Vec<Components>,
+    webhooks: BTreeMap<String, ReferenceOr<PathItem>>,
+  ) -> Self {
     let oas_version = get_oas_version();
     if matches!(oas_version, OpenApiVersion::OAS3_0) {
       return self;
