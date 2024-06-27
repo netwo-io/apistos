@@ -91,11 +91,11 @@ fn api_webhook() {
   #[openapi_webhook(name = "TestWebhook", component = "Header<OrganizationSlug>", response(code = 200))]
   struct TestStruct {}
 
-  let components = TestStruct::components(OpenApiVersion::OAS3_1);
+  let components = TestStruct {}.components(OpenApiVersion::OAS3_1);
   assert_eq!(components.len(), 1);
   let components = serde_json::to_value(components).expect("Unable to serialize as Json");
 
-  let webhooks = TestStruct::webhooks(OpenApiVersion::OAS3_1);
+  let webhooks = TestStruct {}.webhooks(OpenApiVersion::OAS3_1);
   let webhooks = serde_json::to_value(webhooks).expect("Unable to serialize as Json");
 
   assert_json_eq!(components, json!([{}]));
@@ -145,11 +145,11 @@ fn api_webhook_enum() {
     Test2,
   }
 
-  let components = TestEnum::components(OpenApiVersion::OAS3_1);
+  let components = TestEnum::Test.components(OpenApiVersion::OAS3_1);
   assert_eq!(components.len(), 2);
   let components = serde_json::to_value(components).expect("Unable to serialize as Json");
 
-  let webhooks = TestEnum::webhooks(OpenApiVersion::OAS3_1);
+  let webhooks = TestEnum::Test2.webhooks(OpenApiVersion::OAS3_1);
   let webhooks = serde_json::to_value(webhooks).expect("Unable to serialize as Json");
 
   assert_json_eq!(components, json!([{}, {}]));
@@ -228,11 +228,11 @@ fn api_webhook_enum_default() {
     Test2,
   }
 
-  let components = TestEnum::components(OpenApiVersion::OAS3_1);
+  let components = TestEnum::Test.components(OpenApiVersion::OAS3_1);
   assert_eq!(components.len(), 2);
   let components = serde_json::to_value(components).expect("Unable to serialize as Json");
 
-  let webhooks = TestEnum::webhooks(OpenApiVersion::OAS3_1);
+  let webhooks = TestEnum::Test.webhooks(OpenApiVersion::OAS3_1);
   let webhooks = serde_json::to_value(webhooks).expect("Unable to serialize as Json");
 
   assert_json_eq!(components, json!([{}, {}]));
@@ -307,11 +307,11 @@ fn api_webhook_enum_default_and_override() {
     Test2,
   }
 
-  let components = TestEnum::components(OpenApiVersion::OAS3_1);
+  let components = TestEnum::Test2.components(OpenApiVersion::OAS3_1);
   assert_eq!(components.len(), 2);
   let components = serde_json::to_value(components).expect("Unable to serialize as Json");
 
-  let webhooks = TestEnum::webhooks(OpenApiVersion::OAS3_1);
+  let webhooks = TestEnum::Test2.webhooks(OpenApiVersion::OAS3_1);
   let webhooks = serde_json::to_value(webhooks).expect("Unable to serialize as Json");
 
   assert_json_eq!(components, json!([{}, {}]));
