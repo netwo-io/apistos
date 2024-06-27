@@ -43,8 +43,7 @@ proc-macro2 = "1.0"
 proc-macro-error = "1.0"
 quote = "1.0"
 regex = ">=1.5.5"
-schemars = { package = "apistos-schemars", git = "https://github.com/netwo-io/apistos-schemars.git", branch = "v1", features = ["chrono04", "uuid1", "url2", "rust_decimal1", "ipnetwork"] }
-#schemars = { version = "1.0.0-alpha.2", features = ["chrono04", "uuid1", "url2", "rust_decimal1"] }
+schemars = { package = "apistos-schemars", version = "1.0.0-alpha.2", features = ["chrono04", "uuid1", "url2", "rust_decimal1", "ipnetwork"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 syn = "2.0"
