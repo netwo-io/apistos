@@ -24,25 +24,25 @@ regex = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 
-apistos-core = { path = "../apistos-core", version = "1.0.0-pre-release+1" }
-apistos-gen = { path = "../apistos-gen", version = "1.0.0-pre-release+1" }
-apistos-models = { path = "../apistos-models", version = "1.0.0-pre-release+1" }
-apistos-plugins = { path = "../apistos-plugins", version = "1.0.0-pre-release+1" }
-apistos-rapidoc = { path = "../apistos-rapidoc", version = "1.0.0-pre-release+1", optional = true }
-apistos-redoc = { path = "../apistos-redoc", version = "1.0.0-pre-release+1", optional = true }
-apistos-scalar = { path = "../apistos-scalar", version = "1.0.0-pre-release+1", optional = true }
-apistos-swagger-ui = { path = "../apistos-swagger-ui", version = "1.0.0-pre-release+1", optional = true }
+apistos-core = { path = "../apistos-core", version = "1.0.0-pre-release.1" }
+apistos-gen = { path = "../apistos-gen", version = "1.0.0-pre-release.1" }
+apistos-models = { path = "../apistos-models", version = "1.0.0-pre-release.1" }
+apistos-plugins = { path = "../apistos-plugins", version = "1.0.0-pre-release.1" }
+apistos-rapidoc = { path = "../apistos-rapidoc", version = "1.0.0-pre-release.1", optional = true }
+apistos-redoc = { path = "../apistos-redoc", version = "1.0.0-pre-release.1", optional = true }
+apistos-scalar = { path = "../apistos-scalar", version = "1.0.0-pre-release.1", optional = true }
+apistos-swagger-ui = { path = "../apistos-swagger-ui", version = "1.0.0-pre-release.1", optional = true }
 
 [dev-dependencies]
 actix-web-lab = { workspace = true }
 garde-actix-web = { workspace = true }
 schemars = { workspace = true }
 
-apistos-models = { path = "../apistos-models", version = "1.0.0-pre-release+1", features = ["deserialize"] }
-apistos-rapidoc = { path = "../apistos-rapidoc", version = "1.0.0-pre-release+1" }
-apistos-redoc = { path = "../apistos-redoc", version = "1.0.0-pre-release+1" }
-apistos-scalar = { path = "../apistos-scalar", version = "1.0.0-pre-release+1" }
-apistos-swagger-ui = { path = "../apistos-swagger-ui", version = "1.0.0-pre-release+1" }
+apistos-models = { path = "../apistos-models", version = "1.0.0-pre-release.1", features = ["deserialize"] }
+apistos-rapidoc = { path = "../apistos-rapidoc", version = "1.0.0-pre-release.1" }
+apistos-redoc = { path = "../apistos-redoc", version = "1.0.0-pre-release.1" }
+apistos-scalar = { path = "../apistos-scalar", version = "1.0.0-pre-release.1" }
+apistos-swagger-ui = { path = "../apistos-swagger-ui", version = "1.0.0-pre-release.1" }
 
 [lints]
 workspace = true
