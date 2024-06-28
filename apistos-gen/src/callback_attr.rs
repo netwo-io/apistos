@@ -137,7 +137,9 @@ impl CallbackAttr {
 
       operation_builder.deprecated = #deprecated;
 
-      operation_builder.tags = vec![#(#tags.to_string(),)*];#summary
+      operation_builder.tags = vec![#(#tags.to_string(),)*];
+
+      #summary
       #description
 
       operation_builder
