@@ -498,16 +498,17 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
 /// ```
 ///
 /// # `#[api_webhook(...)]` options:
+/// - `tag = "..."` an optional list of tags for the webhook
 /// - `skip` allow to skip an enum variant (for enum only)
 /// - `name = "..."` an optional name for the webhook. Default to the Struct or Variant name
 /// - `deprecated` a bool indicating the operation is deprecated. Deprecation can also be declared
 ///  with rust `#[deprecated]` decorator.
 /// - `summary = "..."` an optional summary
 /// - `description = "..."` an optional description
-/// - `component = "..."` an optional list of components attached to this callback operation (parameters, body...)
-/// - `response(...)` an optional list of responses attached to this callback operation
+/// - `component = "..."` an optional list of components attached to this webhook operation (parameters, body...)
+/// - `response(...)` an optional list of responses attached to this webhook operation
 ///   - `code = "..."` Http response code
-///   - `component = "..."` a component attached to the given callback response. Must derive [ApiComponent] and [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
+///   - `component = "..."` a component attached to the given webhook response. Must derive [ApiComponent] and [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
 #[proc_macro_error]
 #[proc_macro_derive(ApiWebhookComponent, attributes(openapi_webhook))]
 pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
