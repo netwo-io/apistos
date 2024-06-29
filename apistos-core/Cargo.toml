@@ -31,7 +31,7 @@ serde_qs = { workspace = true, features = ["actix4"], optional = true }
 uuid = { workspace = true, optional = true }
 url = { workspace = true, optional = true }
 
-apistos-models = { path = "../apistos-models", version = "1.0.0-pre-release.1", features = ["deserialize"] }
+apistos-models = { path = "../apistos-models", version = "1.0.0-pre-release.2", features = ["deserialize"] }
 
 [dev-dependencies]
 assert-json-diff = { workspace = true }
