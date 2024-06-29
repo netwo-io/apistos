@@ -876,6 +876,7 @@ fn api_component_derive_named_enums_deep() {
     json!({
       "oneOf": [
         {
+          "title": "something",
           "type": "object",
           "properties": {
             "type": {
@@ -892,6 +893,7 @@ fn api_component_derive_named_enums_deep() {
           ]
         },
         {
+          "title": "other",
           "type": "object",
           "properties": {
             "type": {
