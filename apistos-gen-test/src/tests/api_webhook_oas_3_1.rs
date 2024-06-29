@@ -220,11 +220,17 @@ fn api_webhook_enum_default() {
   use test_models::OrganizationSlug;
 
   #[derive(ApiWebhookComponent)]
-  #[openapi_webhook(component = "Header<OrganizationSlug>", response(code = 200))]
+  #[openapi_webhook(
+    component = "Header<OrganizationSlug>",
+    response(code = 200),
+    tag = "tag1",
+    tag = "tag2"
+  )]
   enum TestEnum {
     Test,
     #[openapi_webhook(skip)]
     TestSkipped,
+    #[openapi_webhook(tag = "tag3")]
     Test2,
   }
 
@@ -241,6 +247,10 @@ fn api_webhook_enum_default() {
     json!({
       "Test": {
         "post": {
+          "tags": [
+            "tag1",
+            "tag2"
+          ],
           "parameters": [
             {
               "name": "X-Organization-Slug",
@@ -265,6 +275,9 @@ fn api_webhook_enum_default() {
       },
       "Test2": {
         "post": {
+          "tags": [
+            "tag3"
+          ],
           "parameters": [
             {
               "name": "X-Organization-Slug",
