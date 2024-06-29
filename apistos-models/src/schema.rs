@@ -85,6 +85,10 @@ impl ApistosSchema {
                 sch_obj.entry("title").or_insert_with(|| prop_name.clone().into());
               }
             }
+          } else if let Some(_type) = props.get("type").and_then(|v| v.as_object()) {
+            if let Some(Value::String(prop_name)) = _type.get("const") {
+              sch_obj.entry("title").or_insert_with(|| prop_name.clone().into());
+            }
           }
         } else if let Some(enum_values) = sch_obj.clone().get_mut("enum").and_then(|v| v.as_array_mut()) {
           if enum_values.len() == 1 {
@@ -109,5 +113,317 @@ impl From<Schema> for ApistosSchema {
 impl From<Schema> for crate::reference_or::ReferenceOr<ApistosSchema> {
   fn from(value: Schema) -> Self {
     Self::Object(value.into())
+  }
+}
+
+#[cfg(test)]
+mod test {
+  use assert_json_diff::assert_json_eq;
+
+  use crate::{ApistosSchema, JsonSchema, OpenApiVersion};
+  use schemars::gen::SchemaSettings;
+  use serde::Serialize;
+  use serde_json::json;
+
+  #[test]
+  fn test_apistos_schema_transform_3_0() {
+    #[derive(JsonSchema, Serialize)]
+    struct Test {
+      name: String,
+    }
+
+    #[derive(JsonSchema, Serialize)]
+    struct Test2 {
+      surname: String,
+    }
+
+    #[derive(JsonSchema)]
+    enum TestEnum {
+      Test,
+      Test2,
+    }
+
+    #[derive(JsonSchema, Serialize)]
+    #[serde(tag = "type")]
+    enum TestAlgebraicEnum {
+      Test { key: String, value: String },
+      Test2 { key2: String, value2: String },
+    }
+
+    #[derive(JsonSchema, Serialize)]
+    #[serde(tag = "type")]
+    enum TestAlgebraicEnum2 {
+      Test(Test),
+      Test2(Test2),
+    }
+
+    let mut gen = SchemaSettings::openapi3().into_generator();
+    let schema = TestEnum::json_schema(&mut gen);
+
+    let apistos_schema = ApistosSchema::new(schema, OpenApiVersion::OAS3_0);
+
+    assert_json_eq!(
+      apistos_schema.into_inner(),
+      json!({
+        "type": "string",
+        "enum": [
+          "Test",
+          "Test2"
+        ]
+      })
+    );
+
+    let mut gen = SchemaSettings::openapi3().into_generator();
+    let schema = TestAlgebraicEnum::json_schema(&mut gen);
+
+    let apistos_schema = ApistosSchema::new(schema, OpenApiVersion::OAS3_0);
+
+    assert_json_eq!(
+      apistos_schema.into_inner(),
+      json!({
+        "oneOf": [
+          {
+            "title": "Test",
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "Test"
+              },
+              "key": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "key",
+              "value"
+            ]
+          },
+          {
+            "title": "Test2",
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "Test2"
+              },
+              "key2": {
+                "type": "string"
+              },
+              "value2": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "key2",
+              "value2"
+            ]
+          }
+        ]
+      })
+    );
+
+    let mut gen = SchemaSettings::openapi3().into_generator();
+    let schema = TestAlgebraicEnum2::json_schema(&mut gen);
+
+    let apistos_schema = ApistosSchema::new(schema, OpenApiVersion::OAS3_0);
+
+    assert_json_eq!(
+      apistos_schema.into_inner(),
+      json!({
+        "oneOf": [
+          {
+            "title": "Test",
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "Test"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "name"
+            ]
+          },
+          {
+            "title": "Test2",
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "Test2"
+              },
+              "surname": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "surname"
+            ]
+          }
+        ]
+      })
+    );
+  }
+
+  #[test]
+  fn test_apistos_schema_transform_3_1() {
+    #[derive(JsonSchema, Serialize)]
+    struct Test {
+      name: String,
+    }
+
+    #[derive(JsonSchema, Serialize)]
+    struct Test2 {
+      surname: String,
+    }
+
+    #[derive(JsonSchema)]
+    enum TestEnum {
+      Test,
+      Test2,
+    }
+
+    #[derive(JsonSchema, Serialize)]
+    #[serde(tag = "type")]
+    enum TestAlgebraicEnum {
+      Test { key: String, value: String },
+      Test2 { key2: String, value2: String },
+    }
+
+    #[derive(JsonSchema, Serialize)]
+    #[serde(tag = "type")]
+    enum TestAlgebraicEnum2 {
+      Test(Test),
+      Test2(Test2),
+    }
+
+    let mut gen = SchemaSettings::draft2020_12().into_generator();
+    let schema = TestEnum::json_schema(&mut gen);
+
+    let apistos_schema = ApistosSchema::new(schema, OpenApiVersion::OAS3_1);
+
+    assert_json_eq!(
+      apistos_schema.into_inner(),
+      json!({
+        "type": "string",
+        "enum": [
+          "Test",
+          "Test2"
+        ]
+      })
+    );
+
+    let mut gen = SchemaSettings::draft2020_12().into_generator();
+    let schema = TestAlgebraicEnum::json_schema(&mut gen);
+
+    let apistos_schema = ApistosSchema::new(schema, OpenApiVersion::OAS3_1);
+
+    assert_json_eq!(
+      apistos_schema.into_inner(),
+      json!({
+        "oneOf": [
+          {
+            "title": "Test",
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "Test"
+              },
+              "key": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "key",
+              "value"
+            ]
+          },
+          {
+            "title": "Test2",
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "Test2"
+              },
+              "key2": {
+                "type": "string"
+              },
+              "value2": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "key2",
+              "value2"
+            ]
+          }
+        ]
+      })
+    );
+
+    let mut gen = SchemaSettings::draft2020_12().into_generator();
+    let schema = TestAlgebraicEnum2::json_schema(&mut gen);
+
+    let apistos_schema = ApistosSchema::new(schema, OpenApiVersion::OAS3_1);
+
+    assert_json_eq!(
+      apistos_schema.into_inner(),
+      json!({
+        "oneOf": [
+          {
+            "title": "Test",
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "Test"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "name"
+            ]
+          },
+          {
+            "title": "Test2",
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "Test2"
+              },
+              "surname": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "surname"
+            ]
+          }
+        ]
+      })
+    )
   }
 }
