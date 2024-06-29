@@ -126,14 +126,15 @@ mod test {
   use serde_json::json;
 
   #[test]
+  #[allow(dead_code, unused_qualifications)]
   fn test_apistos_schema_transform_3_0() {
     #[derive(JsonSchema, Serialize)]
-    struct Test {
+    struct TestStruct {
       name: String,
     }
 
     #[derive(JsonSchema, Serialize)]
-    struct Test2 {
+    struct TestStruct2 {
       surname: String,
     }
 
@@ -153,8 +154,8 @@ mod test {
     #[derive(JsonSchema, Serialize)]
     #[serde(tag = "type")]
     enum TestAlgebraicEnum2 {
-      Test(Test),
-      Test2(Test2),
+      Test(TestStruct),
+      Test2(TestStruct2),
     }
 
     let mut gen = SchemaSettings::openapi3().into_generator();
@@ -277,14 +278,15 @@ mod test {
   }
 
   #[test]
+  #[allow(dead_code, unused_qualifications)]
   fn test_apistos_schema_transform_3_1() {
     #[derive(JsonSchema, Serialize)]
-    struct Test {
+    struct TestStruct {
       name: String,
     }
 
     #[derive(JsonSchema, Serialize)]
-    struct Test2 {
+    struct TestStruct2 {
       surname: String,
     }
 
@@ -304,8 +306,8 @@ mod test {
     #[derive(JsonSchema, Serialize)]
     #[serde(tag = "type")]
     enum TestAlgebraicEnum2 {
-      Test(Test),
-      Test2(Test2),
+      Test(TestStruct),
+      Test2(TestStruct2),
     }
 
     let mut gen = SchemaSettings::draft2020_12().into_generator();
