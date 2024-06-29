@@ -40,6 +40,7 @@ pub(crate) struct CallbackAttr {
   pub(crate) summary: Option<String>,
   pub(crate) description: Option<String>,
   pub(crate) components: Vec<Type>,
+  pub(crate) tags: Vec<String>,
   pub(crate) responses: Vec<CallbackResponseDefinition>,
 }
 
@@ -59,6 +60,7 @@ impl TryFrom<CallbackAttrInternal> for CallbackAttr {
       summary: value.summary,
       description: value.description,
       components: value.components,
+      tags: vec![],
       responses: value.responses,
     })
   }
@@ -66,6 +68,7 @@ impl TryFrom<CallbackAttrInternal> for CallbackAttr {
 
 impl CallbackAttr {
   pub(crate) fn operation(&self) -> TokenStream {
+    let tags = &self.tags;
     let components = &self.components;
     let deprecated = self
       .deprecated
@@ -133,6 +136,8 @@ impl CallbackAttr {
       operation_builder.responses = responses;
 
       operation_builder.deprecated = #deprecated;
+
+      operation_builder.tags = vec![#(#tags.to_string(),)*];
 
       #summary
       #description

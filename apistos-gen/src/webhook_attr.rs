@@ -106,6 +106,8 @@ fn parse_openapi_derive_enum_webhook_attrs(_enum: &DataEnum, struct_attrs: Optio
 #[derive(FromMeta, Clone)]
 struct WebhookAttrInternal {
   name: Option<String>,
+  #[darling(default, multiple, rename = "tag")]
+  tags: Vec<String>,
   #[darling(flatten)]
   attr: CallbackAttrInternal,
 }
@@ -114,6 +116,8 @@ struct WebhookAttrInternal {
 struct WebhookAttrEnumInternal {
   #[darling(default)]
   skip: bool,
+  #[darling(default, multiple, rename = "tag")]
+  tags: Vec<String>,
   name: Option<String>,
   #[darling(flatten, default)]
   attr: CallbackAttrInternal,
@@ -131,9 +135,11 @@ impl WebhookAttrInternal {
       ));
     }
 
+    let mut callback_attr: CallbackAttr = self.attr.try_into()?;
+    callback_attr.tags = self.tags;
     Ok(WebhookAttr(BTreeMap::from_iter(vec![(
       self.name.unwrap_or(default_name),
-      self.attr.try_into()?,
+      callback_attr,
     )])))
   }
 }
@@ -164,9 +170,15 @@ impl WebhookAttrEnumInternal {
       ));
     }
 
+    let mut callback_attr: CallbackAttr = self.attr.try_into()?;
+    if self.tags.is_empty() {
+      callback_attr.tags = struct_attrs.map(|t| t.tags.clone()).unwrap_or_default();
+    } else {
+      callback_attr.tags = self.tags;
+    }
     Ok(WebhookAttr(BTreeMap::from_iter(vec![(
       self.name.unwrap_or(default_name),
-      self.attr.try_into()?,
+      callback_attr,
     )])))
   }
 }
