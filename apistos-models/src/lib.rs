@@ -70,6 +70,7 @@ pub struct OpenApi {
   /// This string MUST be the [version number](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#versions) of the OpenAPI Specification that the OpenAPI document uses. The `openapi` field SHOULD be used by tooling to interpret the OpenAPI document. This is not related to the API [**`info.version`**](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#infoVersion) string.
   pub openapi: OpenApiVersion,
   /// Provides metadata about the API. The metadata MAY be used by tooling as required.
+  #[serde(default)]
   pub info: Info,
   /// # ⚠️ OAS 3.1 only
   /// The default value for the $schema keyword within [Schema Objects](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schema-object). contained within this OAS document. This MUST be in the form of a URI.
@@ -79,8 +80,10 @@ pub struct OpenApi {
   /// An array of Server Objects, which provide connectivity information to a target server. If the `servers` property is not provided, or is an empty array, the default value would be a [Server Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#server-object) with a [url](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#serverUrl) value of `/`.
   /// # OAS 3.1
   /// An array of Server Objects, which provide connectivity information to a target server. If the `servers` property is not provided, or is an empty array, the default value would be a [Server Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#server-object) with a [url](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#serverUrl) value of `/`.
+  #[serde(default)]
   pub servers: Vec<Server>,
   /// The available paths and operations for the API.
+  #[serde(default)]
   pub paths: Paths,
   /// # ⚠️ OAS 3.1 only
   /// The incoming webhooks that MAY be received as part of this API and that the API consumer MAY choose to implement. Closely related to the `callbacks` feature, this section describes requests initiated other than by an API call, for example by an out of band registration. The key name is a unique string to refer to each webhook, while the (optionally referenced) Path Item Object describes a request that may be initiated by the API provider and the expected responses. An [example](https://github.com/OAI/OpenAPI-Specification/blob/main/examples/v3.1/webhook-example.yaml) is available.
