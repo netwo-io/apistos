@@ -1,5 +1,5 @@
+use apistos::OpenApiVersion;
 use assert_json_diff::assert_json_eq;
-use schemars::schema::InstanceType;
 use serde_json::json;
 use std::str::FromStr;
 
@@ -14,8 +14,8 @@ fn api_type_derive() {
   struct Name(String);
 
   impl TypedSchema for Name {
-    fn schema_type() -> InstanceType {
-      InstanceType::String
+    fn schema_type() -> String {
+      "string".to_owned()
     }
 
     fn format() -> Option<String> {
@@ -23,8 +23,8 @@ fn api_type_derive() {
     }
   }
 
-  let name_schema = <Name as ApiComponent>::schema();
-  let name_child_schemas = <Name as ApiComponent>::child_schemas();
+  let name_schema = <Name as ApiComponent>::schema(OpenApiVersion::OAS3_1);
+  let name_child_schemas = <Name as ApiComponent>::child_schemas(OpenApiVersion::OAS3_1);
   assert!(name_schema.is_some());
   assert!(name_child_schemas.is_empty());
   let (schema_name, schema) = name_schema.expect("schema should be defined");
@@ -34,7 +34,7 @@ fn api_type_derive() {
   assert_json_eq!(
     json,
     json!({
-      "type": "string"
+      "type": "string",
     })
   );
 }
@@ -46,8 +46,8 @@ fn api_type_derive_with_format() {
   struct Name(String);
 
   impl TypedSchema for Name {
-    fn schema_type() -> InstanceType {
-      InstanceType::String
+    fn schema_type() -> String {
+      "string".to_owned()
     }
 
     fn format() -> Option<String> {
@@ -56,8 +56,8 @@ fn api_type_derive_with_format() {
     }
   }
 
-  let name_schema = <Name as ApiComponent>::schema();
-  let name_child_schemas = <Name as ApiComponent>::child_schemas();
+  let name_schema = <Name as ApiComponent>::schema(OpenApiVersion::OAS3_1);
+  let name_child_schemas = <Name as ApiComponent>::child_schemas(OpenApiVersion::OAS3_1);
   assert!(name_schema.is_some());
   assert!(name_child_schemas.is_empty());
   let (schema_name, schema) = name_schema.expect("schema should be defined");
@@ -84,8 +84,8 @@ fn api_type_derive_with_default_type_parameter() {
   struct Name<T = String>(GenericHolder<T>);
 
   impl<T> TypedSchema for Name<T> {
-    fn schema_type() -> InstanceType {
-      InstanceType::String
+    fn schema_type() -> String {
+      "string".to_owned()
     }
 
     fn format() -> Option<String> {
@@ -94,8 +94,8 @@ fn api_type_derive_with_default_type_parameter() {
     }
   }
 
-  let name_schema = <Name as ApiComponent>::schema();
-  let name_child_schemas = <Name as ApiComponent>::child_schemas();
+  let name_schema = <Name as ApiComponent>::schema(OpenApiVersion::OAS3_1);
+  let name_child_schemas = <Name as ApiComponent>::child_schemas(OpenApiVersion::OAS3_1);
   assert!(name_schema.is_some());
   assert!(name_child_schemas.is_empty());
   let (schema_name, schema) = name_schema.expect("schema should be defined");
@@ -122,8 +122,8 @@ fn api_type_derive_with_generic_type_parameter() {
   struct Name<T: FromStr>(GenericHolder<T>);
 
   impl<T: FromStr> TypedSchema for Name<T> {
-    fn schema_type() -> InstanceType {
-      InstanceType::String
+    fn schema_type() -> String {
+      "string".to_owned()
     }
 
     fn format() -> Option<String> {
@@ -132,8 +132,8 @@ fn api_type_derive_with_generic_type_parameter() {
     }
   }
 
-  let name_schema = <Name<String> as ApiComponent>::schema();
-  let name_child_schemas = <Name<String> as ApiComponent>::child_schemas();
+  let name_schema = <Name<String> as ApiComponent>::schema(OpenApiVersion::OAS3_1);
+  let name_child_schemas = <Name<String> as ApiComponent>::child_schemas(OpenApiVersion::OAS3_1);
   assert!(name_schema.is_some());
   assert!(name_child_schemas.is_empty());
   let (schema_name, schema) = name_schema.expect("schema should be defined");
@@ -160,8 +160,8 @@ fn api_type_derive_with_format_complex_struct() {
   }
 
   impl TypedSchema for Name {
-    fn schema_type() -> InstanceType {
-      InstanceType::String
+    fn schema_type() -> String {
+      "string".to_owned()
     }
 
     fn format() -> Option<String> {
@@ -169,8 +169,8 @@ fn api_type_derive_with_format_complex_struct() {
     }
   }
 
-  let name_schema = <Name as ApiComponent>::schema();
-  let name_child_schemas = <Name as ApiComponent>::child_schemas();
+  let name_schema = <Name as ApiComponent>::schema(OpenApiVersion::OAS3_1);
+  let name_child_schemas = <Name as ApiComponent>::child_schemas(OpenApiVersion::OAS3_1);
   assert!(name_schema.is_some());
   assert!(name_child_schemas.is_empty());
   let (schema_name, schema) = name_schema.expect("schema should be defined");
@@ -180,7 +180,7 @@ fn api_type_derive_with_format_complex_struct() {
   assert_json_eq!(
     json,
     json!({
-      "type": "string"
+      "type": "string",
     })
   );
 }

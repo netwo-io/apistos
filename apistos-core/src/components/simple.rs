@@ -3,22 +3,29 @@ use crate::ApiComponent;
 macro_rules! simple_modifier {
   ($ty:ty) => {
     impl ApiComponent for $ty {
-      fn child_schemas() -> Vec<(
+      fn child_schemas(
+        _: apistos_models::OpenApiVersion,
+      ) -> Vec<(
         String,
-        apistos_models::reference_or::ReferenceOr<apistos_models::Schema>,
+        apistos_models::reference_or::ReferenceOr<apistos_models::ApistosSchema>,
       )> {
         vec![]
       }
-      fn raw_schema() -> Option<apistos_models::reference_or::ReferenceOr<apistos_models::Schema>> {
-        let gen = schemars::gen::SchemaSettings::openapi3().into_generator();
+      fn raw_schema(
+        oas_version: apistos_models::OpenApiVersion,
+      ) -> Option<apistos_models::reference_or::ReferenceOr<apistos_models::ApistosSchema>> {
+        let schema_settings = oas_version.get_schema_settings();
+        let gen = schema_settings.into_generator();
 
-        let schema: apistos_models::reference_or::ReferenceOr<apistos_models::Schema> =
-          apistos_models::Schema::Object(gen.into_root_schema_for::<$ty>().schema).into();
+        let schema: apistos_models::reference_or::ReferenceOr<apistos_models::ApistosSchema> =
+          apistos_models::ApistosSchema::new(gen.into_root_schema_for::<$ty>(), oas_version).into();
         Some(schema)
       }
-      fn schema() -> Option<(
+      fn schema(
+        _: apistos_models::OpenApiVersion,
+      ) -> Option<(
         String,
-        apistos_models::reference_or::ReferenceOr<apistos_models::Schema>,
+        apistos_models::reference_or::ReferenceOr<apistos_models::ApistosSchema>,
       )> {
         None
       }
@@ -56,27 +63,40 @@ simple_modifier!(rust_decimal::Decimal);
 simple_modifier!(uuid::Uuid);
 #[cfg(feature = "url")]
 simple_modifier!(url::Url);
+#[cfg(feature = "ipnetwork")]
+simple_modifier!(ipnetwork::IpNetwork);
+#[cfg(feature = "ipnetwork")]
+simple_modifier!(ipnetwork::Ipv4Network);
+#[cfg(feature = "ipnetwork")]
+simple_modifier!(ipnetwork::Ipv6Network);
 
 #[cfg(feature = "chrono")]
 impl<T: chrono::TimeZone> ApiComponent for chrono::DateTime<T> {
-  fn child_schemas() -> Vec<(
+  fn child_schemas(
+    _: apistos_models::OpenApiVersion,
+  ) -> Vec<(
     String,
-    apistos_models::reference_or::ReferenceOr<apistos_models::Schema>,
+    apistos_models::reference_or::ReferenceOr<apistos_models::ApistosSchema>,
   )> {
     vec![]
   }
 
-  fn raw_schema() -> Option<apistos_models::reference_or::ReferenceOr<apistos_models::Schema>> {
-    let gen = schemars::gen::SchemaSettings::openapi3().into_generator();
+  fn raw_schema(
+    oas_version: apistos_models::OpenApiVersion,
+  ) -> Option<apistos_models::reference_or::ReferenceOr<apistos_models::ApistosSchema>> {
+    let schema_settings = oas_version.get_schema_settings();
+    let gen = schema_settings.into_generator();
 
-    let schema: apistos_models::reference_or::ReferenceOr<apistos_models::Schema> =
-      apistos_models::Schema::Object(gen.into_root_schema_for::<chrono::DateTime<T>>().schema).into();
+    let schema: apistos_models::reference_or::ReferenceOr<apistos_models::ApistosSchema> =
+      apistos_models::ApistosSchema::new(gen.into_root_schema_for::<chrono::DateTime<T>>(), oas_version).into();
     Some(schema)
   }
 
-  fn schema() -> Option<(
+  fn schema(
+    _: apistos_models::OpenApiVersion,
+  ) -> Option<(
     String,
-    apistos_models::reference_or::ReferenceOr<apistos_models::Schema>,
+    apistos_models::reference_or::ReferenceOr<apistos_models::ApistosSchema>,
   )> {
     None
   }

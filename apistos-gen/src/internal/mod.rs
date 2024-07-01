@@ -89,6 +89,7 @@ pub(crate) fn gen_open_api_impl(
       }),
       tags: &operation_attribute.tags,
       scopes: operation_attribute.scopes,
+      callbacks: &operation_attribute.callbacks,
       error_codes: &operation_attribute.error_codes,
       consumes: operation_attribute.consumes.as_ref(),
       produces: operation_attribute.produces.as_ref(),
@@ -97,6 +98,7 @@ pub(crate) fn gen_open_api_impl(
       args: &args,
       responder_wrapper,
       error_codes: &operation_attribute.error_codes,
+      callbacks: &operation_attribute.callbacks,
     };
 
     quote!(
