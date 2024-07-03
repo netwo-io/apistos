@@ -48,12 +48,12 @@ serde_json = "1"
 syn = "2.0"
 
 actix-multipart = "0.6"
-garde-actix-web = "0.7"
+garde-actix-web = "0.8"
 chrono = "0.4.20"
-garde = { version = "0.18", features = ["derive", "serde"] }
+garde = { version = "0.19", features = ["derive", "serde"] }
 rust_decimal = "1"
 serde_qs = "0.13"
-shuttle-runtime = { version = "0.44", default-features = false }
+shuttle-runtime = { version = "0.46", default-features = false }
 uuid = { version = "1", features = ["serde", "v4"] }
 url = "2"
 
