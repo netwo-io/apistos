@@ -6,7 +6,7 @@ use proc_macro_error::{abort, emit_error};
 use quote::quote;
 
 use syn::{
-  Expr, FnArg, Ident, ImplGenerics, ItemFn, Lit, Meta, ReturnType, Token, Type, TypeGenerics, TypeTraitObject,
+  Expr, FnArg, Ident, ImplGenerics, ItemFn, Lit, Meta, Pat, ReturnType, Token, Type, TypeGenerics, TypeTraitObject,
   WhereClause,
 };
 
@@ -35,7 +35,7 @@ pub(crate) fn gen_open_api_impl(
       }
     )
   } else {
-    let args = extract_fn_arguments_types(item_ast);
+    let args = extract_fn_arguments_types(item_ast, &operation_attribute.skip_args);
 
     let deprecated = item_ast.attrs.iter().find_map(|attr| {
       if !matches!(attr.path().get_ident(), Some(ident) if &*ident.to_string() == "deprecated") {
@@ -216,14 +216,23 @@ pub(crate) fn gen_item_ast(
   (responder_wrapper, quote!(#item_ast))
 }
 
-fn extract_fn_arguments_types(item_ast: &ItemFn) -> Vec<Type> {
+fn extract_fn_arguments_types(item_ast: &ItemFn, skipped_args: &[Ident]) -> Vec<Type> {
   item_ast
     .sig
     .inputs
     .iter()
     .filter_map(|inp| match inp {
       FnArg::Receiver(_) => None,
-      FnArg::Typed(ref t) => Some(*t.ty.clone()),
+      FnArg::Typed(ref t) => match *t.pat.clone() {
+        Pat::Ident(pi) => {
+          if skipped_args.contains(&pi.ident) {
+            None
+          } else {
+            Some(*t.ty.clone())
+          }
+        }
+        _ => Some(*t.ty.clone()),
+      },
     })
     .collect()
 }
