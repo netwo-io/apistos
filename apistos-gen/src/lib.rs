@@ -491,6 +491,8 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
 /// # `#[api_operation(...)]` options:
 ///   - `skip` a bool allowing to skip documentation for the decorated handler. No component
 ///  strictly associated to this operation will be document in the resulting openapi definition.
+///   - `skip_args = "..."` an optional list of arguments to skip. `Apistos` will not try to generate the
+///  documentation for those args which prevent errors linked to missing `ApiComponent` implementation.
 ///   - `deprecated` a bool indicating the operation is deprecated. Deprecation can also be declared
 ///  with rust `#[deprecated]` decorator.
 ///   - `operation_id = "..."` an optional operation id for this operation. Default is the handler's fn name.

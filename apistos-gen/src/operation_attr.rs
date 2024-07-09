@@ -1,5 +1,6 @@
 use darling::ast::NestedMeta;
 use darling::FromMeta;
+use proc_macro2::Ident;
 use proc_macro_error::abort;
 use std::collections::BTreeMap;
 
@@ -27,6 +28,8 @@ struct OperationAttrInternal {
   error_codes: Vec<u16>,
   consumes: Option<String>,
   produces: Option<String>,
+  #[darling(multiple)]
+  skip_args: Vec<Ident>,
 }
 
 #[derive(FromMeta, Clone)]
@@ -47,6 +50,7 @@ pub(crate) struct OperationAttr {
   pub(crate) error_codes: Vec<u16>,
   pub(crate) consumes: Option<String>,
   pub(crate) produces: Option<String>,
+  pub(crate) skip_args: Vec<Ident>,
 }
 
 impl From<OperationAttrInternal> for OperationAttr {
@@ -66,6 +70,7 @@ impl From<OperationAttrInternal> for OperationAttr {
       error_codes: value.error_codes,
       consumes: value.consumes,
       produces: value.produces,
+      skip_args: value.skip_args,
     }
   }
 }
