@@ -18,7 +18,7 @@ actix-web = { workspace = true }
 num_cpus = { workspace = true }
 shuttle-runtime = { workspace = true }
 
-apistos = { path = "../apistos", version = "1.0.0-pre-release.2" }
+apistos = { path = "../apistos", version = "1.0.0-pre-release.3" }
 
 [lints]
 workspace = true
