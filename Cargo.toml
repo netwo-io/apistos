@@ -22,11 +22,12 @@ documentation = "https://docs.rs/apistos/"
 license = "MIT OR Apache-2.0"
 rust-version = "1.75"
 publish = true
-version = "0.3.1"
+version = "0.3.2"
 
 [workspace.dependencies]
 actix-service = "2"
 actix-web = "4"
+actix-web-grants = "4"
 actix-web-lab = "0.20"
 assert-json-diff = "2.0.2"
 convert_case = "0.6"

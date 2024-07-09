@@ -19,6 +19,7 @@ schemars = { workspace = true }
 
 actix-web = { workspace = true, optional = true }
 actix-web-lab = { workspace = true, optional = true }
+actix-web-grants = { workspace = true, optional = true }
 actix-multipart = { workspace = true, optional = true }
 garde-actix-web = { workspace = true, optional = true }
 chrono = { workspace = true, optional = true }
@@ -28,7 +29,7 @@ serde_qs = { workspace = true, features = ["actix4"], optional = true }
 uuid = { workspace = true, optional = true }
 url = { workspace = true, optional = true }
 
-apistos-models = { path = "../apistos-models", version = "0.3.1", features = ["deserialize"] }
+apistos-models = { path = "../apistos-models", version = "0.3.2", features = ["deserialize"] }
 
 [dev-dependencies]
 assert-json-diff = { workspace = true }
@@ -40,6 +41,7 @@ workspace = true
 
 [features]
 actix = ["dep:actix-web"]
+actix-web-grants = ["dep:actix-web-grants"]
 
 # query related features
 query = []
