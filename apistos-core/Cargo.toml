@@ -19,6 +19,7 @@ schemars = { workspace = true }
 
 actix-web = { workspace = true, optional = true }
 actix-web-lab = { workspace = true, optional = true }
+actix-web-grants = { workspace = true, optional = true }
 actix-multipart = { workspace = true, optional = true }
 garde-actix-web = { workspace = true, optional = true }
 chrono = { workspace = true, optional = true }
@@ -40,6 +41,7 @@ workspace = true
 
 [features]
 actix = ["dep:actix-web"]
+actix-web-grants = ["dep:actix-web-grants"]
 
 # query related features
 query = []
