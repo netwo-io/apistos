@@ -1,15 +1,20 @@
 #![allow(clippy::expect_used)]
 #![allow(clippy::panic)]
 
+use actix_web::http::StatusCode;
 use actix_web::test::{call_service, init_service, try_read_body_json, TestRequest};
+use actix_web::web::{Json, Path};
 use actix_web::{App, Error, ResponseError};
 use apistos::app::OpenApiWrapper;
 use apistos::spec::Spec;
 use apistos::web::{get, put, resource, scope, Scope};
 use apistos_gen::{api_operation, ApiComponent, ApiErrorComponent};
 use apistos_models::info::Info;
+use apistos_models::paths::OperationType;
+use apistos_models::tag::Tag;
 use apistos_models::OpenApi;
 use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
 
 #[actix_web::test]
@@ -186,12 +191,8 @@ async fn operation_skip_args() {
 
 // Imports bellow aim at making clippy happy. Those dependencies are necessary for integration-test.
 use actix_service as _;
-use actix_web::http::StatusCode;
-use actix_web::web::{Json, Path};
 use actix_web_lab as _;
 use apistos_core as _;
-use apistos_models::paths::OperationType;
-use apistos_models::tag::Tag;
 use apistos_plugins as _;
 use apistos_rapidoc as _;
 use apistos_redoc as _;
@@ -205,5 +206,4 @@ use once_cell as _;
 use regex as _;
 use schemars as _;
 use serde as _;
-use serde::{Deserialize, Serialize};
 use serde_json as _;
