@@ -25,8 +25,8 @@ This crate allows you to run an actix-web server documented with Apistos on [Shu
 #schemars = "0.8"
 # sadly we currently rely on a fork to fix multiple flatten for enums, related PR can be found here: https://github.com/GREsau/schemars/pull/264
 schemars = { package = "apistos-schemars", version = "1.0.0-alpha.2" }
-apistos = { version = "1.0.0-pre-release.2" }
-apistos-shuttle = { version = "1.0.0-pre-release.2" }
+apistos = { version = "1.0.0-pre-release.3" }
+apistos-shuttle = { version = "1.0.0-pre-release.3" }
 ```
 
 ### Example
