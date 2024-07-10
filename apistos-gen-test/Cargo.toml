@@ -25,7 +25,7 @@ apistos-core = { path = "../apistos-core", version = "0.3.2", features = ["actix
 apistos-gen = { path = "../apistos-gen", version = "0.3.2" }
 # we use the "preserve_order" feature from schemars here following https://github.com/netwo-io/apistos/pull/78
 schemars = { workspace = true, features = ["preserve_order"] }
-serde = { version = "1.0.188", features = ["derive"] }
+serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 uuid = { workspace = true, features = ["v4"] }
 
