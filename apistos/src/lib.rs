@@ -150,9 +150,9 @@
 
 pub use indexmap::IndexMap;
 
-pub use apistos_core::{ApiComponent, ApiErrorComponent, TypedSchema};
 pub use apistos_core::parameters::header::ApiHeader;
 pub use apistos_core::PathItemDefinition;
+pub use apistos_core::{ApiComponent, ApiErrorComponent, TypedSchema};
 pub use apistos_gen::{api_operation, ApiComponent, ApiCookie, ApiErrorComponent, ApiHeader, ApiSecurity, ApiType};
 pub use apistos_models::*;
 #[cfg(feature = "rapidoc")]
