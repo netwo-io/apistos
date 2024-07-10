@@ -257,14 +257,12 @@ where
     }
   }
 
-  // We expect error to be present only for response part
   fn error_responses() -> Vec<(String, Response)> {
     let mut error_responses = T::error_responses();
     error_responses.append(&mut E::error_responses());
     error_responses
   }
 
-  // We expect error to be present only for response part
   fn error_schemas() -> BTreeMap<String, (String, ReferenceOr<Schema>)> {
     let mut error_schemas = E::error_schemas();
     error_schemas.append(&mut T::error_schemas());
