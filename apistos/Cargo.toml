@@ -57,6 +57,9 @@ lab_query = ["apistos-core/lab_query"]
 # actix garde feature
 garde = ["apistos-core/garde"]
 
+# actix web grants feature
+actix-web-grants = ["apistos-core/actix-web-grants"]
+
 # extra types related features
 chrono = ["apistos-core/chrono"]
 multipart = ["apistos-core/multipart"]
