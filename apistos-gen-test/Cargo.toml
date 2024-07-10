@@ -16,6 +16,7 @@ license.workspace = true
 [dependencies]
 actix-multipart = { workspace = true }
 actix-web = { workspace = true }
+actix-web-grants = { workspace = true }
 assert-json-diff = { workspace = true }
 chrono = { workspace = true, features = ["serde"] }
 futures-core = { workspace = true }
