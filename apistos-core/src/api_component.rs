@@ -1,11 +1,12 @@
 use crate::ApiErrorComponent;
 #[cfg(feature = "actix")]
 use crate::{PathItemDefinition, ResponseWrapper};
+use actix_web::Either;
 use apistos_models::paths::{MediaType, Parameter, RequestBody, Response, Responses};
 use apistos_models::reference_or::ReferenceOr;
 use apistos_models::security::SecurityScheme;
 use apistos_models::Schema;
-use schemars::schema::{ArrayValidation, InstanceType, SchemaObject, SingleOrVec};
+use schemars::schema::{ArrayValidation, InstanceType, SchemaObject, SingleOrVec, SubschemaValidation};
 use std::collections::BTreeMap;
 #[cfg(feature = "actix")]
 use std::future::Future;
@@ -172,6 +173,113 @@ where
 
   fn responses(content_type: Option<String>) -> Option<Responses> {
     T::responses(content_type)
+  }
+}
+
+impl<T, E> ApiComponent for Either<T, E>
+where
+  T: ApiComponent,
+  E: ApiComponent,
+{
+  fn required() -> bool {
+    T::required() && E::required()
+  }
+
+  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
+    let mut child_schemas = T::child_schemas();
+    child_schemas.append(&mut E::child_schemas());
+    child_schemas
+  }
+
+  fn raw_schema() -> Option<ReferenceOr<Schema>> {
+    match (T::raw_schema(), E::raw_schema()) {
+      (Some(raw_schema1), Some(raw_schema2)) => {
+        let raw_schema1 = match raw_schema1 {
+          ReferenceOr::Object(schema_obj) => schema_obj,
+          ReferenceOr::Reference { _ref } => Schema::Object(SchemaObject {
+            reference: Some(_ref),
+            ..Default::default()
+          }),
+        };
+        let raw_schema2 = match raw_schema2 {
+          ReferenceOr::Object(schema_obj) => schema_obj,
+          ReferenceOr::Reference { _ref } => Schema::Object(SchemaObject {
+            reference: Some(_ref),
+            ..Default::default()
+          }),
+        };
+        Some(ReferenceOr::Object(Schema::Object(SchemaObject {
+          subschemas: Some(Box::new(SubschemaValidation {
+            one_of: Some(vec![raw_schema1, raw_schema2]),
+            ..Default::default()
+          })),
+          ..Default::default()
+        })))
+      }
+      (Some(raw_schema1), None) => Some(raw_schema1),
+      (None, Some(raw_schema2)) => Some(raw_schema2),
+      (None, None) => None,
+    }
+  }
+
+  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
+    match (T::schema(), E::schema()) {
+      (Some(schema1), Some(schema2)) => {
+        let (schema_name1, schema1) = schema1;
+        let schema1 = match schema1 {
+          ReferenceOr::Object(schema_obj) => schema_obj,
+          ReferenceOr::Reference { _ref } => Schema::Object(SchemaObject {
+            reference: Some(_ref),
+            ..Default::default()
+          }),
+        };
+        let (schema_name2, schema2) = schema2;
+        let schema2 = match schema2 {
+          ReferenceOr::Object(schema_obj) => schema_obj,
+          ReferenceOr::Reference { _ref } => Schema::Object(SchemaObject {
+            reference: Some(_ref),
+            ..Default::default()
+          }),
+        };
+        let schema = ReferenceOr::Object(Schema::Object(SchemaObject {
+          subschemas: Some(Box::new(SubschemaValidation {
+            one_of: Some(vec![schema1, schema2]),
+            ..Default::default()
+          })),
+          ..Default::default()
+        }));
+        let schema_name = format!("Either{}Or{}", schema_name1, schema_name2);
+        Some((schema_name, schema))
+      }
+      (Some(schema1), None) => Some(schema1),
+      (None, Some(schema2)) => Some(schema2),
+      (None, None) => None,
+    }
+  }
+
+  fn error_responses() -> Vec<(String, Response)> {
+    let mut error_responses = T::error_responses();
+    error_responses.append(&mut E::error_responses());
+    error_responses
+  }
+
+  fn error_schemas() -> BTreeMap<String, (String, ReferenceOr<Schema>)> {
+    let mut error_schemas = E::error_schemas();
+    error_schemas.append(&mut T::error_schemas());
+    error_schemas
+  }
+
+  fn responses(content_type: Option<String>) -> Option<Responses> {
+    let responses = T::responses(content_type.clone());
+    match responses {
+      None => E::responses(content_type),
+      Some(mut responses) => {
+        responses
+          .responses
+          .append(&mut E::responses(content_type).map(|r| r.responses).unwrap_or_default());
+        Some(responses)
+      }
+    }
   }
 }
 
