@@ -27,7 +27,6 @@ version = "1.0.0-pre-release.3"
 [workspace.dependencies]
 actix-service = "2"
 actix-web = "4"
-actix-web-grants = "4"
 actix-web-lab = "0.20"
 assert-json-diff = "2.0.2"
 convert_case = "0.6"
