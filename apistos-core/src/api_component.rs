@@ -207,36 +207,49 @@ where
     T::required() && E::required()
   }
 
-  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
-    let mut child_schemas = T::child_schemas();
-    child_schemas.append(&mut E::child_schemas());
+  fn child_schemas(oas_version: OpenApiVersion) -> Vec<(String, ReferenceOr<ApistosSchema>)> {
+    let mut child_schemas = T::child_schemas(oas_version);
+    child_schemas.append(&mut E::child_schemas(oas_version));
     child_schemas
   }
 
-  fn raw_schema() -> Option<ReferenceOr<Schema>> {
-    match (T::raw_schema(), E::raw_schema()) {
+  fn raw_schema(oas_version: OpenApiVersion) -> Option<ReferenceOr<ApistosSchema>> {
+    match (T::raw_schema(oas_version), E::raw_schema(oas_version)) {
       (Some(raw_schema1), Some(raw_schema2)) => {
         let raw_schema1 = match raw_schema1 {
-          ReferenceOr::Object(schema_obj) => schema_obj,
-          ReferenceOr::Reference { _ref } => Schema::Object(SchemaObject {
-            reference: Some(_ref),
-            ..Default::default()
-          }),
+          ReferenceOr::Object(schema_obj) => schema_obj.into_inner(),
+          ReferenceOr::Reference { _ref } => Schema::try_from(json!({
+            "$ref": _ref,
+          }))
+          .map_err(|err| {
+            log::warn!("Error generating json schema: {err:?}");
+            err
+          })
+          .unwrap_or_default(),
         };
         let raw_schema2 = match raw_schema2 {
-          ReferenceOr::Object(schema_obj) => schema_obj,
-          ReferenceOr::Reference { _ref } => Schema::Object(SchemaObject {
-            reference: Some(_ref),
-            ..Default::default()
-          }),
+          ReferenceOr::Object(schema_obj) => schema_obj.into_inner(),
+          ReferenceOr::Reference { _ref } => Schema::try_from(json!({
+            "$ref": _ref,
+          }))
+          .map_err(|err| {
+            log::warn!("Error generating json schema: {err:?}");
+            err
+          })
+          .unwrap_or_default(),
         };
-        Some(ReferenceOr::Object(Schema::Object(SchemaObject {
-          subschemas: Some(Box::new(SubschemaValidation {
-            one_of: Some(vec![raw_schema1, raw_schema2]),
-            ..Default::default()
-          })),
-          ..Default::default()
-        })))
+        let schema = Schema::try_from(json!({
+          "oneOf": [
+            raw_schema1,
+            raw_schema2
+          ],
+        }))
+        .map_err(|err| {
+          log::warn!("Error generating json schema: {err:?}");
+          err
+        })
+        .unwrap_or_default();
+        Some(ApistosSchema::new(schema, oas_version).into())
       }
       (Some(raw_schema1), None) => Some(raw_schema1),
       (None, Some(raw_schema2)) => Some(raw_schema2),
@@ -244,34 +257,46 @@ where
     }
   }
 
-  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
-    match (T::schema(), E::schema()) {
+  fn schema(oas_version: OpenApiVersion) -> Option<(String, ReferenceOr<ApistosSchema>)> {
+    match (T::schema(oas_version), E::schema(oas_version)) {
       (Some(schema1), Some(schema2)) => {
         let (schema_name1, schema1) = schema1;
         let schema1 = match schema1 {
-          ReferenceOr::Object(schema_obj) => schema_obj,
-          ReferenceOr::Reference { _ref } => Schema::Object(SchemaObject {
-            reference: Some(_ref),
-            ..Default::default()
-          }),
+          ReferenceOr::Object(schema_obj) => schema_obj.into_inner(),
+          ReferenceOr::Reference { _ref } => Schema::try_from(json!({
+            "$ref": _ref,
+          }))
+          .map_err(|err| {
+            log::warn!("Error generating json schema: {err:?}");
+            err
+          })
+          .unwrap_or_default(),
         };
         let (schema_name2, schema2) = schema2;
         let schema2 = match schema2 {
-          ReferenceOr::Object(schema_obj) => schema_obj,
-          ReferenceOr::Reference { _ref } => Schema::Object(SchemaObject {
-            reference: Some(_ref),
-            ..Default::default()
-          }),
+          ReferenceOr::Object(schema_obj) => schema_obj.into_inner(),
+          ReferenceOr::Reference { _ref } => Schema::try_from(json!({
+            "$ref": _ref,
+          }))
+          .map_err(|err| {
+            log::warn!("Error generating json schema: {err:?}");
+            err
+          })
+          .unwrap_or_default(),
         };
-        let schema = ReferenceOr::Object(Schema::Object(SchemaObject {
-          subschemas: Some(Box::new(SubschemaValidation {
-            one_of: Some(vec![schema1, schema2]),
-            ..Default::default()
-          })),
-          ..Default::default()
-        }));
+        let schema = Schema::try_from(json!({
+          "oneOf": [
+            schema1,
+            schema2
+          ],
+        }))
+        .map_err(|err| {
+          log::warn!("Error generating json schema: {err:?}");
+          err
+        })
+        .unwrap_or_default();
         let schema_name = format!("Either{}Or{}", schema_name1, schema_name2);
-        Some((schema_name, schema))
+        Some((schema_name, ApistosSchema::new(schema, oas_version).into()))
       }
       (Some(schema1), None) => Some(schema1),
       (None, Some(schema2)) => Some(schema2),
@@ -279,26 +304,28 @@ where
     }
   }
 
-  fn error_responses() -> Vec<(String, Response)> {
-    let mut error_responses = T::error_responses();
-    error_responses.append(&mut E::error_responses());
+  fn error_responses(oas_version: OpenApiVersion) -> Vec<(String, Response)> {
+    let mut error_responses = T::error_responses(oas_version);
+    error_responses.append(&mut E::error_responses(oas_version));
     error_responses
   }
 
-  fn error_schemas() -> BTreeMap<String, (String, ReferenceOr<Schema>)> {
-    let mut error_schemas = E::error_schemas();
-    error_schemas.append(&mut T::error_schemas());
+  fn error_schemas(oas_version: OpenApiVersion) -> BTreeMap<String, (String, ReferenceOr<ApistosSchema>)> {
+    let mut error_schemas = E::error_schemas(oas_version);
+    error_schemas.append(&mut T::error_schemas(oas_version));
     error_schemas
   }
 
-  fn responses(content_type: Option<String>) -> Option<Responses> {
-    let responses = T::responses(content_type.clone());
+  fn responses(oas_version: OpenApiVersion, content_type: Option<String>) -> Option<Responses> {
+    let responses = T::responses(oas_version, content_type.clone());
     match responses {
-      None => E::responses(content_type),
+      None => E::responses(oas_version, content_type),
       Some(mut responses) => {
-        responses
-          .responses
-          .append(&mut E::responses(content_type).map(|r| r.responses).unwrap_or_default());
+        responses.responses.append(
+          &mut E::responses(oas_version, content_type)
+            .map(|r| r.responses)
+            .unwrap_or_default(),
+        );
         Some(responses)
       }
     }

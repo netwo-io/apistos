@@ -50,6 +50,7 @@ serde_json = "1"
 syn = "2.0"
 
 actix-multipart = "0.6"
+actix-web-grants = "4"
 garde-actix-web = "0.9"
 chrono = "0.4.20"
 garde = { version = "0.20", features = ["derive", "serde"] }
