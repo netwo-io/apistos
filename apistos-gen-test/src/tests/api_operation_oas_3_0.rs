@@ -1480,12 +1480,12 @@ fn api_operation_actix_web_grant() {
     Ok(Json(vec![test_models::TestResult { id: 0 }]))
   }
 
-  let components = __openapi_test::components();
+  let components = __openapi_test::components(OpenApiVersion::OAS3_0);
   // only one component here because: error does not have schema and Test is used both for query and response
   assert_eq!(components.len(), 1);
   let components = serde_json::to_value(components).expect("Unable to serialize as Json");
 
-  let operation = __openapi_test::operation();
+  let operation = __openapi_test::operation(OpenApiVersion::OAS3_0);
   let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
 
   assert_json_eq!(
@@ -1509,7 +1509,7 @@ fn api_operation_actix_web_grant() {
             "properties": {
               "id": {
                 "format": "uint32",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               }
             },

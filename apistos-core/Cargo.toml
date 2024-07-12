@@ -20,6 +20,7 @@ serde_json = { workspace = true }
 schemars = { workspace = true }
 
 actix-web = { workspace = true, optional = true }
+actix-web-grants = { workspace = true, optional = true }
 actix-web-lab = { workspace = true, optional = true }
 actix-web-grants = { workspace = true, optional = true }
 actix-multipart = { workspace = true, optional = true }
