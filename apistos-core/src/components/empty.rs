@@ -24,10 +24,10 @@ impl<T> ApiComponent for actix_web_grants::authorities::AuthDetails<T>
 where
   T: Eq + std::hash::Hash,
 {
-  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
+  fn child_schemas(_oas_version: apistos_models::OpenApiVersion) -> Vec<(String, ReferenceOr<ApistosSchema>)> {
     vec![]
   }
-  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
+  fn schema(_oas_version: apistos_models::OpenApiVersion) -> Option<(String, ReferenceOr<ApistosSchema>)> {
     None
   }
 }
