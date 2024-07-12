@@ -15,6 +15,7 @@ use darling::ast::NestedMeta;
 use darling::Error;
 use proc_macro::TokenStream;
 use proc_macro_error::{abort, proc_macro_error, OptionExt};
+use proc_macro2::Span;
 use quote::{format_ident, quote};
 use syn::{DeriveInput, GenericParam, Ident, ItemFn};
 
@@ -685,7 +686,6 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
 use apistos as _;
 #[cfg(test)]
 use garde as _;
-use proc_macro2::Span;
 #[cfg(test)]
 use schemars as _;
 #[cfg(test)]
