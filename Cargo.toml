@@ -52,6 +52,7 @@ syn = "2.0"
 actix-multipart = "0.7"
 actix-web-grants = "4"
 actix-session = "0.10"
+actix-web-grants = "4"
 garde-actix-web = "0.11"
 chrono = "0.4.20"
 garde = { version = "0.22", features = ["derive", "serde"] }
