@@ -189,6 +189,80 @@ async fn operation_skip_args() {
   assert!(operation3.parameters.is_empty());
 }
 
+#[actix_web::test]
+async fn operation_generics() {
+  #[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
+  #[openapi_error(status(code = 405, description = "Invalid input"))]
+  pub(crate) enum ErrorResponse {
+    MethodNotAllowed(String),
+  }
+
+  impl Display for ErrorResponse {
+    fn fmt(&self, _f: &mut Formatter<'_>) -> std::fmt::Result {
+      panic!()
+    }
+  }
+
+  impl ResponseError for ErrorResponse {
+    fn status_code(&self) -> StatusCode {
+      panic!()
+    }
+  }
+
+  #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
+  struct Test {
+    id_number: u32,
+    id_string: String,
+  }
+
+  #[api_operation(tag = "pet", skip_args = "_params")]
+  pub(crate) async fn test<T, U>(_params: Path<(u32, String)>, _test: Json<Test>) -> Result<Json<Test>, ErrorResponse> {
+    panic!()
+  }
+
+  let openapi_path = "/test.json";
+  let operation_path = "/test/{plop_id}/{clap_name}";
+
+  let info = Info {
+    title: "A well documented API".to_string(),
+    description: Some("Really well document I mean it".to_string()),
+    terms_of_service: Some("https://terms.com".to_string()),
+    ..Default::default()
+  };
+  let tags = vec![Tag {
+    name: "A super tag".to_owned(),
+    ..Default::default()
+  }];
+  let spec = Spec {
+    info: info.clone(),
+    tags: tags.clone(),
+    ..Default::default()
+  };
+  let app = App::new()
+    .document(spec)
+    .service(scope("test").service(resource("/{plop_id}/{clap_name}").route(get().to(test::<String, String>))))
+    .build(openapi_path);
+  let app = init_service(app).await;
+
+  let req = TestRequest::get().uri(openapi_path).to_request();
+  let resp = call_service(&app, req).await;
+  assert!(resp.status().is_success());
+
+  let body: OpenApi = try_read_body_json(resp).await.expect("Unable to read body");
+  let paths = body.paths.paths;
+
+  let operation = paths.get(&operation_path.to_string()).cloned();
+  assert!(operation.is_some());
+  let operation = operation
+    .unwrap_or_default()
+    .operations
+    .get(&OperationType::Get)
+    .cloned()
+    .unwrap_or_default();
+  assert!(operation.request_body.is_some());
+  assert!(operation.parameters.is_empty());
+}
+
 // Imports bellow aim at making clippy happy. Those dependencies are necessary for integration-test.
 use actix_service as _;
 use actix_web_lab as _;
