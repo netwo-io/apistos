@@ -15,8 +15,8 @@ use darling::ast::NestedMeta;
 use darling::Error;
 use proc_macro::TokenStream;
 use proc_macro_error::{abort, proc_macro_error, OptionExt};
-use quote::quote;
-use syn::{DeriveInput, Ident, ItemFn};
+use quote::{format_ident, quote};
+use syn::{DeriveInput, GenericParam, Ident, ItemFn};
 
 mod internal;
 mod openapi_cookie_attr;
@@ -632,9 +632,25 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
   let mut generics_call = quote!();
   let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
   let openapi_struct_def = if !generics.params.is_empty() {
+    let mut generic_types_idents = vec![];
+    for param in &generics.params {
+      match param {
+        GenericParam::Lifetime(_) => {}
+        GenericParam::Const(_) => {}
+        GenericParam::Type(_type) => generic_types_idents.push(_type.ident.clone()),
+      }
+    }
     let turbofish = ty_generics.as_turbofish();
-    generics_call = quote!(#turbofish { p: std::marker::PhantomData });
-    quote!(struct #openapi_struct #impl_generics #where_clause { p: std::marker::PhantomData #ty_generics } )
+    let mut phantom_params = quote!();
+    let mut phantom_params_names = quote!();
+    for generic_types_ident in generic_types_idents {
+      let param_name = Ident::new(&format_ident!("p_{}", generic_types_ident).to_string().to_lowercase(), Span::call_site());
+      phantom_params_names.extend(quote!(#param_name: std::marker::PhantomData,));
+      phantom_params.extend(quote!(#param_name: std::marker::PhantomData < #generic_types_ident >,))
+    }
+    generics_call = quote!(#turbofish { #phantom_params_names });
+
+    quote!(struct #openapi_struct #impl_generics #where_clause { #phantom_params })
   } else {
     quote!(struct #openapi_struct;)
   };
@@ -669,6 +685,7 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
 use apistos as _;
 #[cfg(test)]
 use garde as _;
+use proc_macro2::Span;
 #[cfg(test)]
 use schemars as _;
 #[cfg(test)]
