@@ -14,8 +14,8 @@ use convert_case::{Case, Casing};
 use darling::ast::NestedMeta;
 use darling::Error;
 use proc_macro::TokenStream;
-use proc_macro_error::{abort, proc_macro_error, OptionExt};
 use proc_macro2::Span;
+use proc_macro_error::{abort, proc_macro_error, OptionExt};
 use quote::{format_ident, quote};
 use syn::{DeriveInput, GenericParam, Ident, ItemFn};
 
@@ -645,7 +645,10 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
     let mut phantom_params = quote!();
     let mut phantom_params_names = quote!();
     for generic_types_ident in generic_types_idents {
-      let param_name = Ident::new(&format_ident!("p_{}", generic_types_ident).to_string().to_lowercase(), Span::call_site());
+      let param_name = Ident::new(
+        &format_ident!("p_{}", generic_types_ident).to_string().to_lowercase(),
+        Span::call_site(),
+      );
       phantom_params_names.extend(quote!(#param_name: std::marker::PhantomData,));
       phantom_params.extend(quote!(#param_name: std::marker::PhantomData < #generic_types_ident >,))
     }
