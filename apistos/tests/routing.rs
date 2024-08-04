@@ -9,8 +9,8 @@ use apistos_gen::api_operation;
 use apistos_models::info::Info;
 use apistos_models::tag::Tag;
 
-#[test]
-fn actix_routing() {
+#[actix_web::test]
+async fn actix_routing() {
   fn my_routes(cfg: &mut ServiceConfig) {
     cfg.service(
       resource("/users/{user_id}")
@@ -50,7 +50,7 @@ fn actix_routing() {
     ..Default::default()
   };
 
-  App::new()
+  let app = App::new()
     .document(spec)
     .service(
       scope("test")
@@ -60,16 +60,39 @@ fn actix_routing() {
           tagged_scope("test2", vec!["Another super tag".to_string()]).service(resource("/").route(post().to(test))),
         )
         .route("test3", patch().to(test))
+        .route("test4/{test_id}", patch().to(test))
         .app_data("")
         .configure(my_routes),
     )
     .build("/openapi.json");
+  let app = init_service(app).await;
+
+  let req = TestRequest::get().uri("/openapi.json").to_request();
+  let resp = call_service(&app, req).await;
+  assert!(resp.status().is_success());
+
+  let body: OpenApi = try_read_body_json(resp).await.expect("Unable to read body");
+  let mut paths: Vec<&String> = body.paths.paths.keys().collect();
+  paths.sort();
+
+  let expected_paths = vec![
+    "/test/line/{plop_id}",
+    "/test/test2/",
+    "/test/test3",
+    "/test/test4/{test_id}",
+    "/test/users/{user_id}",
+    "/test/{plop_id}/{clap_name}",
+  ];
+
+  assert_eq!(paths, expected_paths)
 }
 
 // Imports bellow aim at making clippy happy. Those dependencies are necessary for integration-test.
 use actix_service as _;
+use actix_web::test::{call_service, init_service, try_read_body_json, TestRequest};
 use actix_web_lab as _;
 use apistos_core as _;
+use apistos_models::OpenApi;
 use apistos_plugins as _;
 use apistos_rapidoc as _;
 use apistos_redoc as _;

@@ -107,7 +107,7 @@ where
 
   /// Wrapper for [`actix_web::Scope::route`](https://docs.rs/actix-web/*/actix_web/struct.Scope.html#method.route).
   pub fn route(mut self, path: &str, route: Route) -> Self {
-    let mut w = RouteWrapper::new(&self.path, route);
+    let mut w = RouteWrapper::new(path, route);
     self.update_from_def_holder(&mut w);
     self.inner = self.inner.take().map(|s| s.route(path, w.inner));
     self
