@@ -50,7 +50,7 @@ async fn default_parameters() {
     plap: String,
   }
 
-  #[allow(unused_tuple_struct_fields)]
+  #[allow(dead_code)]
   #[derive(Clone, Debug, JsonSchema, ApiHeader)]
   #[openapi_header(
     name = "X-Env-Complex",
@@ -59,7 +59,7 @@ async fn default_parameters() {
   )]
   struct SomeComplexHeader(TestHeaderStruct);
 
-  #[allow(unused_tuple_struct_fields)]
+  #[allow(dead_code)]
   #[derive(Clone, Debug, JsonSchema, ApiHeader)]
   #[openapi_header(
     name = "X-Env",
