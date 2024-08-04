@@ -16,7 +16,7 @@ pub(crate) fn routes() -> Scope {
       .service(resource("/findByStatus").route(get().to(find_by_status)))
       .service(resource("/findByTags").route(get().to(#[allow(deprecated)] find_by_tags)))
       .service(
-        scope("/{petId}").service(
+        scope("/{petId:.+}").service(
           resource("")
             .route(get().to(get_pet))
             .route(post().to(update_pet_with_form))
