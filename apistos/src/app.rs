@@ -271,7 +271,8 @@ where
         op.operation_id = op.operation_id.clone().or(Some(operation_id));
       });
 
-      paths.insert(path, item);
+      let sanitized_path = sanitize_patterned_path_parameter(&path);
+      paths.insert(sanitized_path, item);
     }
 
     if !self.default_parameters.is_empty() {
@@ -318,6 +319,18 @@ where
     open_api_spec.paths.paths = paths;
     open_api_spec.components = components;
   }
+}
+
+#[allow(clippy::expect_used)]
+static PATH_NAME_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"\{(?<name>\S+):(.*)\}").expect("path name regex"));
+
+fn sanitize_patterned_path_parameter(path: &str) -> String {
+  let param_names: Vec<&str> = path.split('/').collect();
+  let mut path_parts = vec![];
+  for p in &param_names {
+    path_parts.push(PATH_NAME_REGEX.replace(p, "{$name}").to_string());
+  }
+  path_parts.join("/")
 }
 
 #[allow(clippy::expect_used)]
