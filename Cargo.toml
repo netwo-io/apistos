@@ -27,7 +27,7 @@ version = "1.0.0-pre-release.3"
 [workspace.dependencies]
 actix-service = "2"
 actix-web = "4"
-actix-web-lab = "0.20"
+actix-web-lab = "0.21"
 assert-json-diff = "2.0.2"
 convert_case = "0.6"
 darling = "0.20"
@@ -55,7 +55,7 @@ chrono = "0.4.20"
 garde = { version = "0.20", features = ["derive", "serde"] }
 rust_decimal = "1"
 serde_qs = "0.13"
-shuttle-runtime = { version = "0.46", default-features = false }
+shuttle-runtime = { version = "0.47", default-features = false }
 uuid = { version = "1", features = ["serde", "v4"] }
 url = "2"
 
