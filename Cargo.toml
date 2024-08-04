@@ -20,7 +20,7 @@ edition = "2021"
 repository = "https://github.com/netwo-io/apistos"
 documentation = "https://docs.rs/apistos/"
 license = "MIT OR Apache-2.0"
-rust-version = "1.75"
+rust-version = "1.77"
 publish = true
 version = "1.0.0-pre-release.3"
 
@@ -70,7 +70,6 @@ unused_import_braces = "warn"
 unused-lifetimes = "warn"
 unused_macro_rules = "warn"
 unused_qualifications = "warn"
-unused_tuple_struct_fields = "warn"
 
 [workspace.lints.clippy]
 bool_to_int_with_if = "warn"

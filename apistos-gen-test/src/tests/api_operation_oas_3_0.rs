@@ -1465,7 +1465,7 @@ fn api_operation_root_vec() {
 #[test]
 fn api_operation_actix_web_grant() {
   #[allow(clippy::unused_async)]
-  async fn extract(_req: &ServiceRequest) -> Result<HashSet<String>, Error> {
+  async fn extract(_: &ServiceRequest) -> Result<HashSet<String>, Error> {
     Ok(Default::default())
   }
 
