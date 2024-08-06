@@ -103,6 +103,19 @@ impl ApistosSchema {
             if let Some(Value::String(prop_name)) = _type.get("const") {
               sch_obj.entry("title").or_insert_with(|| prop_name.clone().into());
             }
+          } else {
+            let const_values: Vec<&Value> = props.iter().filter_map(|(_, p)| {
+              p.as_object()
+                .and_then(|sch_obj| {
+                  sch_obj.get("const")
+                })
+            })
+              .collect();
+            if const_values.len() == 1 {
+              if let Some(Value::String(prop_name)) = const_values.first() {
+                sch_obj.entry("title").or_insert_with(|| prop_name.clone().into());
+              }
+            }
           }
         } else if let Some(enum_values) = sch_obj.clone().get_mut("enum").and_then(|v| v.as_array_mut()) {
           if enum_values.len() == 1 {
