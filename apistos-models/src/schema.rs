@@ -27,16 +27,16 @@ impl ApistosSchema {
           OpenApiVersion::OAS3_0 => {
             // remove $schema property
             obj.remove("$schema");
-            Self(schemars::Schema::from(obj.clone()))
+            Self(Schema::from(obj.clone()))
           }
-          OpenApiVersion::OAS3_1 => Self(schemars::Schema::from(obj.clone())),
+          OpenApiVersion::OAS3_1 => Self(Schema::from(obj.clone())),
         }
       }
     }
   }
 
   pub fn from_value(value: &Value, oas_version: OpenApiVersion) -> Self {
-    let schema = schemars::Schema::try_from(value.clone());
+    let schema = Schema::try_from(value.clone());
     match schema {
       Ok(sch) => Self::new(sch, oas_version),
       Err(e) => {
@@ -88,6 +88,19 @@ impl ApistosSchema {
           } else if let Some(_type) = props.get("type").and_then(|v| v.as_object()) {
             if let Some(Value::String(prop_name)) = _type.get("const") {
               sch_obj.entry("title").or_insert_with(|| prop_name.clone().into());
+            }
+          } else {
+            let const_values: Vec<&Value> = props.iter().filter_map(|(_, p)| {
+              p.as_object()
+                .and_then(|sch_obj| {
+                  sch_obj.get("const")
+                })
+            })
+              .collect();
+            if const_values.len() == 1 {
+              if let Some(Value::String(prop_name)) = const_values.first() {
+                sch_obj.entry("title").or_insert_with(|| prop_name.clone().into());
+              }
             }
           }
         } else if let Some(enum_values) = sch_obj.clone().get_mut("enum").and_then(|v| v.as_array_mut()) {
