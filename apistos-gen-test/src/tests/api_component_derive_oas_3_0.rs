@@ -656,6 +656,85 @@ fn api_component_derive_named_enums_documented() {
   );
 }
 
+#[test]
+fn api_component_derive_named_tagged_enums() {
+  #[derive(Serialize, Debug, ApiComponent, JsonSchema)]
+  #[cfg_attr(test, derive(Deserialize))]
+  #[serde(tag = "kind")]
+  #[serde(rename_all = "snake_case")]
+  pub(crate) enum TestStruct {
+    Variant1 {
+      expiration: DateTime<Utc>,
+    },
+    Variant2 {
+      email: String,
+      /// pseudonymised phone number
+      phone_number: String,
+    },
+  }
+
+  let name_schema = <TestStruct as ApiComponent>::schema(OpenApiVersion::OAS3_0);
+  let name_child_schemas = <TestStruct as ApiComponent>::child_schemas(OpenApiVersion::OAS3_0);
+  assert!(name_schema.is_some());
+  assert!(name_child_schemas.is_empty());
+  let (schema_name, schema) = name_schema.expect("schema should be defined");
+  assert_eq!(schema_name, "TestStruct");
+  assert_schema(&schema.clone());
+  let json = serde_json::to_value(schema).expect("Unable to serialize as Json");
+  assert_json_eq!(
+    json,
+    json!({
+      "title": "TestStruct",
+      "oneOf": [
+        {
+          "title": "variant1",
+          "type": "object",
+          "properties": {
+            "expiration": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "variant1"
+              ]
+            }
+          },
+          "required": [
+            "kind",
+            "expiration"
+          ]
+        },
+        {
+          "title": "variant2",
+          "type": "object",
+          "properties": {
+            "email": {
+              "type": "string"
+            },
+            "phone_number": {
+              "description": "pseudonymised phone number",
+              "type": "string"
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "variant2"
+              ]
+            }
+          },
+          "required": [
+            "kind",
+            "email",
+            "phone_number"
+          ]
+        }
+      ]
+    })
+  );
+}
+
 #[allow(unused_qualifications)]
 #[test]
 fn api_component_derive_named_enums_deep() {
