@@ -1,28 +1,27 @@
-use schemars::schema::Schema;
-
 use apistos_core::ApiComponent;
 use apistos_models::info::Info;
 use apistos_models::paths::{ExternalDocumentation, Parameter};
 use apistos_models::reference_or::ReferenceOr;
 use apistos_models::server::Server;
 use apistos_models::tag::Tag;
+use apistos_models::{ApistosSchema, OpenApiVersion};
 
 /// Defines an accessor for `DefaultParameters`
 pub trait DefaultParameterAccessor {
-  fn get_default_parameter() -> DefaultParameters;
+  fn get_default_parameter(_: OpenApiVersion) -> DefaultParameters;
 }
 
 impl<T> DefaultParameterAccessor for T
 where
   T: ApiComponent,
 {
-  fn get_default_parameter() -> DefaultParameters {
-    let mut components = T::child_schemas();
-    if let Some(sch) = T::schema() {
+  fn get_default_parameter(oas_version: OpenApiVersion) -> DefaultParameters {
+    let mut components = T::child_schemas(oas_version);
+    if let Some(sch) = T::schema(oas_version) {
       components.push(sch)
     }
     DefaultParameters {
-      parameters: T::parameters(),
+      parameters: T::parameters(oas_version),
       components,
     }
   }
@@ -32,12 +31,13 @@ where
 #[derive(Default, Clone)]
 pub struct DefaultParameters {
   pub parameters: Vec<Parameter>,
-  pub components: Vec<(String, ReferenceOr<Schema>)>,
+  pub components: Vec<(String, ReferenceOr<ApistosSchema>)>,
 }
 
 #[derive(Default, Clone)]
 pub struct Spec {
   pub info: Info,
+  pub openapi: OpenApiVersion,
   pub default_tags: Vec<String>,
   /// See more details at <https://spec.openapis.org/oas/latest.html#tagObject>.
   pub tags: Vec<Tag>,

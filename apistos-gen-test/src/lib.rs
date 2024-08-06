@@ -1,7 +1,7 @@
 #![allow(deprecated)]
 #![allow(dead_code)]
 #![allow(clippy::expect_used)]
-#![allow(unused_tuple_struct_fields)]
+#![allow(dead_code)]
 
 #[cfg(test)]
 pub(crate) mod tests;

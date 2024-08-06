@@ -10,8 +10,8 @@
 //! [dependencies]
 //! #schemars = "0.8"
 //! # sadly we currently rely on a fork to fix multiple flatten for enums, related PR can be found here: https://github.com/GREsau/schemars/pull/264
-//! schemars = { package = "apistos-schemars", version = "0.8" }
-//! apistos = "0.3"
+//! schemars = { package = "apistos-schemars", version = "1.0.0-alpha.2" }
+//! apistos = "1.0.0-pre-release.4"
 //! ```
 //!
 //! # Usage example
@@ -129,6 +129,7 @@
 //! | `redoc`           | Enables `ReDoc` to expose the generated openapi file                     |                                                                |
 //! | `swagger-ui`      | Enables Swagger UI to expose the generated openapi file                  |                                                                |
 //! | `chrono`          | Enables documenting types from `chrono`                                  | [`chrono`](https://crates.io/crates/chrono)                    |
+//! | `ipnetwork`       | Enables documenting types from `ipnetwork`                               | [`ipnetwork`](https://crates.io/crates/ipnetwork)             |
 //! | `multipart`       | Enables documenting types from `actix-multipart`                         | [`actix-multipart`](https://crates.io/crates/actix-multipart)  |
 //! | `rust_decimal`    | Enables documenting types from `rust_decimal`                            | [`rust_decimal`](https://crates.io/crates/rust-decimal)        |
 //! | `uuid`            | Enables documenting types from `uuid`                                    | [`uuid`](https://crates.io/crates/uuid)                        |
@@ -149,11 +150,15 @@
 //! | [`okapi`](https://crates.io/crates/okapi)         | Pretty similar, based on schemars as well (and maintained by the founder of schemars) but not integrated with actix.                                                                                                                                                                                                                          |
 
 pub use indexmap::IndexMap;
+pub use log;
 
 pub use apistos_core::parameters::header::ApiHeader;
 pub use apistos_core::PathItemDefinition;
-pub use apistos_core::{ApiComponent, ApiErrorComponent, TypedSchema};
-pub use apistos_gen::{api_operation, ApiComponent, ApiCookie, ApiErrorComponent, ApiHeader, ApiSecurity, ApiType};
+pub use apistos_core::{ApiComponent, ApiErrorComponent, ApiWebhook, ApiWebhookDef, TypedSchema, __internal};
+pub use apistos_gen::{
+  api_callback, api_operation, ApiComponent, ApiCookie, ApiErrorComponent, ApiHeader, ApiSecurity, ApiType,
+  ApiWebhookComponent,
+};
 pub use apistos_models::*;
 #[cfg(feature = "rapidoc")]
 pub use apistos_rapidoc::RapidocConfig;
