@@ -10,6 +10,7 @@ use crate::openapi_cookie_attr::parse_openapi_cookie_attrs;
 use crate::openapi_error_attr::parse_openapi_error_attrs;
 use crate::openapi_header_attr::parse_openapi_header_attrs;
 use crate::openapi_security_attr::parse_openapi_security_attrs;
+use crate::openapi_type_attr::parse_openapi_type_attrs;
 use crate::operation_attr::parse_openapi_operation_attrs;
 use crate::webhook_attr::parse_openapi_derive_webhook_attrs;
 use convert_case::{Case, Casing};
@@ -27,6 +28,7 @@ mod openapi_cookie_attr;
 mod openapi_error_attr;
 mod openapi_header_attr;
 mod openapi_security_attr;
+mod openapi_type_attr;
 mod operation_attr;
 mod webhook_attr;
 
@@ -35,7 +37,11 @@ const OPENAPI_CALLBACK_STRUCT_PREFIX: &str = "__openapi_callback_";
 
 /// Generates a custom OpenAPI type.
 ///
-/// This `#[derive]` macro should be used in combination with [TypedSchema](trait.TypedSchema.html).
+/// This `#[derive]` macro should be used in combination with [TypedSchema](trait.TypedSchema.html) or require the `#[openapi_type]` attribute.
+///
+/// # `#[openapi_type(...)]` options:
+/// - `schema_type = "..."` a **required** parameter specifying the data type for the schema.
+/// - `format = "..."` an optional format for the schema.
 ///
 /// When deriving [ApiType], [ApiComponent] and [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html) are automatically implemented and thus
 /// should not be derived.
@@ -56,12 +62,32 @@ const OPENAPI_CALLBACK_STRUCT_PREFIX: &str = "__openapi_callback_";
 ///   }
 /// }
 /// ```
+///
+/// or
+///
+/// ```rust
+/// use apistos::ApiType;
+///
+/// #[derive(Debug, Clone, ApiType)]
+/// #[openapi_type(schema_type = "string")]
+/// pub struct Name(String);
+/// ```
+///
+/// with the format attribute:
+///
+/// ```rust
+/// use apistos::ApiType;
+///
+/// #[derive(Debug, Clone, ApiType)]
+/// #[openapi_type(schema_type = "string", format = "email")]
+/// pub struct Email(String);
+/// ```
 #[proc_macro_error]
-#[proc_macro_derive(ApiType)]
+#[proc_macro_derive(ApiType, attributes(openapi_type))]
 pub fn derive_api_type(input: TokenStream) -> TokenStream {
   let input = syn::parse_macro_input!(input as DeriveInput);
   let DeriveInput {
-    attrs: _attrs,
+    attrs,
     ident,
     data: _data,
     generics,
@@ -69,65 +95,78 @@ pub fn derive_api_type(input: TokenStream) -> TokenStream {
   } = input;
 
   let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+
+  let openapi_type_attributes = parse_openapi_type_attrs(&attrs, &impl_generics, &ident, &ty_generics, where_clause);
+  let typed_schema_derived = if let Some(openapi_type_attributes) = openapi_type_attributes {
+    quote!(#openapi_type_attributes)
+  } else {
+    quote!()
+  };
+
   let component_name = quote!(#ident).to_string();
   quote!(
-    #[automatically_derived]
-    impl #impl_generics schemars::JsonSchema for #ident #ty_generics #where_clause {
-       fn always_inline_schema() -> bool {
-        true
-      }
+    const _: () = {
+      use apistos::TypedSchema;
 
-      fn schema_name() -> std::borrow::Cow<'static, str> {
-        std::borrow::Cow::Borrowed(#component_name)
-      }
-
-      fn json_schema(_gen: &mut schemars::gen::SchemaGenerator) -> apistos::Schema {
-        let instance_type = <Self as TypedSchema>::schema_type();
-        match <Self as TypedSchema>::format() {
-          Some(format) => apistos::Schema::try_from(schemars::_serde_json::json!({
-            "type": instance_type,
-            "format": format,
-          })),
-          None => apistos::Schema::try_from(schemars::_serde_json::json!({
-            "type": instance_type,
-          }))
+      #typed_schema_derived
+      #[automatically_derived]
+      impl #impl_generics schemars::JsonSchema for #ident #ty_generics #where_clause {
+         fn always_inline_schema() -> bool {
+          true
         }
-        .map_err(|err| {
-          apistos::log::warn!("Error generating json schema from #ident : {err:?}");
-          err
-        })
-        .unwrap_or_default()
-      }
-    }
 
-    #[automatically_derived]
-    impl #impl_generics apistos::ApiComponent for #ident #ty_generics #where_clause {
-      fn child_schemas(_: apistos::OpenApiVersion) -> Vec<(String, apistos::reference_or::ReferenceOr<apistos::ApistosSchema>)> {
-        vec![]
-      }
+        fn schema_name() -> std::borrow::Cow<'static, str> {
+          std::borrow::Cow::Borrowed(#component_name)
+        }
 
-      fn schema(oas_version: apistos::OpenApiVersion) -> Option<(String, apistos::reference_or::ReferenceOr<apistos::ApistosSchema>)> {
-        Some((
-          #component_name.to_string(),
-          apistos::Schema::try_from(match <#ident #ty_generics>::format() {
-            Some(format) => schemars::_serde_json::json!({
-              "type": <#ident #ty_generics>::schema_type(),
+        fn json_schema(_gen: &mut schemars::gen::SchemaGenerator) -> apistos::Schema {
+          let instance_type = <Self as TypedSchema>::schema_type();
+          match <Self as TypedSchema>::format() {
+            Some(format) => apistos::Schema::try_from(schemars::_serde_json::json!({
+              "type": instance_type,
               "format": format,
-            }),
-            None => schemars::_serde_json::json!({
-              "type": <#ident #ty_generics>::schema_type(),
-            }),
-          })
+            })),
+            None => apistos::Schema::try_from(schemars::_serde_json::json!({
+              "type": instance_type,
+            }))
+          }
           .map_err(|err| {
             apistos::log::warn!("Error generating json schema from #ident : {err:?}");
             err
           })
-          .map(|sch| apistos::ApistosSchema::new(sch, oas_version))
           .unwrap_or_default()
-          .into(),
-        ))
+        }
       }
-    }
+
+      #[automatically_derived]
+      impl #impl_generics apistos::ApiComponent for #ident #ty_generics #where_clause {
+        fn child_schemas(_: apistos::OpenApiVersion) -> Vec<(String, apistos::reference_or::ReferenceOr<apistos::ApistosSchema>)> {
+          vec![]
+        }
+
+        fn schema(oas_version: apistos::OpenApiVersion) -> Option<(String, apistos::reference_or::ReferenceOr<apistos::ApistosSchema>)> {
+          Some((
+            #component_name.to_string(),
+            apistos::Schema::try_from(match <#ident #ty_generics>::format() {
+              Some(format) => schemars::_serde_json::json!({
+                "type": <#ident #ty_generics>::schema_type(),
+                "format": format,
+              }),
+              None => schemars::_serde_json::json!({
+                "type": <#ident #ty_generics>::schema_type(),
+              }),
+            })
+            .map_err(|err| {
+              apistos::log::warn!("Error generating json schema from #ident : {err:?}");
+              err
+            })
+            .map(|sch| apistos::ApistosSchema::new(sch, oas_version))
+            .unwrap_or_default()
+            .into(),
+          ))
+        }
+      }
+    };
   )
   .into()
 }
@@ -168,10 +207,12 @@ pub fn derive_api_component(input: TokenStream) -> TokenStream {
   let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
   let schema_impl = Schemas { deprecated: false };
   quote!(
-    #[automatically_derived]
-    impl #impl_generics apistos::ApiComponent for #ident #ty_generics #where_clause {
-      #schema_impl
-    }
+    const _: () = {
+      #[automatically_derived]
+      impl #impl_generics apistos::ApiComponent for #ident #ty_generics #where_clause {
+        #schema_impl
+      }
+    };
   )
   .into()
 }
@@ -269,24 +310,26 @@ pub fn derive_api_security(input: TokenStream) -> TokenStream {
 
   let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
   quote!(
-    #[automatically_derived]
-    impl #impl_generics apistos::ApiComponent for #ident #ty_generics #where_clause {
-      fn child_schemas(_: apistos::OpenApiVersion) -> Vec<(String, apistos::reference_or::ReferenceOr<apistos::ApistosSchema>)> {
-        vec![]
-      }
+    const _: () = {
+      #[automatically_derived]
+      impl #impl_generics apistos::ApiComponent for #ident #ty_generics #where_clause {
+        fn child_schemas(_: apistos::OpenApiVersion) -> Vec<(String, apistos::reference_or::ReferenceOr<apistos::ApistosSchema>)> {
+          vec![]
+        }
 
-      fn schema(_: apistos::OpenApiVersion) -> Option<(String, apistos::reference_or::ReferenceOr<apistos::ApistosSchema>)> {
-        None
-      }
+        fn schema(_: apistos::OpenApiVersion) -> Option<(String, apistos::reference_or::ReferenceOr<apistos::ApistosSchema>)> {
+          None
+        }
 
-      fn securities() -> std::collections::BTreeMap<String, apistos::security::SecurityScheme> {
-        #openapi_security_attributes
-      }
+        fn securities() -> std::collections::BTreeMap<String, apistos::security::SecurityScheme> {
+          #openapi_security_attributes
+        }
 
-      fn security_requirement_name() -> Option<String> {
-        Some(#security_name.to_string())
+        fn security_requirement_name() -> Option<String> {
+          Some(#security_name.to_string())
+        }
       }
-    }
+    };
   )
   .into()
 }
@@ -341,15 +384,17 @@ pub fn derive_api_header(input: TokenStream) -> TokenStream {
     deprecated: openapi_header_attributes.deprecated.unwrap_or_default(),
   };
   quote!(
-    #[automatically_derived]
-    impl #impl_generics apistos::ApiComponent for #ident #ty_generics #where_clause {
-      #schema_impl
-    }
+    const _: () = {
+      #[automatically_derived]
+      impl #impl_generics apistos::ApiComponent for #ident #ty_generics #where_clause {
+        #schema_impl
+      }
 
-    #[automatically_derived]
-    impl #impl_generics apistos::ApiHeader for #ident #ty_generics #where_clause {
-      #openapi_header_attributes
-    }
+      #[automatically_derived]
+      impl #impl_generics apistos::ApiHeader for #ident #ty_generics #where_clause {
+        #openapi_header_attributes
+      }
+    };
   )
   .into()
 }
@@ -401,10 +446,12 @@ pub fn derive_api_cookie(input: TokenStream) -> TokenStream {
 
   let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
   quote!(
-    #[automatically_derived]
-    impl #impl_generics apistos::ApiComponent for #ident #ty_generics #where_clause {
-      #openapi_cookie_attributes
-    }
+    const _: () = {
+      #[automatically_derived]
+      impl #impl_generics apistos::ApiComponent for #ident #ty_generics #where_clause {
+        #openapi_cookie_attributes
+      }
+    };
   )
   .into()
 }
@@ -454,10 +501,12 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
 
   let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
   quote!(
-    #[automatically_derived]
-    impl #impl_generics apistos::ApiErrorComponent for #ident #ty_generics #where_clause {
-      #openapi_error_attributes
-    }
+    const _: () = {
+      #[automatically_derived]
+      impl #impl_generics apistos::ApiErrorComponent for #ident #ty_generics #where_clause {
+        #openapi_error_attributes
+      }
+    };
   )
   .into()
 }
@@ -527,10 +576,12 @@ pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
   let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
 
   quote!(
-    #[automatically_derived]
-    impl #impl_generics apistos::ApiWebhook for #ident #ty_generics #where_clause {
-      #webhook_operation_attribute
-    }
+    const _: () = {
+      #[automatically_derived]
+      impl #impl_generics apistos::ApiWebhook for #ident #ty_generics #where_clause {
+        #webhook_operation_attribute
+      }
+    };
   )
   .into()
 }

@@ -23,12 +23,31 @@ fn api_type_derive() {
     }
   }
 
+  #[derive(ApiType)]
+  #[openapi_type(schema_type = "string")]
+  struct Name2(String);
+
   let name_schema = <Name as ApiComponent>::schema(OpenApiVersion::OAS3_0);
   let name_child_schemas = <Name as ApiComponent>::child_schemas(OpenApiVersion::OAS3_0);
   assert!(name_schema.is_some());
   assert!(name_child_schemas.is_empty());
   let (schema_name, schema) = name_schema.expect("schema should be defined");
   assert_eq!(schema_name, "Name");
+  assert_schema(&schema.clone());
+  let json = serde_json::to_value(schema).expect("Unable to serialize as Json");
+  assert_json_eq!(
+    json,
+    json!({
+      "type": "string",
+    })
+  );
+
+  let name_schema = <Name2 as ApiComponent>::schema(OpenApiVersion::OAS3_0);
+  let name_child_schemas = <Name2 as ApiComponent>::child_schemas(OpenApiVersion::OAS3_0);
+  assert!(name_schema.is_some());
+  assert!(name_child_schemas.is_empty());
+  let (schema_name, schema) = name_schema.expect("schema should be defined");
+  assert_eq!(schema_name, "Name2");
   assert_schema(&schema.clone());
   let json = serde_json::to_value(schema).expect("Unable to serialize as Json");
   assert_json_eq!(
@@ -56,12 +75,32 @@ fn api_type_derive_with_format() {
     }
   }
 
+  #[derive(ApiType)]
+  #[openapi_type(schema_type = "string", format = "lastname")]
+  struct Name2(String);
+
   let name_schema = <Name as ApiComponent>::schema(OpenApiVersion::OAS3_0);
   let name_child_schemas = <Name as ApiComponent>::child_schemas(OpenApiVersion::OAS3_0);
   assert!(name_schema.is_some());
   assert!(name_child_schemas.is_empty());
   let (schema_name, schema) = name_schema.expect("schema should be defined");
   assert_eq!(schema_name, "Name");
+  assert_schema(&schema.clone());
+  let json = serde_json::to_value(schema).expect("Unable to serialize as Json");
+  assert_json_eq!(
+    json,
+    json!({
+      "type": "string",
+      "format": "lastname"
+    })
+  );
+
+  let name_schema = <Name2 as ApiComponent>::schema(OpenApiVersion::OAS3_0);
+  let name_child_schemas = <Name2 as ApiComponent>::child_schemas(OpenApiVersion::OAS3_0);
+  assert!(name_schema.is_some());
+  assert!(name_child_schemas.is_empty());
+  let (schema_name, schema) = name_schema.expect("schema should be defined");
+  assert_eq!(schema_name, "Name2");
   assert_schema(&schema.clone());
   let json = serde_json::to_value(schema).expect("Unable to serialize as Json");
   assert_json_eq!(
@@ -94,12 +133,32 @@ fn api_type_derive_with_default_type_parameter() {
     }
   }
 
+  #[derive(ApiType)]
+  #[openapi_type(schema_type = "string", format = "lastname")]
+  struct Name2<T = String>(GenericHolder<T>);
+
   let name_schema = <Name as ApiComponent>::schema(OpenApiVersion::OAS3_0);
   let name_child_schemas = <Name as ApiComponent>::child_schemas(OpenApiVersion::OAS3_0);
   assert!(name_schema.is_some());
   assert!(name_child_schemas.is_empty());
   let (schema_name, schema) = name_schema.expect("schema should be defined");
   assert_eq!(schema_name, "Name");
+  assert_schema(&schema.clone());
+  let json = serde_json::to_value(schema).expect("Unable to serialize as Json");
+  assert_json_eq!(
+    json,
+    json!({
+      "type": "string",
+      "format": "lastname"
+    })
+  );
+
+  let name_schema = <Name2 as ApiComponent>::schema(OpenApiVersion::OAS3_0);
+  let name_child_schemas = <Name2 as ApiComponent>::child_schemas(OpenApiVersion::OAS3_0);
+  assert!(name_schema.is_some());
+  assert!(name_child_schemas.is_empty());
+  let (schema_name, schema) = name_schema.expect("schema should be defined");
+  assert_eq!(schema_name, "Name2");
   assert_schema(&schema.clone());
   let json = serde_json::to_value(schema).expect("Unable to serialize as Json");
   assert_json_eq!(
@@ -132,12 +191,32 @@ fn api_type_derive_with_generic_type_parameter() {
     }
   }
 
+  #[derive(ApiType)]
+  #[openapi_type(schema_type = "string", format = "lastname")]
+  struct Name2<T: FromStr>(GenericHolder<T>);
+
   let name_schema = <Name<String> as ApiComponent>::schema(OpenApiVersion::OAS3_0);
   let name_child_schemas = <Name<String> as ApiComponent>::child_schemas(OpenApiVersion::OAS3_0);
   assert!(name_schema.is_some());
   assert!(name_child_schemas.is_empty());
   let (schema_name, schema) = name_schema.expect("schema should be defined");
   assert_eq!(schema_name, "Name");
+  assert_schema(&schema.clone());
+  let json = serde_json::to_value(schema).expect("Unable to serialize as Json");
+  assert_json_eq!(
+    json,
+    json!({
+      "type": "string",
+      "format": "lastname"
+    })
+  );
+
+  let name_schema = <Name2<String> as ApiComponent>::schema(OpenApiVersion::OAS3_0);
+  let name_child_schemas = <Name2<String> as ApiComponent>::child_schemas(OpenApiVersion::OAS3_0);
+  assert!(name_schema.is_some());
+  assert!(name_child_schemas.is_empty());
+  let (schema_name, schema) = name_schema.expect("schema should be defined");
+  assert_eq!(schema_name, "Name2");
   assert_schema(&schema.clone());
   let json = serde_json::to_value(schema).expect("Unable to serialize as Json");
   assert_json_eq!(
@@ -169,12 +248,35 @@ fn api_type_derive_with_format_complex_struct() {
     }
   }
 
+  #[derive(ApiType)]
+  #[openapi_type(schema_type = "string")]
+  struct Name2 {
+    last_name: String,
+    first_name: String,
+    id: u32,
+  }
+
   let name_schema = <Name as ApiComponent>::schema(OpenApiVersion::OAS3_0);
   let name_child_schemas = <Name as ApiComponent>::child_schemas(OpenApiVersion::OAS3_0);
   assert!(name_schema.is_some());
   assert!(name_child_schemas.is_empty());
   let (schema_name, schema) = name_schema.expect("schema should be defined");
   assert_eq!(schema_name, "Name");
+  assert_schema(&schema.clone());
+  let json = serde_json::to_value(schema).expect("Unable to serialize as Json");
+  assert_json_eq!(
+    json,
+    json!({
+      "type": "string",
+    })
+  );
+
+  let name_schema = <Name2 as ApiComponent>::schema(OpenApiVersion::OAS3_0);
+  let name_child_schemas = <Name2 as ApiComponent>::child_schemas(OpenApiVersion::OAS3_0);
+  assert!(name_schema.is_some());
+  assert!(name_child_schemas.is_empty());
+  let (schema_name, schema) = name_schema.expect("schema should be defined");
+  assert_eq!(schema_name, "Name2");
   assert_schema(&schema.clone());
   let json = serde_json::to_value(schema).expect("Unable to serialize as Json");
   assert_json_eq!(
