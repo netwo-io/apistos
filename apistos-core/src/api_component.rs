@@ -485,7 +485,7 @@ where
 #[cfg(test)]
 mod test {
   use apistos_models::{ApistosSchema, OpenApiVersion};
-  use schemars::gen::SchemaGenerator;
+  use schemars::generate::SchemaGenerator;
   use schemars::JsonSchema;
   use serde_json::json;
 

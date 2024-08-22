@@ -24,9 +24,7 @@ This crate is exposed through Apistos `rapidoc` feature.
 
 ```toml
 [dependencies]
-#schemars = "0.8"
-# sadly we currently rely on a fork to fix multiple flatten for enums, related PR can be found here: https://github.com/GREsau/schemars/pull/264
-schemars = { package = "apistos-schemars", version = "1.0.0-alpha.2" }
+schemars = "1.0.0-alpha.8"
 apistos = { version = "1.0.0-pre-release.4", feature = ["rapidoc"] }
 ```
 
