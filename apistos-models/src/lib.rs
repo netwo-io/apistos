@@ -20,7 +20,7 @@ use std::fmt::Debug;
 
 use indexmap::IndexMap;
 pub use schema::ApistosSchema;
-use schemars::gen::SchemaSettings;
+use schemars::generate::SchemaSettings;
 pub use schemars::*;
 use serde::Serialize;
 use serde_json::Value;

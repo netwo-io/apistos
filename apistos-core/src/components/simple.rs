@@ -62,12 +62,6 @@ simple_modifier!(rust_decimal::Decimal);
 simple_modifier!(uuid::Uuid);
 #[cfg(feature = "url")]
 simple_modifier!(url::Url);
-#[cfg(feature = "ipnetwork")]
-simple_modifier!(ipnetwork::IpNetwork);
-#[cfg(feature = "ipnetwork")]
-simple_modifier!(ipnetwork::Ipv4Network);
-#[cfg(feature = "ipnetwork")]
-simple_modifier!(ipnetwork::Ipv6Network);
 
 #[cfg(feature = "chrono")]
 impl<T: chrono::TimeZone> crate::ApiComponent for chrono::DateTime<T> {
