@@ -160,7 +160,7 @@ pub fn derive_api_type(input: TokenStream) -> TokenStream {
               apistos::log::warn!("Error generating json schema from #ident : {err:?}");
               err
             })
-          .map(|sch| apistos::ApistosSchema::new(sch, oas_version))
+            .map(|sch| apistos::ApistosSchema::new(sch, oas_version))
             .map(|sch| apistos::ApistosSchema::new(sch, oas_version))
             .unwrap_or_default()
             .into(),
@@ -651,10 +651,12 @@ pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
   let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
 
   quote!(
-    #[automatically_derived]
-    impl #impl_generics apistos::ApiWebhook for #ident #ty_generics #where_clause {
-      #webhook_operation_attribute
-    }
+    const _: () = {
+      #[automatically_derived]
+      impl #impl_generics apistos::ApiWebhook for #ident #ty_generics #where_clause {
+        #webhook_operation_attribute
+      }
+    };
   )
   .into()
 }
