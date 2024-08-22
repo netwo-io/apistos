@@ -281,17 +281,13 @@ fn api_component_derive_recursive() {
   assert_json_eq!(
     json,
     json!({
+      "type": "object",
       "properties": {
         "old_name": {
-          "allOf": [
-            {
-              "$ref": "#/components/schemas/Name"
-            }
-          ],
+          "$ref": "#/components/schemas/Name",
           "nullable": true
         }
-      },
-      "type": "object"
+      }
     })
   );
 }
@@ -637,19 +633,16 @@ fn api_component_derive_named_enums_documented() {
     json!({
       "oneOf": [
         {
+          "title": "Complex",
+          "type": "string",
           "enum": [
             "Complex"
-          ],
-          "title": "Complex",
-          "type": "string"
+          ]
         },
         {
           "description": "A simple stuff",
-          "enum": [
-            "Simple"
-          ],
-          "title": "Simple",
-          "type": "string"
+          "type": "string",
+          "const": "Simple"
         }
       ]
     })
@@ -935,42 +928,38 @@ fn api_component_derive_named_enums_deep() {
     json!({
       "oneOf": [
         {
+          "title": "something",
+          "type": "object",
           "properties": {
-            "name": {
-              "type": "string"
-            },
             "type": {
-              "enum": [
-                "something"
-              ],
+              "type": "string",
+              "const": "something"
+            },
+            "name": {
               "type": "string"
             }
           },
           "required": [
             "type",
             "name"
-          ],
-          "title": "something",
-          "type": "object"
+          ]
         },
         {
+          "title": "other",
+          "type": "object",
           "properties": {
-            "name": {
-              "type": "string"
-            },
             "type": {
-              "enum": [
-                "other"
-              ],
+              "type": "string",
+              "const": "other"
+            },
+            "name": {
               "type": "string"
             }
           },
           "required": [
             "type",
             "name"
-          ],
-          "title": "other",
-          "type": "object"
+          ]
         }
       ]
     })

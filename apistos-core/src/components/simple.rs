@@ -1,8 +1,6 @@
-use crate::ApiComponent;
-
 macro_rules! simple_modifier {
   ($ty:ty) => {
-    impl ApiComponent for $ty {
+    impl crate::ApiComponent for $ty {
       fn child_schemas(
         _: apistos_models::OpenApiVersion,
       ) -> Vec<(
@@ -32,6 +30,7 @@ macro_rules! simple_modifier {
     }
   };
 }
+pub(crate) use simple_modifier;
 
 simple_modifier!(char);
 simple_modifier!(String);
@@ -63,15 +62,9 @@ simple_modifier!(rust_decimal::Decimal);
 simple_modifier!(uuid::Uuid);
 #[cfg(feature = "url")]
 simple_modifier!(url::Url);
-#[cfg(feature = "ipnetwork")]
-simple_modifier!(ipnetwork::IpNetwork);
-#[cfg(feature = "ipnetwork")]
-simple_modifier!(ipnetwork::Ipv4Network);
-#[cfg(feature = "ipnetwork")]
-simple_modifier!(ipnetwork::Ipv6Network);
 
 #[cfg(feature = "chrono")]
-impl<T: chrono::TimeZone> ApiComponent for chrono::DateTime<T> {
+impl<T: chrono::TimeZone> crate::ApiComponent for chrono::DateTime<T> {
   fn child_schemas(
     _: apistos_models::OpenApiVersion,
   ) -> Vec<(

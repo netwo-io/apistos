@@ -131,7 +131,7 @@ mod test {
   use assert_json_diff::assert_json_eq;
 
   use crate::{ApistosSchema, JsonSchema, OpenApiVersion};
-  use schemars::gen::SchemaSettings;
+  use schemars::generate::SchemaSettings;
   use serde::Serialize;
   use serde_json::json;
 

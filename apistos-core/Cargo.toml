@@ -56,7 +56,7 @@ garde = ["actix", "dep:garde-actix-web"]
 
 # extra types related features
 chrono = ["dep:chrono", "schemars/chrono04"]
-ipnetwork = ["dep:ipnetwork", "schemars/ipnetwork"]
+ipnetwork = ["dep:serde", "dep:ipnetwork"]
 multipart = ["actix", "dep:serde", "dep:actix-multipart"]
 rust_decimal = ["dep:rust_decimal", "schemars/rust_decimal1"]
 uuid = ["dep:uuid", "schemars/uuid1"]

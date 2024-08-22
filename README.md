@@ -59,9 +59,7 @@ carpenters, craftsmen, metallurgy ... which can also be considered by some as th
 
 ```toml
 [dependencies]
-#schemars = "0.8"
-# sadly we currently rely on a fork to fix multiple flatten for enums, related PR can be found here: https://github.com/GREsau/schemars/pull/264
-schemars = { package = "apistos-schemars", version = "1.0.0-alpha.2" }
+schemars = "1.0.0-alpha.8"
 apistos = "1.0.0-pre-release.4"
 ```
 
@@ -180,7 +178,7 @@ For a complete example, see [the sample petstore](https://github.com/netwo-io/ap
 | `swagger-ui`       | Enables Swagger UI to expose the generated openapi file                  |                                                                 |
 | `qs_query`         | Enables documenting types from `serde_qs`                                | [`serde_qs`](https://crates.io/crates/serde-qs)                 |
 | `chrono`           | Enables documenting types from `chrono`                                  | [`chrono`](https://crates.io/crates/chrono)                     |
-| `ipnetwork`       | Enables documenting types from `ipnetwork`                               | [`ipnetwork`](https://crates.io/crates/ipnetwork)             |
+| `ipnetwork`        | Enables documenting types from `ipnetwork`                               | [`ipnetwork`](https://crates.io/crates/ipnetwork)               |
 | `multipart`        | Enables documenting types from `actix-multipart`                         | [`actix-multipart`](https://crates.io/crates/actix-multipart)   |
 | `rust_decimal`     | Enables documenting types from `rust_decimal`                            | [`rust_decimal`](https://crates.io/crates/rust-decimal)         |
 | `uuid`             | Enables documenting types from `uuid`                                    | [`uuid`](https://crates.io/crates/uuid)                         |
