@@ -22,9 +22,9 @@ This crate allows you to run an actix-web server documented with Apistos on [Shu
 
 ```toml
 [dependencies]
-schemars = "1.0.0-alpha.8"
-apistos = { version = "1.0.0-pre-release.4" }
-apistos-shuttle = { version = "1.0.0-pre-release.4" }
+schemars = "1.0.0-alpha.10"
+apistos = { version = "1.0.0-pre-release.5" }
+apistos-shuttle = { version = "1.0.0-pre-release.5" }
 ```
 
 ### Example
