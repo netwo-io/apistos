@@ -359,8 +359,7 @@ fn api_component_derive_flatten_algebraic_enums() {
           },
           "required": [
             "after_id"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "title": "after_date",
@@ -373,8 +372,7 @@ fn api_component_derive_flatten_algebraic_enums() {
           },
           "required": [
             "after_date"
-          ],
-          "additionalProperties": false
+          ]
         }
       ],
       "required": [
@@ -492,9 +490,27 @@ fn api_component_derive_named_enums() {
     json,
     json!({
       "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "title": "Query",
+      "type": "object",
+      "properties": {
+        "test": {
+          "type": "string"
+        },
+        "kinds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/KindQuery"
+          }
+        }
+      },
+      "required": [
+        "test",
+        "kinds"
+      ],
       "oneOf": [
         {
-          "additionalProperties": false,
+          "title": "Active",
+          "type": "object",
           "properties": {
             "Active": {
               "$ref": "#/components/schemas/ActiveOrInactiveQuery"
@@ -502,12 +518,11 @@ fn api_component_derive_named_enums() {
           },
           "required": [
             "Active"
-          ],
-          "title": "Active",
-          "type": "object"
+          ]
         },
         {
-          "additionalProperties": false,
+          "title": "Inactive",
+          "type": "object",
           "properties": {
             "Inactive": {
               "$ref": "#/components/schemas/ActiveOrInactiveQuery"
@@ -515,28 +530,9 @@ fn api_component_derive_named_enums() {
           },
           "required": [
             "Inactive"
-          ],
-          "title": "Inactive",
-          "type": "object"
+          ]
         }
-      ],
-      "properties": {
-        "kinds": {
-          "items": {
-            "$ref": "#/components/schemas/KindQuery"
-          },
-          "type": "array"
-        },
-        "test": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "test",
-        "kinds"
-      ],
-      "title": "Query",
-      "type": "object"
+      ]
     })
   );
 

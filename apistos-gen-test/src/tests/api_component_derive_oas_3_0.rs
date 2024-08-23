@@ -320,49 +320,47 @@ fn api_component_derive_flatten_algebraic_enums() {
   assert_json_eq!(
     json,
     json!({
+      "title": "Query",
+      "type": "object",
+      "properties": {
+        "limit": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
       "oneOf": [
         {
-          "additionalProperties": false,
+          "title": "after_id",
+          "type": "object",
           "properties": {
             "after_id": {
+              "type": "integer",
               "format": "uint64",
-              "minimum": 0,
-              "type": "integer"
+              "minimum": 0
             }
           },
           "required": [
             "after_id"
-          ],
-          "title": "after_id",
-          "type": "object"
+          ]
         },
         {
-          "additionalProperties": false,
+          "title": "after_date",
+          "type": "object",
           "properties": {
             "after_date": {
-              "format": "date-time",
-              "type": "string"
+              "type": "string",
+              "format": "date-time"
             }
           },
           "required": [
             "after_date"
-          ],
-          "title": "after_date",
-          "type": "object"
+          ]
         }
       ],
-      "properties": {
-        "limit": {
-          "format": "uint32",
-          "minimum": 0,
-          "type": "integer"
-        }
-      },
       "required": [
         "limit"
-      ],
-      "title": "Query",
-      "type": "object"
+      ]
     })
   );
 }
@@ -467,9 +465,27 @@ fn api_component_derive_named_enums() {
   assert_json_eq!(
     json,
     json!({
+      "title": "Query",
+      "type": "object",
+      "properties": {
+        "test": {
+          "type": "string"
+        },
+        "kinds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/KindQuery"
+          }
+        }
+      },
+      "required": [
+        "test",
+        "kinds"
+      ],
       "oneOf": [
         {
-          "additionalProperties": false,
+          "title": "Active",
+          "type": "object",
           "properties": {
             "Active": {
               "$ref": "#/components/schemas/ActiveOrInactiveQuery"
@@ -477,12 +493,11 @@ fn api_component_derive_named_enums() {
           },
           "required": [
             "Active"
-          ],
-          "title": "Active",
-          "type": "object"
+          ]
         },
         {
-          "additionalProperties": false,
+          "title": "Inactive",
+          "type": "object",
           "properties": {
             "Inactive": {
               "$ref": "#/components/schemas/ActiveOrInactiveQuery"
@@ -490,28 +505,9 @@ fn api_component_derive_named_enums() {
           },
           "required": [
             "Inactive"
-          ],
-          "title": "Inactive",
-          "type": "object"
+          ]
         }
-      ],
-      "properties": {
-        "kinds": {
-          "items": {
-            "$ref": "#/components/schemas/KindQuery"
-          },
-          "type": "array"
-        },
-        "test": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "test",
-        "kinds"
-      ],
-      "title": "Query",
-      "type": "object"
+      ]
     })
   );
 
