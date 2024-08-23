@@ -10,12 +10,11 @@ use actix_web::Error;
 use apistos_models::components::Components;
 use apistos_models::paths::PathItem;
 use indexmap::IndexMap;
-use std::collections::BTreeMap;
 use std::fmt::Debug;
 use std::future::Future;
 
 pub struct Scope<S = actix_web::Scope> {
-  pub(crate) item_map: BTreeMap<String, PathItem>,
+  pub(crate) item_map: IndexMap<String, PathItem>,
   pub(crate) components: Vec<Components>,
   tags: Vec<String>,
   path: String,
@@ -175,9 +174,11 @@ where
   }
 
   fn update_from_def_holder<D: DefinitionHolder>(&mut self, dh: &mut D) {
-    self.components.extend(dh.components());
-    let mut item_map = IndexMap::new();
+    let mut item_map: IndexMap<String, PathItem> = IndexMap::new();
     dh.update_path_items(&mut item_map);
+
+    self.components.extend(dh.components());
+
     for (path, mut path_item) in item_map {
       let p = [self.path.clone(), path]
         .iter()
@@ -191,7 +192,9 @@ where
         operation.tags.append(&mut self.tags.clone());
       }
 
-      self.item_map.insert(p, path_item);
+      let op_map = self.item_map.entry(p).or_default();
+      //@todo we should probably merge the path items together instead but for now only operations can be defined using apistos here
+      op_map.operations.extend(path_item.operations);
     }
   }
 }

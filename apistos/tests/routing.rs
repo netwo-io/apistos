@@ -62,7 +62,10 @@ async fn actix_routing() {
         .route("test3", patch().to(test))
         .route("test4/{test_id}", patch().to(test))
         .app_data("")
-        .configure(my_routes),
+        .configure(my_routes)
+        .service(scope("test5").route("", post().to(test)).route("", get().to(test)))
+        .service(resource("test6").route(post().to(test)))
+        .service(resource("test6").route(get().to(test))),
     )
     .build("/openapi.json");
   let app = init_service(app).await;
@@ -80,11 +83,18 @@ async fn actix_routing() {
     "/test/test2/",
     "/test/test3",
     "/test/test4/{test_id}",
+    "/test/test5",
+    "/test/test6",
     "/test/users/{user_id}",
     "/test/{plop_id}/{clap_name}",
   ];
 
-  assert_eq!(paths, expected_paths)
+  assert_eq!(paths, expected_paths);
+
+  assert_eq!(
+    body.paths.paths.values().flat_map(|v| v.operations.values()).count(),
+    10
+  );
 }
 
 // Imports bellow aim at making clippy happy. Those dependencies are necessary for integration-test.
