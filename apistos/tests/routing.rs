@@ -91,7 +91,10 @@ async fn actix_routing() {
 
   assert_eq!(paths, expected_paths);
 
-  assert_eq!(body.paths.paths.values().flat_map(|v| v.operations.values()).count(), 10);
+  assert_eq!(
+    body.paths.paths.values().flat_map(|v| v.operations.values()).count(),
+    10
+  );
 }
 
 // Imports bellow aim at making clippy happy. Those dependencies are necessary for integration-test.
