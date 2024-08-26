@@ -8,7 +8,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! schemars = "1.0.0-alpha.10"
+//! schemars = "1.0.0-alpha.11"
 //! apistos = "1.0.0-pre-release.5"
 //! ```
 //!
@@ -153,7 +153,7 @@ pub use log;
 #[cfg(feature = "ipnetwork")]
 pub use apistos_core::ipnetwork;
 #[cfg(feature = "multipart")]
-pub use apistos_core::multipart::tempfile;
+pub use apistos_core::multipart;
 pub use apistos_core::parameters::header::ApiHeader;
 pub use apistos_core::PathItemDefinition;
 pub use apistos_core::{ApiComponent, ApiErrorComponent, ApiWebhook, ApiWebhookDef, TypedSchema, __internal};

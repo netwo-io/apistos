@@ -59,7 +59,7 @@ carpenters, craftsmen, metallurgy ... which can also be considered by some as th
 
 ```toml
 [dependencies]
-schemars = "1.0.0-alpha.10"
+schemars = "1.0.0-alpha.11"
 apistos = "1.0.0-pre-release.5"
 ```
 
