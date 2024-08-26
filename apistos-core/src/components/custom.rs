@@ -1,3 +1,4 @@
+// @todo depends on ipnetwork's schemars feature instead once ipnetwork depends on schemars 1.x
 #[cfg(feature = "ipnetwork")]
 pub mod ipnetwork {
   use crate::simple::simple_modifier;
