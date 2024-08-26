@@ -160,6 +160,39 @@ pub mod ipnetwork {
         }
       }
 
+      let schema = <Test as ApiComponent>::schema(OpenApiVersion::OAS3_0);
+      let (schema_name, schema) = schema.expect("schema should be defined");
+      assert_eq!(schema_name, "Test");
+      let json = serde_json::to_value(schema).expect("Unable to serialize as Json");
+      assert_json_eq!(
+        json,
+        json!({
+          "title": "Test",
+          "type": "object",
+          "properties": {
+            "ip": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "format": "ipv4"
+                },
+                {
+                  "type": "string",
+                  "format": "ipv6"
+                }
+              ]
+            },
+            "label": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "ip",
+            "label"
+          ]
+        })
+      );
+
       let schema = <Test as ApiComponent>::schema(OpenApiVersion::OAS3_1);
       let (schema_name, schema) = schema.expect("schema should be defined");
       assert_eq!(schema_name, "Test");
