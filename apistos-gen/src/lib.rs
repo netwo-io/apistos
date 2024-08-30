@@ -185,7 +185,6 @@ pub fn derive_api_type(input: TokenStream) -> TokenStream {
 /// #[derive(Debug, Clone, JsonSchema, ApiComponent, Validate)]
 /// pub(crate) struct QueryTag {
 ///   #[garde(length(min = 2))]
-///   #[schemars(length(min = 2))]
 ///   pub(crate) tags: Vec<String>,
 /// }
 /// ```
