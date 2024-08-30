@@ -27,7 +27,7 @@ These models are not linked to any web framework.
 
 ```toml
 [dependencies]
-schemars = "1.0.0-alpha.11"
+schemars = "1.0.0-alpha.14"
 apistos-models = "1.0.0-pre-release.5"
 ```
 
