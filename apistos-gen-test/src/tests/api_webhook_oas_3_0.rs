@@ -1,5 +1,5 @@
 use assert_json_diff::assert_json_eq;
-use schemars::_serde_json::json;
+use schemars::_private::serde_json::json;
 
 use apistos::{ApiWebhook, OpenApiVersion};
 use apistos_gen::ApiWebhookComponent;

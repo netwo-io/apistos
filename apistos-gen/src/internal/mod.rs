@@ -2,7 +2,7 @@ use crate::internal::components::Components;
 use crate::internal::operation::Operation;
 use crate::operation_attr::OperationAttr;
 use proc_macro2::{Span, TokenStream as TokenStream2};
-use proc_macro_error::{abort, emit_error};
+use proc_macro_error2::{abort, emit_error};
 use quote::quote;
 
 use syn::{

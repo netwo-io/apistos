@@ -1,6 +1,6 @@
 use actix_web::web::Json;
 use assert_json_diff::assert_json_eq;
-use schemars::_serde_json::json;
+use schemars::_private::serde_json::json;
 
 use crate::tests::api_webhook_oas_3_1::test_models::Test;
 use apistos::{ApiWebhook, OpenApiVersion};
