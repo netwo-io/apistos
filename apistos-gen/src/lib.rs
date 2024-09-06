@@ -18,7 +18,7 @@ use darling::ast::NestedMeta;
 use darling::Error;
 use proc_macro::TokenStream;
 use proc_macro2::Span;
-use proc_macro_error::{abort, proc_macro_error, OptionExt};
+use proc_macro_error2::{abort, proc_macro_error, OptionExt};
 use quote::{format_ident, quote};
 use syn::{DeriveInput, GenericParam, Ident, ItemFn};
 
@@ -122,11 +122,11 @@ pub fn derive_api_type(input: TokenStream) -> TokenStream {
         fn json_schema(_gen: &mut schemars::gen::SchemaGenerator) -> apistos::Schema {
           let instance_type = <Self as TypedSchema>::schema_type();
           match <Self as TypedSchema>::format() {
-            Some(format) => apistos::Schema::try_from(schemars::_serde_json::json!({
+            Some(format) => apistos::Schema::try_from(schemars::_private::serde_json::json!({
               "type": instance_type,
               "format": format,
             })),
-            None => apistos::Schema::try_from(schemars::_serde_json::json!({
+            None => apistos::Schema::try_from(schemars::_private::serde_json::json!({
               "type": instance_type,
             }))
           }
@@ -148,11 +148,11 @@ pub fn derive_api_type(input: TokenStream) -> TokenStream {
           Some((
             #component_name.to_string(),
             apistos::Schema::try_from(match <#ident #ty_generics>::format() {
-              Some(format) => schemars::_serde_json::json!({
+              Some(format) => schemars::_private::serde_json::json!({
                 "type": <#ident #ty_generics>::schema_type(),
                 "format": format,
               }),
-              None => schemars::_serde_json::json!({
+              None => schemars::_private::serde_json::json!({
                 "type": <#ident #ty_generics>::schema_type(),
               }),
             })

@@ -4,7 +4,7 @@ use actix_web::http::header::ContentType;
 use actix_web::web::Json;
 use actix_web::{Error, HttpResponse, Responder};
 use assert_json_diff::assert_json_eq;
-use schemars::_serde_json::json;
+use schemars::_private::serde_json::json;
 use std::collections::HashSet;
 use uuid::Uuid;
 

@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 use darling::FromMeta;
 use proc_macro2::{Ident, Span, TokenStream};
-use proc_macro_error::{abort, OptionExt};
+use proc_macro_error2::{abort, OptionExt};
 use quote::{quote, ToTokens};
 use syn::{Attribute, Data, DataEnum, Error};
 

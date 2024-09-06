@@ -2,7 +2,7 @@ use crate::OPENAPI_CALLBACK_STRUCT_PREFIX;
 use darling::ast::NestedMeta;
 use darling::FromMeta;
 use proc_macro2::{Ident, Span, TokenStream};
-use proc_macro_error::abort;
+use proc_macro_error2::abort;
 use quote::{quote, ToTokens};
 use std::collections::BTreeMap;
 
