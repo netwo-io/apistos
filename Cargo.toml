@@ -22,7 +22,7 @@ documentation = "https://docs.rs/apistos/"
 license = "MIT OR Apache-2.0"
 rust-version = "1.77"
 publish = true
-version = "1.0.0-pre-release.7"
+version = "1.0.0-pre-release.8"
 
 [workspace.dependencies]
 actix-service = "2"

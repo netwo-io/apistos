@@ -9,7 +9,7 @@
 //! ```toml
 //! [dependencies]
 //! schemars = "1.0.0-alpha.14"
-//! apistos = "1.0.0-pre-release.6"
+//! apistos = "1.0.0-pre-release.8"
 //! ```
 //!
 //! # Usage example
