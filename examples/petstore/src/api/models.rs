@@ -31,7 +31,7 @@ pub(crate) struct Category {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, ApiType)]
 #[serde(transparent)]
-#[allow(clippy::useless_vec)]
+#[expect(clippy::useless_vec)]
 pub struct Finite<N: Float> {
   inner: N,
 }

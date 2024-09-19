@@ -175,7 +175,7 @@ pub mod tempfile {
     use serde_json::json;
 
     #[test]
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     fn multipart_tempfile_schema() {
       #[derive(JsonSchema)]
       struct Test {

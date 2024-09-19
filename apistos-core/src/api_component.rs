@@ -495,7 +495,7 @@ mod test {
   use crate::ApiComponent;
 
   #[test]
-  #[allow(dead_code)]
+  #[expect(dead_code)]
   fn api_component_schema_vec_oas_3_0() {
     #[derive(JsonSchema)]
     struct TestChild {
@@ -600,7 +600,7 @@ mod test {
   }
 
   #[test]
-  #[allow(dead_code)]
+  #[expect(dead_code)]
   fn api_component_schema_vec_oas_3_1() {
     #[derive(JsonSchema)]
     struct TestChild {

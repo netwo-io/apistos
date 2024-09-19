@@ -8,7 +8,7 @@ use apistos_core::{ApiComponent, TypedSchema};
 use apistos_gen::ApiType;
 
 #[test]
-#[allow(dead_code)]
+#[expect(dead_code)]
 fn api_type_derive() {
   #[derive(ApiType)]
   struct Name(String);
@@ -59,7 +59,7 @@ fn api_type_derive() {
 }
 
 #[test]
-#[allow(dead_code)]
+#[expect(dead_code)]
 fn api_type_derive_with_format() {
   #[derive(ApiType)]
   struct Name(String);
@@ -113,7 +113,7 @@ fn api_type_derive_with_format() {
 }
 
 #[test]
-#[allow(dead_code)]
+#[expect(dead_code)]
 fn api_type_derive_with_default_type_parameter() {
   struct GenericHolder<T = String> {
     inner: T,
@@ -171,7 +171,7 @@ fn api_type_derive_with_default_type_parameter() {
 }
 
 #[test]
-#[allow(dead_code)]
+#[expect(dead_code)]
 fn api_type_derive_with_generic_type_parameter() {
   struct GenericHolder<T: FromStr> {
     inner: T,
@@ -229,7 +229,7 @@ fn api_type_derive_with_generic_type_parameter() {
 }
 
 #[test]
-#[allow(dead_code)]
+#[expect(dead_code)]
 fn api_type_derive_with_format_complex_struct() {
   #[derive(ApiType)]
   struct Name {

@@ -13,7 +13,7 @@ use apistos::OpenApiVersion;
 use apistos_core::PathItemDefinition;
 use apistos_gen::api_operation;
 
-#[allow(clippy::todo)]
+#[expect(clippy::todo)]
 mod test_models {
   use std::fmt::{Display, Formatter};
   use std::future::Ready;
@@ -80,6 +80,7 @@ mod test_models {
     }
   }
 
+  #[allow(clippy::duplicated_attributes)]
   #[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
   #[openapi_error(status(code = 401), status(code = 403), status(code = 404), status(code = 405))]
   pub(crate) enum MultipleErrorResponse {
@@ -118,7 +119,6 @@ mod test_models {
 }
 
 #[test]
-#[allow(dead_code)]
 fn api_operation() {
   /// Add a new pet to the store
   /// Add a new pet to the store
@@ -200,7 +200,6 @@ fn api_operation() {
 }
 
 #[test]
-#[allow(dead_code)]
 fn api_operation_impl_responder() {
   /// Add a new pet to the store
   /// Add a new pet to the store
@@ -254,7 +253,6 @@ fn api_operation_impl_responder() {
 }
 
 #[test]
-#[allow(dead_code)]
 fn api_operation_simple_response() {
   /// Add a new pet to the store
   /// Add a new pet to the store
@@ -325,7 +323,6 @@ fn api_operation_simple_response() {
 }
 
 #[test]
-#[allow(dead_code)]
 fn api_operation_without_parameters() {
   /// Add a new pet to the store
   /// Add a new pet to the store
@@ -385,7 +382,6 @@ fn api_operation_without_parameters() {
 }
 
 #[test]
-#[allow(dead_code)]
 fn api_operation_no_content() {
   /// Add a new pet to the store
   /// Add a new pet to the store
@@ -446,7 +442,6 @@ fn api_operation_no_content() {
 }
 
 #[test]
-#[allow(dead_code)]
 fn api_operation_created_json() {
   /// Add a new pet to the store
   /// Add a new pet to the store
@@ -547,7 +542,6 @@ fn api_operation_created_json() {
 }
 
 #[test]
-#[allow(dead_code)]
 fn api_operation_created_json_simple_response() {
   /// Add a new pet to the store
   /// Add a new pet to the store
@@ -618,7 +612,6 @@ fn api_operation_created_json_simple_response() {
 }
 
 #[test]
-#[allow(dead_code)]
 fn api_operation_accepted_json() {
   /// Add a new pet to the store
   /// Add a new pet to the store
@@ -700,7 +693,6 @@ fn api_operation_accepted_json() {
 }
 
 #[test]
-#[allow(dead_code)]
 fn api_operation_deprecated() {
   /// Add a new pet to the store
   /// Add a new pet to the store
@@ -860,7 +852,6 @@ fn api_operation_deprecated() {
 }
 
 #[test]
-#[allow(dead_code)]
 fn api_operation_skip() {
   /// Add a new pet to the store
   /// Add a new pet to the store
@@ -887,7 +878,6 @@ fn api_operation_skip() {
 }
 
 #[test]
-#[allow(dead_code)]
 fn api_operation_error() {
   /// Add a new pet to the store
   /// Add a new pet to the store
@@ -971,7 +961,6 @@ fn api_operation_error() {
 }
 
 #[test]
-#[allow(dead_code)]
 fn api_operation_security() {
   /// Add a new pet to the store
   /// Add a new pet to the store
@@ -1087,7 +1076,6 @@ fn api_operation_security() {
 }
 
 #[test]
-#[allow(dead_code)]
 fn api_operation_multipart() {
   /// Add a new pet to the store
   /// Add a new pet to the store
@@ -1156,7 +1144,6 @@ fn api_operation_multipart() {
 }
 
 #[test]
-#[allow(dead_code)]
 fn api_operation_consumes_produces() {
   /// Add a new pet to the store
   /// Add a new pet to the store
@@ -1228,7 +1215,6 @@ fn api_operation_consumes_produces() {
 }
 
 #[test]
-#[allow(dead_code)]
 fn api_operation_root_vec() {
   /// Add a new pet to the store
   /// Add a new pet to the store
@@ -1324,8 +1310,9 @@ fn api_operation_root_vec() {
 }
 
 #[test]
+#[expect(dead_code)]
 fn api_operation_actix_web_grant() {
-  #[allow(clippy::unused_async)]
+  #[expect(clippy::unused_async)]
   async fn extract(_: &ServiceRequest) -> Result<HashSet<String>, Error> {
     Ok(Default::default())
   }

@@ -3,7 +3,7 @@
 //! These models are not linked to any web framework.
 
 // schemars::Schema does not implement Eq
-#![allow(clippy::derive_partial_eq_without_eq)]
+#![expect(clippy::derive_partial_eq_without_eq)]
 
 use std::collections::BTreeMap;
 use std::fmt::Debug;
@@ -122,8 +122,6 @@ pub enum VersionSpecificSchema {
 
 #[cfg(test)]
 mod test {
-  #![allow(clippy::expect_used)]
-
   use std::collections::BTreeMap;
 
   use indexmap::IndexMap;

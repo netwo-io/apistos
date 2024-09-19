@@ -136,7 +136,7 @@ mod test {
   use serde_json::json;
 
   #[test]
-  #[allow(dead_code, unused_qualifications)]
+  #[expect(dead_code, unused_qualifications)]
   fn test_apistos_schema_transform_3_0() {
     #[derive(JsonSchema, Serialize)]
     struct TestStruct {
@@ -288,7 +288,7 @@ mod test {
   }
 
   #[test]
-  #[allow(dead_code, unused_qualifications)]
+  #[expect(dead_code, unused_qualifications)]
   fn test_apistos_schema_transform_3_1() {
     #[derive(JsonSchema, Serialize)]
     struct TestStruct {

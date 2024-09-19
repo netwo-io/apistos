@@ -6,7 +6,7 @@ use crate::tests::api_webhook_oas_3_1::test_models::Test;
 use apistos::{ApiWebhook, OpenApiVersion};
 use apistos_gen::ApiWebhookComponent;
 
-#[allow(clippy::todo)]
+#[expect(clippy::todo)]
 mod test_models {
   use actix_web::http::header::{Header, HeaderName, HeaderValue, InvalidHeaderValue, TryIntoHeaderValue};
   use std::fmt::{Display, Formatter};
@@ -82,7 +82,6 @@ mod test_models {
 }
 
 #[test]
-#[allow(dead_code)]
 fn api_webhook() {
   use actix_web::web::Header;
   use test_models::OrganizationSlug;
@@ -131,7 +130,7 @@ fn api_webhook() {
 }
 
 #[test]
-#[allow(dead_code)]
+#[expect(dead_code)]
 fn api_webhook_enum() {
   use actix_web::web::Header;
   use test_models::OrganizationSlug;
@@ -214,7 +213,7 @@ fn api_webhook_enum() {
 }
 
 #[test]
-#[allow(dead_code)]
+#[expect(dead_code)]
 fn api_webhook_enum_default() {
   use actix_web::web::Header;
   use test_models::OrganizationSlug;
@@ -305,7 +304,7 @@ fn api_webhook_enum_default() {
 }
 
 #[test]
-#[allow(dead_code)]
+#[expect(dead_code)]
 fn api_webhook_enum_default_and_override() {
   use actix_web::web::Header;
   use test_models::OrganizationSlug;

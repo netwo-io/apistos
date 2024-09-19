@@ -5,8 +5,9 @@ use schemars::JsonSchema;
 use std::collections::{BTreeMap, HashSet};
 
 #[test]
-#[allow(dead_code)]
+#[expect(dead_code)]
 fn api_component_derive() {
+  #[allow(clippy::duplicated_attributes)]
   #[derive(ApiErrorComponent)]
   #[openapi_error(
     status(code = 403),
@@ -52,7 +53,7 @@ fn api_component_derive() {
 }
 
 #[test]
-#[allow(dead_code)]
+#[expect(dead_code)]
 fn api_component_with_schema() {
   #[derive(JsonSchema)]
   struct AuthorizeError {
@@ -60,6 +61,7 @@ fn api_component_with_schema() {
     code: String,
   }
 
+  #[allow(clippy::duplicated_attributes)]
   #[derive(ApiErrorComponent)]
   #[openapi_error(status(code = 403), status(code = 409, description = "Too many requests"))]
   enum ErrorResponse {

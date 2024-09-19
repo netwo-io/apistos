@@ -11,7 +11,7 @@ use apistos_models::{ApistosSchema, Schema};
 use crate::internal::get_oas_version;
 
 /// Regex that can be used to fetch templated path parameters.
-#[allow(clippy::expect_used)]
+#[expect(clippy::expect_used)]
 static PATH_TEMPLATE_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"\{(.*?)\}").expect("path template regex"));
 
 pub(crate) trait OperationUpdater {
@@ -62,7 +62,7 @@ impl OperationUpdater for Operation {
 
 #[cfg(test)]
 mod test {
-  #![allow(clippy::panic)]
+  #![expect(clippy::panic)]
 
   use apistos_models::paths::{Operation, Parameter, ParameterDefinition, ParameterIn};
   use apistos_models::reference_or::ReferenceOr;

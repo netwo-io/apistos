@@ -78,7 +78,6 @@ impl ServiceFactory<ServiceRequest> for Route {
   type InitError = ();
   type Future = <actix_web::Route as ServiceFactory<ServiceRequest>>::Future;
 
-  #[allow(clippy::unit_arg)]
   fn new_service(&self, cfg: Self::Config) -> Self::Future {
     self.inner.new_service(cfg)
   }
@@ -86,7 +85,7 @@ impl ServiceFactory<ServiceRequest> for Route {
 
 impl Route {
   /// Wrapper for [`actix_web::Route::new`](https://docs.rs/actix-web/*/actix_web/struct.Route.html#method.new)
-  #[allow(clippy::new_without_default)]
+  #[expect(clippy::new_without_default)]
   pub fn new() -> Route {
     let oas_version = get_oas_version();
     Route {

@@ -9,7 +9,7 @@ use apistos_core::ApiComponent;
 use apistos_gen::ApiHeader;
 
 #[test]
-#[allow(dead_code)]
+#[expect(dead_code)]
 fn api_header_derive() {
   #[derive(JsonSchema, ApiHeader)]
   #[openapi_header(

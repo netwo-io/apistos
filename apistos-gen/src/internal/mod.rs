@@ -17,7 +17,6 @@ pub(crate) mod schemas;
 pub(crate) mod security;
 pub(crate) mod utils;
 
-#[allow(clippy::too_many_arguments)]
 pub(crate) fn gen_open_api_impl(
   item_ast: &ItemFn,
   operation_attribute: OperationAttr,
@@ -111,7 +110,7 @@ pub(crate) fn gen_open_api_impl(
   };
 
   quote! {
-    #[allow(non_camel_case_types)]
+    #[expect(non_camel_case_types)]
     #[doc(hidden)]
     #openapi_struct_def
     #[automatically_derived]

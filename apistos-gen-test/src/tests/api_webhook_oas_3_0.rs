@@ -4,7 +4,7 @@ use schemars::_private::serde_json::json;
 use apistos::{ApiWebhook, OpenApiVersion};
 use apistos_gen::ApiWebhookComponent;
 
-#[allow(clippy::todo)]
+#[expect(clippy::todo)]
 mod test_models {
   use std::fmt::{Display, Formatter};
 
@@ -80,7 +80,6 @@ mod test_models {
 }
 
 #[test]
-#[allow(dead_code)]
 fn api_webhook() {
   use actix_web::web::Header;
   use test_models::OrganizationSlug;

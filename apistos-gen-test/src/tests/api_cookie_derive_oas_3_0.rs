@@ -8,7 +8,7 @@ use apistos_core::ApiComponent;
 use apistos_gen::ApiCookie;
 
 #[test]
-#[allow(dead_code)]
+#[expect(dead_code)]
 fn api_cookie_derive() {
   #[derive(JsonSchema, ApiCookie)]
   #[openapi_cookie(
@@ -55,7 +55,8 @@ fn api_cookie_derive() {
 }
 
 #[test]
-#[allow(dead_code)]
+#[expect(dead_code)]
+#[expect(deprecated)]
 fn api_cookie_derive_deprecated() {
   #[derive(JsonSchema, ApiCookie)]
   #[openapi_cookie(
@@ -105,7 +106,7 @@ fn api_cookie_derive_deprecated() {
 }
 
 #[test]
-#[allow(dead_code)]
+#[expect(dead_code)]
 fn api_cookie_derive_deprecated_attribute() {
   #[derive(JsonSchema, ApiCookie)]
   #[openapi_cookie(

@@ -141,8 +141,6 @@ where
 
 #[cfg(test)]
 mod test {
-  #![allow(clippy::expect_used)]
-
   use serde::Serialize;
 
   use apistos_core::ApiComponent;

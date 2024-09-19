@@ -213,20 +213,17 @@ where
   }
 
   /// Register webhooks to the OAS spec. This only have effect in 3.1.x
-  #[allow(clippy::unwrap_used)]
   pub fn webhook<W: ApiWebhook>(self, webhook: &W) -> Self {
     let oas_version = get_oas_version();
     self.register_webhook_components(webhook.components(oas_version), webhook.webhooks(oas_version))
   }
 
   /// Register webhooks to the OAS spec. This only have effect in 3.1.x
-  #[allow(clippy::unwrap_used)]
   pub fn webhook_from_def(self, webhook_def: ApiWebhookDef) -> Self {
     self.register_webhook_components(webhook_def.components, webhook_def.webhooks)
   }
 
   /// Register webhooks to the OAS spec. This only have effect in 3.1.x
-  #[allow(clippy::unwrap_used)]
   pub fn webhook_from_type<W: ApiWebhook>(self) -> Self {
     let oas_version = get_oas_version();
     let webhook_def = W::get_def(oas_version);
@@ -234,7 +231,7 @@ where
   }
 
   /// Add a new resource at **`openapi_path`** to expose the generated openapi schema and return an [actix_web::App](https://docs.rs/actix-web/latest/actix_web/struct.App.html)
-  #[allow(clippy::unwrap_used, clippy::expect_used)]
+  #[expect(clippy::unwrap_used, clippy::expect_used)]
   pub fn build(self, openapi_path: &str) -> actix_web::App<T> {
     let open_api_spec = self.open_api_spec.read().unwrap().clone();
     self
@@ -263,7 +260,7 @@ where
   ///       .with(SwaggerUIConfig::new(&"/swagger")), // with swagger-ui feature enable
   ///   );
   /// ```
-  #[allow(clippy::unwrap_used, clippy::expect_used)]
+  #[expect(clippy::unwrap_used, clippy::expect_used)]
   pub fn build_with(self, openapi_path: &str, config: BuildConfig) -> actix_web::App<T> {
     let open_api_spec = self.open_api_spec.read().unwrap().clone();
 
@@ -276,7 +273,7 @@ where
     actix_app.service(resource(openapi_path).route(get().to(OASHandler::new(open_api_spec))))
   }
 
-  #[allow(clippy::unwrap_used)]
+  #[expect(clippy::unwrap_used)]
   fn register_webhook_components(
     self,
     components: Vec<Components>,
@@ -310,7 +307,7 @@ where
   }
 
   /// Updates the underlying spec with definitions and operations from the given definition holder.
-  #[allow(clippy::unwrap_used)]
+  #[expect(clippy::unwrap_used)]
   fn update_from_def_holder<D: DefinitionHolder>(&mut self, definition_holder: &mut D) {
     let mut open_api_spec = self.open_api_spec.write().unwrap();
     let mut components = definition_holder.components().into_iter().reduce(|mut acc, component| {
@@ -383,7 +380,7 @@ where
   }
 }
 
-#[allow(clippy::expect_used)]
+#[expect(clippy::expect_used)]
 static PATH_NAME_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"\{(?<name>\S+):(.*)\}").expect("path name regex"));
 
 fn sanitize_patterned_path_parameter(path: &str) -> String {
@@ -395,7 +392,7 @@ fn sanitize_patterned_path_parameter(path: &str) -> String {
   path_parts.join("/")
 }
 
-#[allow(clippy::expect_used)]
+#[expect(clippy::expect_used)]
 static PATH_RESOURCE_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"/(.*?)/\{(.*?)\}").expect("path template regex"));
 
 fn build_operation_id(path: &str, operation_type: &OperationType) -> String {
@@ -416,8 +413,6 @@ fn build_operation_id(path: &str, operation_type: &OperationType) -> String {
 
 #[cfg(test)]
 mod test {
-  #![allow(clippy::expect_used)]
-
   use actix_web::test::{call_service, init_service, try_read_body_json, TestRequest};
   use actix_web::App;
 

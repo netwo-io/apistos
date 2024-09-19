@@ -940,7 +940,7 @@ pub fn api_callback(attr: TokenStream, item: TokenStream) -> TokenStream {
   };
 
   quote!(
-    #[allow(non_camel_case_types)]
+    #[expect(non_camel_case_types)]
     #[doc(hidden)]
     #openapi_struct_def
     #[automatically_derived]

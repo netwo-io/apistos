@@ -5,7 +5,7 @@ use schemars::JsonSchema;
 use std::collections::{BTreeMap, HashSet};
 
 #[test]
-#[allow(dead_code)]
+#[expect(dead_code)]
 fn api_component_derive() {
   #[allow(clippy::duplicated_attributes)]
   #[derive(ApiErrorComponent)]
@@ -53,7 +53,7 @@ fn api_component_derive() {
 }
 
 #[test]
-#[allow(dead_code)]
+#[expect(dead_code)]
 fn api_component_with_schema() {
   #[derive(JsonSchema)]
   struct AuthorizeError {

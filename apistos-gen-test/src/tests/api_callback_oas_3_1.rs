@@ -7,7 +7,7 @@ use apistos::{JsonSchema, OpenApiVersion};
 use apistos_core::PathItemDefinition;
 use apistos_gen::{api_callback, api_operation, ApiComponent};
 
-#[allow(clippy::todo)]
+#[expect(clippy::todo)]
 mod test_models {
   use actix_web::http::header::{Header, HeaderName, HeaderValue, InvalidHeaderValue, TryIntoHeaderValue};
   use std::fmt::{Display, Formatter};
@@ -83,7 +83,6 @@ mod test_models {
 }
 
 #[test]
-#[allow(dead_code)]
 fn api_callback() {
   use actix_web::web::Header;
   use test_models::OrganizationSlug;

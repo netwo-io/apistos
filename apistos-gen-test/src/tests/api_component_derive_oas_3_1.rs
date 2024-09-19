@@ -10,7 +10,7 @@ use apistos_core::ApiComponent;
 use apistos_gen::ApiComponent;
 
 #[test]
-#[allow(dead_code)]
+#[expect(dead_code)]
 fn api_component_derive() {
   #[derive(JsonSchema, ApiComponent)]
   struct Name {
@@ -44,7 +44,7 @@ fn api_component_derive() {
 }
 
 #[test]
-#[allow(dead_code)]
+#[expect(dead_code)]
 fn api_component_derive_with_generic() {
   #[derive(JsonSchema, ApiComponent)]
   struct Name<T>
@@ -117,6 +117,7 @@ fn api_component_derive_with_generic() {
 }
 
 #[test]
+#[expect(dead_code)]
 fn api_component_derive_with_flatten() {
   #[derive(JsonSchema, ApiComponent)]
   struct Name {
@@ -168,6 +169,7 @@ fn api_component_derive_with_flatten() {
 }
 
 #[test]
+#[expect(dead_code)]
 fn api_component_derive_with_deprecated_field() {
   #[derive(JsonSchema, ApiComponent)]
   struct Name {
@@ -210,6 +212,7 @@ fn api_component_derive_with_deprecated_field() {
 }
 
 #[test]
+#[expect(dead_code)]
 fn api_component_derive_with_format() {
   #[derive(JsonSchema, ApiComponent)]
   struct Name {
@@ -249,6 +252,7 @@ fn api_component_derive_with_format() {
 }
 
 #[test]
+#[expect(dead_code)]
 fn api_component_derive_recursive() {
   #[derive(JsonSchema, ApiComponent)]
   struct Name {
@@ -747,7 +751,7 @@ fn api_component_derive_named_tagged_enums() {
   );
 }
 
-#[allow(unused_qualifications)]
+#[expect(unused_qualifications)]
 #[test]
 fn api_component_derive_named_enums_deep() {
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
