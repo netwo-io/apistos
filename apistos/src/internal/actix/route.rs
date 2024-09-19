@@ -1,13 +1,13 @@
 use crate::internal::actix::utils::OperationUpdater;
 use crate::internal::actix::METHODS;
 use crate::internal::get_oas_version;
-use actix_service::{ServiceFactory, Transform};
 use actix_service::boxed::BoxService;
+use actix_service::{ServiceFactory, Transform};
+use actix_web::body::MessageBody;
 use actix_web::dev::{ServiceRequest, ServiceResponse};
 use actix_web::guard::Guard;
 use actix_web::http::Method;
 use actix_web::{Error, FromRequest, Handler, Responder};
-use actix_web::body::MessageBody;
 use apistos_core::PathItemDefinition;
 use apistos_models::components::Components;
 use apistos_models::paths::{Operation, OperationType, PathItem};
@@ -102,12 +102,12 @@ impl Route {
   pub fn wrap<M, B>(self, mw: M) -> Route
   where
     M: Transform<
-      BoxService<ServiceRequest, ServiceResponse, Error>,
-      ServiceRequest,
-      Response = ServiceResponse<B>,
-      Error = Error,
-      InitError = (),
-    > + 'static,
+        BoxService<ServiceRequest, ServiceResponse, Error>,
+        ServiceRequest,
+        Response = ServiceResponse<B>,
+        Error = Error,
+        InitError = (),
+      > + 'static,
     B: MessageBody + 'static,
   {
     let oas_version = get_oas_version();
@@ -169,13 +169,7 @@ impl Route {
   /// Currently doesn't affect OAS generation
   pub fn service<S, E>(mut self, service_factory: S) -> Self
   where
-    S: ServiceFactory<
-      ServiceRequest,
-      Response = ServiceResponse,
-      Error = E,
-      InitError = (),
-      Config = (),
-    > + 'static,
+    S: ServiceFactory<ServiceRequest, Response = ServiceResponse, Error = E, InitError = (), Config = ()> + 'static,
     E: Into<Error> + 'static,
   {
     self.inner = self.inner.service(service_factory);
