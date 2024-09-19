@@ -1,6 +1,3 @@
-#![allow(clippy::expect_used)]
-#![allow(clippy::panic)]
-
 use actix_web::web::Query;
 #[cfg(feature = "lab_query")]
 use actix_web_lab::extract::Query as LabQuery;
