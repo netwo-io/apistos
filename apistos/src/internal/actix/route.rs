@@ -8,7 +8,6 @@ use actix_web::dev::{ServiceRequest, ServiceResponse};
 use actix_web::guard::Guard;
 use actix_web::http::Method;
 use actix_web::{Error, FromRequest, Handler, Responder};
-use actix_web::body::MessageBody;
 use apistos_core::PathItemDefinition;
 use apistos_models::OpenApiVersion;
 use apistos_models::components::Components;
