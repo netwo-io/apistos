@@ -620,7 +620,7 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
 
   let operation_attribute = parse_openapi_operation_attrs(&attr_args);
 
-  let default_span = proc_macro2::Span::call_site();
+  let default_span = Span::call_site();
   let item_ast = match syn::parse::<ItemFn>(item) {
     Ok(v) => v,
     Err(e) => abort!(e.span(), format!("{e}")),

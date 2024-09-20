@@ -114,7 +114,7 @@ pub struct OauthImplicit {
   /// The URL to be used for obtaining refresh tokens. This MUST be in the form of a URL.
   #[serde(skip_serializing_if = "Option::is_none")]
   pub refresh_url: Option<String>,
-  /// The available scopes for the OAuth2 security scheme. A map between the scope name and a short description for it. The map MAY be empty.
+  /// The available scopes for the `OAuth2` security scheme. A map between the scope name and a short description for it. The map MAY be empty.
   pub scopes: BTreeMap<String, String>,
 }
 
@@ -127,7 +127,7 @@ pub struct OauthToken {
   /// The URL to be used for obtaining refresh tokens. This MUST be in the form of a URL.
   #[serde(skip_serializing_if = "Option::is_none")]
   pub refresh_url: Option<String>,
-  /// The available scopes for the OAuth2 security scheme. A map between the scope name and a short description for it. The map MAY be empty.
+  /// The available scopes for the `OAuth2` security scheme. A map between the scope name and a short description for it. The map MAY be empty.
   pub scopes: BTreeMap<String, String>,
 }
 
@@ -135,6 +135,6 @@ pub struct OauthToken {
 #[cfg_attr(any(test, feature = "deserialize"), derive(serde::Deserialize, PartialEq))]
 #[serde(rename_all = "camelCase")]
 pub struct OpenIdConnect {
-  /// OpenId Connect URL to discover OAuth2 configuration values. This MUST be in the form of a URL.
+  /// `OpenId` Connect URL to discover `OAuth2` configuration values. This MUST be in the form of a URL.
   pub open_id_connect_url: String,
 }

@@ -74,6 +74,7 @@ mod test_models {
     }
   }
 
+  #[allow(clippy::duplicated_attributes)]
   #[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
   #[openapi_error(status(code = 401), status(code = 403), status(code = 404), status(code = 405))]
   pub(crate) enum MultipleErrorResponse {
@@ -216,12 +217,78 @@ fn api_operation_impl_responder() {
     HttpResponse::Ok()
   }
 
+  #[allow(clippy::todo, clippy::unused_async)]
+  async fn plop() {
+    todo!()
+  }
+
+  /// Add a new pet to the store
+  /// Add a new pet to the store
+  /// Plop
+  #[api_operation(tag = "pet")]
+  pub(crate) async fn test_async(_body: Json<test_models::Test>) -> impl Responder {
+    plop().await;
+    HttpResponse::Ok()
+  }
+
   let components = __openapi_test::components();
   // only one component here because: error does not have schema and Test is used both for query and response
   assert_eq!(components.len(), 1);
   let components = serde_json::to_value(components).expect("Unable to serialize as Json");
 
   let operation = __openapi_test::operation();
+  let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
+
+  assert_json_eq!(
+    components,
+    json!([
+      {
+        "schemas": {
+          "Test": {
+            "properties": {
+              "test": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "test"
+            ],
+            "title": "Test",
+            "type": "object"
+          }
+        }
+      }
+    ])
+  );
+  assert_json_eq!(
+    operation,
+    json!({
+      "deprecated": false,
+      "description": "Add a new pet to the store\\\nPlop",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Test"
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {},
+      "summary": "Add a new pet to the store",
+      "tags": [
+        "pet"
+      ]
+    })
+  );
+
+  let components = __openapi_test_async::components();
+  // only one component here because: error does not have schema and Test is used both for query and response
+  assert_eq!(components.len(), 1);
+  let components = serde_json::to_value(components).expect("Unable to serialize as Json");
+
+  let operation = __openapi_test_async::operation();
   let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
 
   assert_json_eq!(

@@ -69,7 +69,6 @@ unused_import_braces = "warn"
 unused-lifetimes = "warn"
 unused_macro_rules = "warn"
 unused_qualifications = "warn"
-unused_tuple_struct_fields = "warn"
 
 [workspace.lints.clippy]
 bool_to_int_with_if = "warn"

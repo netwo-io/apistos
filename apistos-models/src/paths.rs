@@ -309,7 +309,7 @@ pub struct Example {
   /// Long description for the example. [CommonMark syntax](https://spec.commonmark.org/) MAY be used for rich text representation.
   #[serde(skip_serializing_if = "Option::is_none")]
   pub description: Option<String>,
-  /// Embedded literal example. The `value` field and `externalValue field are mutually exclusive. To represent examples of media types that cannot naturally represented in JSON or YAML, use a string value to contain the example, escaping where necessary.
+  /// Embedded literal example. The `value` field and `externalValue` field are mutually exclusive. To represent examples of media types that cannot naturally represented in JSON or YAML, use a string value to contain the example, escaping where necessary.
   #[serde(flatten)]
   pub value: ExampleValue,
   /// This object MAY be extended with [Specification Extensions](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions).
@@ -445,6 +445,6 @@ pub enum AnyOrExpression {
 pub enum OperationIdentifier {
   /// A relative or absolute URI reference to an OAS operation. This field is mutually exclusive of the `operationId` field, and MUST point to an [Operation Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#operation-object). Relative `operationRef` values MAY be used to locate an existing [Operation Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#operation-object) in the OpenAPI definition.
   OperationRef(String),
-  /// The name of an existing, resolvable OAS operation, as defined with a unique `operationId. This field is mutually exclusive of the `operationRef` field.
+  /// The name of an existing, resolvable OAS operation, as defined with a unique `operationId`. This field is mutually exclusive of the `operationRef` field.
   OperationId(String),
 }
