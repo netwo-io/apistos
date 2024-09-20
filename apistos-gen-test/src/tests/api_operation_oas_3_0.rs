@@ -80,7 +80,7 @@ mod test_models {
     }
   }
 
-  #[allow(clippy::duplicated_attributes)]
+  #[expect(clippy::duplicated_attributes)]
   #[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
   #[openapi_error(status(code = 401), status(code = 403), status(code = 404), status(code = 405))]
   pub(crate) enum MultipleErrorResponse {
@@ -221,7 +221,7 @@ fn api_operation_impl_responder() {
     HttpResponse::Ok()
   }
 
-  #[allow(clippy::todo, clippy::unused_async)]
+  #[expect(clippy::todo, clippy::unused_async, dead_code)]
   async fn plop() {
     todo!()
   }
@@ -287,12 +287,12 @@ fn api_operation_impl_responder() {
     })
   );
 
-  let components = __openapi_test_async::components();
+  let components = __openapi_test_async::components(OpenApiVersion::OAS3_0);
   // only one component here because: error does not have schema and Test is used both for query and response
   assert_eq!(components.len(), 1);
   let components = serde_json::to_value(components).expect("Unable to serialize as Json");
 
-  let operation = __openapi_test_async::operation();
+  let operation = __openapi_test_async::operation(OpenApiVersion::OAS3_0);
   let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
 
   assert_json_eq!(

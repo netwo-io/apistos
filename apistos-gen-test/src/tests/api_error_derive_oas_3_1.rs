@@ -7,7 +7,7 @@ use std::collections::{BTreeMap, HashSet};
 #[test]
 #[expect(dead_code)]
 fn api_component_derive() {
-  #[allow(clippy::duplicated_attributes)]
+  #[expect(clippy::duplicated_attributes)]
   #[derive(ApiErrorComponent)]
   #[openapi_error(
     status(code = 403),
@@ -61,7 +61,7 @@ fn api_component_with_schema() {
     code: String,
   }
 
-  #[allow(clippy::duplicated_attributes)]
+  #[expect(clippy::duplicated_attributes)]
   #[derive(ApiErrorComponent)]
   #[openapi_error(status(code = 403), status(code = 409, description = "Too many requests"))]
   enum ErrorResponse {
