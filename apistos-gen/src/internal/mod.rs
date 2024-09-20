@@ -186,7 +186,11 @@ pub(crate) fn gen_item_ast(
 
   let block = item_ast.block;
   let inner_handler = if is_responder {
-    quote!(core::future::ready(apistos::actix::ResponderWrapper((move || #block)())))
+    quote!({
+      use apistos::FutureExt;
+      #[expect(async_yields_async)]
+      (move || { async move #block })().map(apistos::actix::ResponderWrapper)
+    })
   } else if is_impl_trait {
     quote!((move || #block)())
   } else {

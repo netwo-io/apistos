@@ -75,7 +75,7 @@ async fn actix_web() -> ShuttleApistosActixWeb<impl FnOnce(&mut ServiceConfig) +
 > Default features are disabled for `shuttle-runtime` to avoid pulling [colored](https://github.com/colored-rs/colored)
 > which as a license considered as
 > copyleft by cargo-deny.
-> To implement your own tracing, please visit https://docs.shuttle.rs/configuration/logs
+> To implement your own tracing, please visit <https://docs.shuttle.rs/configuration/logs>
 
 ### About us
 

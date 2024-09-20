@@ -50,7 +50,7 @@ async fn default_parameters() {
     plap: String,
   }
 
-  #[allow(unused_tuple_struct_fields)]
+  #[allow(dead_code)]
   #[derive(Clone, Debug, JsonSchema, ApiHeader)]
   #[openapi_header(
     name = "X-Env-Complex",
@@ -59,7 +59,7 @@ async fn default_parameters() {
   )]
   struct SomeComplexHeader(TestHeaderStruct);
 
-  #[allow(unused_tuple_struct_fields)]
+  #[allow(dead_code)]
   #[derive(Clone, Debug, JsonSchema, ApiHeader)]
   #[openapi_header(
     name = "X-Env",
@@ -182,6 +182,7 @@ use apistos_rapidoc as _;
 use apistos_redoc as _;
 use apistos_scalar as _;
 use apistos_swagger_ui as _;
+use futures_util as _;
 use garde_actix_web as _;
 use indexmap as _;
 use log as _;
