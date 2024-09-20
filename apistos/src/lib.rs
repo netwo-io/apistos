@@ -11,7 +11,7 @@
 //! #schemars = "0.8"
 //! # sadly we currently rely on a fork to fix multiple flatten for enums, related PR can be found here: https://github.com/GREsau/schemars/pull/264
 //! schemars = { package = "apistos-schemars", version = "0.8" }
-//! apistos = "0.3"
+//! apistos = "0.4"
 //! ```
 //!
 //! # Usage example
