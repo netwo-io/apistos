@@ -16,6 +16,7 @@ license.workspace = true
 [dependencies]
 actix-service = { workspace = true }
 actix-web = { workspace = true }
+futures-util = { workspace = true }
 indexmap = { workspace = true }
 log = { workspace = true }
 md5 = { workspace = true }

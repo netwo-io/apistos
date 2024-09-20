@@ -163,6 +163,7 @@ pub use apistos_redoc::RedocConfig;
 pub use apistos_scalar::ScalarConfig;
 #[cfg(feature = "swagger-ui")]
 pub use apistos_swagger_ui::SwaggerUIConfig;
+pub use futures_util::future::FutureExt;
 
 mod internal;
 
