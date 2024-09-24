@@ -14,7 +14,7 @@ rust-version.workspace = true
 license.workspace = true
 
 [dependencies]
-pin-project = { workspace = true }
+pin-project = { workspace = true, optional = true }
 schemars = { workspace = true }
 
 actix-web = { workspace = true, optional = true }
@@ -33,14 +33,13 @@ apistos-models = { path = "../apistos-models", version = "0.4.0", features = ["d
 
 [dev-dependencies]
 assert-json-diff = { workspace = true }
-serde = { workspace = true }
 serde_json = { workspace = true }
 
 [lints]
 workspace = true
 
 [features]
-actix = ["dep:actix-web"]
+actix = ["dep:actix-web", "dep:pin-project"]
 actix-web-grants = ["dep:actix-web-grants"]
 
 # query related features
