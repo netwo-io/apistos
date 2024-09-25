@@ -1,7 +1,7 @@
 use actix_web::http::StatusCode;
 use darling::FromMeta;
 use proc_macro2::{Span, TokenStream};
-use proc_macro_error::abort;
+use proc_macro_error2::abort;
 use quote::{quote, ToTokens};
 use syn::Attribute;
 
@@ -31,12 +31,12 @@ impl ToTokens for OpenapiErrorAttribute {
   fn to_tokens(&self, tokens: &mut TokenStream) {
     let defs = &self.status;
     tokens.extend(quote! {
-      fn error_responses() -> Vec<(String, apistos::paths::Response)> {
-        let responses: Vec<((String, apistos::paths::Response), Option<(String, apistos::reference_or::ReferenceOr<apistos::Schema>)>)> = vec![#(#defs,)*];
+      fn error_responses(_: apistos::OpenApiVersion) -> Vec<(String, apistos::paths::Response)> {
+        let responses: Vec<((String, apistos::paths::Response), Option<(String, apistos::reference_or::ReferenceOr<apistos::ApistosSchema>)>)> = vec![#(#defs,)*];
         responses.into_iter().map(|v| v.0).collect()
       }
 
-      fn schemas_by_status_code() -> std::collections::BTreeMap<String, (String, apistos::reference_or::ReferenceOr<apistos::Schema>)> {
+      fn schemas_by_status_code(_: apistos::OpenApiVersion) -> std::collections::BTreeMap<String, (String, apistos::reference_or::ReferenceOr<apistos::ApistosSchema>)> {
         let mut schemas = std::collections::BTreeMap::default();
         for ((status_code, _), schema) in [#(#defs,)*] {
           if let Some(schema) = schema {

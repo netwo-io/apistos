@@ -1,4 +1,4 @@
-#[allow(deprecated)]
+#[expect(deprecated)]
 use crate::api::handlers::{
   add_pet, delete_pet, find_by_status, find_by_tags, get_pet, update_pet, update_pet_with_form,
 };
@@ -14,7 +14,7 @@ pub(crate) fn routes() -> Scope {
           .route(put().to(update_pet))
       )
       .service(resource("/findByStatus").route(get().to(find_by_status)))
-      .service(resource("/findByTags").route(get().to(#[allow(deprecated)] find_by_tags)))
+      .service(resource("/findByTags").route(get().to(#[expect(deprecated)] find_by_tags)))
       .service(
         scope("/{petId:.+}").service(
           resource("")

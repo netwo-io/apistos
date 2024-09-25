@@ -1,5 +1,4 @@
-#![allow(clippy::expect_used)]
-#![allow(clippy::panic)]
+#![expect(clippy::panic)]
 
 use actix_web::http::StatusCode;
 use actix_web::test::{call_service, init_service, try_read_body_json, TestRequest};

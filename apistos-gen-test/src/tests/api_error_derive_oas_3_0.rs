@@ -1,12 +1,13 @@
+use apistos::OpenApiVersion;
 use apistos_core::ApiErrorComponent;
 use apistos_gen::ApiErrorComponent;
 use schemars::JsonSchema;
 use std::collections::{BTreeMap, HashSet};
 
 #[test]
-#[allow(dead_code)]
+#[expect(dead_code)]
 fn api_component_derive() {
-  #[allow(clippy::duplicated_attributes)]
+  #[expect(clippy::duplicated_attributes)]
   #[derive(ApiErrorComponent)]
   #[openapi_error(
     status(code = 403),
@@ -21,8 +22,8 @@ fn api_component_derive() {
     Unauthorized(String),
   }
 
-  let error_schemas = <ErrorResponse as ApiErrorComponent>::schemas_by_status_code();
-  let error_responses = <ErrorResponse as ApiErrorComponent>::error_responses();
+  let error_schemas = <ErrorResponse as ApiErrorComponent>::schemas_by_status_code(OpenApiVersion::OAS3_0);
+  let error_responses = <ErrorResponse as ApiErrorComponent>::error_responses(OpenApiVersion::OAS3_0);
   assert!(error_schemas.is_empty());
   assert!(!error_responses.is_empty());
   assert_eq!(error_responses.len(), 4);
@@ -52,7 +53,7 @@ fn api_component_derive() {
 }
 
 #[test]
-#[allow(dead_code)]
+#[expect(dead_code)]
 fn api_component_with_schema() {
   #[derive(JsonSchema)]
   struct AuthorizeError {
@@ -60,7 +61,7 @@ fn api_component_with_schema() {
     code: String,
   }
 
-  #[allow(clippy::duplicated_attributes)]
+  #[expect(clippy::duplicated_attributes)]
   #[derive(ApiErrorComponent)]
   #[openapi_error(status(code = 403), status(code = 409, description = "Too many requests"))]
   enum ErrorResponse {
@@ -68,8 +69,8 @@ fn api_component_with_schema() {
     Conflict(String),
   }
 
-  let error_schemas = <ErrorResponse as ApiErrorComponent>::schemas_by_status_code();
-  let error_responses = <ErrorResponse as ApiErrorComponent>::error_responses();
+  let error_schemas = <ErrorResponse as ApiErrorComponent>::schemas_by_status_code(OpenApiVersion::OAS3_0);
+  let error_responses = <ErrorResponse as ApiErrorComponent>::error_responses(OpenApiVersion::OAS3_0);
   assert!(error_schemas.is_empty());
   assert!(!error_responses.is_empty());
   assert_eq!(error_responses.len(), 2);

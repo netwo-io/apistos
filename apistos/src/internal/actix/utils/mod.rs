@@ -1,12 +1,17 @@
-use apistos_models::paths::{Operation, ParameterDefinition, ParameterIn};
-use apistos_models::reference_or::ReferenceOr;
-use once_cell::sync::Lazy;
-use regex::{Captures, Regex};
-use schemars::schema::{Schema, SchemaObject, StringValidation};
 use std::borrow::Cow;
 
+use once_cell::sync::Lazy;
+use regex::{Captures, Regex};
+use serde_json::json;
+
+use apistos_models::paths::{Operation, ParameterDefinition, ParameterIn};
+use apistos_models::reference_or::ReferenceOr;
+use apistos_models::{ApistosSchema, Schema};
+
+use crate::internal::get_oas_version;
+
 /// Regex that can be used to fetch templated path parameters.
-#[allow(clippy::expect_used)]
+#[expect(clippy::expect_used)]
 static PATH_TEMPLATE_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"\{(.*?)\}").expect("path template regex"));
 
 pub(crate) trait OperationUpdater {
@@ -15,6 +20,8 @@ pub(crate) trait OperationUpdater {
 
 impl OperationUpdater for Operation {
   fn update_path_parameter_name_from_path(&mut self, path: &str) {
+    let oas_version = get_oas_version();
+
     let mut param_names = vec![];
     PATH_TEMPLATE_REGEX.replace_all(path, |c: &Captures| {
       param_names.push(c[1].to_owned());
@@ -31,15 +38,18 @@ impl OperationUpdater for Operation {
       if let Some(n) = param_names.pop() {
         if let Some((name, pattern)) = n.split_once(':') {
           param.name = name.to_string();
-          param.definition = Some(ParameterDefinition::Schema(ReferenceOr::Object(Schema::Object(
-            SchemaObject {
-              string: Some(Box::new(StringValidation {
-                pattern: Some(pattern.to_string()),
-                ..Default::default()
-              })),
-              ..Default::default()
-            },
-          ))))
+
+          let parameter_definition = Schema::try_from(json!({
+            "type": "string",
+            "pattern": pattern
+          }))
+          .map_err(|err| {
+            log::warn!("Error generating json schema: {err:?}");
+            err
+          })
+          .map(|sch| ApistosSchema::new(sch, oas_version))
+          .unwrap_or_default();
+          param.definition = Some(ParameterDefinition::Schema(ReferenceOr::Object(parameter_definition)))
         } else {
           param.name = n;
         }
@@ -52,12 +62,12 @@ impl OperationUpdater for Operation {
 
 #[cfg(test)]
 mod test {
-  #![allow(clippy::panic)]
+  #![expect(clippy::panic)]
 
-  use crate::internal::actix::utils::OperationUpdater;
   use apistos_models::paths::{Operation, Parameter, ParameterDefinition, ParameterIn};
   use apistos_models::reference_or::ReferenceOr;
-  use apistos_models::Schema;
+
+  use crate::internal::actix::utils::OperationUpdater;
 
   #[test]
   fn simple_path_parameter_name_replacement() {
@@ -139,13 +149,14 @@ mod test {
       let def = p.definition.clone().expect("missing parameter definition");
       match def {
         ParameterDefinition::Schema(sch) => match sch {
-          ReferenceOr::Object(obj) => match obj {
-            Schema::Bool(_) => panic!("expected schema object"),
-            Schema::Object(obj) => {
-              let str_obj = obj.string.expect("should be a string schema");
-              assert_eq!(str_obj.pattern, Some(".+".to_string()));
-            }
-          },
+          ReferenceOr::Object(obj) => {
+            let pattern = obj
+              .inner()
+              .as_object()
+              .and_then(|obj| obj.get("pattern"))
+              .and_then(|_type| _type.as_str());
+            assert_eq!(pattern, Some(".+"));
+          }
           ReferenceOr::Reference { .. } => panic!("expected schema object"),
         },
         ParameterDefinition::Content(_) => panic!("expected schema"),

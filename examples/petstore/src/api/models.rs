@@ -2,8 +2,7 @@ use actix_web::dev::Payload;
 use actix_web::error::ParseError;
 use actix_web::http::header::{Header, HeaderName, HeaderValue, InvalidHeaderValue, TryIntoHeaderValue};
 use actix_web::{Error, FromRequest, HttpMessage, HttpRequest};
-use apistos::InstanceType;
-use apistos::{ApiComponent, ApiCookie, ApiHeader, ApiType, TypedSchema};
+use apistos::{ApiComponent, ApiCookie, ApiHeader, ApiType, ApiWebhookComponent, TypedSchema};
 use num_traits::Float;
 use rust_decimal::Decimal;
 use schemars::JsonSchema;
@@ -32,14 +31,14 @@ pub(crate) struct Category {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, ApiType)]
 #[serde(transparent)]
-#[allow(clippy::useless_vec)]
+#[expect(clippy::useless_vec)]
 pub struct Finite<N: Float> {
   inner: N,
 }
 
 impl<N: Float> TypedSchema for Finite<N> {
-  fn schema_type() -> InstanceType {
-    InstanceType::Number
+  fn schema_type() -> String {
+    "number".to_string()
   }
 
   fn format() -> Option<String> {
@@ -51,8 +50,8 @@ impl<N: Float> TypedSchema for Finite<N> {
 pub struct Name(String);
 
 impl TypedSchema for Name {
-  fn schema_type() -> InstanceType {
-    InstanceType::String
+  fn schema_type() -> String {
+    "string".to_string()
   }
 
   fn format() -> Option<String> {
@@ -136,4 +135,12 @@ impl FromRequest for Realm {
   fn from_request(_req: &HttpRequest, _payload: &mut Payload) -> Self::Future {
     todo!()
   }
+}
+
+#[derive(ApiWebhookComponent)]
+pub(crate) enum WebhookHolder {
+  #[openapi_webhook(name = "PetCreated", response(code = 200))]
+  PetCreated,
+  #[openapi_webhook(skip)]
+  AnotherWebhook,
 }

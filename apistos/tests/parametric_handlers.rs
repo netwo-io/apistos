@@ -1,5 +1,4 @@
-#![allow(clippy::expect_used)]
-#![allow(clippy::panic)]
+#![expect(clippy::panic)]
 
 use actix_web::http::StatusCode;
 use actix_web::test::{call_service, init_service, try_read_body_json, TestRequest};
@@ -15,7 +14,6 @@ use apistos_models::paths::{OperationType, Parameter, ParameterDefinition};
 use apistos_models::reference_or::ReferenceOr;
 use apistos_models::tag::Tag;
 use apistos_models::OpenApi;
-use schemars::schema::{InstanceType, SingleOrVec};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
@@ -120,13 +118,17 @@ async fn path_parameter_replacement() {
   let first_parameter_schema = first_parameter
     .definition
     .and_then(|p| match p {
-      ParameterDefinition::Schema(ReferenceOr::Object(sch)) => Some(sch.into_object().clone()),
+      ParameterDefinition::Schema(ReferenceOr::Object(sch)) => Some(sch),
       _ => None,
     })
     .unwrap_or_default();
   assert_eq!(
-    first_parameter_schema.instance_type,
-    Some(SingleOrVec::Single(Box::new(InstanceType::Integer)))
+    first_parameter_schema
+      .inner()
+      .as_object()
+      .and_then(|obj| obj.get("type"))
+      .and_then(|_type| _type.as_str()),
+    Some("integer")
   );
 
   let last_parameter = parameters.last().cloned().unwrap_or_default();
@@ -134,13 +136,17 @@ async fn path_parameter_replacement() {
   let last_parameter_schema = last_parameter
     .definition
     .and_then(|p| match p {
-      ParameterDefinition::Schema(ReferenceOr::Object(sch)) => Some(sch.into_object().clone()),
+      ParameterDefinition::Schema(ReferenceOr::Object(sch)) => Some(sch),
       _ => None,
     })
     .unwrap_or_default();
   assert_eq!(
-    last_parameter_schema.instance_type,
-    Some(SingleOrVec::Single(Box::new(InstanceType::String)))
+    last_parameter_schema
+      .inner()
+      .as_object()
+      .and_then(|obj| obj.get("type"))
+      .and_then(|_type| _type.as_str()),
+    Some("string")
   );
 
   let parameters: Vec<Parameter> = body
@@ -168,13 +174,17 @@ async fn path_parameter_replacement() {
   let parameter_schema = parameter
     .definition
     .and_then(|p| match p {
-      ParameterDefinition::Schema(ReferenceOr::Object(sch)) => Some(sch.into_object().clone()),
+      ParameterDefinition::Schema(ReferenceOr::Object(sch)) => Some(sch),
       _ => None,
     })
     .unwrap_or_default();
   assert_eq!(
-    parameter_schema.instance_type,
-    Some(SingleOrVec::Single(Box::new(InstanceType::Integer)))
+    parameter_schema
+      .inner()
+      .as_object()
+      .and_then(|obj| obj.get("type"))
+      .and_then(|_type| _type.as_str()),
+    Some("integer")
   );
 }
 
