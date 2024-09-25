@@ -1,12 +1,15 @@
 use crate::ApiErrorComponent;
 #[cfg(feature = "actix")]
 use crate::{PathItemDefinition, ResponseWrapper};
+#[cfg(feature = "actix")]
 use actix_web::Either;
 use apistos_models::paths::{MediaType, Parameter, RequestBody, Response, Responses};
 use apistos_models::reference_or::ReferenceOr;
 use apistos_models::security::SecurityScheme;
 use apistos_models::Schema;
-use schemars::schema::{ArrayValidation, InstanceType, SchemaObject, SingleOrVec, SubschemaValidation};
+#[cfg(feature = "actix")]
+use schemars::schema::SubschemaValidation;
+use schemars::schema::{ArrayValidation, InstanceType, SchemaObject, SingleOrVec};
 use std::collections::BTreeMap;
 #[cfg(feature = "actix")]
 use std::future::Future;
@@ -176,6 +179,7 @@ where
   }
 }
 
+#[cfg(feature = "actix")]
 impl<T, E> ApiComponent for Either<T, E>
 where
   T: ApiComponent,
