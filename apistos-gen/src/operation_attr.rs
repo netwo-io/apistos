@@ -14,7 +14,7 @@ pub(crate) fn parse_openapi_operation_attrs(attrs: &[NestedMeta]) -> OperationAt
 }
 
 #[derive(FromMeta, Clone)]
-struct OperationAttrInternal {
+pub(crate) struct OperationAttrInternal {
   #[darling(default)]
   skip: bool,
   #[darling(default)]

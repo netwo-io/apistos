@@ -2,6 +2,7 @@
 //!
 //! ⚠️ This crate is not indented to be used by itself. Please use [**apistos**](https://crates.io/crates/apistos) instead.
 
+use crate::actix_operation_attr::parse_actix_openapi_operation_attrs;
 use crate::callback_attr::parse_openapi_callback_attrs;
 use crate::internal::schemas::Schemas;
 use crate::internal::utils::extract_deprecated_from_attr;
@@ -11,7 +12,7 @@ use crate::openapi_error_attr::parse_openapi_error_attrs;
 use crate::openapi_header_attr::parse_openapi_header_attrs;
 use crate::openapi_security_attr::parse_openapi_security_attrs;
 use crate::openapi_type_attr::parse_openapi_type_attrs;
-use crate::operation_attr::parse_openapi_operation_attrs;
+use crate::operation_attr::{parse_openapi_operation_attrs, OperationAttr};
 use crate::webhook_attr::parse_openapi_derive_webhook_attrs;
 use convert_case::{Case, Casing};
 use darling::Error;
@@ -22,6 +23,7 @@ use proc_macro2::Span;
 use quote::{format_ident, quote};
 use syn::{DeriveInput, GenericParam, Ident, ItemFn};
 
+mod actix_operation_attr;
 mod callback_attr;
 mod internal;
 mod openapi_cookie_attr;
@@ -848,62 +850,7 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
   };
 
   let operation_attribute = parse_openapi_operation_attrs(&attr_args);
-
-  let default_span = Span::call_site();
-  let item_ast = match syn::parse::<ItemFn>(item) {
-    Ok(v) => v,
-    Err(e) => abort!(e.span(), format!("{e}")),
-  };
-
-  let s_name = format!("{OPENAPI_STRUCT_PREFIX}{}", item_ast.sig.ident);
-  let openapi_struct = Ident::new(&s_name, default_span);
-
-  let generics = &item_ast.sig.generics.clone();
-  let mut generics_call = quote!();
-  let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
-  let openapi_struct_def = if !generics.params.is_empty() {
-    let mut generic_types_idents = vec![];
-    for param in &generics.params {
-      match param {
-        GenericParam::Lifetime(_) => {}
-        GenericParam::Const(_) => {}
-        GenericParam::Type(_type) => generic_types_idents.push(_type.ident.clone()),
-      }
-    }
-    let turbofish = ty_generics.as_turbofish();
-    let mut phantom_params = quote!();
-    let mut phantom_params_names = quote!();
-    for generic_types_ident in generic_types_idents {
-      let param_name = Ident::new(
-        &format_ident!("p_{}", generic_types_ident).to_string().to_lowercase(),
-        Span::call_site(),
-      );
-      phantom_params_names.extend(quote!(#param_name: std::marker::PhantomData,));
-      phantom_params.extend(quote!(#param_name: std::marker::PhantomData < #generic_types_ident >,))
-    }
-    generics_call = quote!(#turbofish { #phantom_params_names });
-
-    quote!(struct #openapi_struct #impl_generics #where_clause { #phantom_params })
-  } else {
-    quote!(struct #openapi_struct;)
-  };
-
-  let (responder_wrapper, generated_item_ast) =
-    gen_item_ast(default_span, item_ast, &openapi_struct, &ty_generics, &generics_call);
-  let generated_item_fn = match syn::parse::<ItemFn>(generated_item_ast.clone().into()) {
-    Ok(v) => v,
-    Err(e) => abort!(e.span(), format!("{e}")),
-  };
-  let open_api_def = gen_open_api_impl(
-    &generated_item_fn,
-    operation_attribute,
-    &openapi_struct,
-    &openapi_struct_def,
-    &impl_generics,
-    &ty_generics,
-    where_clause,
-    &responder_wrapper,
-  );
+  let (open_api_def, generated_item_ast) = gen_open_api_def(operation_attribute, item, OPENAPI_STRUCT_PREFIX, None);
 
   quote!(
     #open_api_def
@@ -1025,6 +972,116 @@ pub fn api_callback(attr: TokenStream, item: TokenStream) -> TokenStream {
     }
   )
   .into()
+}
+
+#[proc_macro_error]
+#[proc_macro_attribute]
+pub fn get(attr: TokenStream, item: TokenStream) -> TokenStream {
+  let attr_args = match NestedMeta::parse_meta_list(attr.into()) {
+    Ok(v) => v,
+    Err(e) => {
+      return TokenStream::from(Error::from(e).write_errors());
+    }
+  };
+  let operation_attribute = parse_actix_openapi_operation_attrs(&attr_args, "get");
+  let path = operation_attribute.path;
+
+  let (open_api_def, generated_item_ast) = gen_open_api_def(
+    operation_attribute.operation,
+    item,
+    "",
+    Some(quote!(#[::actix_web::get(#path)])),
+  );
+
+  quote!(
+    #open_api_def
+
+    #generated_item_ast
+  )
+  .into()
+}
+
+fn gen_open_api_def(
+  operation_attribute: OperationAttr,
+  item: TokenStream,
+  struct_prefix: &str,
+  actix_proc_macro: Option<proc_macro2::TokenStream>,
+) -> (proc_macro2::TokenStream, proc_macro2::TokenStream) {
+  let default_span = Span::call_site();
+  let item_ast = match syn::parse::<ItemFn>(item) {
+    Ok(v) => v,
+    Err(e) => abort!(e.span(), format!("{e}")),
+  };
+
+  let s_name = format!("{struct_prefix}{}", item_ast.sig.ident);
+  let openapi_struct = Ident::new(&s_name, default_span);
+
+  let generics = &item_ast.sig.generics.clone();
+  let mut generics_call = quote!();
+  let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+  let openapi_struct_def = if !generics.params.is_empty() {
+    let mut generic_types_idents = vec![];
+    for param in &generics.params {
+      match param {
+        GenericParam::Lifetime(_) => {}
+        GenericParam::Const(_) => {}
+        GenericParam::Type(_type) => generic_types_idents.push(_type.ident.clone()),
+      }
+    }
+    let turbofish = ty_generics.as_turbofish();
+    let mut phantom_params = quote!();
+    let mut phantom_params_names = quote!();
+    for generic_types_ident in generic_types_idents {
+      let param_name = Ident::new(
+        &format_ident!("p_{}", generic_types_ident).to_string().to_lowercase(),
+        Span::call_site(),
+      );
+      phantom_params_names.extend(quote!(#param_name: std::marker::PhantomData,));
+      phantom_params.extend(quote!(#param_name: std::marker::PhantomData < #generic_types_ident >,))
+    }
+    generics_call = quote!(#turbofish { #phantom_params_names });
+
+    quote!(struct #openapi_struct #impl_generics #where_clause { #phantom_params })
+  } else {
+    quote!(struct #openapi_struct;)
+  };
+
+  let (responder_wrapper, generated_item_ast) = gen_item_ast(
+    default_span,
+    item_ast,
+    &openapi_struct,
+    &ty_generics,
+    &generics_call,
+    actix_proc_macro.is_some(),
+  );
+  let generated_item_fn = match syn::parse::<ItemFn>(generated_item_ast.clone().into()) {
+    Ok(v) => v,
+    Err(e) => abort!(e.span(), format!("{e}")),
+  };
+
+  let open_api_def = gen_open_api_impl(
+    &generated_item_fn,
+    operation_attribute,
+    &openapi_struct,
+    &openapi_struct_def,
+    &impl_generics,
+    &ty_generics,
+    where_clause,
+    &responder_wrapper,
+    actix_proc_macro.is_some(),
+  );
+
+  // Handle actix like macros (#get, #post, ...)
+  let generated_item_ast = if let Some(actix_proc_macro) = actix_proc_macro {
+    quote!(
+      #actix_proc_macro
+      #generated_item_ast
+    )
+  } else {
+    generated_item_ast
+  };
+
+  (open_api_def, generated_item_ast)
 }
 
 // Imports bellow aim at making clippy happy. Those dependencies are necessary for doc-test.
