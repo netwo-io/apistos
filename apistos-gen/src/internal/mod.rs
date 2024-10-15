@@ -26,6 +26,7 @@ pub(crate) fn gen_open_api_impl(
   ty_generics: &TypeGenerics,
   where_clause: Option<&WhereClause>,
   responder_wrapper: &TokenStream2,
+  with_actix_macros: bool,
 ) -> TokenStream2 {
   let path_item_def_impl = if operation_attribute.skip {
     quote!(
@@ -109,15 +110,23 @@ pub(crate) fn gen_open_api_impl(
     )
   };
 
-  quote! {
-    #[expect(non_camel_case_types)]
-    #[doc(hidden)]
-    #openapi_struct_def
+  let mut res = quote!();
+  if !with_actix_macros {
+    res.extend(quote! {
+      #[expect(non_camel_case_types)]
+      #[doc(hidden)]
+      #openapi_struct_def
+    });
+  }
+
+  res.extend(quote! {
     #[automatically_derived]
     impl #impl_generics apistos::PathItemDefinition for #openapi_struct #ty_generics #where_clause {
       #path_item_def_impl
     }
-  }
+  });
+
+  res
 }
 
 pub(crate) fn gen_item_ast(
@@ -126,6 +135,7 @@ pub(crate) fn gen_item_ast(
   openapi_struct: &Ident,
   ty_generics: &TypeGenerics,
   generics_call: &TokenStream2,
+  with_actix_macros: bool,
 ) -> (proc_macro2::TokenStream, proc_macro2::TokenStream) {
   // Remove async prefix if any. This macro generates an impl Future
   if item_ast.sig.asyncness.is_some() {
@@ -198,6 +208,11 @@ pub(crate) fn gen_item_ast(
     quote!((move || async move #block)())
   };
 
+  let openapi_struct = if with_actix_macros {
+    quote! {Self}
+  } else {
+    quote! {#openapi_struct}
+  };
   item_ast.block = Box::new(
     match syn::parse2(quote!(
         {
