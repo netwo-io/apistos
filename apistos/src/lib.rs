@@ -158,8 +158,8 @@ pub use apistos_core::multipart;
 pub use apistos_core::parameters::header::ApiHeader;
 pub use apistos_core::{__internal, ApiComponent, ApiErrorComponent, ApiWebhook, ApiWebhookDef, TypedSchema};
 pub use apistos_gen::{
-  api_callback, api_operation, get, ApiComponent, ApiCookie, ApiErrorComponent, ApiHeader, ApiSecurity, ApiType,
-  ApiWebhookComponent,
+  api_callback, api_operation, delete, get, head, options, patch, post, put, trace, ApiComponent, ApiCookie,
+  ApiErrorComponent, ApiHeader, ApiSecurity, ApiType, ApiWebhookComponent,
 };
 pub use apistos_models::*;
 #[cfg(feature = "rapidoc")]
@@ -171,6 +171,7 @@ pub use apistos_scalar::ScalarConfig;
 #[cfg(feature = "swagger-ui")]
 pub use apistos_swagger_ui::SwaggerUIConfig;
 pub use futures_util::future::FutureExt;
+pub use internal::definition_holder::*;
 
 mod internal;
 

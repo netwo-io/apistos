@@ -12,7 +12,7 @@ use crate::openapi_error_attr::parse_openapi_error_attrs;
 use crate::openapi_header_attr::parse_openapi_header_attrs;
 use crate::openapi_security_attr::parse_openapi_security_attrs;
 use crate::openapi_type_attr::parse_openapi_type_attrs;
-use crate::operation_attr::{parse_openapi_operation_attrs, OperationAttr};
+use crate::operation_attr::{parse_openapi_operation_attrs, OperationAttr, OperationType};
 use crate::webhook_attr::parse_openapi_derive_webhook_attrs;
 use convert_case::{Case, Casing};
 use darling::Error;
@@ -20,7 +20,7 @@ use darling::ast::NestedMeta;
 use proc_macro::TokenStream;
 use proc_macro_error2::{OptionExt, abort, proc_macro_error};
 use proc_macro2::Span;
-use quote::{format_ident, quote};
+use quote::{format_ident, quote, ToTokens};
 use syn::{DeriveInput, GenericParam, Ident, ItemFn};
 
 mod actix_operation_attr;
@@ -33,6 +33,7 @@ mod openapi_security_attr;
 mod openapi_type_attr;
 mod operation_attr;
 mod webhook_attr;
+mod utils;
 
 const OPENAPI_STRUCT_PREFIX: &str = "__openapi_";
 const OPENAPI_CALLBACK_STRUCT_PREFIX: &str = "__openapi_callback_";
@@ -171,7 +172,7 @@ pub fn derive_api_type(input: TokenStream) -> TokenStream {
       }
     };
   )
-  .into()
+    .into()
 }
 
 /// Generates a reusable OpenAPI schema.
@@ -216,7 +217,7 @@ pub fn derive_api_component(input: TokenStream) -> TokenStream {
       }
     };
   )
-  .into()
+    .into()
 }
 
 /// Generates a reusable OpenAPI security scheme.
@@ -333,7 +334,7 @@ pub fn derive_api_security(input: TokenStream) -> TokenStream {
       }
     };
   )
-  .into()
+    .into()
 }
 
 /// Generates a reusable OpenAPI header schema.
@@ -398,7 +399,7 @@ pub fn derive_api_header(input: TokenStream) -> TokenStream {
       }
     };
   )
-  .into()
+    .into()
 }
 
 /// Generates a reusable OpenAPI parameter schema in cookie.
@@ -455,7 +456,7 @@ pub fn derive_api_cookie(input: TokenStream) -> TokenStream {
       }
     };
   )
-  .into()
+    .into()
 }
 
 /// Generates a reusable OpenAPI error schema.
@@ -510,7 +511,7 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
       }
     };
   )
-  .into()
+    .into()
 }
 
 /// # ⚠️ OAS 3.1 only
@@ -585,7 +586,7 @@ pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
       }
     };
   )
-  .into()
+    .into()
 }
 
 /// # ⚠️ OAS 3.1 only
@@ -850,14 +851,76 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
   };
 
   let operation_attribute = parse_openapi_operation_attrs(&attr_args);
-  let (open_api_def, generated_item_ast) = gen_open_api_def(operation_attribute, item, OPENAPI_STRUCT_PREFIX, None);
+
+  let default_span = Span::call_site();
+  let item_ast = match syn::parse::<ItemFn>(item) {
+    Ok(v) => v,
+    Err(e) => abort!(e.span(), format!("{e}")),
+  };
+
+  let s_name = format!("{OPENAPI_STRUCT_PREFIX}{}", item_ast.sig.ident);
+  let openapi_struct = Ident::new(&s_name, default_span);
+
+  let generics = &item_ast.sig.generics.clone();
+  let mut generics_call = quote!();
+  let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+  let openapi_struct_def = if !generics.params.is_empty() {
+    let mut generic_types_idents = vec![];
+    for param in &generics.params {
+      match param {
+        GenericParam::Lifetime(_) => {}
+        GenericParam::Const(_) => {}
+        GenericParam::Type(_type) => generic_types_idents.push(_type.ident.clone()),
+      }
+    }
+    let turbofish = ty_generics.as_turbofish();
+    let mut phantom_params = quote!();
+    let mut phantom_params_names = quote!();
+    for generic_types_ident in generic_types_idents {
+      let param_name = Ident::new(
+        &format_ident!("p_{}", generic_types_ident).to_string().to_lowercase(),
+        Span::call_site(),
+      );
+      phantom_params_names.extend(quote!(#param_name: std::marker::PhantomData,));
+      phantom_params.extend(quote!(#param_name: std::marker::PhantomData < #generic_types_ident >,))
+    }
+    generics_call = quote!(#turbofish { #phantom_params_names });
+
+    quote!(struct #openapi_struct #impl_generics #where_clause { #phantom_params })
+  } else {
+    quote!(struct #openapi_struct;)
+  };
+
+  let (responder_wrapper, generated_item_ast) = gen_item_ast(
+    default_span,
+    item_ast,
+    &openapi_struct,
+    &ty_generics,
+    &generics_call,
+    false,
+  );
+  let generated_item_fn = match syn::parse::<ItemFn>(generated_item_ast.clone().into()) {
+    Ok(v) => v,
+    Err(e) => abort!(e.span(), format!("{e}")),
+  };
+  let open_api_def = gen_open_api_impl(
+    &generated_item_fn,
+    operation_attribute,
+    &openapi_struct,
+    &openapi_struct_def,
+    &impl_generics,
+    &ty_generics,
+    where_clause,
+    &responder_wrapper,
+    false,
+  );
 
   quote!(
     #open_api_def
 
     #generated_item_ast
   )
-  .into()
+    .into()
 }
 
 /// Callback operation attribute macro implementing [PathItemDefinition](path_item_definition/trait.PathItemDefinition.html) for the decorated handler function.
@@ -971,41 +1034,119 @@ pub fn api_callback(attr: TokenStream, item: TokenStream) -> TokenStream {
       #callback_operation_attribute
     }
   )
-  .into()
+    .into()
 }
 
 #[proc_macro_error]
 #[proc_macro_attribute]
-pub fn get(attr: TokenStream, item: TokenStream) -> TokenStream {
-  let attr_args = match NestedMeta::parse_meta_list(attr.into()) {
+pub fn routes(_: TokenStream, item: TokenStream) -> TokenStream {
+  let mut item_ast = match syn::parse::<ItemFn>(item) {
     Ok(v) => v,
-    Err(e) => {
-      return TokenStream::from(Error::from(e).write_errors());
-    }
+    Err(e) => abort!(e.span(), format!("{e}")),
   };
-  let operation_attribute = parse_actix_openapi_operation_attrs(&attr_args, "get");
-  let path = operation_attribute.path;
 
-  let (open_api_def, generated_item_ast) = gen_open_api_def(
-    operation_attribute.operation,
-    item,
-    "",
-    Some(quote!(#[::actix_web::get(#path)])),
-  );
+  let (operations, others) = item_ast
+    .attrs
+    .into_iter()
+    .map(|attr| {
+      (method_from_attr_path(attr.path()), attr)
+    })
+    .partition::<Vec<_>, _>(|(operation, _)| operation.is_some());
 
-  quote!(
-    #open_api_def
+  item_ast.attrs = others.into_iter().map(|(_, attr)| attr).collect();
 
-    #generated_item_ast
-  )
-  .into()
+  let operations = operations
+    .into_iter()
+    .map(|(operation_type, attr)| operation_type.map(|ot| (ot, attr)))
+    .flatten()
+    .map(|(operation_type, attr)| {
+      NestedMeta::parse_meta_list(attr.into_token_stream()).map(|attr_args| parse_actix_openapi_operation_attrs(&attr_args, &operation_type.to_string()))
+    })
+    .collect::<Result<Vec<_>, _>>();
+  let operations = match operations
+  {
+    Ok(methods) if methods.is_empty() => {
+      abort!(Span::call_site(), "The #[routes] macro requires at least one `#[<method>(..)]` attribute.");
+    }
+    Ok(methods) => methods,
+    Err(err) => abort!(err.span(), format!("{err:?}")),
+  };
+
+  for operation in &operations {
+    //@todo gen definition with one struct per operation attribute
+    //@todo gen actix function like default actix and generate definition holder for actix struct
+    // gen_open_api_def_actix_macro(
+    //   ope
+    // )
+  }
+
+  quote!().into()
 }
 
-fn gen_open_api_def(
+macro_rules! actix_method_macro {
+    ($variant:ident, $method:ident) => {
+        #[proc_macro_attribute]
+        pub fn $method(attr: TokenStream, item: TokenStream) -> TokenStream {
+            let attr_args = match NestedMeta::parse_meta_list(attr.into()) {
+              Ok(v) => v,
+              Err(e) => {
+                return TokenStream::from(Error::from(e).write_errors());
+              }
+            };
+            let operation_attribute = parse_actix_openapi_operation_attrs(&attr_args, "$method");
+            let path = operation_attribute.path;
+            let name = if let Some(name) = operation_attribute.name {
+              quote!(, name = #name)
+            } else {
+              quote!()
+            };
+            let guard = if let Some(guard) = operation_attribute.guard {
+              quote!(, guard = #guard)
+            } else {
+              quote!()
+            };
+            let wrap = if let Some(wrap) = operation_attribute.wrap {
+              quote!(, wrap = #wrap)
+            } else {
+              quote!()
+            };
+
+            let (open_api_def, generated_item_ast) = gen_open_api_def_actix_macro(
+              operation_attribute.operation,
+              item,
+              quote!{#[::actix_web::$method(#path #name #guard #wrap)]},
+              &path,
+              OperationType::$variant,
+            );
+
+            quote!(
+              #open_api_def
+
+              #generated_item_ast
+            )
+            .into()
+        }
+    };
+}
+
+// @todo
+// - actix scope macro (actix-web-codegen/src/lib.rs:232)
+// - handle multiple actix macro (routes.rs:106)
+actix_method_macro!(Get, get);
+actix_method_macro!(Post, post);
+actix_method_macro!(Put, put);
+actix_method_macro!(Delete, delete);
+actix_method_macro!(Head, head);
+actix_method_macro!(Options, options);
+actix_method_macro!(Trace, trace);
+actix_method_macro!(Patch, patch);
+
+fn gen_open_api_def_actix_macro(
   operation_attribute: OperationAttr,
   item: TokenStream,
-  struct_prefix: &str,
-  actix_proc_macro: Option<proc_macro2::TokenStream>,
+  actix_proc_macro: proc_macro2::TokenStream,
+  path: &str,
+  operation_type: OperationType,
 ) -> (proc_macro2::TokenStream, proc_macro2::TokenStream) {
   let default_span = Span::call_site();
   let item_ast = match syn::parse::<ItemFn>(item) {
@@ -1013,8 +1154,7 @@ fn gen_open_api_def(
     Err(e) => abort!(e.span(), format!("{e}")),
   };
 
-  let s_name = format!("{struct_prefix}{}", item_ast.sig.ident);
-  let openapi_struct = Ident::new(&s_name, default_span);
+  let openapi_struct = &item_ast.sig.ident;
 
   let generics = &item_ast.sig.generics.clone();
   let mut generics_call = quote!();
@@ -1046,40 +1186,48 @@ fn gen_open_api_def(
     quote!(struct #openapi_struct;)
   };
 
-  let (responder_wrapper, generated_item_ast) = gen_item_ast(
+  let (responder_wrapper, _) = gen_item_ast(
     default_span,
-    item_ast,
-    &openapi_struct,
+    item_ast.clone(),
+    openapi_struct,
     &ty_generics,
     &generics_call,
-    actix_proc_macro.is_some(),
+    true,
   );
-  let generated_item_fn = match syn::parse::<ItemFn>(generated_item_ast.clone().into()) {
-    Ok(v) => v,
-    Err(e) => abort!(e.span(), format!("{e}")),
-  };
 
   let open_api_def = gen_open_api_impl(
-    &generated_item_fn,
+    &item_ast,
     operation_attribute,
-    &openapi_struct,
+    openapi_struct,
     &openapi_struct_def,
     &impl_generics,
     &ty_generics,
     where_clause,
     &responder_wrapper,
-    actix_proc_macro.is_some(),
+    true,
   );
 
-  // Handle actix like macros (#get, #post, ...)
-  let generated_item_ast = if let Some(actix_proc_macro) = actix_proc_macro {
-    quote!(
-      #actix_proc_macro
-      #generated_item_ast
-    )
-  } else {
-    generated_item_ast
-  };
+  let definition_holder_impl = quote!(
+    impl ::apistos::DefinitionHolder for #openapi_struct {
+      fn path(&self) -> &str { #path }
+      fn operations(&mut self, oas_version: apistos::OpenApiVersion) -> apistos::IndexMap<apistos::paths::OperationType, apistos::paths::Operation> {
+        use ::apistos::PathItemDefinition;
+        apistos::IndexMap::from_iter(vec![(#operation_type, {
+            #openapi_struct::operation(oas_version)
+        })])
+      }
+      fn components(&mut self, oas_version: apistos::OpenApiVersion) -> Vec<apistos::components::Components> {
+        use ::apistos::PathItemDefinition;
+        <#openapi_struct as ::apistos::PathItemDefinition>::components(oas_version)
+      }
+    }
+  );
+
+  let generated_item_ast = quote!(
+    #definition_holder_impl
+    #actix_proc_macro
+    #item_ast
+  );
 
   (open_api_def, generated_item_ast)
 }
@@ -1087,9 +1235,4 @@ fn gen_open_api_def(
 // Imports bellow aim at making clippy happy. Those dependencies are necessary for doc-test.
 #[cfg(test)]
 use apistos as _;
-#[cfg(test)]
-use garde as _;
-#[cfg(test)]
-use schemars as _;
-#[cfg(test)]
-use serde as _;
+use crate::utils::method_from_attr_path;

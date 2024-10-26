@@ -1,5 +1,6 @@
 use crate::internal::actix::route::{Route, RouteWrapper};
 use crate::internal::definition_holder::DefinitionHolder;
+use crate::internal::get_oas_version;
 use actix_web::dev::HttpServiceFactory;
 use apistos_models::components::Components;
 use apistos_models::paths::PathItem;
@@ -24,9 +25,10 @@ impl<'a> From<&'a mut actix_web::web::ServiceConfig> for ServiceConfig<'a> {
 impl ServiceConfig<'_> {
   /// Wrapper for [`actix_web::web::ServiceConfig::route`](https://docs.rs/actix-web/*/actix_web/web/struct.ServiceConfig.html#method.route).
   pub fn route(&mut self, path: &str, route: Route) -> &mut Self {
+    let oas_version = get_oas_version();
     let mut w = RouteWrapper::new(path, route);
-    w.update_path_items(&mut self.item_map);
-    self.components.extend(w.components());
+    w.update_path_items(oas_version, &mut self.item_map);
+    self.components.extend(w.components(oas_version));
     self.inner.route(path, w.inner);
     self
   }
@@ -45,8 +47,9 @@ impl ServiceConfig<'_> {
   where
     F: DefinitionHolder + HttpServiceFactory + 'static,
   {
-    factory.update_path_items(&mut self.item_map);
-    self.components.extend(factory.components());
+    let oas_version = get_oas_version();
+    factory.update_path_items(oas_version, &mut self.item_map);
+    self.components.extend(factory.components(oas_version));
     self.inner.service(factory);
     self
   }

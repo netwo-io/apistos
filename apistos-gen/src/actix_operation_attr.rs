@@ -13,6 +13,9 @@ pub(crate) fn parse_actix_openapi_operation_attrs(attrs: &[NestedMeta], macro_id
 #[derive(FromMeta, Clone)]
 struct ActixOperationAttrInternal {
   path: String,
+  name: Option<String>,
+  guard: Option<String>, // @todo vec ?
+  wrap: Option<String>, // @todo vec ?
   #[darling(flatten)]
   operation: OperationAttrInternal,
 }
@@ -21,6 +24,9 @@ impl From<ActixOperationAttrInternal> for ActixOperationAttr {
   fn from(value: ActixOperationAttrInternal) -> Self {
     Self {
       path: value.path,
+      name: value.name,
+      guard: value.guard,
+      wrap: value.wrap,
       operation: value.operation.into(),
     }
   }
@@ -28,5 +34,8 @@ impl From<ActixOperationAttrInternal> for ActixOperationAttr {
 
 pub(crate) struct ActixOperationAttr {
   pub(crate) path: String,
+  pub(crate) name: Option<String>,
+  pub(crate) guard: Option<String>,
+  pub(crate) wrap: Option<String>,
   pub(crate) operation: OperationAttr,
 }

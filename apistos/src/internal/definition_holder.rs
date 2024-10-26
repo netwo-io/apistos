@@ -6,6 +6,7 @@ use actix_web::http::StatusCode;
 use apistos_models::components::Components;
 use apistos_models::paths::{Operation, OperationType, PathItem, Responses};
 use apistos_models::reference_or::ReferenceOr;
+use apistos_models::OpenApiVersion;
 use indexmap::IndexMap;
 use std::collections::BTreeMap;
 use std::mem;
@@ -15,10 +16,10 @@ use super::actix::redirect::Redirect;
 
 pub trait DefinitionHolder {
   fn path(&self) -> &str;
-  fn operations(&mut self) -> IndexMap<OperationType, Operation>;
-  fn components(&mut self) -> Vec<Components>;
-  fn update_path_items(&mut self, path_op_map: &mut IndexMap<String, PathItem>) {
-    let ops = self.operations();
+  fn operations(&mut self, _oas_version: OpenApiVersion) -> IndexMap<OperationType, Operation>;
+  fn components(&mut self, _oas_version: OpenApiVersion) -> Vec<Components>;
+  fn update_path_items(&mut self, oas_version: OpenApiVersion, path_op_map: &mut IndexMap<String, PathItem>) {
+    let ops = self.operations(oas_version);
     if !ops.is_empty() {
       let op_map = path_op_map.entry(self.path().into()).or_default();
       op_map.operations.extend(ops);
@@ -31,11 +32,11 @@ impl DefinitionHolder for RouteWrapper {
     &self.def.path
   }
 
-  fn operations(&mut self) -> IndexMap<OperationType, Operation> {
+  fn operations(&mut self, _oas_version: OpenApiVersion) -> IndexMap<OperationType, Operation> {
     mem::take(&mut self.def.item.operations)
   }
 
-  fn components(&mut self) -> Vec<Components> {
+  fn components(&mut self, _oas_version: OpenApiVersion) -> Vec<Components> {
     mem::take(&mut self.component)
   }
 }
@@ -45,11 +46,11 @@ impl<T> DefinitionHolder for Resource<T> {
     &self.path
   }
 
-  fn operations(&mut self) -> IndexMap<OperationType, Operation> {
+  fn operations(&mut self, _oas_version: OpenApiVersion) -> IndexMap<OperationType, Operation> {
     mem::take(&mut self.item_definition).unwrap_or_default().operations
   }
 
-  fn components(&mut self) -> Vec<Components> {
+  fn components(&mut self, _oas_version: OpenApiVersion) -> Vec<Components> {
     mem::take(&mut self.components)
   }
 }
@@ -60,15 +61,15 @@ impl<T> DefinitionHolder for Scope<T> {
     unimplemented!("Scope has multiple paths");
   }
 
-  fn operations(&mut self) -> IndexMap<OperationType, Operation> {
+  fn operations(&mut self, _oas_version: OpenApiVersion) -> IndexMap<OperationType, Operation> {
     unimplemented!("Scope has multiple operation maps");
   }
 
-  fn components(&mut self) -> Vec<Components> {
+  fn components(&mut self, _oas_version: OpenApiVersion) -> Vec<Components> {
     mem::take(&mut self.components)
   }
 
-  fn update_path_items(&mut self, path_op_map: &mut IndexMap<String, PathItem>) {
+  fn update_path_items(&mut self, _oas_version: OpenApiVersion, path_op_map: &mut IndexMap<String, PathItem>) {
     for (path, item) in mem::take(&mut self.item_map) {
       let op_map = path_op_map.entry(path).or_default();
       op_map.operations.extend(item.operations.into_iter());
@@ -82,15 +83,15 @@ impl DefinitionHolder for ServiceConfig<'_> {
     unimplemented!("ServiceConfig has multiple paths.");
   }
 
-  fn operations(&mut self) -> IndexMap<OperationType, Operation> {
+  fn operations(&mut self, _oas_version: OpenApiVersion) -> IndexMap<OperationType, Operation> {
     unimplemented!("ServiceConfig has multiple operation maps.")
   }
 
-  fn components(&mut self) -> Vec<Components> {
+  fn components(&mut self, _oas_version: OpenApiVersion) -> Vec<Components> {
     mem::take(&mut self.components)
   }
 
-  fn update_path_items(&mut self, path_op_map: &mut IndexMap<String, PathItem>) {
+  fn update_path_items(&mut self, _oas_version: OpenApiVersion, path_op_map: &mut IndexMap<String, PathItem>) {
     for (path, item) in mem::take(&mut self.item_map) {
       let op_map = path_op_map.entry(path).or_default();
       op_map.operations.extend(item.operations.into_iter());
