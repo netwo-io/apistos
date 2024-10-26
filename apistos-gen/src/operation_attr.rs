@@ -185,3 +185,18 @@ impl ToTokens for OperationType {
     }
   }
 }
+
+impl ToString for OperationType {
+  fn to_string(&self) -> String {
+    match self {
+      OperationType::Get => "get".to_string(),
+      OperationType::Put => "put".to_string(),
+      OperationType::Post => "post".to_string(),
+      OperationType::Delete => "delete".to_string(),
+      OperationType::Options => "options".to_string(),
+      OperationType::Head => "head".to_string(),
+      OperationType::Patch => "patch".to_string(),
+      OperationType::Trace => "trace".to_string()
+    }
+  }
+}

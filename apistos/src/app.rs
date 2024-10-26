@@ -309,14 +309,18 @@ where
   /// Updates the underlying spec with definitions and operations from the given definition holder.
   #[expect(clippy::unwrap_used)]
   fn update_from_def_holder<D: DefinitionHolder>(&mut self, definition_holder: &mut D) {
+    let oas_version = get_oas_version();
     let mut open_api_spec = self.open_api_spec.write().unwrap();
-    let mut components = definition_holder.components().into_iter().reduce(|mut acc, component| {
-      acc.schemas.extend(component.schemas);
-      acc.responses.extend(component.responses);
-      acc.security_schemes.extend(component.security_schemes);
-      acc
-    });
-    definition_holder.update_path_items(&mut open_api_spec.paths.paths);
+    let mut components = definition_holder
+      .components(oas_version)
+      .into_iter()
+      .reduce(|mut acc, component| {
+        acc.schemas.extend(component.schemas);
+        acc.responses.extend(component.responses);
+        acc.security_schemes.extend(component.security_schemes);
+        acc
+      });
+    definition_holder.update_path_items(oas_version, &mut open_api_spec.paths.paths);
     let mut paths = IndexMap::new();
     for (path, mut item) in mem::take(&mut open_api_spec.paths.paths) {
       let path = if path.starts_with('/') {
