@@ -159,7 +159,7 @@ impl From<OperationAttrInternal> for OperationAttr {
   }
 }
 
-#[derive(Ord, PartialOrd, Eq, PartialEq)]
+#[derive(Ord, PartialOrd, Eq, PartialEq, Clone, Copy)]
 pub(crate) enum OperationType {
   Get,
   Put,
