@@ -11,8 +11,6 @@ use std::borrow::Cow;
 use std::collections::BTreeMap;
 use std::fmt::Debug;
 
-use crate::internal::get_oas_version;
-
 #[derive(Debug, Clone)]
 pub struct Redirect {
   pub(crate) path: String,
@@ -93,27 +91,26 @@ impl Redirect {
     self
   }
 
-  pub(crate) fn get_open_api_response(&self) -> Response {
-    let version = get_oas_version();
-    let version_specific_schema = match version {
+  pub(crate) fn get_open_api_response(&self, oas_version: OpenApiVersion) -> Response {
+    let schema = match oas_version {
       OpenApiVersion::OAS3_0 => VersionSpecificSchema::OAS3_0(ReferenceOr::Object(ApistosSchema::new(
         json_schema!({
           "enum": &[self.redirect.clone()]}),
-        version,
+        oas_version,
       ))),
       OpenApiVersion::OAS3_1 => VersionSpecificSchema::OAS3_1(ApistosSchema::new(
         json_schema!({
           "type": "string",
           "const": self.redirect.clone(),
         }),
-        version,
+        oas_version,
       )),
     };
     let location_header = Header {
       definition: Some(ParameterDefinition::Content(BTreeMap::from_iter(vec![(
         "text/plain".to_string(),
         MediaType {
-          schema: Some(version_specific_schema),
+          schema: Some(schema),
           ..Default::default()
         },
       )]))),

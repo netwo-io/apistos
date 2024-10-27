@@ -2,7 +2,7 @@
 //!
 //! ⚠️ This crate is not indented to be used by itself. Please use [**apistos**](https://crates.io/crates/apistos) instead.
 
-use crate::actix_operation_attr::parse_actix_openapi_operation_attrs;
+use crate::actix_operation_attr::{parse_actix_openapi_operation_attrs, ActixOperationAttr};
 use crate::callback_attr::parse_openapi_callback_attrs;
 use crate::internal::schemas::Schemas;
 use crate::internal::utils::extract_deprecated_from_attr;
@@ -1060,7 +1060,7 @@ pub fn routes(_: TokenStream, item: TokenStream) -> TokenStream {
     .map(|(operation_type, attr)| operation_type.map(|ot| (ot, attr)))
     .flatten()
     .map(|(operation_type, attr)| {
-      NestedMeta::parse_meta_list(attr.into_token_stream()).map(|attr_args| parse_actix_openapi_operation_attrs(&attr_args, &operation_type.to_string()))
+      NestedMeta::parse_meta_list(attr.into_token_stream()).map(|attr_args| (operation_type, parse_actix_openapi_operation_attrs(&attr_args, &operation_type.to_string())))
     })
     .collect::<Result<Vec<_>, _>>();
   let operations = match operations
@@ -1072,15 +1072,7 @@ pub fn routes(_: TokenStream, item: TokenStream) -> TokenStream {
     Err(err) => abort!(err.span(), format!("{err:?}")),
   };
 
-  for operation in &operations {
-    //@todo gen definition with one struct per operation attribute
-    //@todo gen actix function like default actix and generate definition holder for actix struct
-    // gen_open_api_def_actix_macro(
-    //   ope
-    // )
-  }
-
-  quote!().into()
+  gen_open_api_def_actix_route_macro(operations, item_ast).into()
 }
 
 macro_rules! actix_method_macro {
@@ -1111,20 +1103,13 @@ macro_rules! actix_method_macro {
               quote!()
             };
 
-            let (open_api_def, generated_item_ast) = gen_open_api_def_actix_macro(
+            gen_open_api_def_actix_macro(
               operation_attribute.operation,
               item,
               quote!{#[::actix_web::$method(#path #name #guard #wrap)]},
               &path,
               OperationType::$variant,
-            );
-
-            quote!(
-              #open_api_def
-
-              #generated_item_ast
-            )
-            .into()
+            ).into()
         }
     };
 }
@@ -1141,13 +1126,112 @@ actix_method_macro!(Options, options);
 actix_method_macro!(Trace, trace);
 actix_method_macro!(Patch, patch);
 
+
+fn gen_open_api_def_actix_route_macro(
+  operations: Vec<(OperationType, ActixOperationAttr)>,
+  item_ast: ItemFn,
+) -> proc_macro2::TokenStream {
+  let mut res = quote!();
+
+  let item_ident = &item_ast.sig.ident;
+
+  let generics = &item_ast.sig.generics.clone();
+  let generics_call = quote!();
+  let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+
+  let mut openapi_structs = vec![];
+  let mut operation_defs = quote!();
+  let mut actix_macros = quote!();
+  for (operation_type, operation_attr) in operations {
+    let operation_type_str = operation_type.to_string();
+    let path = operation_attr.path;
+    let normalized_path = path.replace("/", "_").replace("{", "").replace("}", "");
+    let openapi_struct = format_ident!("{item_ident}{operation_type_str}{normalized_path}");
+    let openapi_struct_def = quote!(struct #openapi_struct;);
+
+    let (responder_wrapper, _) = gen_item_ast(
+      Span::call_site(),
+      item_ast.clone(),
+      &openapi_struct,
+      &ty_generics,
+      &generics_call,
+      true,
+    );
+
+    let open_api_def = gen_open_api_impl(
+      &item_ast,
+      operation_attr.operation,
+      &openapi_struct,
+      &openapi_struct_def,
+      &impl_generics,
+      &ty_generics,
+      where_clause,
+      &responder_wrapper,
+      true,
+    );
+
+    res.extend(quote! {
+      #open_api_def
+    });
+
+    operation_defs.extend(quote!(
+      (#path, vec![(#operation_type, #openapi_struct::operation(oas_version))])
+    ));
+
+
+    let name = if let Some(name) = operation_attr.name {
+      quote!(, name = #name)
+    } else {
+      quote!()
+    };
+    let guard = if let Some(guard) = operation_attr.guard {
+      quote!(, guard = #guard)
+    } else {
+      quote!()
+    };
+    let wrap = if let Some(wrap) = operation_attr.wrap {
+      quote!(, wrap = #wrap)
+    } else {
+      quote!()
+    };
+    actix_macros.extend(quote!(
+      #[::actix_web::#operation_type_str(#path #name #guard #wrap)]
+    ));
+
+    openapi_structs.push(openapi_struct);
+  }
+
+  let definition_holder_impl = quote!(
+    impl ::apistos::DefinitionHolder for #item_ident {
+      fn operations(&mut self, oas_version: apistos::OpenApiVersion) -> apistos::IndexMap<String, apistos::IndexMap<apistos::paths::OperationType, apistos::paths::Operation>> {
+        use ::apistos::PathItemDefinition;
+        apistos::IndexMap::from_iter(vec![#operation_defs])
+      }
+      fn components(&mut self, oas_version: apistos::OpenApiVersion) -> Vec<apistos::components::Components> {
+        use ::apistos::PathItemDefinition;
+        vec![#(<#openapi_structs as ::apistos::PathItemDefinition>::components(oas_version),)*].flatten()
+      }
+    }
+  );
+
+  res.extend(quote!(
+    #definition_holder_impl
+
+    #[::actix_web::route()]
+    #actix_macros
+    #item_ast
+  ));
+
+  res
+}
+
 fn gen_open_api_def_actix_macro(
   operation_attribute: OperationAttr,
   item: TokenStream,
   actix_proc_macro: proc_macro2::TokenStream,
   path: &str,
   operation_type: OperationType,
-) -> (proc_macro2::TokenStream, proc_macro2::TokenStream) {
+) -> proc_macro2::TokenStream {
   let default_span = Span::call_site();
   let item_ast = match syn::parse::<ItemFn>(item) {
     Ok(v) => v,
@@ -1209,12 +1293,14 @@ fn gen_open_api_def_actix_macro(
 
   let definition_holder_impl = quote!(
     impl ::apistos::DefinitionHolder for #openapi_struct {
-      fn path(&self) -> &str { #path }
-      fn operations(&mut self, oas_version: apistos::OpenApiVersion) -> apistos::IndexMap<apistos::paths::OperationType, apistos::paths::Operation> {
+      fn operations(&mut self, oas_version: apistos::OpenApiVersion) -> apistos::IndexMap<String, apistos::IndexMap<apistos::paths::OperationType, apistos::paths::Operation>> {
         use ::apistos::PathItemDefinition;
-        apistos::IndexMap::from_iter(vec![(#operation_type, {
-            #openapi_struct::operation(oas_version)
-        })])
+        apistos::IndexMap::from_iter(
+          vec![(
+            #path.to_string(),
+            apistos::IndexMap::from_iter(vec![(#operation_type, #openapi_struct::operation(oas_version))])
+          )]
+        )
       }
       fn components(&mut self, oas_version: apistos::OpenApiVersion) -> Vec<apistos::components::Components> {
         use ::apistos::PathItemDefinition;
@@ -1223,13 +1309,13 @@ fn gen_open_api_def_actix_macro(
     }
   );
 
-  let generated_item_ast = quote!(
+  quote!(
+    #open_api_def
+
     #definition_holder_impl
     #actix_proc_macro
     #item_ast
-  );
-
-  (open_api_def, generated_item_ast)
+  )
 }
 
 // Imports bellow aim at making clippy happy. Those dependencies are necessary for doc-test.
