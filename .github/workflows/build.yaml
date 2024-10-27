@@ -31,7 +31,6 @@ jobs:
           - apistos
           - apistos-core
           - apistos-gen
-          - apistos-gen-test
           - apistos-models
           - apistos-plugins
           - apistos-rapidoc
