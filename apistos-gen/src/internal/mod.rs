@@ -140,7 +140,7 @@ pub(crate) fn gen_item_ast(
   // Remove async prefix if any. This macro generates an impl Future
   if item_ast.sig.asyncness.is_some() {
     item_ast.sig.asyncness = None;
-  } else {
+  } else if !with_actix_macros {
     emit_error!(default_span, "Operation must be an async function.");
     return (quote!(), quote!());
   }

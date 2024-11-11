@@ -1042,7 +1042,7 @@ pub fn api_callback(attr: TokenStream, item: TokenStream) -> TokenStream {
 pub fn routes(_: TokenStream, item: TokenStream) -> TokenStream {
   let mut item_ast = match syn::parse::<ItemFn>(item) {
     Ok(v) => v,
-    Err(e) => abort!(e.span(), format!("{e}")),
+    Err(e) => abort!(e.span(), format!("Failed to part itemFn: {e}")),
   };
 
   let (operations, others) = item_ast
@@ -1077,6 +1077,7 @@ pub fn routes(_: TokenStream, item: TokenStream) -> TokenStream {
 
 macro_rules! actix_method_macro {
     ($variant:ident, $method:ident) => {
+        #[proc_macro_error]
         #[proc_macro_attribute]
         pub fn $method(attr: TokenStream, item: TokenStream) -> TokenStream {
             let attr_args = match NestedMeta::parse_meta_list(attr.into()) {
@@ -1085,7 +1086,7 @@ macro_rules! actix_method_macro {
                 return TokenStream::from(Error::from(e).write_errors());
               }
             };
-            let operation_attribute = parse_actix_openapi_operation_attrs(&attr_args, "$method");
+            let operation_attribute = parse_actix_openapi_operation_attrs(&attr_args, stringify!($method));
             let path = operation_attribute.path;
             let name = if let Some(name) = operation_attribute.name {
               quote!(, name = #name)
