@@ -24,6 +24,9 @@ syn = { workspace = true, features = ["full", "extra-traits"] }
 
 [dev-dependencies]
 actix-multipart = { workspace = true }
+actix-rt = { workspace = true }
+actix-test = { workspace = true }
+actix-utils = { workspace = true }
 actix-web-grants = { workspace = true }
 assert-json-diff = { workspace = true }
 chrono = { workspace = true, features = ["serde"] }
