@@ -11,11 +11,11 @@ pub(crate) fn parse_actix_openapi_operation_attrs(attrs: &[NestedMeta], macro_id
 }
 
 #[derive(FromMeta, Clone)]
-struct ActixOperationAttrInternal {
+pub(crate) struct ActixOperationAttrInternal {
   path: String,
   name: Option<String>,
   guard: Option<String>, // @todo vec ?
-  wrap: Option<String>, // @todo vec ?
+  wrap: Option<String>,  // @todo vec ?
   #[darling(flatten)]
   operation: OperationAttrInternal,
 }

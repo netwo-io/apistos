@@ -1,4 +1,4 @@
-use crate::api::test::todo::get_todo;
+use crate::api::test::todo::{add_todo, get_todo};
 use actix_web::middleware::Logger;
 use actix_web::{App, HttpServer};
 use apistos::app::{BuildConfig, OpenApiWrapper};
@@ -34,7 +34,7 @@ async fn main() -> Result<(), impl Error> {
       .document(spec)
       .wrap(Logger::default())
       .service(get_todo)
-      // .service(add_todo)
+      .service(add_todo)
       .build_with(
         "/openapi.json",
         BuildConfig::default()
