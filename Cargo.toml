@@ -11,7 +11,7 @@ members = [
     "apistos-scalar",
     "apistos-shuttle",
     "apistos-swagger-ui"
-]
+, "examples/test-actix"]
 
 [workspace.package]
 authors = ["Netwo <oss@netwo.com>"]

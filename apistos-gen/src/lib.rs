@@ -898,7 +898,7 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
     default_span,
     item_ast,
     &openapi_struct,
-    &ty_generics,
+    Some(&ty_generics),
     &generics_call,
     false,
   );
@@ -911,8 +911,8 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
     operation_attribute,
     &openapi_struct,
     &openapi_struct_def,
-    &impl_generics,
-    &ty_generics,
+    Some(&impl_generics),
+    Some(&ty_generics),
     where_clause,
     &responder_wrapper,
     false,
@@ -1131,6 +1131,69 @@ actix_method_macro!(Options, options);
 actix_method_macro!(Trace, trace);
 actix_method_macro!(Patch, patch);
 
+#[proc_macro_error]
+#[proc_macro_attribute]
+pub fn connect(attr: TokenStream, item: TokenStream) -> TokenStream {
+  let attr_args = match NestedMeta::parse_meta_list(attr.into()) {
+    Ok(v) => v,
+    Err(e) => {
+      return TokenStream::from(Error::from(e).write_errors());
+    }
+  };
+  let operation_attribute = parse_actix_openapi_operation_attrs(&attr_args, "connect");
+  let path = operation_attribute.path;
+  let name = if let Some(name) = operation_attribute.name {
+    quote!(, name = #name)
+  } else {
+    quote!()
+  };
+  let guard = if let Some(guard) = operation_attribute.guard {
+    quote!(, guard = #guard)
+  } else {
+    quote!()
+  };
+  let wrap = if let Some(wrap) = operation_attribute.wrap {
+    quote!(, wrap = #wrap)
+  } else {
+    quote!()
+  };
+
+  let item_ast = match syn::parse::<ItemFn>(item) {
+    Ok(v) => v,
+    Err(e) => abort!(e.span(), format!("{e}")),
+  };
+  let openapi_struct = &item_ast.sig.ident;
+
+  let definition_holder_impl = quote!(
+    impl ::apistos::DefinitionHolder for #openapi_struct {
+      fn operations(&mut self, _oas_version: apistos::OpenApiVersion) -> apistos::IndexMap<String, apistos::IndexMap<apistos::paths::OperationType, apistos::paths::Operation>> {
+        apistos::IndexMap::default()
+      }
+      fn components(&mut self, _oas_version: apistos::OpenApiVersion) -> Vec<apistos::components::Components> {
+        Default::default()
+      }
+    }
+  );
+
+  let open_api_def = quote!(
+    #[automatically_derived]
+    impl apistos::PathItemDefinition for #openapi_struct {
+      fn is_visible() -> bool {
+        false
+      }
+    }
+  );
+
+  quote!(
+    #open_api_def
+
+    #definition_holder_impl
+    #[::actix_web::connect(#path #name #guard #wrap)]
+    #item_ast
+  )
+  .into()
+}
+
 fn gen_open_api_def_actix_route_macro(
   operations: Vec<(OperationType, ActixOperationAttr)>,
   item_ast: ItemFn,
@@ -1139,9 +1202,7 @@ fn gen_open_api_def_actix_route_macro(
 
   let item_ident = &item_ast.sig.ident;
 
-  let generics = &item_ast.sig.generics.clone();
   let generics_call = quote!();
-  let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
 
   let mut openapi_structs = vec![];
   let mut operation_defs = quote!();
@@ -1158,7 +1219,7 @@ fn gen_open_api_def_actix_route_macro(
       Span::call_site(),
       item_ast.clone(),
       &openapi_struct,
-      &ty_generics,
+      None,
       &generics_call,
       true,
     );
@@ -1168,9 +1229,9 @@ fn gen_open_api_def_actix_route_macro(
       operation_attr.operation,
       &openapi_struct,
       &openapi_struct_def,
-      &impl_generics,
-      &ty_generics,
-      where_clause,
+      None,
+      None,
+      None,
       &responder_wrapper,
       true,
     );
@@ -1228,7 +1289,6 @@ fn gen_open_api_def_actix_route_macro(
     #actix_macros
     #item_ast
   ));
-  eprintln!("res: {res:#}");
 
   res
 }
@@ -1250,8 +1310,8 @@ fn gen_open_api_def_actix_macro(
 
   let generics = &item_ast.sig.generics.clone();
   let mut generics_call = quote!();
-  let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
-  let openapi_struct_def = if !generics.params.is_empty() {
+  let (_impl_generics, ty_generics, _where_clause) = generics.split_for_impl();
+  if !generics.params.is_empty() {
     let mut generic_types_idents = vec![];
     for param in &generics.params {
       match param {
@@ -1272,17 +1332,14 @@ fn gen_open_api_def_actix_macro(
       phantom_params.extend(quote!(#param_name: std::marker::PhantomData < #generic_types_ident >,))
     }
     generics_call = quote!(#turbofish { #phantom_params_names });
-
-    quote!(struct #openapi_struct #impl_generics #where_clause { #phantom_params })
-  } else {
-    quote!(struct #openapi_struct;)
   };
+  let openapi_struct_def = quote!(struct #openapi_struct;);
 
   let (responder_wrapper, _) = gen_item_ast(
     default_span,
     item_ast.clone(),
     openapi_struct,
-    &ty_generics,
+    None,
     &generics_call,
     true,
   );
@@ -1292,9 +1349,9 @@ fn gen_open_api_def_actix_macro(
     operation_attribute,
     openapi_struct,
     &openapi_struct_def,
-    &impl_generics,
-    &ty_generics,
-    where_clause,
+    None,
+    None,
+    None,
     &responder_wrapper,
     true,
   );
