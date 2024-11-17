@@ -10,7 +10,7 @@ use actix_web::{
   },
   route, web, App, Error, HttpRequest, HttpResponse, Responder,
 };
-use apistos_gen::{delete, get, head, options, patch, post, put, routes, trace};
+use apistos_gen::{connect, delete, get, head, options, patch, post, put, routes, trace};
 use futures_core::future::LocalBoxFuture;
 
 // Make sure that we can name function as 'config'
@@ -44,11 +44,10 @@ async fn head_test() -> impl Responder {
   HttpResponse::Ok()
 }
 
-// @todo handle connect with empty definition
-// #[connect(path = "/test")]
-// async fn connect_test() -> impl Responder {
-//     HttpResponse::Ok()
-// }
+#[connect(path = "/test")]
+async fn connect_test() -> impl Responder {
+  HttpResponse::Ok()
+}
 
 #[options(path = "/test")]
 async fn options_test() -> impl Responder {
@@ -255,7 +254,7 @@ async fn test_body() {
       .service(post_test)
       .service(put_test)
       .service(head_test)
-      // .service(connect_test)
+      .service(connect_test)
       .service(options_test)
       .service(trace_test)
       .service(patch_test)
