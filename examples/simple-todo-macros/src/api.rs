@@ -8,7 +8,7 @@ pub mod test {
   pub mod todo {
     use actix_web::web::{Json, Path};
     use actix_web::Error;
-    use apistos::{get, post, ApiComponent};
+    use apistos::{get, post, routes, ApiComponent};
     use schemars::JsonSchema;
     use serde::{Deserialize, Serialize};
     use uuid::Uuid;
@@ -26,6 +26,7 @@ pub mod test {
       pub description: Option<String>,
     }
 
+    #[routes]
     #[get(path = "/todo/{todo_id}", summary = "Get an element from the todo list")]
     pub(crate) async fn get_todo(todo_id: Path<Uuid>) -> Result<Json<Todo>, Error> {
       // because it is a sample app, we do not currently implement any logic to store todos

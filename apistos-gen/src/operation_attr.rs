@@ -196,7 +196,49 @@ impl ToString for OperationType {
       OperationType::Options => "options".to_string(),
       OperationType::Head => "head".to_string(),
       OperationType::Patch => "patch".to_string(),
-      OperationType::Trace => "trace".to_string()
+      OperationType::Trace => "trace".to_string(),
+    }
+  }
+}
+
+#[derive(Ord, PartialOrd, Eq, PartialEq, Clone, Copy)]
+pub(crate) enum ActixOperationTypePath {
+  Get,
+  Put,
+  Post,
+  Delete,
+  Options,
+  Head,
+  Patch,
+  Trace,
+}
+
+impl ToTokens for ActixOperationTypePath {
+  fn to_tokens(&self, tokens: &mut TokenStream) {
+    match self {
+      ActixOperationTypePath::Get => tokens.extend(quote!(get)),
+      ActixOperationTypePath::Put => tokens.extend(quote!(put)),
+      ActixOperationTypePath::Post => tokens.extend(quote!(post)),
+      ActixOperationTypePath::Delete => tokens.extend(quote!(delete)),
+      ActixOperationTypePath::Options => tokens.extend(quote!(options)),
+      ActixOperationTypePath::Head => tokens.extend(quote!(head)),
+      ActixOperationTypePath::Patch => tokens.extend(quote!(patch)),
+      ActixOperationTypePath::Trace => tokens.extend(quote!(trace)),
+    }
+  }
+}
+
+impl From<OperationType> for ActixOperationTypePath {
+  fn from(value: OperationType) -> Self {
+    match value {
+      OperationType::Get => Self::Get,
+      OperationType::Put => Self::Put,
+      OperationType::Post => Self::Post,
+      OperationType::Delete => Self::Delete,
+      OperationType::Options => Self::Options,
+      OperationType::Head => Self::Head,
+      OperationType::Patch => Self::Patch,
+      OperationType::Trace => Self::Trace,
     }
   }
 }
