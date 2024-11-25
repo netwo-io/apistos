@@ -23,22 +23,10 @@ quote = { workspace = true }
 syn = { workspace = true, features = ["full", "extra-traits"] }
 
 [dev-dependencies]
-actix-multipart = { workspace = true }
-actix-rt = { workspace = true }
-actix-test = { workspace = true }
-actix-utils = { workspace = true }
-actix-web-grants = { workspace = true }
-assert-json-diff = { workspace = true }
-chrono = { workspace = true, features = ["serde"] }
-futures-core = { workspace = true }
 garde = { workspace = true }
 schemars = { workspace = true }
 serde = { workspace = true }
-serde_json = { workspace = true }
-uuid = { workspace = true, features = ["v4"] }
-
-apistos = { path = "../apistos", version = "1.0.0-pre-release.9", features = ["multipart", "uuid"] }
-apistos-core = { path = "../apistos-core", version = "1.0.0-pre-release.9", features = ["actix-web-grants"] }
+apistos = { path = "../apistos" }
 
 [lints]
 workspace = true
