@@ -8,9 +8,9 @@ use actix_web::{
     header::{HeaderName, HeaderValue},
     StatusCode,
   },
-  route, web, App, Error, HttpRequest, HttpResponse, Responder,
+  web, App, Error, HttpRequest, HttpResponse, Responder,
 };
-use apistos_gen::{connect, delete, get, head, options, patch, post, put, routes, trace};
+use apistos_gen::{connect, delete, get, head, options, patch, post, put, route, routes, trace};
 use futures_core::future::LocalBoxFuture;
 
 // Make sure that we can name function as 'config'
@@ -60,12 +60,12 @@ async fn trace_test() -> impl Responder {
 }
 
 #[get(path = "/test")]
-fn auto_async() -> impl Future<Output = Result<HttpResponse, actix_web::Error>> {
+fn auto_async() -> impl Future<Output = Result<HttpResponse, Error>> {
   ok(HttpResponse::Ok().finish())
 }
 
 #[get(path = "/test")]
-fn auto_sync() -> impl Future<Output = Result<HttpResponse, actix_web::Error>> {
+fn auto_sync() -> impl Future<Output = Result<HttpResponse, Error>> {
   ok(HttpResponse::Ok().finish())
 }
 
@@ -84,22 +84,21 @@ async fn get_param_test(_: web::Path<String>) -> impl Responder {
   HttpResponse::Ok()
 }
 
-// @todo handle route with parameters
-// #[route(path = "/hello", method = "HELLO")]
-// async fn custom_route_test() -> impl Responder {
-//     HttpResponse::Ok()
-// }
-//
-// #[route(
-//     "/multi",
-//     method = "GET",
-//     method = "POST",
-//     method = "HEAD",
-//     method = "HELLO"
-// )]
-// async fn route_test() -> impl Responder {
-//     HttpResponse::Ok()
-// }
+#[route(path = "/hello", method(method = "HELLO"))]
+async fn custom_route_test() -> impl Responder {
+  HttpResponse::Ok()
+}
+
+#[route(
+  path = "/multi",
+  method(method = "GET"),
+  method(method = "POST"),
+  method(method = "HEAD"),
+  method(method = "HELLO")
+)]
+async fn route_test() -> impl Responder {
+  HttpResponse::Ok()
+}
 
 #[routes]
 #[get(path = "/routes/test")]
@@ -134,6 +133,7 @@ async fn routes_overlapping_inaccessible_test(req: HttpRequest) -> impl Responde
   HttpResponse::Ok()
 }
 
+#[allow(unused_lifetimes)]
 #[get(path = "/custom_resource_name", name = "custom")]
 async fn custom_resource_name_test<'a>(req: HttpRequest) -> impl Responder {
   assert!(req.url_for_static("custom").is_ok());
@@ -144,7 +144,7 @@ async fn custom_resource_name_test<'a>(req: HttpRequest) -> impl Responder {
 mod guard_module {
   use actix_web::{guard::GuardContext, http::header};
 
-  pub fn guard(ctx: &GuardContext<'_>) -> bool {
+  pub(crate) fn guard(ctx: &GuardContext<'_>) -> bool {
     ctx
       .header::<header::Accept>()
       .map(|h| h.preference() == "image/*")
@@ -157,7 +157,7 @@ async fn guard_test() -> impl Responder {
   HttpResponse::Ok()
 }
 
-pub struct ChangeStatusCode;
+pub(crate) struct ChangeStatusCode;
 
 impl<S, B> Transform<S, ServiceRequest> for ChangeStatusCode
 where
@@ -176,7 +176,7 @@ where
   }
 }
 
-pub struct ChangeStatusCodeMiddleware<S> {
+pub(crate) struct ChangeStatusCodeMiddleware<S> {
   service: S,
 }
 
@@ -216,9 +216,9 @@ async fn get_wrap(_: web::Path<String>) -> impl Responder {
 ///
 /// Regression from <https://github.com/actix/actix-web/issues/3118>.
 #[route(
-  "/catalog",
-  method = "GET",
-  method = "HEAD",
+  path = "/catalog",
+  method(method = "GET"),
+  method(method = "HEAD"),
   wrap = "actix_web::middleware::Compress::default()"
 )]
 async fn get_catalog() -> impl Responder {
@@ -236,15 +236,15 @@ async fn test_params() {
 
   let request = srv.request(http::Method::GET, srv.url("/test/it"));
   let response = request.send().await.unwrap();
-  assert_eq!(response.status(), http::StatusCode::OK);
+  assert_eq!(response.status(), StatusCode::OK);
 
   let request = srv.request(http::Method::PUT, srv.url("/test/it"));
   let response = request.send().await.unwrap();
-  assert_eq!(response.status(), http::StatusCode::CREATED);
+  assert_eq!(response.status(), StatusCode::CREATED);
 
   let request = srv.request(http::Method::DELETE, srv.url("/test/it"));
   let response = request.send().await.unwrap();
-  assert_eq!(response.status(), http::StatusCode::NO_CONTENT);
+  assert_eq!(response.status(), StatusCode::NO_CONTENT);
 }
 
 #[actix_rt::test]
@@ -259,7 +259,7 @@ async fn test_body() {
       .service(trace_test)
       .service(patch_test)
       .service(test_handler)
-      // .service(route_test)
+      .service(route_test)
       .service(routes_overlapping_test)
       .service(routes_overlapping_inaccessible_test)
       .service(routes_test)
@@ -293,12 +293,12 @@ async fn test_body() {
   let request = srv.request(http::Method::PUT, srv.url("/test"));
   let response = request.send().await.unwrap();
   assert!(response.status().is_success());
-  assert_eq!(response.status(), http::StatusCode::CREATED);
+  assert_eq!(response.status(), StatusCode::CREATED);
 
   let request = srv.request(http::Method::POST, srv.url("/test"));
   let response = request.send().await.unwrap();
   assert!(response.status().is_success());
-  assert_eq!(response.status(), http::StatusCode::NO_CONTENT);
+  assert_eq!(response.status(), StatusCode::NO_CONTENT);
 
   let request = srv.request(http::Method::GET, srv.url("/test"));
   let response = request.send().await.unwrap();

@@ -4,6 +4,7 @@ members = [
     "apistos",
     "apistos-core",
     "apistos-gen",
+    "apistos-gen-test",
     "apistos-models",
     "apistos-plugins",
     "apistos-rapidoc",
@@ -11,7 +12,7 @@ members = [
     "apistos-scalar",
     "apistos-shuttle",
     "apistos-swagger-ui"
-, "examples/test-actix"]
+]
 
 [workspace.package]
 authors = ["Netwo <oss@netwo.com>"]

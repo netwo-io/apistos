@@ -5,6 +5,9 @@ use proc_macro_error2::abort;
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{ToTokens, quote};
 use std::collections::BTreeMap;
+use std::convert::Infallible;
+use std::fmt::{Display, Formatter};
+use std::str::FromStr;
 
 pub(crate) fn parse_openapi_operation_attrs(attrs: &[NestedMeta]) -> OperationAttr {
   match OperationAttrInternal::from_list(attrs) {
@@ -159,7 +162,7 @@ impl From<OperationAttrInternal> for OperationAttr {
   }
 }
 
-#[derive(Ord, PartialOrd, Eq, PartialEq, Clone, Copy)]
+#[derive(Ord, PartialOrd, Eq, PartialEq, Clone)]
 pub(crate) enum OperationType {
   Get,
   Put,
@@ -169,6 +172,7 @@ pub(crate) enum OperationType {
   Head,
   Patch,
   Trace,
+  Custom(String),
 }
 
 impl ToTokens for OperationType {
@@ -182,21 +186,41 @@ impl ToTokens for OperationType {
       OperationType::Head => tokens.extend(quote!(apistos::paths::OperationType::Head)),
       OperationType::Patch => tokens.extend(quote!(apistos::paths::OperationType::Patch)),
       OperationType::Trace => tokens.extend(quote!(apistos::paths::OperationType::Trace)),
+      OperationType::Custom(_) => {}
     }
   }
 }
 
-impl ToString for OperationType {
-  fn to_string(&self) -> String {
+impl FromStr for OperationType {
+  type Err = Infallible;
+
+  fn from_str(s: &str) -> Result<Self, Self::Err> {
+    match s.to_lowercase().as_str() {
+      "get" => Ok(OperationType::Get),
+      "put" => Ok(OperationType::Patch),
+      "post" => Ok(OperationType::Post),
+      "delete" => Ok(OperationType::Delete),
+      "options" => Ok(OperationType::Options),
+      "head" => Ok(OperationType::Head),
+      "patch" => Ok(OperationType::Patch),
+      "trace" => Ok(OperationType::Trace),
+      str => Ok(OperationType::Custom(str.to_string())),
+    }
+  }
+}
+
+impl Display for OperationType {
+  fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
     match self {
-      OperationType::Get => "get".to_string(),
-      OperationType::Put => "put".to_string(),
-      OperationType::Post => "post".to_string(),
-      OperationType::Delete => "delete".to_string(),
-      OperationType::Options => "options".to_string(),
-      OperationType::Head => "head".to_string(),
-      OperationType::Patch => "patch".to_string(),
-      OperationType::Trace => "trace".to_string(),
+      OperationType::Get => write!(f, "get"),
+      OperationType::Put => write!(f, "put"),
+      OperationType::Post => write!(f, "post"),
+      OperationType::Delete => write!(f, "delete"),
+      OperationType::Options => write!(f, "options"),
+      OperationType::Head => write!(f, "head"),
+      OperationType::Patch => write!(f, "patch"),
+      OperationType::Trace => write!(f, "trace"),
+      OperationType::Custom(op) => write!(f, "{op}"),
     }
   }
 }
@@ -228,17 +252,20 @@ impl ToTokens for ActixOperationTypePath {
   }
 }
 
-impl From<OperationType> for ActixOperationTypePath {
-  fn from(value: OperationType) -> Self {
+impl TryFrom<OperationType> for ActixOperationTypePath {
+  type Error = syn::Error;
+
+  fn try_from(value: OperationType) -> Result<Self, Self::Error> {
     match value {
-      OperationType::Get => Self::Get,
-      OperationType::Put => Self::Put,
-      OperationType::Post => Self::Post,
-      OperationType::Delete => Self::Delete,
-      OperationType::Options => Self::Options,
-      OperationType::Head => Self::Head,
-      OperationType::Patch => Self::Patch,
-      OperationType::Trace => Self::Trace,
+      OperationType::Get => Ok(Self::Get),
+      OperationType::Put => Ok(Self::Put),
+      OperationType::Post => Ok(Self::Post),
+      OperationType::Delete => Ok(Self::Delete),
+      OperationType::Options => Ok(Self::Options),
+      OperationType::Head => Ok(Self::Head),
+      OperationType::Patch => Ok(Self::Patch),
+      OperationType::Trace => Ok(Self::Trace),
+      OperationType::Custom(_) => Err(syn::Error::new(Span::call_site(), "Custum operation type found")),
     }
   }
 }

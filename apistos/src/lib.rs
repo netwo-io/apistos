@@ -158,8 +158,8 @@ pub use apistos_core::multipart;
 pub use apistos_core::parameters::header::ApiHeader;
 pub use apistos_core::{__internal, ApiComponent, ApiErrorComponent, ApiWebhook, ApiWebhookDef, TypedSchema};
 pub use apistos_gen::{
-  api_callback, api_operation, delete, get, head, options, patch, post, put, routes, trace, ApiComponent, ApiCookie,
-  ApiErrorComponent, ApiHeader, ApiSecurity, ApiType, ApiWebhookComponent,
+  api_callback, api_operation, connect, delete, get, head, options, patch, post, put, route, routes, trace,
+  ApiComponent, ApiCookie, ApiErrorComponent, ApiHeader, ApiSecurity, ApiType, ApiWebhookComponent,
 };
 pub use apistos_models::*;
 #[cfg(feature = "rapidoc")]

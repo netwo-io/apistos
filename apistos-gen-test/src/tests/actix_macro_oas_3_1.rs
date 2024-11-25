@@ -209,7 +209,7 @@ fn api_operation_impl_responder() {
     HttpResponse::Ok()
   }
 
-  #[expect(clippy::todo, clippy::unused_async, dead_code)]
+  #[expect(clippy::todo, clippy::unused_async)]
   async fn plop() {
     todo!()
   }
@@ -749,6 +749,7 @@ fn api_operation_accepted_json() {
 }
 
 #[test]
+#[allow(deprecated)]
 fn api_operation_deprecated() {
   /// Add a new pet to the store
   /// Add a new pet to the store
@@ -1136,7 +1137,7 @@ fn api_operation_multipart() {
   /// Add a new pet to the store
   /// Add a new pet to the store
   /// Plop
-  #[get(path = "/", )]
+  #[get(path = "/")]
   pub(crate) async fn test(
     _payload: MultipartForm<test_models::Test>,
   ) -> Result<HttpResponse, test_models::MultipleErrorResponse> {

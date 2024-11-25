@@ -15,19 +15,23 @@ license.workspace = true
 
 [dev-dependencies]
 actix-multipart = { workspace = true }
+actix-rt = { workspace = true }
+actix-test = { workspace = true }
+actix-utils = { workspace = true }
 actix-web = { workspace = true }
 actix-web-grants = { workspace = true }
 assert-json-diff = { workspace = true }
 chrono = { workspace = true, features = ["serde"] }
 futures-core = { workspace = true }
-apistos = { path = "../apistos", features = ["multipart", "uuid"] }
-apistos-core = { path = "../apistos-core", version = "1.0.0-pre-release.9", features = ["actix-web-grants"] }
-apistos-gen = { path = "../apistos-gen", version = "1.0.0-pre-release.9" }
 # we use the "preserve_order" feature from schemars here following https://github.com/netwo-io/apistos/pull/78
 schemars = { workspace = true, features = ["preserve_order"] }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 uuid = { workspace = true, features = ["v4"] }
+
+apistos = { path = "../apistos", features = ["multipart", "uuid"] }
+apistos-core = { path = "../apistos-core", version = "1.0.0-pre-release.9", features = ["actix-web-grants"] }
+apistos-gen = { path = "../apistos-gen", version = "1.0.0-pre-release.9" }
 
 [lints]
 workspace = true

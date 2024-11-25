@@ -21,7 +21,7 @@ pub trait DefinitionHolder {
     let ops = self.operations(oas_version);
     if !ops.is_empty() {
       for (path, ops) in ops {
-        path_op_map.entry(path.into()).or_default().operations.extend(ops);
+        path_op_map.entry(path).or_default().operations.extend(ops);
       }
     }
   }
@@ -49,7 +49,6 @@ impl<T> DefinitionHolder for Resource<T> {
   }
 }
 
-#[expect(clippy::unimplemented)]
 impl<T> DefinitionHolder for Scope<T> {
   fn operations(&mut self, _oas_version: OpenApiVersion) -> IndexMap<String, IndexMap<OperationType, Operation>> {
     let item_map = mem::take(&mut self.item_map);
@@ -64,7 +63,6 @@ impl<T> DefinitionHolder for Scope<T> {
   }
 }
 
-#[expect(clippy::unimplemented)]
 impl DefinitionHolder for ServiceConfig<'_> {
   fn operations(&mut self, _oas_version: OpenApiVersion) -> IndexMap<String, IndexMap<OperationType, Operation>> {
     let item_map = mem::take(&mut self.item_map);
@@ -109,7 +107,7 @@ impl DefinitionHolder for Redirect {
     index_map
   }
 
-  fn components(&mut self) -> Vec<Components> {
+  fn components(&mut self, _oas_version: OpenApiVersion) -> Vec<Components> {
     vec![]
   }
 }
