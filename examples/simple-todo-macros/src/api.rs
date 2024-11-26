@@ -46,14 +46,5 @@ pub mod test {
         description: new_todo.description,
       }))
     }
-
-    #[get(path = "/custom_resource_name", name = "custom")]
-    async fn custom_resource_name_test<'a>(_body: Json<NewTodo>) -> Result<Json<Todo>, Error> {
-      Ok(Json(Todo {
-        id: Uuid::new_v4(),
-        title: "".to_string(),
-        description: None,
-      }))
-    }
   }
 }
