@@ -1046,6 +1046,7 @@ pub fn api_callback(attr: TokenStream, item: TokenStream) -> TokenStream {
   .into()
 }
 
+#[cfg(feature = "actix-web-macros")]
 #[proc_macro_error]
 #[proc_macro_attribute]
 pub fn route(attr: TokenStream, item: TokenStream) -> TokenStream {
@@ -1126,6 +1127,7 @@ pub fn route(attr: TokenStream, item: TokenStream) -> TokenStream {
   .into()
 }
 
+#[cfg(feature = "actix-web-macros")]
 #[proc_macro_error]
 #[proc_macro_attribute]
 pub fn routes(_: TokenStream, item: TokenStream) -> TokenStream {
@@ -1201,6 +1203,7 @@ pub fn routes(_: TokenStream, item: TokenStream) -> TokenStream {
   .into()
 }
 
+#[cfg(feature = "actix-web-macros")]
 macro_rules! actix_method_macro {
     ($variant:ident, $method:ident) => {
         #[proc_macro_error]
@@ -1243,16 +1246,24 @@ macro_rules! actix_method_macro {
 
 // @todo
 // - actix scope macro (actix-web-codegen/src/lib.rs:232)
-// - handle multiple actix macro (routes.rs:106)
+#[cfg(feature = "actix-web-macros")]
 actix_method_macro!(Get, get);
+#[cfg(feature = "actix-web-macros")]
 actix_method_macro!(Post, post);
+#[cfg(feature = "actix-web-macros")]
 actix_method_macro!(Put, put);
+#[cfg(feature = "actix-web-macros")]
 actix_method_macro!(Delete, delete);
+#[cfg(feature = "actix-web-macros")]
 actix_method_macro!(Head, head);
+#[cfg(feature = "actix-web-macros")]
 actix_method_macro!(Options, options);
+#[cfg(feature = "actix-web-macros")]
 actix_method_macro!(Trace, trace);
+#[cfg(feature = "actix-web-macros")]
 actix_method_macro!(Patch, patch);
 
+#[cfg(feature = "actix-web-macros")]
 #[proc_macro_error]
 #[proc_macro_attribute]
 pub fn connect(attr: TokenStream, item: TokenStream) -> TokenStream {

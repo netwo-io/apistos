@@ -55,6 +55,9 @@ query = []
 qs_query = ["apistos-core/qs_query"]
 lab_query = ["apistos-core/lab_query"]
 
+# actix like macros
+actix-web-macros = ["apistos-gen/actix-web-macros"]
+
 # actix garde feature
 garde = ["apistos-core/garde"]
 
