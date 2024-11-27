@@ -2,9 +2,11 @@
 //!
 //! ⚠️ This crate is not indented to be used by itself. Please use [**apistos**](https://crates.io/crates/apistos) instead.
 
+#[cfg(feature = "actix-web-macros")]
 use crate::actix_operation_attr::{
   parse_actix_openapi_operation_attrs, ActixOperationAttr, ActixOperationAttrInternal,
 };
+#[cfg(feature = "actix-web-macros")]
 use crate::actix_route_attr::parse_actix_route_attrs;
 use crate::callback_attr::parse_openapi_callback_attrs;
 use crate::internal::gen_item_ast;
@@ -17,7 +19,8 @@ use crate::openapi_header_attr::parse_openapi_header_attrs;
 use crate::openapi_security_attr::parse_openapi_security_attrs;
 use crate::openapi_type_attr::parse_openapi_type_attrs;
 use crate::operation_attr::{parse_openapi_operation_attrs, ActixOperationTypePath, OperationType};
-use crate::utils::method_from_attr_path;
+#[cfg(feature = "actix-web-macros")]
+use crate::utils::{method_from_attr_path, modify_attribute_with_scope};
 use crate::webhook_attr::parse_openapi_derive_webhook_attrs;
 use convert_case::{Case, Casing};
 use darling::Error;
@@ -29,7 +32,9 @@ use quote::{format_ident, quote};
 use std::str::FromStr;
 use syn::{DeriveInput, GenericParam, Ident, ItemFn};
 
+#[cfg(feature = "actix-web-macros")]
 mod actix_operation_attr;
+#[cfg(feature = "actix-web-macros")]
 mod actix_route_attr;
 mod callback_attr;
 mod internal;
@@ -39,6 +44,7 @@ mod openapi_header_attr;
 mod openapi_security_attr;
 mod openapi_type_attr;
 mod operation_attr;
+#[cfg(feature = "actix-web-macros")]
 mod utils;
 mod webhook_attr;
 
@@ -1326,6 +1332,54 @@ pub fn connect(attr: TokenStream, item: TokenStream) -> TokenStream {
     #item_ast
   )
   .into()
+}
+
+#[cfg(feature = "actix-web-macros")]
+#[proc_macro_error]
+#[proc_macro_attribute]
+pub fn scope(attr: TokenStream, item: TokenStream) -> TokenStream {
+  if attr.is_empty() {
+    abort!(
+      Span::call_site(),
+      "missing arguments for scope macro, expected: #[scope(\"/prefix\")]",
+    )
+  }
+
+  let scope_prefix = match syn::parse::<syn::LitStr>(attr.clone()) {
+    Ok(v) => v,
+    Err(e) => abort!(
+      e.span(),
+      "argument to scope macro is not a string literal, expected: #[scope(\"/prefix\")]"
+    ),
+  };
+  let scope_prefix_value = scope_prefix.value();
+
+  if scope_prefix_value.ends_with('/') {
+    // trailing slashes cause non-obvious problems
+    // it's better to point them out to developers rather than
+    abort!(scope_prefix.span(), "scopes should not have trailing slashes; see https://docs.rs/actix-web/4/actix_web/struct.Scope.html#avoid-trailing-slashes")
+  }
+
+  let mut module = match syn::parse::<syn::ItemMod>(item) {
+    Ok(v) => v,
+    Err(e) => abort!(e.span(), "#[scope] macro must be attached to a module"),
+  };
+
+  // modify any routing macros (method or route[s]) attached to
+  // functions by prefixing them with this scope macro's argument
+  if let Some((_, items)) = &mut module.content {
+    for item in items {
+      if let syn::Item::Fn(fun) = item {
+        fun.attrs = fun
+          .attrs
+          .iter()
+          .map(|attr| modify_attribute_with_scope(attr, &scope_prefix_value))
+          .collect();
+      }
+    }
+  }
+
+  quote!(#module).into()
 }
 
 // Imports bellow aim at making clippy happy. Those dependencies are necessary for doc-test.

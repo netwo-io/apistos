@@ -1,7 +1,9 @@
 use crate::operation_attr::{OperationAttr, OperationAttrInternal};
 use darling::ast::NestedMeta;
 use darling::FromMeta;
+use proc_macro2::TokenStream;
 use proc_macro_error2::abort;
+use quote::{quote, ToTokens};
 
 pub(crate) fn parse_actix_route_attrs(attrs: &[NestedMeta]) -> ActixRouteAttr {
   match ActixRouteAttrInternal::from_list(attrs) {
@@ -11,13 +13,13 @@ pub(crate) fn parse_actix_route_attrs(attrs: &[NestedMeta]) -> ActixRouteAttr {
 }
 
 #[derive(FromMeta, Clone)]
-struct ActixRouteAttrInternal {
-  path: String,
+pub(crate) struct ActixRouteAttrInternal {
+  pub(crate) path: String,
   #[darling(multiple, rename = "method")]
-  methods: Vec<ActixRouteMethodAttrInternal>,
-  name: Option<String>,
-  guard: Option<String>, // @todo vec ?
-  wrap: Option<String>,  // @todo vec ?
+  pub(crate) methods: Vec<ActixRouteMethodAttrInternal>,
+  pub(crate) name: Option<String>,
+  pub(crate) guard: Option<String>, // @todo vec ?
+  pub(crate) wrap: Option<String>,  // @todo vec ?
 }
 
 #[derive(FromMeta, Clone)]
@@ -25,6 +27,13 @@ pub(crate) struct ActixRouteMethodAttrInternal {
   method: String,
   #[darling(flatten)]
   operation: OperationAttrInternal,
+}
+
+impl ToTokens for ActixRouteMethodAttrInternal {
+  fn to_tokens(&self, tokens: &mut TokenStream) {
+    let ActixRouteMethodAttrInternal { method, operation } = self;
+    tokens.extend(quote!(method(method = #method, #operation)))
+  }
 }
 
 impl From<ActixRouteAttrInternal> for ActixRouteAttr {

@@ -7,6 +7,7 @@ use syn::{FnArg, Ident, ItemFn, Pat, ReturnType, Token, Type, TypeGenerics, Type
 mod components;
 mod operation;
 
+#[cfg(feature = "actix-web-macros")]
 pub(crate) mod actix_macros;
 pub(crate) mod path_item;
 pub(crate) mod schemas;
