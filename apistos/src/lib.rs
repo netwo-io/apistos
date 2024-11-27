@@ -162,7 +162,7 @@ pub use apistos_gen::{
   ApiWebhookComponent,
 };
 #[cfg(feature = "actix-web-macros")]
-pub use apistos_gen::{connect, delete, get, head, options, patch, post, put, route, routes, trace};
+pub use apistos_gen::{connect, delete, get, head, options, patch, post, put, route, routes, scope, trace};
 pub use apistos_models::*;
 #[cfg(feature = "rapidoc")]
 pub use apistos_rapidoc::RapidocConfig;

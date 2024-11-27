@@ -1,3 +1,3 @@
 mod routes;
-// mod scopes;
+mod scopes;
 // mod trybuild;

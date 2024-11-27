@@ -1,3 +1,4 @@
+#[cfg(feature = "actix-web-macros")]
 use crate::actix_operation_attr::ActixOperationAttr;
 use crate::internal::gen_item_ast;
 use crate::internal::path_item::{PathItem, SourceDefinitionKind};
@@ -21,7 +22,7 @@ pub(crate) fn gen_open_api_def_actix_routes_macro(
   let mut openapi_structs = vec![];
   let mut operation_defs = quote!();
   for (operation_type, operation_attr) in operations {
-    if matches!(operation_type, OperationType::Custom(_)) {
+    if matches!(operation_type, OperationType::Custom(_) | OperationType::Connect) {
       continue;
     }
 
