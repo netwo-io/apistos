@@ -1053,6 +1053,33 @@ pub fn api_callback(attr: TokenStream, item: TokenStream) -> TokenStream {
 }
 
 #[cfg(feature = "actix-web-macros")]
+/// Replacement for [actix-web route macro](https://docs.rs/actix-web/latest/actix_web/attr.route.html)
+///
+/// # Syntax
+/// ```plain
+/// #[route(path = "path", method="HTTP_METHOD"[, attributes])]
+/// ```
+///
+/// # Attributes
+/// - `path = "path"`: Raw literal string with path for which to register handler.
+/// - `name = "resource_name"`: Specifies resource name for the handler. If not set, the function
+///   name of handler is used.
+/// - `method = "HTTP_METHOD"`: Registers HTTP method to provide guard for. Upper-case string,
+///   "GET", "POST" for example.
+/// - `guard = "function_name"`: Registers function as guard using `actix_web::guard::fn_guard`.
+/// - `wrap = "Middleware"`: Registers a resource middleware.
+/// - `key = "value"` any [`api_operation`](https://docs.rs/apistos/latest/apistos/attr.api_operation.html) option
+///
+/// # Examples
+/// ```
+/// use actix_web::HttpResponse;
+/// use apistos::route;
+///
+/// #[route("/test", method = "GET", method = "HEAD", method = "CUSTOM")]
+/// async fn example() -> HttpResponse {
+///     HttpResponse::Ok().finish()
+/// }
+/// ```
 #[proc_macro_error]
 #[proc_macro_attribute]
 pub fn route(attr: TokenStream, item: TokenStream) -> TokenStream {
@@ -1134,6 +1161,35 @@ pub fn route(attr: TokenStream, item: TokenStream) -> TokenStream {
 }
 
 #[cfg(feature = "actix-web-macros")]
+/// Replacement for [actix-web routes macro](https://docs.rs/actix-web/latest/actix_web/attr.routes.html)
+///
+/// # Syntax
+/// ```plain
+/// #[routes]
+/// #[<method>(path = "path", ...)]
+/// #[<method>(path = "path", ...)]
+/// ...
+/// ```
+///
+/// # Attributes
+/// The `routes` macro itself has no parameters, but allows specifying the attribute macros for
+/// the multiple paths and/or methods, e.g. [`GET`](get) and [`POST`](post).
+///
+/// These helper attributes take the same parameters as the single method macros.
+///
+/// # Examples
+/// ```
+/// use actix_web::HttpResponse;
+/// use apistos::routes;
+///
+/// #[routes]
+/// #[get(path = "/test")]
+/// #[get(path = "/test2")]
+/// #[delete(path = "/test")]
+/// async fn example() -> HttpResponse {
+///     HttpResponse::Ok().finish()
+/// }
+/// ```
 #[proc_macro_error]
 #[proc_macro_attribute]
 pub fn routes(_: TokenStream, item: TokenStream) -> TokenStream {
@@ -1212,6 +1268,31 @@ pub fn routes(_: TokenStream, item: TokenStream) -> TokenStream {
 #[cfg(feature = "actix-web-macros")]
 macro_rules! actix_method_macro {
     ($variant:ident, $method:ident) => {
+        #[doc = concat!("Replacement for [actix-web ", stringify!($variant), " macro](https://docs.rs/actix-web/latest/actix_web/attr.", stringify!($variant), ".html)")]
+        ///
+        /// # Syntax
+        /// ```plain
+        #[doc = concat!("#[", stringify!($method), r#"(path = "path"[, attributes])]"#)]
+        /// ```
+        ///
+        /// # Attributes
+        /// - `path = "path"`: Raw literal string with path for which to register handler.
+        /// - `name = "resource_name"`: Specifies resource name for the handler. If not set, the
+        ///   function name of handler is used.
+        /// - `guard = "function_name"`: Registers function as guard using `actix_web::guard::fn_guard`.
+        /// - `wrap = "Middleware"`: Registers a resource middleware.
+        ///  - `key = "value"` any [`api_operation`](https://docs.rs/apistos/latest/apistos/attr.api_operation.html) option
+        ///
+        /// # Examples
+        /// ```
+        /// use actix_web::HttpResponse;
+        #[doc = concat!("use apistos::", stringify!($method), ";")]
+        ///
+        #[doc = concat!("#[", stringify!($method), r#"(path = "/")]"#)]
+        /// async fn example() -> HttpResponse {
+        ///     HttpResponse::Ok().finish()
+        /// }
+        /// ```
         #[proc_macro_error]
         #[proc_macro_attribute]
         pub fn $method(attr: TokenStream, item: TokenStream) -> TokenStream {
@@ -1250,8 +1331,6 @@ macro_rules! actix_method_macro {
     };
 }
 
-// @todo
-// - actix scope macro (actix-web-codegen/src/lib.rs:232)
 #[cfg(feature = "actix-web-macros")]
 actix_method_macro!(Get, get);
 #[cfg(feature = "actix-web-macros")]
@@ -1270,6 +1349,31 @@ actix_method_macro!(Trace, trace);
 actix_method_macro!(Patch, patch);
 
 #[cfg(feature = "actix-web-macros")]
+/// Replacement for [actix-web connect macro](https://docs.rs/actix-web/latest/actix_web/attr.connect.html)")]
+///
+/// # Syntax
+/// ```plain
+/// #[connect(path = "path"[, attributes])]
+/// ```
+///
+/// # Attributes
+/// - `path = "path"`: Raw literal string with path for which to register handler.
+/// - `name = "resource_name"`: Specifies resource name for the handler. If not set, the
+///   function name of handler is used.
+/// - `guard = "function_name"`: Registers function as guard using `actix_web::guard::fn_guard`.
+/// - `wrap = "Middleware"`: Registers a resource middleware.
+///  - `key = "value"` any [`api_operation`](https://docs.rs/apistos/latest/apistos/attr.api_operation.html) option
+///
+/// # Examples
+/// ```
+/// use actix_web::HttpResponse;
+/// use apistos::connect;
+///
+/// #[connect(path = "/")]
+/// async fn example() -> HttpResponse {
+///     HttpResponse::Ok().finish()
+/// }
+/// ```
 #[proc_macro_error]
 #[proc_macro_attribute]
 pub fn connect(attr: TokenStream, item: TokenStream) -> TokenStream {
@@ -1335,6 +1439,39 @@ pub fn connect(attr: TokenStream, item: TokenStream) -> TokenStream {
 }
 
 #[cfg(feature = "actix-web-macros")]
+/// Drop in replacement for [actix-web scope macro](https://docs.rs/actix-web/latest/actix_web/attr.scope.html)")]
+///
+/// # Syntax
+///
+/// ```
+/// use apistos::scope;
+///
+/// #[scope("/prefix")]
+/// mod api {
+///     // ...
+/// }
+/// ```
+///
+/// # Arguments
+///
+/// - `"/prefix"` - Raw literal string to be prefixed onto contained handlers' paths.
+///
+/// # Example
+///
+/// ```
+/// use apistos::{scope, get};
+/// use actix_web::Responder;
+///
+/// #[scope("/api")]
+/// mod api {
+///     #[get(path = "/hello")]
+///     pub async fn hello() -> impl Responder {
+///         // this has path /api/hello
+///         "Hello, world!"
+///     }
+/// }
+/// # fn main() {}
+/// ```
 #[proc_macro_error]
 #[proc_macro_attribute]
 pub fn scope(attr: TokenStream, item: TokenStream) -> TokenStream {
