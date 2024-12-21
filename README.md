@@ -174,6 +174,7 @@ For a complete example, see [the sample petstore](https://github.com/netwo-io/ap
 | `actix` (default)  | Enables documenting types from `actix`                                   |                                                                 |
 | `lab_query`        | Enables documenting `actix_web_lab::extract::Query`                      | [`actix-web-lab`](https://crates.io/crates/actix-web-lab)       |
 | `garde`            | Enables input validation through `garde`                                 | [`garde`](https://crates.io/crates/garde)                       |
+| `actix-session`    | Enables documenting types from `actix-session`                           | [`actix-session`](https://crates.io/crates/actix-session)       |
 | `actix-web-grants` | Enables support for `actix-web-grants`                                   | [`actix-web-grants`](https://crates.io/crates/actix-web-grants) |
 | `rapidoc`          | Enables RapiDoc to expose the generated openapi file                     |                                                                 |
 | `redoc`            | Enables Redoc to expose the generated openapi file                       |                                                                 |

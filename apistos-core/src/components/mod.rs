@@ -8,4 +8,6 @@ pub mod json;
 pub mod multipart;
 #[cfg(feature = "actix")]
 pub mod parameters;
+#[cfg(feature = "actix-session")]
+pub mod session;
 pub mod simple;
