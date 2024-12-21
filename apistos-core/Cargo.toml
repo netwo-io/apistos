@@ -21,6 +21,7 @@ actix-web = { workspace = true, optional = true }
 actix-web-lab = { workspace = true, optional = true }
 actix-web-grants = { workspace = true, optional = true }
 actix-multipart = { workspace = true, optional = true }
+actix-session = { workspace = true, optional = true }
 garde-actix-web = { workspace = true, optional = true }
 chrono = { workspace = true, optional = true }
 rust_decimal = { workspace = true, optional = true }
@@ -54,6 +55,7 @@ garde = ["actix", "dep:garde-actix-web"]
 chrono = ["dep:chrono", "schemars/chrono"]
 multipart = ["actix", "dep:serde", "dep:actix-multipart"]
 rust_decimal = ["dep:rust_decimal", "schemars/rust_decimal"]
+actix-session = ["actix", "dep:serde", "dep:actix-session"]
 uuid = ["dep:uuid", "schemars/uuid1"]
 url = ["dep:url", "schemars/url"]
 extras = ["chrono", "multipart", "rust_decimal", "uuid", "url"]
