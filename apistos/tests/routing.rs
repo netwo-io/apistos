@@ -2,12 +2,16 @@ use actix_web::middleware::Logger;
 use actix_web::web::{Json, Path};
 use actix_web::{App, Error};
 
+use actix_web::test::{call_service, init_service, try_read_body_json, TestRequest};
 use apistos::app::OpenApiWrapper;
 use apistos::spec::Spec;
 use apistos::web::{delete, get, patch, post, put, resource, scope, tagged_resource, tagged_scope, ServiceConfig};
-use apistos_gen::api_operation;
+use apistos_gen::{api_operation, ApiComponent};
 use apistos_models::info::Info;
 use apistos_models::tag::Tag;
+use apistos_models::OpenApi;
+use schemars::JsonSchema;
+use serde::Serialize;
 
 #[actix_web::test]
 async fn actix_routing() {
@@ -97,12 +101,79 @@ async fn actix_routing() {
   );
 }
 
+#[actix_web::test]
+async fn actix_routing_multiple_root_definition_holder() {
+  #[derive(ApiComponent, JsonSchema, Serialize)]
+  pub(crate) struct TestResponse {
+    pub(crate) value: String,
+  }
+
+  #[derive(ApiComponent, JsonSchema, Serialize)]
+  pub(crate) struct TestResponse2 {
+    pub(crate) value: String,
+  }
+
+  #[api_operation(tag = "pet")]
+  pub(crate) async fn test(_params: Path<(u32, String)>) -> Result<Json<TestResponse>, Error> {
+    Ok(Json(TestResponse {
+      value: "plop".to_string(),
+    }))
+  }
+
+  #[api_operation(tag = "pet")]
+  pub(crate) async fn test2(_params: Path<String>) -> Result<Json<TestResponse2>, Error> {
+    Ok(Json(TestResponse2 {
+      value: "plop".to_string(),
+    }))
+  }
+
+  let info = Info {
+    title: "A well documented API".to_string(),
+    description: Some("Really well document I mean it".to_string()),
+    terms_of_service: Some("https://terms.com".to_string()),
+    ..Default::default()
+  };
+  let tags = vec![
+    Tag {
+      name: "pet".to_owned(),
+      ..Default::default()
+    },
+    Tag {
+      name: "A super tag".to_owned(),
+      ..Default::default()
+    },
+    Tag {
+      name: "Another super tag".to_owned(),
+      ..Default::default()
+    },
+  ];
+  let spec = Spec {
+    info: info.clone(),
+    tags: tags.clone(),
+    ..Default::default()
+  };
+
+  let app = App::new()
+    .document(spec)
+    .service(scope("test").service(resource("/{plop_id}/{clap_name}").route(get().to(test))))
+    .service(scope("test2").service(resource("/{clap_name}").route(get().to(test2))))
+    .build("/openapi.json");
+  let app = init_service(app).await;
+
+  let req = TestRequest::get().uri("/openapi.json").to_request();
+  let resp = call_service(&app, req).await;
+  assert!(resp.status().is_success());
+
+  let body: OpenApi = try_read_body_json(resp).await.expect("Unable to read body");
+  let components = body.components.expect("Unable to get components");
+
+  assert_eq!(components.schemas.len(), 2);
+}
+
 // Imports bellow aim at making clippy happy. Those dependencies are necessary for integration-test.
 use actix_service as _;
-use actix_web::test::{call_service, init_service, try_read_body_json, TestRequest};
 use actix_web_lab as _;
 use apistos_core as _;
-use apistos_models::OpenApi;
 use apistos_plugins as _;
 use apistos_rapidoc as _;
 use apistos_redoc as _;
@@ -115,6 +186,4 @@ use log as _;
 use md5 as _;
 use once_cell as _;
 use regex as _;
-use schemars as _;
-use serde as _;
 use serde_json as _;
