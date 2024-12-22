@@ -2,12 +2,14 @@ use actix_web::middleware::Logger;
 use actix_web::web::{Json, Path};
 use actix_web::{App, Error};
 
+use actix_web::test::{call_service, init_service, try_read_body_json, TestRequest};
 use apistos::app::OpenApiWrapper;
 use apistos::spec::Spec;
 use apistos::web::{delete, get, patch, post, put, resource, scope, tagged_resource, tagged_scope, ServiceConfig};
 use apistos_gen::api_operation;
 use apistos_models::info::Info;
 use apistos_models::tag::Tag;
+use apistos_models::OpenApi;
 
 #[actix_web::test]
 async fn actix_routing() {
@@ -99,10 +101,8 @@ async fn actix_routing() {
 
 // Imports bellow aim at making clippy happy. Those dependencies are necessary for integration-test.
 use actix_service as _;
-use actix_web::test::{call_service, init_service, try_read_body_json, TestRequest};
 use actix_web_lab as _;
 use apistos_core as _;
-use apistos_models::OpenApi;
 use apistos_plugins as _;
 use apistos_rapidoc as _;
 use apistos_redoc as _;

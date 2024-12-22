@@ -1,5 +1,6 @@
-use schemars::schema::Schema;
 use serde::Serialize;
+
+use crate::schema::ApistosSchema;
 
 #[derive(Serialize, Clone, Debug)]
 #[cfg_attr(any(test, feature = "deserialize"), derive(serde::Deserialize, PartialEq))]
@@ -12,8 +13,8 @@ pub enum ReferenceOr<T: Clone> {
   },
 }
 
-impl From<Schema> for ReferenceOr<Schema> {
-  fn from(value: Schema) -> Self {
+impl From<ApistosSchema> for ReferenceOr<ApistosSchema> {
+  fn from(value: ApistosSchema) -> Self {
     Self::Object(value)
   }
 }

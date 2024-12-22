@@ -2,7 +2,7 @@ use crate::internal::components::Components;
 use crate::internal::operation::Operation;
 use crate::operation_attr::OperationAttr;
 use proc_macro2::{Span, TokenStream as TokenStream2};
-use proc_macro_error::{abort, emit_error};
+use proc_macro_error2::{abort, emit_error};
 use quote::quote;
 
 use syn::{
@@ -17,7 +17,6 @@ pub(crate) mod schemas;
 pub(crate) mod security;
 pub(crate) mod utils;
 
-#[allow(clippy::too_many_arguments)]
 pub(crate) fn gen_open_api_impl(
   item_ast: &ItemFn,
   operation_attribute: OperationAttr,
@@ -89,6 +88,7 @@ pub(crate) fn gen_open_api_impl(
       }),
       tags: &operation_attribute.tags,
       scopes: operation_attribute.scopes,
+      callbacks: &operation_attribute.callbacks,
       error_codes: &operation_attribute.error_codes,
       consumes: operation_attribute.consumes.as_ref(),
       produces: operation_attribute.produces.as_ref(),
@@ -97,6 +97,7 @@ pub(crate) fn gen_open_api_impl(
       args: &args,
       responder_wrapper,
       error_codes: &operation_attribute.error_codes,
+      callbacks: &operation_attribute.callbacks,
     };
 
     quote!(
@@ -109,7 +110,7 @@ pub(crate) fn gen_open_api_impl(
   };
 
   quote! {
-    #[allow(non_camel_case_types)]
+    #[expect(non_camel_case_types)]
     #[doc(hidden)]
     #openapi_struct_def
     #[automatically_derived]

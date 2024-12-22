@@ -48,7 +48,7 @@ impl<T> DefinitionHolder for Resource<T> {
   }
 }
 
-#[allow(clippy::unimplemented)]
+#[expect(clippy::unimplemented)]
 impl<T> DefinitionHolder for Scope<T> {
   fn path(&self) -> &str {
     unimplemented!("Scope has multiple paths");
@@ -70,7 +70,7 @@ impl<T> DefinitionHolder for Scope<T> {
   }
 }
 
-#[allow(clippy::unimplemented)]
+#[expect(clippy::unimplemented)]
 impl<'a> DefinitionHolder for ServiceConfig<'a> {
   fn path(&self) -> &str {
     unimplemented!("ServiceConfig has multiple paths.");

@@ -1,13 +1,17 @@
 use crate::internal::actix::utils::OperationUpdater;
 use crate::internal::actix::METHODS;
-use actix_service::ServiceFactory;
-use actix_web::dev::ServiceRequest;
+use crate::internal::get_oas_version;
+use actix_service::boxed::BoxService;
+use actix_service::{ServiceFactory, Transform};
+use actix_web::body::MessageBody;
+use actix_web::dev::{ServiceRequest, ServiceResponse};
 use actix_web::guard::Guard;
 use actix_web::http::Method;
 use actix_web::{Error, FromRequest, Handler, Responder};
 use apistos_core::PathItemDefinition;
 use apistos_models::components::Components;
 use apistos_models::paths::{Operation, OperationType, PathItem};
+use apistos_models::OpenApiVersion;
 use indexmap::IndexMap;
 use log::warn;
 
@@ -58,6 +62,7 @@ pub enum OperationTypeDoc {
 }
 
 pub struct Route {
+  oas_version: OpenApiVersion,
   operation: Option<Operation>,
   path_item_type: OperationTypeDoc,
   components: Vec<Components>,
@@ -73,7 +78,6 @@ impl ServiceFactory<ServiceRequest> for Route {
   type InitError = ();
   type Future = <actix_web::Route as ServiceFactory<ServiceRequest>>::Future;
 
-  #[allow(clippy::unit_arg)]
   fn new_service(&self, cfg: Self::Config) -> Self::Future {
     self.inner.new_service(cfg)
   }
@@ -81,13 +85,37 @@ impl ServiceFactory<ServiceRequest> for Route {
 
 impl Route {
   /// Wrapper for [`actix_web::Route::new`](https://docs.rs/actix-web/*/actix_web/struct.Route.html#method.new)
-  #[allow(clippy::new_without_default)]
+  #[expect(clippy::new_without_default)]
   pub fn new() -> Route {
+    let oas_version = get_oas_version();
     Route {
+      oas_version,
       operation: None,
       path_item_type: OperationTypeDoc::AllMethods,
       components: Default::default(),
       inner: actix_web::Route::new(),
+    }
+  }
+
+  /// Drop in for [`actix_web::Route::wrap`](https://docs.rs/actix-web/*/actix_web/struct.Route.html#method.wrap)
+  pub fn wrap<M, B>(self, mw: M) -> Route
+  where
+    M: Transform<
+        BoxService<ServiceRequest, ServiceResponse, Error>,
+        ServiceRequest,
+        Response = ServiceResponse<B>,
+        Error = Error,
+        InitError = (),
+      > + 'static,
+    B: MessageBody + 'static,
+  {
+    let oas_version = get_oas_version();
+    Route {
+      oas_version,
+      operation: self.operation,
+      path_item_type: self.path_item_type,
+      components: self.components,
+      inner: self.inner.wrap(mw),
     }
   }
 
@@ -129,10 +157,21 @@ impl Route {
     F::Future: PathItemDefinition,
   {
     if F::Future::is_visible() {
-      self.operation = Some(F::Future::operation());
-      self.components = F::Future::components();
+      self.operation = Some(F::Future::operation(self.oas_version));
+      self.components = F::Future::components(self.oas_version);
     }
     self.inner = self.inner.to(handler);
+    self
+  }
+
+  /// Drop in for [`actix_web::Route::service`](https://docs.rs/actix-web/*/actix_web/struct.Route.html#method.service)
+  /// Currently doesn't affect OAS generation
+  pub fn service<S, E>(mut self, service_factory: S) -> Self
+  where
+    S: ServiceFactory<ServiceRequest, Response = ServiceResponse, Error = E, InitError = (), Config = ()> + 'static,
+    E: Into<Error> + 'static,
+  {
+    self.inner = self.inner.service(service_factory);
     self
   }
 }
