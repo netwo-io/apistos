@@ -5,7 +5,6 @@ use apistos_core::ApiComponent;
 use apistos_gen::ApiSecurity;
 
 #[test]
-#[allow(dead_code)]
 fn api_security_derive_api_key() {
   #[derive(ApiSecurity)]
   #[openapi_security(scheme(security_type(api_key(name = "api_key", api_key_in = "header"))))]
@@ -26,7 +25,6 @@ fn api_security_derive_api_key() {
 }
 
 #[test]
-#[allow(dead_code)]
 fn api_security_derive_api_key_named() {
   #[derive(ApiSecurity)]
   #[openapi_security(
@@ -50,7 +48,6 @@ fn api_security_derive_api_key_named() {
 }
 
 #[test]
-#[allow(dead_code)]
 fn api_security_derive_oauth2() {
   #[derive(ApiSecurity)]
   #[openapi_security(scheme(security_type(oauth2(flows(implicit(
@@ -84,7 +81,6 @@ fn api_security_derive_oauth2() {
 }
 
 #[test]
-#[allow(dead_code)]
 fn api_security_derive_oauth2_password() {
   #[derive(ApiSecurity)]
   #[openapi_security(scheme(security_type(oauth2(flows(password(
@@ -118,7 +114,6 @@ fn api_security_derive_oauth2_password() {
 }
 
 #[test]
-#[allow(dead_code)]
 fn api_security_derive_http() {
   #[derive(ApiSecurity)]
   #[openapi_security(scheme(security_type(http(scheme = "bearer", bearer_format = "JWT"))))]
@@ -139,7 +134,6 @@ fn api_security_derive_http() {
 }
 
 #[test]
-#[allow(dead_code)]
 fn api_security_derive_openid_connect() {
   #[derive(ApiSecurity)]
   #[openapi_security(scheme(security_type(open_id_connect(open_id_connect_url = "https://connect.com"))))]

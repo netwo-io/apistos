@@ -1,25 +1,30 @@
-use crate::internal::actix::handler::OASHandler;
-use crate::internal::actix::route::{Route, RouteWrapper};
-use crate::internal::definition_holder::DefinitionHolder;
-use crate::spec::{DefaultParameters, Spec};
-use crate::web::ServiceConfig;
+use std::collections::BTreeMap;
+use std::future::Future;
+use std::sync::{Arc, RwLock};
+use std::{fmt, mem};
+
 use actix_service::{IntoServiceFactory, ServiceFactory, Transform};
 use actix_web::body::MessageBody;
 use actix_web::dev::{HttpServiceFactory, ServiceRequest, ServiceResponse};
 use actix_web::web::{get, resource};
 use actix_web::Error;
-use apistos_models::paths::{OperationType, Parameter};
-use apistos_models::reference_or::ReferenceOr;
-use apistos_models::OpenApi;
-use apistos_plugins::ui::{UIPluginConfig, UIPluginWrapper};
 use indexmap::IndexMap;
 use once_cell::sync::Lazy;
 use regex::Regex;
-use schemars::schema::Schema;
-use std::collections::BTreeMap;
-use std::future::Future;
-use std::sync::{Arc, RwLock};
-use std::{fmt, mem};
+
+use apistos_core::{ApiWebhook, ApiWebhookDef};
+use apistos_models::components::Components;
+use apistos_models::paths::{OperationType, Parameter, PathItem};
+use apistos_models::reference_or::ReferenceOr;
+use apistos_models::{ApistosSchema, OpenApi, OpenApiVersion};
+use apistos_plugins::ui::{UIPluginConfig, UIPluginWrapper};
+
+use crate::internal::actix::handler::OASHandler;
+use crate::internal::actix::route::{Route, RouteWrapper};
+use crate::internal::definition_holder::DefinitionHolder;
+use crate::internal::{get_oas_version, set_oas_version};
+use crate::spec::{DefaultParameters, Spec};
+use crate::web::ServiceConfig;
 
 pub trait OpenApiWrapper<T> {
   type Wrapper;
@@ -75,6 +80,7 @@ impl<T> OpenApiWrapper<T> for actix_web::App<T> {
   fn document(self, spec: Spec) -> Self::Wrapper {
     let mut open_api_spec = OpenApi {
       info: spec.info,
+      openapi: spec.openapi,
       ..Default::default()
     };
     if !spec.tags.is_empty() {
@@ -84,6 +90,8 @@ impl<T> OpenApiWrapper<T> for actix_web::App<T> {
     if !spec.servers.is_empty() {
       open_api_spec.servers = spec.servers;
     }
+
+    set_oas_version(spec.openapi);
     App {
       open_api_spec: Arc::new(RwLock::new(open_api_spec)),
       inner: Some(self),
@@ -204,8 +212,26 @@ where
     }
   }
 
+  /// Register webhooks to the OAS spec. This only have effect in 3.1.x
+  pub fn webhook<W: ApiWebhook>(self, webhook: &W) -> Self {
+    let oas_version = get_oas_version();
+    self.register_webhook_components(webhook.components(oas_version), webhook.webhooks(oas_version))
+  }
+
+  /// Register webhooks to the OAS spec. This only have effect in 3.1.x
+  pub fn webhook_from_def(self, webhook_def: ApiWebhookDef) -> Self {
+    self.register_webhook_components(webhook_def.components, webhook_def.webhooks)
+  }
+
+  /// Register webhooks to the OAS spec. This only have effect in 3.1.x
+  pub fn webhook_from_type<W: ApiWebhook>(self) -> Self {
+    let oas_version = get_oas_version();
+    let webhook_def = W::get_def(oas_version);
+    self.register_webhook_components(webhook_def.components, webhook_def.webhooks)
+  }
+
   /// Add a new resource at **`openapi_path`** to expose the generated openapi schema and return an [actix_web::App](https://docs.rs/actix-web/latest/actix_web/struct.App.html)
-  #[allow(clippy::unwrap_used, clippy::expect_used)]
+  #[expect(clippy::unwrap_used, clippy::expect_used)]
   pub fn build(self, openapi_path: &str) -> actix_web::App<T> {
     let open_api_spec = self.open_api_spec.read().unwrap().clone();
     self
@@ -234,7 +260,7 @@ where
   ///       .with(SwaggerUIConfig::new(&"/swagger")), // with swagger-ui feature enable
   ///   );
   /// ```
-  #[allow(clippy::unwrap_used, clippy::expect_used)]
+  #[expect(clippy::unwrap_used, clippy::expect_used)]
   pub fn build_with(self, openapi_path: &str, config: BuildConfig) -> actix_web::App<T> {
     let open_api_spec = self.open_api_spec.read().unwrap().clone();
 
@@ -247,8 +273,41 @@ where
     actix_app.service(resource(openapi_path).route(get().to(OASHandler::new(open_api_spec))))
   }
 
+  #[expect(clippy::unwrap_used)]
+  fn register_webhook_components(
+    self,
+    components: Vec<Components>,
+    webhooks: BTreeMap<String, ReferenceOr<PathItem>>,
+  ) -> Self {
+    let oas_version = get_oas_version();
+    if matches!(oas_version, OpenApiVersion::OAS3_0) {
+      return self;
+    }
+
+    let open_api_spec = self.open_api_spec.clone();
+    let mut open_api_spec = open_api_spec.write().unwrap();
+    let mut components = components
+      .into_iter()
+      .reduce(|mut acc, component| {
+        acc.schemas.extend(component.schemas);
+        acc.responses.extend(component.responses);
+        acc.security_schemes.extend(component.security_schemes);
+        acc
+      })
+      .unwrap_or_default();
+
+    if let Some(c) = &mut open_api_spec.components {
+      c.parameters.append(&mut components.parameters);
+      c.responses.append(&mut components.responses);
+      c.schemas.append(&mut components.schemas);
+    }
+
+    open_api_spec.webhooks = webhooks;
+    self
+  }
+
   /// Updates the underlying spec with definitions and operations from the given definition holder.
-  #[allow(clippy::unwrap_used)]
+  #[expect(clippy::unwrap_used)]
   fn update_from_def_holder<D: DefinitionHolder>(&mut self, definition_holder: &mut D) {
     let mut open_api_spec = self.open_api_spec.write().unwrap();
     let components = mem::take(&mut open_api_spec.components);
@@ -289,7 +348,7 @@ where
         .map(|p| (p.name.clone(), ReferenceOr::Object(p.clone())))
         .collect();
 
-      let mut schema_components: BTreeMap<String, ReferenceOr<Schema>> = self
+      let mut schema_components: BTreeMap<String, ReferenceOr<ApistosSchema>> = self
         .default_parameters
         .iter()
         .flat_map(|p| p.components.clone())
@@ -327,7 +386,7 @@ where
   }
 }
 
-#[allow(clippy::expect_used)]
+#[expect(clippy::expect_used)]
 static PATH_NAME_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"\{(?<name>\S+):(.*)\}").expect("path name regex"));
 
 fn sanitize_patterned_path_parameter(path: &str) -> String {
@@ -339,7 +398,7 @@ fn sanitize_patterned_path_parameter(path: &str) -> String {
   path_parts.join("/")
 }
 
-#[allow(clippy::expect_used)]
+#[expect(clippy::expect_used)]
 static PATH_RESOURCE_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"/(.*?)/\{(.*?)\}").expect("path template regex"));
 
 fn build_operation_id(path: &str, operation_type: &OperationType) -> String {
@@ -360,12 +419,9 @@ fn build_operation_id(path: &str, operation_type: &OperationType) -> String {
 
 #[cfg(test)]
 mod test {
-  #![allow(clippy::expect_used)]
-
-  use crate::app::{build_operation_id, BuildConfig, OpenApiWrapper};
-  use crate::spec::Spec;
   use actix_web::test::{call_service, init_service, try_read_body_json, TestRequest};
   use actix_web::App;
+
   use apistos_models::info::Info;
   use apistos_models::paths::OperationType;
   use apistos_models::tag::Tag;
@@ -374,6 +430,9 @@ mod test {
   use apistos_redoc::RedocConfig;
   use apistos_scalar::ScalarConfig;
   use apistos_swagger_ui::SwaggerUIConfig;
+
+  use crate::app::{build_operation_id, BuildConfig, OpenApiWrapper};
+  use crate::spec::Spec;
 
   #[actix_web::test]
   async fn open_api_available() {
