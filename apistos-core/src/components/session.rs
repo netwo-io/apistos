@@ -1,39 +1,44 @@
 use crate::ApiComponent;
 use apistos_models::paths::{Parameter, ParameterDefinition, ParameterIn, RequestBody};
 use apistos_models::reference_or::ReferenceOr;
-use schemars::schema::{InstanceType, Schema, SchemaObject, SingleOrVec, StringValidation};
+use apistos_models::ApistosSchema;
+use schemars::json_schema;
 
 impl ApiComponent for actix_session::Session {
   fn required() -> bool {
     true
   }
 
-  fn child_schemas() -> Vec<(String, ReferenceOr<Schema>)> {
+  fn child_schemas(_oas_version: apistos_models::OpenApiVersion) -> Vec<(String, ReferenceOr<ApistosSchema>)> {
     vec![]
   }
 
-  fn raw_schema() -> Option<ReferenceOr<Schema>> {
-    Some(ReferenceOr::Object(Schema::Object(SchemaObject {
-      instance_type: Some(SingleOrVec::Single(Box::new(InstanceType::String))),
-      string: Some(Box::new(StringValidation::default())),
-      ..Default::default()
-    })))
+  fn raw_schema(oas_version: apistos_models::OpenApiVersion) -> Option<ReferenceOr<ApistosSchema>> {
+    Some(
+      ApistosSchema::new(
+        json_schema!({
+          "type": "string",
+        }),
+        oas_version,
+      )
+      .into(),
+    )
   }
 
-  fn schema() -> Option<(String, ReferenceOr<Schema>)> {
+  fn schema(_oas_version: apistos_models::OpenApiVersion) -> Option<(String, ReferenceOr<ApistosSchema>)> {
     None
   }
 
-  fn request_body() -> Option<RequestBody> {
+  fn request_body(_oas_version: apistos_models::OpenApiVersion) -> Option<RequestBody> {
     None
   }
 
-  fn parameters() -> Vec<Parameter> {
+  fn parameters(oas_version: apistos_models::OpenApiVersion) -> Vec<Parameter> {
     vec![Parameter {
       name: "id".to_string(), // from default actix-session's CookieConfiguration
       _in: ParameterIn::Cookie,
       required: Some(true),
-      definition: Self::raw_schema().map(ParameterDefinition::Schema),
+      definition: Self::raw_schema(oas_version).map(ParameterDefinition::Schema),
       ..Default::default()
     }]
   }

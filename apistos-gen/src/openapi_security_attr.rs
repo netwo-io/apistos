@@ -1,7 +1,7 @@
 use crate::internal::security::models::{ApiKey, Http, OAuth2, OpenIdConnect};
 use darling::FromMeta;
 use proc_macro2::{Span, TokenStream};
-use proc_macro_error::abort;
+use proc_macro_error2::abort;
 use quote::{quote, ToTokens};
 use syn::Attribute;
 

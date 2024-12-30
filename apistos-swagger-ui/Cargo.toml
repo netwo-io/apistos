@@ -14,7 +14,7 @@ rust-version.workspace = true
 license.workspace = true
 
 [dependencies]
-apistos-plugins = { path = "../apistos-plugins", version = "0.4.2" }
+apistos-plugins = { path = "../apistos-plugins", version = "1.0.0-pre-release.9" }
 
 [lints]
 workspace = true

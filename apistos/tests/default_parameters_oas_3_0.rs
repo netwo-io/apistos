@@ -1,5 +1,4 @@
-#![allow(clippy::expect_used)]
-#![allow(clippy::panic)]
+#![expect(clippy::panic)]
 
 use actix_web::http::StatusCode;
 use actix_web::test::{call_service, init_service, try_read_body_json, TestRequest};
@@ -13,7 +12,7 @@ use apistos_models::info::Info;
 use apistos_models::paths::{OperationType, Parameter, ParameterIn};
 use apistos_models::reference_or::ReferenceOr;
 use apistos_models::tag::Tag;
-use apistos_models::OpenApi;
+use apistos_models::{OpenApi, OpenApiVersion};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
@@ -50,7 +49,7 @@ async fn default_parameters() {
     plap: String,
   }
 
-  #[allow(dead_code)]
+  #[expect(dead_code)]
   #[derive(Clone, Debug, JsonSchema, ApiHeader)]
   #[openapi_header(
     name = "X-Env-Complex",
@@ -59,7 +58,7 @@ async fn default_parameters() {
   )]
   struct SomeComplexHeader(TestHeaderStruct);
 
-  #[allow(dead_code)]
+  #[expect(dead_code)]
   #[derive(Clone, Debug, JsonSchema, ApiHeader)]
   #[openapi_header(
     name = "X-Env",
@@ -87,9 +86,10 @@ async fn default_parameters() {
     ..Default::default()
   }];
 
-  let default_parameters_macro = <Header<SomeHeader> as DefaultParameterAccessor>::get_default_parameter();
+  let default_parameters_macro =
+    <Header<SomeHeader> as DefaultParameterAccessor>::get_default_parameter(OpenApiVersion::OAS3_0);
   let default_complex_parameters_macro =
-    <Header<SomeComplexHeader> as DefaultParameterAccessor>::get_default_parameter();
+    <Header<SomeComplexHeader> as DefaultParameterAccessor>::get_default_parameter(OpenApiVersion::OAS3_0);
   let simple_default_parameters = DefaultParameters {
     parameters: vec![Parameter {
       name: "X-SomeParam".to_string(),

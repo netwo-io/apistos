@@ -1,3 +1,4 @@
+use apistos::OpenApiVersion;
 use assert_json_diff::assert_json_eq;
 use chrono::{DateTime, Utc};
 use schemars::JsonSchema;
@@ -9,15 +10,15 @@ use apistos_core::ApiComponent;
 use apistos_gen::ApiComponent;
 
 #[test]
-#[allow(dead_code)]
+#[expect(dead_code)]
 fn api_component_derive() {
   #[derive(JsonSchema, ApiComponent)]
   struct Name {
     name: String,
   }
 
-  let name_schema = <Name as ApiComponent>::schema();
-  let name_child_schemas = <Name as ApiComponent>::child_schemas();
+  let name_schema = <Name as ApiComponent>::schema(OpenApiVersion::OAS3_1);
+  let name_child_schemas = <Name as ApiComponent>::child_schemas(OpenApiVersion::OAS3_1);
   assert!(name_schema.is_some());
   assert!(name_child_schemas.is_empty());
   let (schema_name, schema) = name_schema.expect("schema should be defined");
@@ -27,6 +28,7 @@ fn api_component_derive() {
   assert_json_eq!(
     json,
     json!({
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "properties": {
         "name": {
           "type": "string"
@@ -42,7 +44,7 @@ fn api_component_derive() {
 }
 
 #[test]
-#[allow(dead_code)]
+#[expect(dead_code)]
 fn api_component_derive_with_generic() {
   #[derive(JsonSchema, ApiComponent)]
   struct Name<T>
@@ -59,8 +61,8 @@ fn api_component_derive_with_generic() {
     id_string: String,
   }
 
-  let name_schema = <Name<Test> as ApiComponent>::schema();
-  let name_child_schemas = <Name<Test> as ApiComponent>::child_schemas();
+  let name_schema = <Name<Test> as ApiComponent>::schema(OpenApiVersion::OAS3_1);
+  let name_child_schemas = <Name<Test> as ApiComponent>::child_schemas(OpenApiVersion::OAS3_1);
   assert!(name_schema.is_some());
   assert_eq!(name_child_schemas.len(), 1);
   let (schema_name, schema) = name_schema.expect("schema should be defined");
@@ -70,6 +72,7 @@ fn api_component_derive_with_generic() {
   assert_json_eq!(
     json,
     json!({
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "properties": {
         "id": {
           "$ref": "#/components/schemas/Test"
@@ -79,8 +82,8 @@ fn api_component_derive_with_generic() {
         }
       },
       "required": [
-        "id",
-        "name"
+        "name",
+        "id"
       ],
       "title": "Name_for_Test",
       "type": "object"
@@ -97,7 +100,7 @@ fn api_component_derive_with_generic() {
       "properties": {
         "id_number": {
           "format": "uint32",
-          "minimum": 0.0,
+          "minimum": 0,
           "type": "integer"
         },
         "id_string": {
@@ -114,6 +117,7 @@ fn api_component_derive_with_generic() {
 }
 
 #[test]
+#[expect(dead_code)]
 fn api_component_derive_with_flatten() {
   #[derive(JsonSchema, ApiComponent)]
   struct Name {
@@ -128,8 +132,8 @@ fn api_component_derive_with_flatten() {
     id_string: String,
   }
 
-  let name_schema = <Name as ApiComponent>::schema();
-  let name_child_schemas = <Name as ApiComponent>::child_schemas();
+  let name_schema = <Name as ApiComponent>::schema(OpenApiVersion::OAS3_1);
+  let name_child_schemas = <Name as ApiComponent>::child_schemas(OpenApiVersion::OAS3_1);
   assert!(name_schema.is_some());
   assert!(name_child_schemas.is_empty());
   let (schema_name, schema) = name_schema.expect("schema should be defined");
@@ -139,10 +143,11 @@ fn api_component_derive_with_flatten() {
   assert_json_eq!(
     json,
     json!({
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "properties": {
         "id_number": {
           "format": "uint32",
-          "minimum": 0.0,
+          "minimum": 0,
           "type": "integer"
         },
         "id_string": {
@@ -153,9 +158,9 @@ fn api_component_derive_with_flatten() {
         }
       },
       "required": [
+        "name",
         "id_number",
-        "id_string",
-        "name"
+        "id_string"
       ],
       "title": "Name",
       "type": "object"
@@ -164,6 +169,7 @@ fn api_component_derive_with_flatten() {
 }
 
 #[test]
+#[expect(dead_code)]
 fn api_component_derive_with_deprecated_field() {
   #[derive(JsonSchema, ApiComponent)]
   struct Name {
@@ -172,8 +178,8 @@ fn api_component_derive_with_deprecated_field() {
     new_name: String,
   }
 
-  let name_schema = <Name as ApiComponent>::schema();
-  let name_child_schemas = <Name as ApiComponent>::child_schemas();
+  let name_schema = <Name as ApiComponent>::schema(OpenApiVersion::OAS3_1);
+  let name_child_schemas = <Name as ApiComponent>::child_schemas(OpenApiVersion::OAS3_1);
   assert!(name_schema.is_some());
   assert!(name_child_schemas.is_empty());
   let (schema_name, schema) = name_schema.expect("schema should be defined");
@@ -183,11 +189,16 @@ fn api_component_derive_with_deprecated_field() {
   assert_json_eq!(
     json,
     json!({
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "title": "Name",
+      "type": "object",
       "properties": {
         "name": {
-          "type": "string",
-          "deprecated": true,
-          "nullable": true
+          "type": [
+            "string",
+            "null"
+          ],
+          "deprecated": true
         },
         "new_name": {
           "type": "string"
@@ -195,14 +206,13 @@ fn api_component_derive_with_deprecated_field() {
       },
       "required": [
         "new_name"
-      ],
-      "title": "Name",
-      "type": "object"
+      ]
     })
   );
 }
 
 #[test]
+#[expect(dead_code)]
 fn api_component_derive_with_format() {
   #[derive(JsonSchema, ApiComponent)]
   struct Name {
@@ -210,8 +220,8 @@ fn api_component_derive_with_format() {
     usernames: Vec<String>,
   }
 
-  let name_schema = <Name as ApiComponent>::schema();
-  let name_child_schemas = <Name as ApiComponent>::child_schemas();
+  let name_schema = <Name as ApiComponent>::schema(OpenApiVersion::OAS3_1);
+  let name_child_schemas = <Name as ApiComponent>::child_schemas(OpenApiVersion::OAS3_1);
   assert!(name_schema.is_some());
   assert!(name_child_schemas.is_empty());
   let (schema_name, schema) = name_schema.expect("schema should be defined");
@@ -221,6 +231,7 @@ fn api_component_derive_with_format() {
   assert_json_eq!(
     json,
     json!({
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "properties": {
         "usernames": {
           "items": {
@@ -241,14 +252,15 @@ fn api_component_derive_with_format() {
 }
 
 #[test]
+#[expect(dead_code)]
 fn api_component_derive_recursive() {
   #[derive(JsonSchema, ApiComponent)]
   struct Name {
     old_name: Option<Box<Name>>,
   }
 
-  let name_schema = <Name as ApiComponent>::schema();
-  let name_child_schemas = <Name as ApiComponent>::child_schemas();
+  let name_schema = <Name as ApiComponent>::schema(OpenApiVersion::OAS3_1);
+  let name_child_schemas = <Name as ApiComponent>::child_schemas(OpenApiVersion::OAS3_1);
   assert!(name_schema.is_some());
   assert_eq!(name_child_schemas.len(), 1);
   let (schema_name, schema) = name_schema.expect("schema should be defined");
@@ -258,18 +270,21 @@ fn api_component_derive_recursive() {
   assert_json_eq!(
     json,
     json!({
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "title": "Name",
+      "type": "object",
       "properties": {
         "old_name": {
-          "allOf": [
+          "anyOf": [
             {
               "$ref": "#/components/schemas/Name"
+            },
+            {
+              "type": "null"
             }
-          ],
-          "nullable": true
+          ]
         }
-      },
-      "title": "Name",
-      "type": "object"
+      }
     })
   );
 
@@ -280,17 +295,19 @@ fn api_component_derive_recursive() {
   assert_json_eq!(
     json,
     json!({
+      "type": "object",
       "properties": {
         "old_name": {
-          "allOf": [
+          "anyOf": [
             {
               "$ref": "#/components/schemas/Name"
+            },
+            {
+              "type": "null"
             }
-          ],
-          "nullable": true
+          ]
         }
-      },
-      "type": "object"
+      }
     })
   );
 }
@@ -312,8 +329,8 @@ fn api_component_derive_flatten_algebraic_enums() {
     pub(crate) limit: u32,
   }
 
-  let name_schema = <Query as ApiComponent>::schema();
-  let name_child_schemas = <Query as ApiComponent>::child_schemas();
+  let name_schema = <Query as ApiComponent>::schema(OpenApiVersion::OAS3_1);
+  let name_child_schemas = <Query as ApiComponent>::child_schemas(OpenApiVersion::OAS3_1);
   assert!(name_schema.is_some());
   assert!(name_child_schemas.is_empty());
   let (schema_name, schema) = name_schema.expect("schema should be defined");
@@ -323,49 +340,48 @@ fn api_component_derive_flatten_algebraic_enums() {
   assert_json_eq!(
     json,
     json!({
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "title": "Query",
+      "type": "object",
+      "properties": {
+        "limit": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
       "oneOf": [
         {
-          "additionalProperties": false,
+          "title": "after_id",
+          "type": "object",
           "properties": {
             "after_id": {
+              "type": "integer",
               "format": "uint64",
-              "minimum": 0.0,
-              "type": "integer"
+              "minimum": 0
             }
           },
           "required": [
             "after_id"
-          ],
-          "title": "after_id",
-          "type": "object"
+          ]
         },
         {
-          "additionalProperties": false,
+          "title": "after_date",
+          "type": "object",
           "properties": {
             "after_date": {
-              "format": "date-time",
-              "type": "string"
+              "type": "string",
+              "format": "date-time"
             }
           },
           "required": [
             "after_date"
-          ],
-          "title": "after_date",
-          "type": "object"
+          ]
         }
       ],
-      "properties": {
-        "limit": {
-          "format": "uint32",
-          "minimum": 0.0,
-          "type": "integer"
-        }
-      },
       "required": [
         "limit"
-      ],
-      "title": "Query",
-      "type": "object"
+      ]
     })
   );
 }
@@ -392,8 +408,8 @@ fn api_component_derive_optional_enums() {
     pub(crate) pagination: PaginationQuery,
   }
 
-  let name_schema = <Query as ApiComponent>::schema();
-  let name_child_schemas = <Query as ApiComponent>::child_schemas();
+  let name_schema = <Query as ApiComponent>::schema(OpenApiVersion::OAS3_1);
+  let name_child_schemas = <Query as ApiComponent>::child_schemas(OpenApiVersion::OAS3_1);
   assert!(name_schema.is_some());
   assert_eq!(name_child_schemas.len(), 1);
   let (schema_name, schema) = name_schema.expect("schema should be defined");
@@ -403,36 +419,43 @@ fn api_component_derive_optional_enums() {
   assert_json_eq!(
     json,
     json!({
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "title": "Query",
+      "type": "object",
       "properties": {
-        "limit": {
-          "format": "uint32",
-          "minimum": 0.0,
-          "type": "integer"
-        },
-        "offset": {
-          "format": "uint32",
-          "minimum": 0.0,
-          "nullable": true,
-          "type": "integer"
+        "test": {
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "status": {
-          "allOf": [
+          "anyOf": [
             {
               "$ref": "#/components/schemas/StatusQuery"
+            },
+            {
+              "type": "null"
             }
-          ],
-          "nullable": true
+          ]
         },
-        "test": {
-          "nullable": true,
-          "type": "string"
+        "limit": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "offset": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint32",
+          "minimum": 0
         }
       },
       "required": [
         "limit"
-      ],
-      "title": "Query",
-      "type": "object"
+      ]
     })
   );
 }
@@ -459,8 +482,8 @@ fn api_component_derive_named_enums() {
     pub(crate) kinds: Vec<KindQuery>,
   }
 
-  let name_schema = <Query as ApiComponent>::schema();
-  let name_child_schemas = <Query as ApiComponent>::child_schemas();
+  let name_schema = <Query as ApiComponent>::schema(OpenApiVersion::OAS3_1);
+  let name_child_schemas = <Query as ApiComponent>::child_schemas(OpenApiVersion::OAS3_1);
   assert!(name_schema.is_some());
   assert_eq!(name_child_schemas.len(), 2);
   let (schema_name, schema) = name_schema.expect("schema should be defined");
@@ -470,9 +493,28 @@ fn api_component_derive_named_enums() {
   assert_json_eq!(
     json,
     json!({
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "title": "Query",
+      "type": "object",
+      "properties": {
+        "test": {
+          "type": "string"
+        },
+        "kinds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/KindQuery"
+          }
+        }
+      },
+      "required": [
+        "test",
+        "kinds"
+      ],
       "oneOf": [
         {
-          "additionalProperties": false,
+          "title": "Active",
+          "type": "object",
           "properties": {
             "Active": {
               "$ref": "#/components/schemas/ActiveOrInactiveQuery"
@@ -480,12 +522,11 @@ fn api_component_derive_named_enums() {
           },
           "required": [
             "Active"
-          ],
-          "title": "Active",
-          "type": "object"
+          ]
         },
         {
-          "additionalProperties": false,
+          "title": "Inactive",
+          "type": "object",
           "properties": {
             "Inactive": {
               "$ref": "#/components/schemas/ActiveOrInactiveQuery"
@@ -493,32 +534,38 @@ fn api_component_derive_named_enums() {
           },
           "required": [
             "Inactive"
-          ],
-          "title": "Inactive",
-          "type": "object"
+          ]
         }
-      ],
-      "properties": {
-        "kinds": {
-          "items": {
-            "$ref": "#/components/schemas/KindQuery"
-          },
-          "type": "array"
-        },
-        "test": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "kinds",
-        "test"
-      ],
-      "title": "Query",
-      "type": "object"
+      ]
     })
   );
 
   let (child_schema_name, child_schema) = name_child_schemas.first().expect("missing child schema");
+  assert_eq!(child_schema_name, "ActiveOrInactiveQuery");
+  assert_schema(&child_schema.clone());
+  let json = serde_json::to_value(child_schema).expect("Unable to serialize as Json");
+  assert_json_eq!(
+    json,
+    json!({
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "id": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "description"
+      ],
+      "type": "object"
+    })
+  );
+
+  let (child_schema_name, child_schema) = name_child_schemas.last().expect("missing child schema");
   assert_eq!(child_schema_name, "KindQuery");
   assert_schema(&child_schema.clone());
   let json = serde_json::to_value(child_schema).expect("Unable to serialize as Json");
@@ -555,31 +602,6 @@ fn api_component_derive_named_enums() {
       ]
     })
   );
-
-  let (child_schema_name, child_schema) = name_child_schemas.last().expect("missing child schema");
-  assert_eq!(child_schema_name, "ActiveOrInactiveQuery");
-  assert_schema(&child_schema.clone());
-  let json = serde_json::to_value(child_schema).expect("Unable to serialize as Json");
-  assert_json_eq!(
-    json,
-    json!({
-      "properties": {
-        "description": {
-          "type": "string"
-        },
-        "id": {
-          "format": "uint32",
-          "minimum": 0.0,
-          "type": "integer"
-        }
-      },
-      "required": [
-        "description",
-        "id"
-      ],
-      "type": "object"
-    })
-  );
 }
 
 #[test]
@@ -597,8 +619,8 @@ fn api_component_derive_named_enums_documented() {
     pub(crate) kind: Kind,
   }
 
-  let name_schema = <Query as ApiComponent>::schema();
-  let name_child_schemas = <Query as ApiComponent>::child_schemas();
+  let name_schema = <Query as ApiComponent>::schema(OpenApiVersion::OAS3_1);
+  let name_child_schemas = <Query as ApiComponent>::child_schemas(OpenApiVersion::OAS3_1);
   assert!(name_schema.is_some());
   assert_eq!(name_child_schemas.len(), 1);
   let (schema_name, schema) = name_schema.expect("schema should be defined");
@@ -608,6 +630,7 @@ fn api_component_derive_named_enums_documented() {
   assert_json_eq!(
     json,
     json!({
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "properties": {
         "kind": {
           "$ref": "#/components/schemas/Kind"
@@ -617,8 +640,8 @@ fn api_component_derive_named_enums_documented() {
         }
       },
       "required": [
-        "kind",
-        "test"
+        "test",
+        "kind"
       ],
       "title": "Query",
       "type": "object"
@@ -636,26 +659,98 @@ fn api_component_derive_named_enums_documented() {
     json!({
       "oneOf": [
         {
+          "title": "Complex",
+          "type": "string",
           "enum": [
             "Complex"
-          ],
-          "title": "Complex",
-          "type": "string"
+          ]
         },
         {
           "description": "A simple stuff",
-          "enum": [
-            "Simple"
-          ],
-          "title": "Simple",
-          "type": "string"
+          "type": "string",
+          "const": "Simple"
         }
       ]
     })
   );
 }
 
-#[allow(unused_qualifications)]
+#[test]
+fn api_component_derive_named_tagged_enums() {
+  #[derive(Serialize, Debug, ApiComponent, JsonSchema)]
+  #[cfg_attr(test, derive(Deserialize))]
+  #[serde(tag = "kind")]
+  #[serde(rename_all = "snake_case")]
+  pub(crate) enum TestStruct {
+    Variant1 {
+      expiration: DateTime<Utc>,
+    },
+    Variant2 {
+      email: String,
+      /// pseudonymised phone number
+      phone_number: String,
+    },
+  }
+
+  let name_schema = <TestStruct as ApiComponent>::schema(OpenApiVersion::OAS3_1);
+  let name_child_schemas = <TestStruct as ApiComponent>::child_schemas(OpenApiVersion::OAS3_1);
+  assert!(name_schema.is_some());
+  assert!(name_child_schemas.is_empty());
+  let (schema_name, schema) = name_schema.expect("schema should be defined");
+  assert_eq!(schema_name, "TestStruct");
+  assert_schema(&schema.clone());
+  let json = serde_json::to_value(schema).expect("Unable to serialize as Json");
+  assert_json_eq!(
+    json,
+    json!({
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "title": "TestStruct",
+      "oneOf": [
+        {
+          "title": "variant1",
+          "type": "object",
+          "properties": {
+            "expiration": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "kind": {
+              "type": "string",
+              "const": "variant1"
+            }
+          },
+          "required": [
+            "kind",
+            "expiration"
+          ]
+        },
+        {
+          "title": "variant2",
+          "type": "object",
+          "properties": {
+            "email": {
+              "type": "string"
+            },
+            "phone_number": {
+              "description": "pseudonymised phone number",
+              "type": "string"
+            },
+            "kind": {
+              "type": "string",
+              "const": "variant2"
+            }
+          },
+          "required": [
+            "kind",
+            "email",
+            "phone_number"
+          ]
+        }
+      ]
+    })
+  );
+}
+
 #[test]
 fn api_component_derive_named_enums_deep() {
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
@@ -700,9 +795,10 @@ fn api_component_derive_named_enums_deep() {
     pub(crate) level2: Level2Query,
   }
 
-  let name_schema = <Query as ApiComponent>::schema();
-  let name_child_schemas = <Query as ApiComponent>::child_schemas();
+  let name_schema = <Query as ApiComponent>::schema(OpenApiVersion::OAS3_1);
+  let name_child_schemas = <Query as ApiComponent>::child_schemas(OpenApiVersion::OAS3_1);
   assert!(name_schema.is_some());
+  eprintln!("name_schema : {name_child_schemas:#?}");
   assert_eq!(name_child_schemas.len(), 5);
   let (schema_name, schema) = name_schema.expect("schema should be defined");
   assert_eq!(schema_name, "Query");
@@ -711,6 +807,7 @@ fn api_component_derive_named_enums_deep() {
   assert_json_eq!(
     json,
     json!({
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "properties": {
         "level2": {
           "$ref": "#/components/schemas/Level2Query"
@@ -720,8 +817,8 @@ fn api_component_derive_named_enums_deep() {
         }
       },
       "required": [
-        "level2",
-        "test"
+        "test",
+        "level2"
       ],
       "title": "Query",
       "type": "object"
@@ -828,7 +925,7 @@ fn api_component_derive_named_enums_deep() {
         },
         "id": {
           "format": "uint32",
-          "minimum": 0.0,
+          "minimum": 0,
           "type": "integer"
         },
         "level4": {
@@ -836,8 +933,8 @@ fn api_component_derive_named_enums_deep() {
         }
       },
       "required": [
-        "description",
         "id",
+        "description",
         "level4"
       ],
       "type": "object"
@@ -855,42 +952,38 @@ fn api_component_derive_named_enums_deep() {
     json!({
       "oneOf": [
         {
+          "title": "something",
+          "type": "object",
           "properties": {
-            "name": {
-              "type": "string"
-            },
             "type": {
-              "enum": [
-                "something"
-              ],
+              "type": "string",
+              "const": "something"
+            },
+            "name": {
               "type": "string"
             }
           },
           "required": [
-            "name",
-            "type"
-          ],
-          "title": "something",
-          "type": "object"
+            "type",
+            "name"
+          ]
         },
         {
+          "title": "other",
+          "type": "object",
           "properties": {
-            "name": {
-              "type": "string"
-            },
             "type": {
-              "enum": [
-                "other"
-              ],
+              "type": "string",
+              "const": "other"
+            },
+            "name": {
               "type": "string"
             }
           },
           "required": [
-            "name",
-            "type"
-          ],
-          "title": "other",
-          "type": "object"
+            "type",
+            "name"
+          ]
         }
       ]
     })

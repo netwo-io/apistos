@@ -18,9 +18,14 @@ indexmap = { workspace = true, features = ["serde"] }
 schemars = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
+log = { workspace = true }
+
+[dev-dependencies]
+assert-json-diff = { workspace = true }
 
 [features]
 deserialize = []
+test = []
 
 [lints]
 workspace = true

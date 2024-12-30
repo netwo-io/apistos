@@ -59,10 +59,8 @@ carpenters, craftsmen, metallurgy ... which can also be considered by some as th
 
 ```toml
 [dependencies]
-#schemars = "0.8"
-# sadly we currently rely on a fork to fix multiple flatten for enums, related PR can be found here: https://github.com/GREsau/schemars/pull/264
-schemars = { package = "apistos-schemars", version = "0.8" }
-apistos = "0.4"
+schemars = "1.0.0-alpha.14"
+apistos = "1.0.0-pre-release.9"
 ```
 
 ### Usage example
@@ -168,24 +166,25 @@ For a complete example, see [the sample petstore](https://github.com/netwo-io/ap
 
 ### Feature flags
 
-| name               | description                                                              | extra dependencies                                              |
-|--------------------|--------------------------------------------------------------------------|-----------------------------------------------------------------|
-| `query` (default)  | Enables documenting `actix_web::web::Query`                              |                                                                 |
-| `actix` (default)  | Enables documenting types from `actix`                                   |                                                                 |
-| `lab_query`        | Enables documenting `actix_web_lab::extract::Query`                      | [`actix-web-lab`](https://crates.io/crates/actix-web-lab)       |
-| `garde`            | Enables input validation through `garde`                                 | [`garde`](https://crates.io/crates/garde)                       |
+| name               | description                                                                                                             | extra dependencies                                              |
+|--------------------|-------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------|
+| `query` (default)  | Enables documenting `actix_web::web::Query`                                                                             |                                                                 |
+| `actix` (default)  | Enables documenting types from `actix`                                                                                  |                                                                 |
+| `lab_query`        | Enables documenting `actix_web_lab::extract::Query`                                                                     | [`actix-web-lab`](https://crates.io/crates/actix-web-lab)       |
+| `garde`            | Enables input validation through `garde`                                                                                | [`garde`](https://crates.io/crates/garde)                       |
 | `actix-session`    | Enables documenting types from `actix-session`                           | [`actix-session`](https://crates.io/crates/actix-session)       |
-| `actix-web-grants` | Enables support for `actix-web-grants`                                   | [`actix-web-grants`](https://crates.io/crates/actix-web-grants) |
-| `rapidoc`          | Enables RapiDoc to expose the generated openapi file                     |                                                                 |
-| `redoc`            | Enables Redoc to expose the generated openapi file                       |                                                                 |
-| `swagger-ui`       | Enables Swagger UI to expose the generated openapi file                  |                                                                 |
-| `qs_query`         | Enables documenting types from `serde_qs`                                | [`serde_qs`](https://crates.io/crates/serde-qs)                 |
-| `chrono`           | Enables documenting types from `chrono`                                  | [`chrono`](https://crates.io/crates/chrono)                     |
-| `multipart`        | Enables documenting types from `actix-multipart`                         | [`actix-multipart`](https://crates.io/crates/actix-multipart)   |
-| `rust_decimal`     | Enables documenting types from `rust_decimal`                            | [`rust_decimal`](https://crates.io/crates/rust-decimal)         |
-| `uuid`             | Enables documenting types from `uuid`                                    | [`uuid`](https://crates.io/crates/uuid)                         |
-| `url`              | Enables documenting types from `url`                                     | [`url`](https://crates.io/crates/url)                           |
-| `extras`           | Enables `chrono`, `multipart`, `rust_decimal`, `uuid` and `url` features | All from previous features                                      |
+| `actix-web-grants` | Enables support for `actix-web-grants`                                                                                  | [`actix-web-grants`](https://crates.io/crates/actix-web-grants) |
+| `rapidoc`          | Enables RapiDoc to expose the generated openapi file                                                                    |                                                                 |
+| `redoc`            | Enables Redoc to expose the generated openapi file                                                                      |                                                                 |
+| `swagger-ui`       | Enables Swagger UI to expose the generated openapi file                                                                 |                                                                 |
+| `qs_query`         | Enables documenting types from `serde_qs`                                                                               | [`serde_qs`](https://crates.io/crates/serde-qs)                 |
+| `chrono`           | Enables documenting types from `chrono`                                                                                 | [`chrono`](https://crates.io/crates/chrono)                     |
+| `ipnetwork`        | Enables documenting types from `ipnetwork`. Supported via `apistos::ipnetwork` mod.                                     | [`ipnetwork`](https://crates.io/crates/ipnetwork)               |
+| `multipart`        | Enables documenting types from `actix-multipart`. `Tempfile` is supported though `apistos::multipart::Tempfile` struct. | [`actix-multipart`](https://crates.io/crates/actix-multipart)   |
+| `rust_decimal`     | Enables documenting types from `rust_decimal`                                                                           | [`rust_decimal`](https://crates.io/crates/rust-decimal)         |
+| `uuid`             | Enables documenting types from `uuid`                                                                                   | [`uuid`](https://crates.io/crates/uuid)                         |
+| `url`              | Enables documenting types from `url`                                                                                    | [`url`](https://crates.io/crates/url)                           |
+| `extras`           | Enables `chrono`, `multipart`, `rust_decimal`, `uuid` and `url` features                                                | All from previous features                                      |
 
 ### What's next
 

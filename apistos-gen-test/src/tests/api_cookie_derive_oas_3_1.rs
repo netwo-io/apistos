@@ -1,3 +1,4 @@
+use apistos::OpenApiVersion;
 use assert_json_diff::assert_json_eq;
 use schemars::JsonSchema;
 use serde_json::json;
@@ -7,7 +8,7 @@ use apistos_core::ApiComponent;
 use apistos_gen::ApiCookie;
 
 #[test]
-#[allow(dead_code)]
+#[expect(dead_code)]
 fn api_cookie_derive() {
   #[derive(JsonSchema, ApiCookie)]
   #[openapi_cookie(
@@ -17,9 +18,9 @@ fn api_cookie_derive() {
   )]
   struct OrganizationSlugCookie(String);
 
-  let schema = <OrganizationSlugCookie as ApiComponent>::schema();
-  let child_schemas = <OrganizationSlugCookie as ApiComponent>::child_schemas();
-  let header_parameter = <OrganizationSlugCookie as ApiComponent>::parameters();
+  let schema = <OrganizationSlugCookie as ApiComponent>::schema(OpenApiVersion::OAS3_1);
+  let child_schemas = <OrganizationSlugCookie as ApiComponent>::child_schemas(OpenApiVersion::OAS3_1);
+  let header_parameter = <OrganizationSlugCookie as ApiComponent>::parameters(OpenApiVersion::OAS3_1);
   assert!(schema.is_some());
   assert!(child_schemas.is_empty());
   assert!(!header_parameter.is_empty());
@@ -30,6 +31,7 @@ fn api_cookie_derive() {
   assert_json_eq!(
     json,
     json!({
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "title": "OrganizationSlugCookie",
       "type": "string"
     })
@@ -46,6 +48,7 @@ fn api_cookie_derive() {
       "name": "X-Organization-Slug",
       "required": true,
       "schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
         "title": "OrganizationSlugCookie",
         "type": "string"
       }
@@ -54,7 +57,8 @@ fn api_cookie_derive() {
 }
 
 #[test]
-#[allow(dead_code)]
+#[expect(dead_code)]
+#[expect(deprecated)]
 fn api_cookie_derive_deprecated() {
   #[derive(JsonSchema, ApiCookie)]
   #[openapi_cookie(
@@ -65,9 +69,9 @@ fn api_cookie_derive_deprecated() {
   #[deprecated]
   struct OrganizationSlugCookie(String);
 
-  let schema = <OrganizationSlugCookie as ApiComponent>::schema();
-  let child_schemas = <OrganizationSlugCookie as ApiComponent>::child_schemas();
-  let header_parameter = <OrganizationSlugCookie as ApiComponent>::parameters();
+  let schema = <OrganizationSlugCookie as ApiComponent>::schema(OpenApiVersion::OAS3_1);
+  let child_schemas = <OrganizationSlugCookie as ApiComponent>::child_schemas(OpenApiVersion::OAS3_1);
+  let header_parameter = <OrganizationSlugCookie as ApiComponent>::parameters(OpenApiVersion::OAS3_1);
   assert!(schema.is_some());
   assert!(child_schemas.is_empty());
   assert!(!header_parameter.is_empty());
@@ -78,6 +82,7 @@ fn api_cookie_derive_deprecated() {
   assert_json_eq!(
     json,
     json!({
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "title": "OrganizationSlugCookie",
       "type": "string",
       "deprecated": true
@@ -95,6 +100,7 @@ fn api_cookie_derive_deprecated() {
       "name": "X-Organization-Slug",
       "required": true,
       "schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
         "title": "OrganizationSlugCookie",
         "type": "string",
         "deprecated": true
@@ -104,7 +110,7 @@ fn api_cookie_derive_deprecated() {
 }
 
 #[test]
-#[allow(dead_code)]
+#[expect(dead_code)]
 fn api_cookie_derive_deprecated_attribute() {
   #[derive(JsonSchema, ApiCookie)]
   #[openapi_cookie(
@@ -115,9 +121,9 @@ fn api_cookie_derive_deprecated_attribute() {
   )]
   struct OrganizationSlugCookie2(String);
 
-  let schema = <OrganizationSlugCookie2 as ApiComponent>::schema();
-  let child_schemas = <OrganizationSlugCookie2 as ApiComponent>::child_schemas();
-  let header_parameter = <OrganizationSlugCookie2 as ApiComponent>::parameters();
+  let schema = <OrganizationSlugCookie2 as ApiComponent>::schema(OpenApiVersion::OAS3_1);
+  let child_schemas = <OrganizationSlugCookie2 as ApiComponent>::child_schemas(OpenApiVersion::OAS3_1);
+  let header_parameter = <OrganizationSlugCookie2 as ApiComponent>::parameters(OpenApiVersion::OAS3_1);
   assert!(schema.is_some());
   assert!(child_schemas.is_empty());
   assert!(!header_parameter.is_empty());
@@ -128,6 +134,7 @@ fn api_cookie_derive_deprecated_attribute() {
   assert_json_eq!(
     json,
     json!({
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "title": "OrganizationSlugCookie2",
       "type": "string",
       "deprecated": true
@@ -145,6 +152,7 @@ fn api_cookie_derive_deprecated_attribute() {
       "name": "X-Organization-Slug",
       "required": true,
       "schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
         "title": "OrganizationSlugCookie2",
         "type": "string",
         "deprecated": true
