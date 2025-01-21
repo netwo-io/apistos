@@ -29,6 +29,7 @@ serde = { workspace = true, optional = true }
 serde_qs = { workspace = true, features = ["actix4"], optional = true }
 uuid = { workspace = true, optional = true }
 url = { workspace = true, optional = true }
+primitive-types = { workspace = true, optional = true }
 
 apistos-models = { path = "../apistos-models", version = "0.4.2", features = ["deserialize"] }
 
@@ -58,6 +59,8 @@ rust_decimal = ["dep:rust_decimal", "schemars/rust_decimal"]
 actix-session = ["actix", "dep:serde", "dep:actix-session"]
 uuid = ["dep:uuid", "schemars/uuid1"]
 url = ["dep:url", "schemars/url"]
-extras = ["chrono", "multipart", "rust_decimal", "uuid", "url"]
+primitive_types = ["dep:primitive-types", "schemars/primitive_types"]
+
+extras = ["chrono", "multipart", "rust_decimal", "uuid", "url", "primitive_types"]
 
 default = ["actix", "query"]

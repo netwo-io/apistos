@@ -50,6 +50,24 @@ simple_modifier!(chrono::NaiveDate);
 simple_modifier!(chrono::NaiveTime);
 #[cfg(feature = "chrono")]
 simple_modifier!(chrono::NaiveDateTime);
+#[cfg(feature = "primitive_types")]
+simple_modifier!(primitive_types::U128);
+#[cfg(feature = "primitive_types")]
+simple_modifier!(primitive_types::U256);
+#[cfg(feature = "primitive_types")]
+simple_modifier!(primitive_types::U512);
+#[cfg(feature = "primitive_types")]
+simple_modifier!(primitive_types::H128);
+#[cfg(feature = "primitive_types")]
+simple_modifier!(primitive_types::H160);
+#[cfg(feature = "primitive_types")]
+simple_modifier!(primitive_types::H256);
+#[cfg(feature = "primitive_types")]
+simple_modifier!(primitive_types::H384);
+#[cfg(feature = "primitive_types")]
+simple_modifier!(primitive_types::H512);
+#[cfg(feature = "primitive_types")]
+simple_modifier!(primitive_types::H768);
 #[cfg(feature = "rust_decimal")]
 simple_modifier!(rust_decimal::Decimal);
 #[cfg(feature = "uuid")]
