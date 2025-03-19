@@ -4,13 +4,13 @@ use crate::internal::definition_holder::DefinitionHolder;
 use crate::spec::{DefaultParameters, Spec};
 use crate::web::ServiceConfig;
 use actix_service::{IntoServiceFactory, ServiceFactory, Transform};
+use actix_web::Error;
 use actix_web::body::MessageBody;
 use actix_web::dev::{HttpServiceFactory, ServiceRequest, ServiceResponse};
 use actix_web::web::{get, resource};
-use actix_web::Error;
+use apistos_models::OpenApi;
 use apistos_models::paths::{OperationType, Parameter};
 use apistos_models::reference_or::ReferenceOr;
-use apistos_models::OpenApi;
 use apistos_plugins::ui::{UIPluginConfig, UIPluginWrapper};
 use indexmap::IndexMap;
 use once_cell::sync::Lazy;
@@ -362,14 +362,14 @@ fn build_operation_id(path: &str, operation_type: &OperationType) -> String {
 mod test {
   #![allow(clippy::expect_used)]
 
-  use crate::app::{build_operation_id, BuildConfig, OpenApiWrapper};
+  use crate::app::{BuildConfig, OpenApiWrapper, build_operation_id};
   use crate::spec::Spec;
-  use actix_web::test::{call_service, init_service, try_read_body_json, TestRequest};
   use actix_web::App;
+  use actix_web::test::{TestRequest, call_service, init_service, try_read_body_json};
+  use apistos_models::OpenApi;
   use apistos_models::info::Info;
   use apistos_models::paths::OperationType;
   use apistos_models::tag::Tag;
-  use apistos_models::OpenApi;
   use apistos_rapidoc::RapidocConfig;
   use apistos_redoc::RedocConfig;
   use apistos_scalar::ScalarConfig;

@@ -1,6 +1,6 @@
 use actix_web::{Error, HttpResponse};
 use apistos_models::OpenApi;
-use std::future::{ready, Ready};
+use std::future::{Ready, ready};
 
 #[derive(Clone)]
 pub(crate) struct OASHandler(OpenApi);

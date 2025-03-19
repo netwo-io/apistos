@@ -3,10 +3,10 @@ use crate::ApiComponent;
 use actix_web::web::Query;
 #[cfg(feature = "lab_query")]
 use actix_web_lab::extract::Query as LabQuery;
+use apistos_models::Schema;
 use apistos_models::paths::ParameterStyle;
 use apistos_models::paths::{Parameter, ParameterDefinition, ParameterIn, RequestBody};
 use apistos_models::reference_or::ReferenceOr;
-use apistos_models::Schema;
 use apistos_models::{ObjectValidation, SchemaObject};
 #[cfg(all(feature = "lab_query", feature = "garde"))]
 use garde_actix_web::web::LabQuery as GardeLabQuery;
@@ -279,8 +279,8 @@ mod test {
   use apistos_models::paths::ParameterStyle;
   use apistos_models::paths::{Parameter, ParameterDefinition, ParameterIn};
   use apistos_models::reference_or::ReferenceOr;
-  use schemars::schema::{InstanceType, NumberValidation, RootSchema, Schema, SchemaObject, SingleOrVec};
   use schemars::JsonSchema;
+  use schemars::schema::{InstanceType, NumberValidation, RootSchema, Schema, SchemaObject, SingleOrVec};
   use serde::{Deserialize, Serialize};
   #[cfg(feature = "qs_query")]
   use serde_qs::actix::QsQuery;
@@ -299,9 +299,9 @@ mod test {
     fn schema() -> Option<(String, ReferenceOr<Schema>)> {
       let (name, schema) = {
         let schema_name = <Self as JsonSchema>::schema_name();
-        let settings = schemars::gen::SchemaSettings::openapi3();
-        let gen = settings.into_generator();
-        let schema: RootSchema = gen.into_root_schema_for::<Self>();
+        let settings = schemars::r#gen::SchemaSettings::openapi3();
+        let generator = settings.into_generator();
+        let schema: RootSchema = generator.into_root_schema_for::<Self>();
         (schema_name, ReferenceOr::Object(Schema::Object(schema.schema)))
       };
       Some((name, schema))

@@ -2,7 +2,7 @@
 name = "simple-shuttle-rs"
 description = "Simple TODO example api with shuttle rs runtime"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 license = "MIT OR Apache-2.0"
 authors = ["Netwo <oss@netwo.com>"]
 
@@ -12,7 +12,7 @@ apistos = { path = "../../apistos", features = ["extras", "qs_query", "rapidoc",
 apistos-shuttle = { path = "../../apistos-shuttle" }
 schemars = { package = "apistos-schemars", version = "0.8", features = ["chrono", "uuid1", "url", "rust_decimal"] }
 serde = { version = "1.0", features = ["derive"] }
-shuttle-runtime = { version = "0.44", default-features = false }
+shuttle-runtime = { version = "0.53", default-features = false }
 uuid = { version = "1", features = ["serde", "v4"] }
 
 [workspace]

@@ -1,8 +1,8 @@
 use crate::internal::security::models::{ApiKey, Http, OAuth2, OpenIdConnect};
 use darling::FromMeta;
-use proc_macro2::{Span, TokenStream};
 use proc_macro_error::abort;
-use quote::{quote, ToTokens};
+use proc_macro2::{Span, TokenStream};
+use quote::{ToTokens, quote};
 use syn::Attribute;
 
 pub(crate) fn parse_openapi_security_attrs(attrs: &[Attribute], struct_name: String) -> Option<SecurityDeclaration> {

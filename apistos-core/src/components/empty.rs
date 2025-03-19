@@ -1,8 +1,8 @@
 use crate::ApiComponent;
 use actix_web::dev::Payload;
 use actix_web::{HttpRequest, HttpResponse};
-use apistos_models::reference_or::ReferenceOr;
 use apistos_models::Schema;
+use apistos_models::reference_or::ReferenceOr;
 
 macro_rules! empty_component_impl {
   ($($ty:ty),+) => {

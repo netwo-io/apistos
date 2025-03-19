@@ -1,6 +1,6 @@
+use crate::internal::actix::METHODS;
 use crate::internal::actix::route::{Route, RouteWrapper};
 use crate::internal::actix::utils::OperationUpdater;
-use crate::internal::actix::METHODS;
 use actix_service::{ServiceFactory, Transform};
 use actix_web::body::MessageBody;
 use actix_web::dev::{AppService, HttpServiceFactory, ServiceRequest, ServiceResponse};

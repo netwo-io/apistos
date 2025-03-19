@@ -55,9 +55,9 @@ mod test {
   #![allow(clippy::panic)]
 
   use crate::internal::actix::utils::OperationUpdater;
+  use apistos_models::Schema;
   use apistos_models::paths::{Operation, Parameter, ParameterDefinition, ParameterIn};
   use apistos_models::reference_or::ReferenceOr;
-  use apistos_models::Schema;
 
   #[test]
   fn simple_path_parameter_name_replacement() {

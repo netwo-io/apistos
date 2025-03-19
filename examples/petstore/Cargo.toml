@@ -2,7 +2,7 @@
 name = "petstore"
 description = "Simple petstore example api"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 license = "MIT OR Apache-2.0"
 authors = ["Netwo <oss@netwo.com>"]
 
@@ -14,7 +14,7 @@ num-traits = "0.2"
 rust_decimal = "1"
 schemars = { package = "apistos-schemars", version = "0.8", features = ["chrono", "uuid1", "url", "rust_decimal"] }
 serde = { version = "1.0", features = ["derive"] }
-serde_qs = { version = "0.13", features = ["actix4"] }
+serde_qs = { version = "0.14", features = ["actix4"] }
 uuid = { version = "1", features = ["serde", "v4"] }
 url = { version = "2", features = ["serde"] }
 

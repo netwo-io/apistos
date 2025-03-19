@@ -1,9 +1,9 @@
 use crate::{ApiComponent, PathItemDefinition};
 use actix_web::{HttpRequest, HttpResponse, Responder};
+use apistos_models::Schema;
 use apistos_models::components::Components;
 use apistos_models::paths::Operation;
 use apistos_models::reference_or::ReferenceOr;
-use apistos_models::Schema;
 use pin_project::pin_project;
 use std::future::Future;
 use std::pin::Pin;

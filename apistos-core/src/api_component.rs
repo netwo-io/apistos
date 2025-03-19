@@ -3,10 +3,10 @@ use crate::ApiErrorComponent;
 use crate::{PathItemDefinition, ResponseWrapper};
 #[cfg(feature = "actix")]
 use actix_web::Either;
+use apistos_models::Schema;
 use apistos_models::paths::{MediaType, Parameter, RequestBody, Response, Responses};
 use apistos_models::reference_or::ReferenceOr;
 use apistos_models::security::SecurityScheme;
-use apistos_models::Schema;
 #[cfg(feature = "actix")]
 use schemars::schema::SubschemaValidation;
 use schemars::schema::{ArrayValidation, InstanceType, SchemaObject, SingleOrVec};

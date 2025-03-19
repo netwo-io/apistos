@@ -84,18 +84,22 @@ fn api_component_with_schema() {
     error_responses.get("403").map(|r| r.description.clone()),
     Some("Forbidden".to_string())
   );
-  assert!(error_responses
-    .get("403")
-    .map(|r| r.content.clone())
-    .unwrap_or_default()
-    .is_empty());
+  assert!(
+    error_responses
+      .get("403")
+      .map(|r| r.content.clone())
+      .unwrap_or_default()
+      .is_empty()
+  );
   assert_eq!(
     error_responses.get("409").map(|r| r.description.clone()),
     Some("Too many requests".to_string())
   );
-  assert!(error_responses
-    .get("409")
-    .map(|r| r.content.clone())
-    .unwrap_or_default()
-    .is_empty());
+  assert!(
+    error_responses
+      .get("409")
+      .map(|r| r.content.clone())
+      .unwrap_or_default()
+      .is_empty()
+  );
 }

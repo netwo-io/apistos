@@ -11,11 +11,11 @@ use crate::openapi_header_attr::parse_openapi_header_attrs;
 use crate::openapi_security_attr::parse_openapi_security_attrs;
 use crate::operation_attr::parse_openapi_operation_attrs;
 use convert_case::{Case, Casing};
-use darling::ast::NestedMeta;
 use darling::Error;
+use darling::ast::NestedMeta;
 use proc_macro::TokenStream;
+use proc_macro_error::{OptionExt, abort, proc_macro_error};
 use proc_macro2::Span;
-use proc_macro_error::{abort, proc_macro_error, OptionExt};
 use quote::{format_ident, quote};
 use syn::{DeriveInput, GenericParam, Ident, ItemFn};
 
@@ -76,7 +76,7 @@ pub fn derive_api_type(input: TokenStream) -> TokenStream {
         #component_name.to_string()
       }
 
-      fn json_schema(_gen: &mut schemars::gen::SchemaGenerator) -> apistos::Schema {
+      fn json_schema(_generator: &mut schemars::r#gen::SchemaGenerator) -> apistos::Schema {
         let instance_type = <Self as TypedSchema>::schema_type();
         apistos::Schema::Object(apistos::SchemaObject {
           instance_type: Some(apistos::SingleOrVec::Single(Box::new(instance_type))),

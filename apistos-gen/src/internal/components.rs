@@ -1,5 +1,5 @@
 use proc_macro2::TokenStream;
-use quote::{quote, ToTokens};
+use quote::{ToTokens, quote};
 use syn::Type;
 
 pub(crate) struct Components<'a> {
@@ -8,7 +8,7 @@ pub(crate) struct Components<'a> {
   pub(crate) error_codes: &'a [u16],
 }
 
-impl<'a> ToTokens for Components<'a> {
+impl ToTokens for Components<'_> {
   fn to_tokens(&self, tokens: &mut TokenStream) {
     let args = self.args;
     let responder_wrapper = self.responder_wrapper;

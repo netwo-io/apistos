@@ -1,6 +1,6 @@
+use apistos_models::Schema;
 use apistos_models::paths::Response;
 use apistos_models::reference_or::ReferenceOr;
-use apistos_models::Schema;
 use std::collections::BTreeMap;
 
 pub trait ApiErrorComponent {

@@ -1,7 +1,7 @@
-use darling::ast::NestedMeta;
 use darling::FromMeta;
-use proc_macro2::Ident;
+use darling::ast::NestedMeta;
 use proc_macro_error::abort;
+use proc_macro2::Ident;
 use std::collections::BTreeMap;
 
 pub(crate) fn parse_openapi_operation_attrs(attrs: &[NestedMeta]) -> OperationAttr {

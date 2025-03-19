@@ -1,10 +1,10 @@
 use crate::ApiComponent;
+use actix_multipart::Multipart;
 use actix_multipart::form::text::Text;
 use actix_multipart::form::{MultipartCollect, MultipartForm};
-use actix_multipart::Multipart;
+use apistos_models::Schema;
 use apistos_models::paths::{MediaType, RequestBody};
 use apistos_models::reference_or::ReferenceOr;
-use apistos_models::Schema;
 use serde::de::DeserializeOwned;
 use std::collections::BTreeMap;
 
