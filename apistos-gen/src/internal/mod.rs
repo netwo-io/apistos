@@ -1,8 +1,8 @@
 use crate::internal::components::Components;
 use crate::internal::operation::Operation;
 use crate::operation_attr::OperationAttr;
-use proc_macro2::{Span, TokenStream as TokenStream2};
 use proc_macro_error::{abort, emit_error};
+use proc_macro2::{Span, TokenStream as TokenStream2};
 use quote::quote;
 
 use syn::{
@@ -227,7 +227,7 @@ fn extract_fn_arguments_types(item_ast: &ItemFn, skipped_args: &[Ident]) -> Vec<
     .iter()
     .filter_map(|inp| match inp {
       FnArg::Receiver(_) => None,
-      FnArg::Typed(ref t) => match *t.pat.clone() {
+      FnArg::Typed(t) => match *t.pat.clone() {
         Pat::Ident(pi) => {
           if skipped_args.contains(&pi.ident) {
             None

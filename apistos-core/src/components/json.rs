@@ -1,7 +1,7 @@
 use crate::ApiComponent;
 use actix_web::web::Json;
-use apistos_models::reference_or::ReferenceOr;
 use apistos_models::Schema;
+use apistos_models::reference_or::ReferenceOr;
 
 impl<T> ApiComponent for Json<T>
 where

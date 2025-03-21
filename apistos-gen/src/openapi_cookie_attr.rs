@@ -1,8 +1,8 @@
 use crate::internal::schemas::Schemas;
 use darling::FromMeta;
-use proc_macro2::{Span, TokenStream};
 use proc_macro_error::abort;
-use quote::{quote, ToTokens};
+use proc_macro2::{Span, TokenStream};
+use quote::{ToTokens, quote};
 use syn::Attribute;
 
 pub(crate) fn parse_openapi_cookie_attrs(

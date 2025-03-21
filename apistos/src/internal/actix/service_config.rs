@@ -21,7 +21,7 @@ impl<'a> From<&'a mut actix_web::web::ServiceConfig> for ServiceConfig<'a> {
   }
 }
 
-impl<'a> ServiceConfig<'a> {
+impl ServiceConfig<'_> {
   /// Wrapper for [`actix_web::web::ServiceConfig::route`](https://docs.rs/actix-web/*/actix_web/web/struct.ServiceConfig.html#method.route).
   pub fn route(&mut self, path: &str, route: Route) -> &mut Self {
     let mut w = RouteWrapper::new(path, route);

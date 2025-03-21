@@ -1,9 +1,9 @@
 use crate::ApiComponent;
 use actix_web::web::Path;
-use apistos_models::paths::{Parameter, ParameterDefinition, ParameterIn, RequestBody};
-use apistos_models::reference_or::ReferenceOr;
 use apistos_models::ObjectValidation;
 use apistos_models::Schema;
+use apistos_models::paths::{Parameter, ParameterDefinition, ParameterIn, RequestBody};
+use apistos_models::reference_or::ReferenceOr;
 use schemars::schema::{InstanceType, SingleOrVec};
 
 impl<T> ApiComponent for Path<T>

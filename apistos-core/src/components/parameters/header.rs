@@ -1,8 +1,8 @@
 use crate::ApiComponent;
 use actix_web::web::Header;
+use apistos_models::Schema;
 use apistos_models::paths::{Parameter, ParameterDefinition, ParameterIn, ParameterStyle, RequestBody};
 use apistos_models::reference_or::ReferenceOr;
-use apistos_models::Schema;
 
 pub trait ApiHeader {
   fn name() -> String;

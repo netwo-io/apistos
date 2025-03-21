@@ -2,14 +2,14 @@ use actix_web::middleware::Logger;
 use actix_web::web::{Json, Path};
 use actix_web::{App, Error};
 
-use actix_web::test::{call_service, init_service, try_read_body_json, TestRequest};
+use actix_web::test::{TestRequest, call_service, init_service, try_read_body_json};
 use apistos::app::OpenApiWrapper;
 use apistos::spec::Spec;
-use apistos::web::{delete, get, patch, post, put, resource, scope, tagged_resource, tagged_scope, ServiceConfig};
-use apistos_gen::{api_operation, ApiComponent};
+use apistos::web::{ServiceConfig, delete, get, patch, post, put, resource, scope, tagged_resource, tagged_scope};
+use apistos_gen::{ApiComponent, api_operation};
+use apistos_models::OpenApi;
 use apistos_models::info::Info;
 use apistos_models::tag::Tag;
-use apistos_models::OpenApi;
 use schemars::JsonSchema;
 use serde::Serialize;
 

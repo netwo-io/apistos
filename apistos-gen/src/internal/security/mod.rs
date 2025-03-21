@@ -1,5 +1,5 @@
 use proc_macro2::TokenStream;
-use quote::{quote, ToTokens};
+use quote::{ToTokens, quote};
 use std::collections::BTreeMap;
 use syn::Type;
 
@@ -10,7 +10,7 @@ pub(crate) struct Security<'a> {
   pub(crate) scopes: &'a BTreeMap<String, Vec<String>>,
 }
 
-impl<'a> ToTokens for Security<'a> {
+impl ToTokens for Security<'_> {
   fn to_tokens(&self, tokens: &mut TokenStream) {
     let args = self.args;
     let scopes = if self.scopes.is_empty() {

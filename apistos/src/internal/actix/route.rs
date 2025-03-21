@@ -1,5 +1,5 @@
-use crate::internal::actix::utils::OperationUpdater;
 use crate::internal::actix::METHODS;
+use crate::internal::actix::utils::OperationUpdater;
 use actix_service::ServiceFactory;
 use actix_web::dev::ServiceRequest;
 use actix_web::guard::Guard;

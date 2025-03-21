@@ -1,7 +1,7 @@
 use crate::ApiComponent;
 use actix_web::web::Form;
-use apistos_models::reference_or::ReferenceOr;
 use apistos_models::Schema;
+use apistos_models::reference_or::ReferenceOr;
 
 impl<T> ApiComponent for Form<T>
 where
