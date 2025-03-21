@@ -21,13 +21,25 @@ impl<'a> From<&'a mut actix_web::web::ServiceConfig> for ServiceConfig<'a> {
   }
 }
 
-impl ServiceConfig<'_> {
+impl<'a> ServiceConfig<'_> {
   /// Wrapper for [`actix_web::web::ServiceConfig::route`](https://docs.rs/actix-web/*/actix_web/web/struct.ServiceConfig.html#method.route).
   pub fn route(&mut self, path: &str, route: Route) -> &mut Self {
     let mut w = RouteWrapper::new(path, route);
     w.update_path_items(&mut self.item_map);
     self.components.extend(w.components());
     self.inner.route(path, w.inner);
+    self
+  }
+
+  /// Run external configuration as part of the application building process
+  pub fn configure<F>(&'a mut self, f: F) -> &mut Self
+  where
+    F: FnOnce(&mut ServiceConfig),
+  {
+    self.inner = self.inner.configure(|service_config| {
+      let mut actix_service_config: ServiceConfig<'_> = ServiceConfig::from(service_config);
+      f(&mut actix_service_config);
+    });
     self
   }
 
