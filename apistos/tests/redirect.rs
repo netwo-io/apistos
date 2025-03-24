@@ -7,6 +7,7 @@ use apistos::app::OpenApiWrapper;
 use apistos::spec::Spec;
 use apistos_models::OpenApi;
 
+#[allow(clippy::panic)]
 #[actix_web::test]
 async fn actix_redirect() {
   let app = App::new()
