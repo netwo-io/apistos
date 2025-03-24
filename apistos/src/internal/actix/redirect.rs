@@ -2,7 +2,12 @@ use actix_web::dev::{AppService, HttpServiceFactory};
 
 use actix_web::http::StatusCode;
 use actix_web::{HttpRequest, HttpResponse, Responder};
+use apistos_models::paths::{Header, MediaType, ParameterDefinition, Response};
+use apistos_models::reference_or::ReferenceOr;
+use apistos_models::{Schema, SchemaObject};
+use serde_json::Value;
 use std::borrow::Cow;
+use std::collections::BTreeMap;
 use std::fmt::Debug;
 
 #[derive(Debug, Clone)]
@@ -18,7 +23,6 @@ impl From<Redirect> for actix_web::web::Redirect {
     value.inner
   }
 }
-
 impl Redirect {
   /// Wrapper for [`actix_web::web::Redirect`](https://docs.rs/actix-web/*/actix_web/web/struct.Redirect.html#method.new)
   pub fn new(from: impl Into<Cow<'static, str>>, to: impl Into<Cow<'static, str>>) -> Self {
@@ -83,6 +87,36 @@ impl Redirect {
       inner: self.inner.using_status_code(status),
     };
     self
+  }
+  fn get_redirect_description(&self) -> String {
+    match self.code {
+      StatusCode::TEMPORARY_REDIRECT => "Temporary redirection".to_owned(),
+      StatusCode::PERMANENT_REDIRECT => "Permanent redirection".to_owned(),
+      StatusCode::SEE_OTHER => "See Other redirection".to_owned(),
+      _ => String::new(),
+    }
+  }
+  pub(crate) fn get_open_api_response(&self) -> Response {
+    let location_header = Header {
+      definition: Some(ParameterDefinition::Content(BTreeMap::from_iter(vec![(
+        "text/plain".to_string(),
+        MediaType {
+          schema: Some(ReferenceOr::Object(Schema::Object(SchemaObject {
+            enum_values: Some(vec![Value::String(self.redirect.clone())]),
+            ..Default::default()
+          }))),
+          ..Default::default()
+        },
+      )]))),
+      description: Some("Redirection URL".to_owned()),
+      ..Default::default()
+    };
+
+    Response {
+      description: self.get_redirect_description(),
+      headers: BTreeMap::from_iter(vec![("Location".to_string(), ReferenceOr::Object(location_header))]),
+      ..Default::default()
+    }
   }
 }
 

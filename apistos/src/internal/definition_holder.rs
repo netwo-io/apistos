@@ -5,11 +5,9 @@ use crate::internal::actix::scope::Scope;
 use crate::internal::actix::service_config::ServiceConfig;
 use actix_web::http::StatusCode;
 use apistos_models::components::Components;
-use apistos_models::paths::{Header, MediaType, Operation, OperationType, ParameterDefinition, PathItem, Response};
+use apistos_models::paths::{Operation, OperationType, PathItem, Responses};
 use apistos_models::reference_or::ReferenceOr;
-use apistos_models::{Schema, SchemaObject};
 use indexmap::IndexMap;
-use serde_json::Value;
 use std::collections::BTreeMap;
 use std::mem;
 
@@ -105,50 +103,44 @@ impl DefinitionHolder for Redirect {
 
   fn operations(&mut self) -> IndexMap<OperationType, Operation> {
     let mut index_map: IndexMap<OperationType, Operation> = IndexMap::new();
-    match self.code {
-      StatusCode::TEMPORARY_REDIRECT | StatusCode::PERMANENT_REDIRECT => {
-        let _unused = index_map.insert(OperationType::Get, Operation { ..Default::default() });
-        let _unused = index_map.insert(OperationType::Delete, Operation { ..Default::default() });
-        let _unused = index_map.insert(OperationType::Head, Operation { ..Default::default() });
-        let _unused = index_map.insert(OperationType::Options, Operation { ..Default::default() });
-        let _unused = index_map.insert(OperationType::Patch, Operation { ..Default::default() });
-        let _unused = index_map.insert(OperationType::Post, Operation { ..Default::default() });
-        let _unused = index_map.insert(OperationType::Put, Operation { ..Default::default() });
-        let _unused = index_map.insert(OperationType::Trace, Operation { ..Default::default() });
+    let methods = match self.code {
+      StatusCode::TEMPORARY_REDIRECT | StatusCode::PERMANENT_REDIRECT => vec![
+        OperationType::Get,
+        OperationType::Put,
+        OperationType::Post,
+        OperationType::Delete,
+        OperationType::Options,
+        OperationType::Head,
+        OperationType::Patch,
+      ],
+      StatusCode::SEE_OTHER => vec![OperationType::Get],
+      _ => vec![],
+    };
+
+    if !methods.is_empty() {
+      let response = self.get_open_api_response();
+      for method in methods {
+        index_map.insert(
+          method,
+          Operation {
+            responses: Responses {
+              default: Some(ReferenceOr::Object(response.clone())),
+              responses: BTreeMap::from_iter(vec![(
+                self.code.as_u16().to_string(),
+                ReferenceOr::Object(response.clone()),
+              )]),
+              ..Default::default()
+            },
+            ..Default::default()
+          },
+        );
       }
-      StatusCode::SEE_OTHER => {
-        let _unused = index_map.insert(OperationType::Get, Operation { ..Default::default() });
-      }
-      _ => {}
     }
     index_map
   }
 
   // https://github.com/OAI/OpenAPI-Specification/issues/2512
   fn components(&mut self) -> Vec<Components> {
-    let location_header = Header {
-      definition: Some(ParameterDefinition::Content(BTreeMap::from_iter(vec![(
-        "text/plain".to_string(),
-        MediaType {
-          schema: Some(ReferenceOr::Object(Schema::Object(SchemaObject {
-            enum_values: Some(vec![Value::String(self.redirect.clone())]),
-            ..Default::default()
-          }))),
-          ..Default::default()
-        },
-      )]))),
-      ..Default::default()
-    };
-
-    let response = Response {
-      description: "Redirect".to_owned(),
-      headers: BTreeMap::from_iter(vec![("Location".to_string(), ReferenceOr::Object(location_header))]),
-      ..Default::default()
-    };
-
-    vec![Components {
-      responses: BTreeMap::from_iter(vec![(self.code.as_u16().to_string(), ReferenceOr::Object(response))]),
-      ..Default::default()
-    }]
+    vec![]
   }
 }

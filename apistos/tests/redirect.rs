@@ -1,4 +1,5 @@
 use actix_web::App;
+use apistos::paths::{OperationType, ParameterDefinition};
 use apistos::web::redirect;
 
 use actix_web::test::{TestRequest, call_service, init_service, try_read_body_json};
@@ -21,24 +22,21 @@ async fn actix_redirect() {
   let body: OpenApi = try_read_body_json(resp).await.expect("Unable to read body");
   let mut paths: Vec<&String> = body.paths.paths.keys().collect();
   paths.sort();
-
   let expected_paths = vec!["/duck"];
 
-  // /duck is documented
   assert_eq!(paths, expected_paths);
-  // By default (temporary redirect) all methods are allowed
-  assert_eq!(body.paths.paths.values().flat_map(|v| v.operations.values()).count(), 8);
-
-  assert!(body.components.is_some());
-  let components = body.components.unwrap();
-  assert_eq!(components.responses.len(), 1);
-
-  let redirect_response = components.responses.get("307");
-  assert!(redirect_response.is_some());
-  let redirect_response = redirect_response.unwrap();
-  let headers = redirect_response.clone().get_object().unwrap().headers;
-  let location_header = headers.get("Location");
-  assert!(location_header.is_some());
+  assert_eq!(body.paths.paths.values().flat_map(|v| v.operations.values()).count(), 7);
+  let duck = body.paths.paths.get("/duck").unwrap();
+  let get = duck.operations.get(&OperationType::Get).unwrap();
+  let responses = get.responses.responses.get("307").unwrap();
+  let reponse = responses.clone().get_object().unwrap();
+  let location = reponse.headers.get("Location").unwrap();
+  let location_header = location.clone().get_object().unwrap();
+  let location_header_definition = location_header.definition.unwrap();
+  match location_header_definition {
+    ParameterDefinition::Schema(_) => panic!(),
+    ParameterDefinition::Content(btree_map) => btree_map.get("text/plain").unwrap(),
+  };
 }
 
 // Imports bellow aim at making clippy happy. Those dependencies are necessary for integration-test.
