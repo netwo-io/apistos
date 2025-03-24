@@ -1,7 +1,7 @@
 use actix_web::App;
 use apistos::web::redirect;
 
-use actix_web::test::{call_service, init_service, try_read_body_json, TestRequest};
+use actix_web::test::{TestRequest, call_service, init_service, try_read_body_json};
 use apistos::app::OpenApiWrapper;
 use apistos::spec::Spec;
 use apistos_models::OpenApi;
