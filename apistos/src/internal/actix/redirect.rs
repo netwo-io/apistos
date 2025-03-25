@@ -23,6 +23,7 @@ impl From<Redirect> for actix_web::web::Redirect {
     value.inner
   }
 }
+
 impl Redirect {
   /// Wrapper for [`actix_web::web::Redirect`](https://docs.rs/actix-web/*/actix_web/web/struct.Redirect.html#method.new)
   pub fn new(from: impl Into<Cow<'static, str>>, to: impl Into<Cow<'static, str>>) -> Self {
@@ -88,14 +89,7 @@ impl Redirect {
     };
     self
   }
-  fn get_redirect_description(&self) -> String {
-    match self.code {
-      StatusCode::TEMPORARY_REDIRECT => "Temporary redirection".to_owned(),
-      StatusCode::PERMANENT_REDIRECT => "Permanent redirection".to_owned(),
-      StatusCode::SEE_OTHER => "See Other redirection".to_owned(),
-      _ => String::new(),
-    }
-  }
+
   pub(crate) fn get_open_api_response(&self) -> Response {
     let mut schema = Schema::default();
     schema.insert("const".to_owned(), Value::String(self.redirect.clone()));
@@ -116,7 +110,6 @@ impl Redirect {
     };
 
     Response {
-      description: self.get_redirect_description(),
       headers: BTreeMap::from_iter(vec![("Location".to_string(), ReferenceOr::Object(location_header))]),
       ..Default::default()
     }
@@ -128,6 +121,7 @@ impl HttpServiceFactory for Redirect {
     self.inner.register(config);
   }
 }
+
 impl Responder for Redirect {
   type Body = ();
 

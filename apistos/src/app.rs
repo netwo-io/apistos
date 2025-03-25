@@ -332,7 +332,7 @@ where
       };
 
       item.operations.iter_mut().for_each(|(op_type, op)| {
-        let operation_id = build_operation_id(&path, op_type);
+        let operation_id = build_operation_id(&path, *op_type);
         op.operation_id = op.operation_id.clone().or(Some(operation_id));
       });
 
@@ -401,7 +401,7 @@ fn sanitize_patterned_path_parameter(path: &str) -> String {
 #[expect(clippy::expect_used)]
 static PATH_RESOURCE_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"/(.*?)/\{(.*?)\}").expect("path template regex"));
 
-fn build_operation_id(path: &str, operation_type: &OperationType) -> String {
+fn build_operation_id(path: &str, operation_type: OperationType) -> String {
   let resource = PATH_RESOURCE_REGEX
     .captures(path)
     .and_then(|c| c.get(1))
@@ -649,13 +649,13 @@ mod test {
 
   #[test]
   fn test_build_operation_id() {
-    let operation_id = build_operation_id("/api/v1/plop/", &OperationType::Get);
+    let operation_id = build_operation_id("/api/v1/plop/", OperationType::Get);
     assert_eq!(operation_id, "get_api-v1-plop-89654e0732d51aafdc164076a57fd663");
 
-    let operation_id = build_operation_id("/api/v1/plap/{test_id}", &OperationType::Get);
+    let operation_id = build_operation_id("/api/v1/plap/{test_id}", OperationType::Get);
     assert_eq!(operation_id, "get_api-v1-plap-97ba4631a55f77d23b996bf558be60da");
 
-    let operation_id = build_operation_id("/api/v1/plip/{test_id}/test/", &OperationType::Get);
+    let operation_id = build_operation_id("/api/v1/plip/{test_id}/test/", OperationType::Get);
     assert_eq!(operation_id, "get_api-v1-plip-f5c9e39d7a1acb928c72745f3893bce8")
   }
 }

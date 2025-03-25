@@ -9,7 +9,7 @@ pub(crate) mod service_config;
 
 mod utils;
 
-const METHODS: &[OperationType] = &[
+pub(super) const METHODS: &[OperationType] = &[
   OperationType::Get,
   OperationType::Put,
   OperationType::Post,

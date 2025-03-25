@@ -11,6 +11,7 @@ use std::collections::BTreeMap;
 use std::mem;
 
 use super::actix::redirect::Redirect;
+use super::actix::METHODS;
 
 pub trait DefinitionHolder {
   fn path(&self) -> &str;
@@ -105,24 +106,16 @@ impl DefinitionHolder for Redirect {
   fn operations(&mut self) -> IndexMap<OperationType, Operation> {
     let mut index_map: IndexMap<OperationType, Operation> = IndexMap::new();
     let methods = match self.code {
-      StatusCode::TEMPORARY_REDIRECT | StatusCode::PERMANENT_REDIRECT => vec![
-        OperationType::Get,
-        OperationType::Put,
-        OperationType::Post,
-        OperationType::Delete,
-        OperationType::Options,
-        OperationType::Head,
-        OperationType::Patch,
-      ],
-      StatusCode::SEE_OTHER => vec![OperationType::Get],
-      _ => vec![],
+      StatusCode::TEMPORARY_REDIRECT | StatusCode::PERMANENT_REDIRECT => METHODS,
+      StatusCode::SEE_OTHER => &[OperationType::Get],
+      _ => &[],
     };
 
     if !methods.is_empty() {
       let response = self.get_open_api_response();
       for method in methods {
         index_map.insert(
-          method,
+          *method,
           Operation {
             responses: Responses {
               default: Some(ReferenceOr::Object(response.clone())),
@@ -140,7 +133,6 @@ impl DefinitionHolder for Redirect {
     index_map
   }
 
-  // https://github.com/OAI/OpenAPI-Specification/issues/2512
   fn components(&mut self) -> Vec<Components> {
     vec![]
   }
