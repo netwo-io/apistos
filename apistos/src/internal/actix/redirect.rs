@@ -23,6 +23,7 @@ impl From<Redirect> for actix_web::web::Redirect {
     value.inner
   }
 }
+
 impl Redirect {
   /// Wrapper for [`actix_web::web::Redirect`](https://docs.rs/actix-web/*/actix_web/web/struct.Redirect.html#method.new)
   pub fn new(from: impl Into<Cow<'static, str>>, to: impl Into<Cow<'static, str>>) -> Self {
