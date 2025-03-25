@@ -1,9 +1,9 @@
 use crate::OPENAPI_CALLBACK_STRUCT_PREFIX;
-use darling::ast::NestedMeta;
 use darling::FromMeta;
-use proc_macro2::{Ident, Span, TokenStream};
+use darling::ast::NestedMeta;
 use proc_macro_error2::abort;
-use quote::{quote, ToTokens};
+use proc_macro2::{Ident, Span, TokenStream};
+use quote::{ToTokens, quote};
 use std::collections::BTreeMap;
 
 pub(crate) fn parse_openapi_operation_attrs(attrs: &[NestedMeta]) -> OperationAttr {

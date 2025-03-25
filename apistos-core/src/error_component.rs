@@ -1,8 +1,8 @@
 use std::collections::BTreeMap;
 
+use apistos_models::ApistosSchema;
 use apistos_models::paths::Response;
 use apistos_models::reference_or::ReferenceOr;
-use apistos_models::ApistosSchema;
 
 pub trait ApiErrorComponent {
   fn schemas_by_status_code(

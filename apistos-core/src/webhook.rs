@@ -1,9 +1,9 @@
 use std::collections::BTreeMap;
 
+use apistos_models::OpenApiVersion;
 use apistos_models::components::Components;
 use apistos_models::paths::PathItem;
 use apistos_models::reference_or::ReferenceOr;
-use apistos_models::OpenApiVersion;
 
 #[derive(Clone, Debug, Default)]
 pub struct ApiWebhookDef {

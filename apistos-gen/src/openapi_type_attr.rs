@@ -1,7 +1,7 @@
 use darling::FromMeta;
-use proc_macro2::{Ident, Span, TokenStream};
 use proc_macro_error2::abort;
-use quote::{quote, ToTokens};
+use proc_macro2::{Ident, Span, TokenStream};
+use quote::{ToTokens, quote};
 use syn::{Attribute, ImplGenerics, TypeGenerics, WhereClause};
 
 pub(crate) fn parse_openapi_type_attrs(

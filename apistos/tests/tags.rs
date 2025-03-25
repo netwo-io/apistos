@@ -1,17 +1,17 @@
 #![expect(clippy::panic)]
 
 use actix_web::http::StatusCode;
-use actix_web::test::{call_service, init_service, try_read_body_json, TestRequest};
+use actix_web::test::{TestRequest, call_service, init_service, try_read_body_json};
 use actix_web::web::{Json, Path};
 use actix_web::{App, ResponseError};
 use apistos::app::OpenApiWrapper;
 use apistos::spec::Spec;
 use apistos::web::{get, resource, tagged_resource, tagged_scope};
-use apistos_gen::{api_operation, ApiComponent, ApiErrorComponent};
+use apistos_gen::{ApiComponent, ApiErrorComponent, api_operation};
+use apistos_models::OpenApi;
 use apistos_models::info::Info;
 use apistos_models::paths::OperationType;
 use apistos_models::tag::Tag;
-use apistos_models::OpenApi;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};

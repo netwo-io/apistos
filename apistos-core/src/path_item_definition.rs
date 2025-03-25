@@ -1,6 +1,6 @@
+use apistos_models::OpenApiVersion;
 use apistos_models::components::Components;
 use apistos_models::paths::Operation;
-use apistos_models::OpenApiVersion;
 
 pub trait PathItemDefinition {
   fn is_visible() -> bool {

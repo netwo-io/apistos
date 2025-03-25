@@ -13,7 +13,7 @@ repository.workspace = true
 rust-version.workspace = true
 license.workspace = true
 
-[dependencies]
+[dev-dependencies]
 actix-multipart = { workspace = true }
 actix-web = { workspace = true }
 actix-web-grants = { workspace = true }

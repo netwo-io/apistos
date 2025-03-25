@@ -145,9 +145,9 @@ mod test {
 
   use apistos_core::ApiComponent;
   use apistos_gen::ApiComponent;
+  use apistos_models::OpenApiVersion;
   use apistos_models::paths::Response;
   use apistos_models::reference_or::ReferenceOr;
-  use apistos_models::OpenApiVersion;
   use schemars::JsonSchema;
 
   use crate as apistos;

@@ -1,8 +1,8 @@
-use darling::ast::NestedMeta;
 use darling::FromMeta;
-use proc_macro2::{Span, TokenStream};
+use darling::ast::NestedMeta;
 use proc_macro_error2::abort;
-use quote::{quote, ToTokens};
+use proc_macro2::{Span, TokenStream};
+use quote::{ToTokens, quote};
 use syn::Type;
 
 pub(crate) fn parse_openapi_callback_attrs(attrs: &[NestedMeta]) -> CallbackAttr {

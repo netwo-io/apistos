@@ -1,10 +1,10 @@
 use crate::ApiComponent;
+use actix_multipart::Multipart;
 use actix_multipart::form::text::Text;
 use actix_multipart::form::{MultipartCollect, MultipartForm};
-use actix_multipart::Multipart;
+use apistos_models::ApistosSchema;
 use apistos_models::paths::{MediaType, RequestBody};
 use apistos_models::reference_or::ReferenceOr;
-use apistos_models::ApistosSchema;
 use serde::de::DeserializeOwned;
 use std::collections::BTreeMap;
 
@@ -94,7 +94,7 @@ pub mod tempfile {
   use apistos_models::reference_or::ReferenceOr;
   use apistos_models::{ApistosSchema, OpenApiVersion};
   use futures_core::future::LocalBoxFuture;
-  use schemars::{json_schema, JsonSchema, Schema, SchemaGenerator};
+  use schemars::{JsonSchema, Schema, SchemaGenerator, json_schema};
   use std::borrow::Cow;
 
   #[derive(Debug)]
@@ -142,8 +142,8 @@ pub mod tempfile {
       let (name, schema) = {
         let schema_name = Self::schema_name();
         let settings = oas_version.get_schema_settings();
-        let gen = settings.into_generator();
-        let schema = gen.into_root_schema_for::<Self>();
+        let generator = settings.into_generator();
+        let schema = generator.into_root_schema_for::<Self>();
 
         let schema = ApistosSchema::new(schema, oas_version);
         (schema_name, ReferenceOr::Object(schema))
@@ -166,8 +166,8 @@ pub mod tempfile {
 
   #[cfg(test)]
   mod test {
-    use crate::multipart::tempfile::Tempfile;
     use crate::ApiComponent;
+    use crate::multipart::tempfile::Tempfile;
     use apistos_models::reference_or::ReferenceOr;
     use apistos_models::{ApistosSchema, OpenApiVersion};
     use assert_json_diff::assert_json_eq;
@@ -190,8 +190,8 @@ pub mod tempfile {
 
         fn schema(oas_version: OpenApiVersion) -> Option<(String, ReferenceOr<ApistosSchema>)> {
           let schema_settings = oas_version.get_schema_settings();
-          let gen = SchemaGenerator::new(schema_settings);
-          let schema = gen.into_root_schema_for::<Test>();
+          let generator = SchemaGenerator::new(schema_settings);
+          let schema = generator.into_root_schema_for::<Test>();
           Some(("Test".to_string(), ApistosSchema::new(schema, oas_version).into()))
         }
       }

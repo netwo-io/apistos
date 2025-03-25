@@ -1,5 +1,5 @@
-use crate::internal::actix::utils::OperationUpdater;
 use crate::internal::actix::METHODS;
+use crate::internal::actix::utils::OperationUpdater;
 use crate::internal::get_oas_version;
 use actix_service::boxed::BoxService;
 use actix_service::{ServiceFactory, Transform};
@@ -9,9 +9,9 @@ use actix_web::guard::Guard;
 use actix_web::http::Method;
 use actix_web::{Error, FromRequest, Handler, Responder};
 use apistos_core::PathItemDefinition;
+use apistos_models::OpenApiVersion;
 use apistos_models::components::Components;
 use apistos_models::paths::{Operation, OperationType, PathItem};
-use apistos_models::OpenApiVersion;
 use indexmap::IndexMap;
 use log::warn;
 

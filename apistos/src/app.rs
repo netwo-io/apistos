@@ -4,10 +4,10 @@ use std::sync::{Arc, RwLock};
 use std::{fmt, mem};
 
 use actix_service::{IntoServiceFactory, ServiceFactory, Transform};
+use actix_web::Error;
 use actix_web::body::MessageBody;
 use actix_web::dev::{HttpServiceFactory, ServiceRequest, ServiceResponse};
 use actix_web::web::{get, resource};
-use actix_web::Error;
 use indexmap::IndexMap;
 use once_cell::sync::Lazy;
 use regex::Regex;
@@ -419,19 +419,19 @@ fn build_operation_id(path: &str, operation_type: &OperationType) -> String {
 
 #[cfg(test)]
 mod test {
-  use actix_web::test::{call_service, init_service, try_read_body_json, TestRequest};
   use actix_web::App;
+  use actix_web::test::{TestRequest, call_service, init_service, try_read_body_json};
 
+  use apistos_models::OpenApi;
   use apistos_models::info::Info;
   use apistos_models::paths::OperationType;
   use apistos_models::tag::Tag;
-  use apistos_models::OpenApi;
   use apistos_rapidoc::RapidocConfig;
   use apistos_redoc::RedocConfig;
   use apistos_scalar::ScalarConfig;
   use apistos_swagger_ui::SwaggerUIConfig;
 
-  use crate::app::{build_operation_id, BuildConfig, OpenApiWrapper};
+  use crate::app::{BuildConfig, OpenApiWrapper, build_operation_id};
   use crate::spec::Spec;
 
   #[actix_web::test]

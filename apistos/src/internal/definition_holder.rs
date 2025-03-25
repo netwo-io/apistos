@@ -71,7 +71,7 @@ impl<T> DefinitionHolder for Scope<T> {
 }
 
 #[expect(clippy::unimplemented)]
-impl<'a> DefinitionHolder for ServiceConfig<'a> {
+impl DefinitionHolder for ServiceConfig<'_> {
   fn path(&self) -> &str {
     unimplemented!("ServiceConfig has multiple paths.");
   }

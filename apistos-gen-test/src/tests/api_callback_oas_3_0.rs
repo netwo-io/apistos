@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use apistos::{JsonSchema, OpenApiVersion};
 use apistos_core::PathItemDefinition;
-use apistos_gen::{api_callback, api_operation, ApiComponent};
+use apistos_gen::{ApiComponent, api_callback, api_operation};
 
 #[expect(clippy::todo)]
 mod test_models {

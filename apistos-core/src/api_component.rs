@@ -4,7 +4,7 @@ use std::future::Future;
 
 #[cfg(feature = "actix")]
 use actix_web::Either;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 
 use apistos_models::paths::{MediaType, Parameter, RequestBody, Response, Responses};
 use apistos_models::reference_or::ReferenceOr;
@@ -485,8 +485,8 @@ where
 #[cfg(test)]
 mod test {
   use apistos_models::{ApistosSchema, OpenApiVersion};
-  use schemars::generate::SchemaGenerator;
   use schemars::JsonSchema;
+  use schemars::generate::SchemaGenerator;
   use serde_json::json;
 
   use apistos_models::reference_or::ReferenceOr;
@@ -509,10 +509,10 @@ mod test {
 
       fn schema(oas_version: OpenApiVersion) -> Option<(String, ReferenceOr<ApistosSchema>)> {
         let schema_settings = oas_version.get_schema_settings();
-        let gen = SchemaGenerator::new(schema_settings);
+        let generator = SchemaGenerator::new(schema_settings);
         Some((
           "TestChild".to_string(),
-          ApistosSchema::new(gen.into_root_schema_for::<TestChild>(), oas_version).into(),
+          ApistosSchema::new(generator.into_root_schema_for::<TestChild>(), oas_version).into(),
         ))
       }
     }
@@ -530,8 +530,8 @@ mod test {
 
       fn schema(oas_version: OpenApiVersion) -> Option<(String, ReferenceOr<ApistosSchema>)> {
         let schema_settings = oas_version.get_schema_settings();
-        let gen = SchemaGenerator::new(schema_settings);
-        let schema = gen.into_root_schema_for::<Test>();
+        let generator = SchemaGenerator::new(schema_settings);
+        let schema = generator.into_root_schema_for::<Test>();
         Some(("Test".to_string(), ApistosSchema::new(schema, oas_version).into()))
       }
     }
@@ -614,10 +614,10 @@ mod test {
 
       fn schema(oas_version: OpenApiVersion) -> Option<(String, ReferenceOr<ApistosSchema>)> {
         let schema_settings = oas_version.get_schema_settings();
-        let gen = SchemaGenerator::new(schema_settings);
+        let generator = SchemaGenerator::new(schema_settings);
         Some((
           "TestChild".to_string(),
-          ApistosSchema::new(gen.into_root_schema_for::<TestChild>(), oas_version).into(),
+          ApistosSchema::new(generator.into_root_schema_for::<TestChild>(), oas_version).into(),
         ))
       }
     }
@@ -635,8 +635,8 @@ mod test {
 
       fn schema(oas_version: OpenApiVersion) -> Option<(String, ReferenceOr<ApistosSchema>)> {
         let schema_settings = oas_version.get_schema_settings();
-        let gen = SchemaGenerator::new(schema_settings);
-        let schema = gen.into_root_schema_for::<Test>();
+        let generator = SchemaGenerator::new(schema_settings);
+        let schema = generator.into_root_schema_for::<Test>();
         Some(("Test".to_string(), ApistosSchema::new(schema, oas_version).into()))
       }
     }
