@@ -729,6 +729,7 @@ fn api_component_derive_named_tagged_enums() {
 }
 
 #[test]
+#[allow(unused_qualifications)]
 fn api_component_derive_named_enums_deep() {
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
   pub(crate) struct TestStuff {

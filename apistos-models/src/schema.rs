@@ -290,6 +290,7 @@ mod test {
 
   #[test]
   #[expect(dead_code)]
+  #[allow(unused_qualifications)]
   fn test_apistos_schema_transform_3_1() {
     #[derive(JsonSchema, Serialize)]
     struct TestStruct {

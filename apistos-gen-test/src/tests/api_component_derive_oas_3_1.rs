@@ -752,6 +752,8 @@ fn api_component_derive_named_tagged_enums() {
 }
 
 #[test]
+#[allow(clippy::print_stderr)]
+#[allow(unused_qualifications)]
 fn api_component_derive_named_enums_deep() {
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
   pub(crate) struct TestStuff {
@@ -798,6 +800,7 @@ fn api_component_derive_named_enums_deep() {
   let name_schema = <Query as ApiComponent>::schema(OpenApiVersion::OAS3_1);
   let name_child_schemas = <Query as ApiComponent>::child_schemas(OpenApiVersion::OAS3_1);
   assert!(name_schema.is_some());
+
   eprintln!("name_schema : {name_child_schemas:#?}");
   assert_eq!(name_child_schemas.len(), 5);
   let (schema_name, schema) = name_schema.expect("schema should be defined");
