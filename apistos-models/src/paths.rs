@@ -42,7 +42,7 @@ pub struct PathItem {
   pub extensions: IndexMap<String, Value>,
 }
 
-#[derive(Serialize, Clone, Debug, Hash, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Serialize, Clone, Copy, Debug, Hash, Eq, PartialEq, Ord, PartialOrd)]
 #[cfg_attr(any(test, feature = "deserialize"), derive(serde::Deserialize))]
 #[serde(rename_all = "lowercase")]
 pub enum OperationType {
