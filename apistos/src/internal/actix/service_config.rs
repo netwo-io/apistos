@@ -31,6 +31,15 @@ impl ServiceConfig<'_> {
     self
   }
 
+  /// Wrapper for [`actix_web::web::ServiceConfig::service`](https://docs.rs/actix-web/*/actix_web/web/struct.ServiceConfig.html#method.configure).
+  pub fn configure<F>(&mut self, f: F) -> &mut Self
+  where
+    F: FnOnce(&mut ServiceConfig),
+  {
+    f(self);
+    self
+  }
+
   /// Wrapper for [`actix_web::web::ServiceConfig::service`](https://docs.rs/actix-web/*/actix_web/web/struct.ServiceConfig.html#method.service).
   pub fn service<F>(&mut self, mut factory: F) -> &mut Self
   where
