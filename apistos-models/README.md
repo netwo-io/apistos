@@ -30,7 +30,7 @@ These models are not linked to any web framework.
 #schemars = "0.8"
 # sadly we currently rely on a fork to fix multiple flatten for enums, related PR can be found here: https://github.com/GREsau/schemars/pull/264
 schemars = { package = "apistos-schemars", version = "0.8" }
-apistos-models = "0.4"
+apistos-models = "0.5"
 ```
 
 ### About us

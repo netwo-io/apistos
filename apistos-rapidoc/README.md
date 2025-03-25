@@ -27,7 +27,7 @@ This crate is exposed through Apistos `rapidoc` feature.
 #schemars = "0.8"
 # sadly we currently rely on a fork to fix multiple flatten for enums, related PR can be found here: https://github.com/GREsau/schemars/pull/264
 schemars = { package = "apistos-schemars", version = "0.8" }
-apistos = { version = "0.3", feature = ["rapidoc"] }
+apistos = { version = "0.5", feature = ["rapidoc"] }
 ```
 
 ### About us
