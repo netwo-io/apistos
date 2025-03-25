@@ -13,10 +13,10 @@ macro_rules! simple_modifier {
         oas_version: apistos_models::OpenApiVersion,
       ) -> Option<apistos_models::reference_or::ReferenceOr<apistos_models::ApistosSchema>> {
         let schema_settings = oas_version.get_schema_settings();
-        let gen = schema_settings.into_generator();
+        let generator = schema_settings.into_generator();
 
         let schema: apistos_models::reference_or::ReferenceOr<apistos_models::ApistosSchema> =
-          apistos_models::ApistosSchema::new(gen.into_root_schema_for::<$ty>(), oas_version).into();
+          apistos_models::ApistosSchema::new(generator.into_root_schema_for::<$ty>(), oas_version).into();
         Some(schema)
       }
       fn schema(
@@ -78,10 +78,10 @@ impl<T: chrono::TimeZone> crate::ApiComponent for chrono::DateTime<T> {
     oas_version: apistos_models::OpenApiVersion,
   ) -> Option<apistos_models::reference_or::ReferenceOr<apistos_models::ApistosSchema>> {
     let schema_settings = oas_version.get_schema_settings();
-    let gen = schema_settings.into_generator();
+    let generator = schema_settings.into_generator();
 
     let schema: apistos_models::reference_or::ReferenceOr<apistos_models::ApistosSchema> =
-      apistos_models::ApistosSchema::new(gen.into_root_schema_for::<chrono::DateTime<T>>(), oas_version).into();
+      apistos_models::ApistosSchema::new(generator.into_root_schema_for::<chrono::DateTime<T>>(), oas_version).into();
     Some(schema)
   }
 

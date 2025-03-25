@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 use proc_macro2::TokenStream;
-use quote::{quote, ToTokens};
+use quote::{ToTokens, quote};
 use syn::Type;
 
 use crate::internal::security::Security;
@@ -22,7 +22,7 @@ pub(crate) struct Operation<'a> {
   pub(crate) produces: Option<&'a String>,
 }
 
-impl<'a> ToTokens for Operation<'a> {
+impl ToTokens for Operation<'_> {
   fn to_tokens(&self, tokens: &mut TokenStream) {
     let args = self.args;
     let responder_wrapper = self.responder_wrapper;

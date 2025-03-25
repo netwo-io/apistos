@@ -2,7 +2,7 @@
 #[cfg(feature = "ipnetwork")]
 pub mod ipnetwork {
   use crate::simple::simple_modifier;
-  use schemars::{json_schema, JsonSchema, Schema, SchemaGenerator};
+  use schemars::{JsonSchema, Schema, SchemaGenerator, json_schema};
   use serde::{Deserialize, Serialize};
   use std::borrow::Cow;
 
@@ -131,8 +131,8 @@ pub mod ipnetwork {
 
   #[cfg(test)]
   mod test {
-    use crate::ipnetwork::IpNetwork;
     use crate::ApiComponent;
+    use crate::ipnetwork::IpNetwork;
     use apistos_models::reference_or::ReferenceOr;
     use apistos_models::{ApistosSchema, OpenApiVersion};
     use assert_json_diff::assert_json_eq;
@@ -155,8 +155,8 @@ pub mod ipnetwork {
 
         fn schema(oas_version: OpenApiVersion) -> Option<(String, ReferenceOr<ApistosSchema>)> {
           let schema_settings = oas_version.get_schema_settings();
-          let gen = SchemaGenerator::new(schema_settings);
-          let schema = gen.into_root_schema_for::<Test>();
+          let generator = SchemaGenerator::new(schema_settings);
+          let schema = generator.into_root_schema_for::<Test>();
           Some(("Test".to_string(), ApistosSchema::new(schema, oas_version).into()))
         }
       }

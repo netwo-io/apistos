@@ -9,7 +9,7 @@ use garde_actix_web::web::QsQuery as GardeQsQuery;
 #[cfg(all(feature = "query", feature = "garde"))]
 use garde_actix_web::web::Query as GardeQuery;
 use schemars::Schema;
-use serde_json::{json, Map, Value};
+use serde_json::{Map, Value, json};
 #[cfg(feature = "qs_query")]
 use serde_qs::actix::QsQuery;
 
@@ -315,7 +315,7 @@ fn extract_required_from_schema(sch_props: &Map<String, Value>, property_name: &
 #[cfg(test)]
 mod test {
   use actix_web::web::Query;
-  use schemars::{json_schema, JsonSchema};
+  use schemars::{JsonSchema, json_schema};
   use serde::{Deserialize, Serialize};
   #[cfg(feature = "qs_query")]
   use serde_qs::actix::QsQuery;
@@ -344,8 +344,8 @@ mod test {
     fn schema(oas_version: OpenApiVersion) -> Option<(String, ReferenceOr<ApistosSchema>)> {
       let (name, schema) = {
         let schema_name = <Self as JsonSchema>::schema_name().to_string();
-        let gen = oas_version.get_schema_settings().into_generator();
-        let schema = gen.into_root_schema_for::<Self>();
+        let generator = oas_version.get_schema_settings().into_generator();
+        let schema = generator.into_root_schema_for::<Self>();
         (schema_name, ApistosSchema::new(schema, oas_version).into())
       };
       Some((name, schema))

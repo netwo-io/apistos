@@ -58,8 +58,8 @@ impl ApistosSchema {
     &mut self.0
   }
 
-  fn remove_definition_from_schema(obj: &mut serde_json::Map<String, Value>, gen: &SchemaGenerator) {
-    let definition_path = gen.settings().definitions_path.clone();
+  fn remove_definition_from_schema(obj: &mut serde_json::Map<String, Value>, generator: &SchemaGenerator) {
+    let definition_path = generator.settings().definitions_path.clone();
     let definition_path = definition_path
       .trim_start_matches('/')
       .split('/')
@@ -137,6 +137,7 @@ mod test {
 
   #[test]
   #[expect(dead_code)]
+  #[allow(unused_qualifications)]
   fn test_apistos_schema_transform_3_0() {
     #[derive(JsonSchema, Serialize)]
     struct TestStruct {
@@ -168,8 +169,8 @@ mod test {
       Test2(TestStruct2),
     }
 
-    let mut gen = SchemaSettings::openapi3().into_generator();
-    let schema = TestEnum::json_schema(&mut gen);
+    let mut generator = SchemaSettings::openapi3().into_generator();
+    let schema = TestEnum::json_schema(&mut generator);
 
     let apistos_schema = ApistosSchema::new(schema, OpenApiVersion::OAS3_0);
 
@@ -184,8 +185,8 @@ mod test {
       })
     );
 
-    let mut gen = SchemaSettings::openapi3().into_generator();
-    let schema = TestAlgebraicEnum::json_schema(&mut gen);
+    let mut generator = SchemaSettings::openapi3().into_generator();
+    let schema = TestAlgebraicEnum::json_schema(&mut generator);
 
     let apistos_schema = ApistosSchema::new(schema, OpenApiVersion::OAS3_0);
 
@@ -239,8 +240,8 @@ mod test {
       })
     );
 
-    let mut gen = SchemaSettings::openapi3().into_generator();
-    let schema = TestAlgebraicEnum2::json_schema(&mut gen);
+    let mut generator = SchemaSettings::openapi3().into_generator();
+    let schema = TestAlgebraicEnum2::json_schema(&mut generator);
 
     let apistos_schema = ApistosSchema::new(schema, OpenApiVersion::OAS3_0);
 
@@ -320,8 +321,8 @@ mod test {
       Test2(TestStruct2),
     }
 
-    let mut gen = SchemaSettings::draft2020_12().into_generator();
-    let schema = TestEnum::json_schema(&mut gen);
+    let mut generator = SchemaSettings::draft2020_12().into_generator();
+    let schema = TestEnum::json_schema(&mut generator);
 
     let apistos_schema = ApistosSchema::new(schema, OpenApiVersion::OAS3_1);
 
@@ -336,8 +337,8 @@ mod test {
       })
     );
 
-    let mut gen = SchemaSettings::draft2020_12().into_generator();
-    let schema = TestAlgebraicEnum::json_schema(&mut gen);
+    let mut generator = SchemaSettings::draft2020_12().into_generator();
+    let schema = TestAlgebraicEnum::json_schema(&mut generator);
 
     let apistos_schema = ApistosSchema::new(schema, OpenApiVersion::OAS3_1);
 
@@ -391,8 +392,8 @@ mod test {
       })
     );
 
-    let mut gen = SchemaSettings::draft2020_12().into_generator();
-    let schema = TestAlgebraicEnum2::json_schema(&mut gen);
+    let mut generator = SchemaSettings::draft2020_12().into_generator();
+    let schema = TestAlgebraicEnum2::json_schema(&mut generator);
 
     let apistos_schema = ApistosSchema::new(schema, OpenApiVersion::OAS3_1);
 
