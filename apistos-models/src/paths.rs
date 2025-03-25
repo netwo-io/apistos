@@ -4,11 +4,11 @@ use indexmap::IndexMap;
 use serde::Serialize;
 use serde_json::Value;
 
+use crate::VersionSpecificSchema;
 use crate::reference_or::ReferenceOr;
 use crate::schema::ApistosSchema;
 use crate::security::SecurityRequirement;
 use crate::server::Server;
-use crate::VersionSpecificSchema;
 
 /// # OAS 3.0
 /// Holds the relative paths to the individual endpoints and their operations. The path is appended to the URL from the [Server Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#server-object) in order to construct the full URL. The Paths MAY be empty, due to [ACL constraints](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#security-filtering).

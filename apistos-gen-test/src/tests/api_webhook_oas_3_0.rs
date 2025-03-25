@@ -9,8 +9,8 @@ mod test_models {
   use std::fmt::{Display, Formatter};
 
   use actix_web::error::ParseError;
-  use actix_web::http::header::{Header, HeaderName, HeaderValue, InvalidHeaderValue, TryIntoHeaderValue};
   use actix_web::http::StatusCode;
+  use actix_web::http::header::{Header, HeaderName, HeaderValue, InvalidHeaderValue, TryIntoHeaderValue};
   use actix_web::{HttpMessage, ResponseError};
   use schemars::JsonSchema;
   use serde::{Deserialize, Serialize};

@@ -1,6 +1,6 @@
+use crate::internal::actix::METHODS;
 use crate::internal::actix::route::{Route, RouteWrapper};
 use crate::internal::actix::utils::OperationUpdater;
-use crate::internal::actix::METHODS;
 use crate::internal::get_oas_version;
 use actix_service::{ServiceFactory, Transform};
 use actix_web::body::MessageBody;
@@ -8,9 +8,9 @@ use actix_web::dev::{AppService, HttpServiceFactory, ServiceRequest, ServiceResp
 use actix_web::guard::Guard;
 use actix_web::{Error, FromRequest, Handler, Responder};
 use apistos_core::PathItemDefinition;
+use apistos_models::OpenApiVersion;
 use apistos_models::components::Components;
 use apistos_models::paths::PathItem;
-use apistos_models::OpenApiVersion;
 use std::fmt::Debug;
 use std::future::Future;
 

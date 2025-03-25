@@ -1,6 +1,6 @@
 use darling::FromMeta;
 use proc_macro2::TokenStream;
-use quote::{quote, ToTokens};
+use quote::{ToTokens, quote};
 
 #[derive(FromMeta, Clone)]
 #[darling(rename_all = "snake_case")]

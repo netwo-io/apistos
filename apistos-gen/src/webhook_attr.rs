@@ -1,9 +1,9 @@
 use std::collections::BTreeMap;
 
 use darling::FromMeta;
+use proc_macro_error2::{OptionExt, abort};
 use proc_macro2::{Ident, Span, TokenStream};
-use proc_macro_error2::{abort, OptionExt};
-use quote::{quote, ToTokens};
+use quote::{ToTokens, quote};
 use syn::{Attribute, Data, DataEnum, Error};
 
 use crate::callback_attr::{CallbackAttr, CallbackAttrInternal};

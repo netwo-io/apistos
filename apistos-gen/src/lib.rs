@@ -14,11 +14,11 @@ use crate::openapi_type_attr::parse_openapi_type_attrs;
 use crate::operation_attr::parse_openapi_operation_attrs;
 use crate::webhook_attr::parse_openapi_derive_webhook_attrs;
 use convert_case::{Case, Casing};
-use darling::ast::NestedMeta;
 use darling::Error;
+use darling::ast::NestedMeta;
 use proc_macro::TokenStream;
+use proc_macro_error2::{OptionExt, abort, proc_macro_error};
 use proc_macro2::Span;
-use proc_macro_error2::{abort, proc_macro_error, OptionExt};
 use quote::{format_ident, quote};
 use syn::{DeriveInput, GenericParam, Ident, ItemFn};
 

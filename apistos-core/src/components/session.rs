@@ -1,7 +1,7 @@
 use crate::ApiComponent;
+use apistos_models::ApistosSchema;
 use apistos_models::paths::{Parameter, ParameterDefinition, ParameterIn, RequestBody};
 use apistos_models::reference_or::ReferenceOr;
-use apistos_models::ApistosSchema;
 use schemars::json_schema;
 
 impl ApiComponent for actix_session::Session {
