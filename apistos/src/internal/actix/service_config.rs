@@ -31,7 +31,7 @@ impl ServiceConfig<'_> {
     self
   }
 
-  /// Run external configuration as part of the application building process
+  /// Wrapper for [`actix_web::web::ServiceConfig::service`](https://docs.rs/actix-web/*/actix_web/web/struct.ServiceConfig.html#method.configure).
   pub fn configure<F>(&mut self, f: F) -> &mut Self
   where
     F: FnOnce(&mut ServiceConfig),
