@@ -1,6 +1,7 @@
 use apistos_models::paths::OperationType;
 
 pub(crate) mod handler;
+pub(crate) mod redirect;
 pub(crate) mod resource;
 pub(crate) mod route;
 pub(crate) mod scope;
