@@ -88,14 +88,7 @@ impl Redirect {
     };
     self
   }
-  fn get_redirect_description(&self) -> String {
-    match self.code {
-      StatusCode::TEMPORARY_REDIRECT => "Temporary redirection".to_owned(),
-      StatusCode::PERMANENT_REDIRECT => "Permanent redirection".to_owned(),
-      StatusCode::SEE_OTHER => "See Other redirection".to_owned(),
-      _ => String::new(),
-    }
-  }
+
   pub(crate) fn get_open_api_response(&self) -> Response {
     let location_header = Header {
       definition: Some(ParameterDefinition::Content(BTreeMap::from_iter(vec![(
@@ -113,7 +106,6 @@ impl Redirect {
     };
 
     Response {
-      description: self.get_redirect_description(),
       headers: BTreeMap::from_iter(vec![("Location".to_string(), ReferenceOr::Object(location_header))]),
       ..Default::default()
     }
@@ -125,6 +117,7 @@ impl HttpServiceFactory for Redirect {
     self.inner.register(config);
   }
 }
+
 impl Responder for Redirect {
   type Body = ();
 
