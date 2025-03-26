@@ -2,13 +2,16 @@ use actix_web::dev::{AppService, HttpServiceFactory};
 
 use actix_web::http::StatusCode;
 use actix_web::{HttpRequest, HttpResponse, Responder};
+use apistos_models::json_schema;
 use apistos_models::paths::{Header, MediaType, ParameterDefinition, Response};
 use apistos_models::reference_or::ReferenceOr;
-use apistos_models::{ApistosSchema, Schema, VersionSpecificSchema};
-use serde_json::Value;
+use apistos_models::{ApistosSchema, OpenApiVersion, VersionSpecificSchema};
+
 use std::borrow::Cow;
 use std::collections::BTreeMap;
 use std::fmt::Debug;
+
+use crate::internal::get_oas_version;
 
 #[derive(Debug, Clone)]
 pub struct Redirect {
@@ -91,17 +94,26 @@ impl Redirect {
   }
 
   pub(crate) fn get_open_api_response(&self) -> Response {
-    let mut schema = Schema::default();
-    schema.insert("const".to_owned(), Value::String(self.redirect.clone()));
-
+    let version = get_oas_version();
+    let version_specific_schema = match version {
+      OpenApiVersion::OAS3_0 => VersionSpecificSchema::OAS3_0(ReferenceOr::Object(ApistosSchema::new(
+        json_schema!({
+          "enum": &[self.redirect.clone()]}),
+        version,
+      ))),
+      OpenApiVersion::OAS3_1 => VersionSpecificSchema::OAS3_1(ApistosSchema::new(
+        json_schema!({
+          "type": "string",
+          "const": self.redirect.clone(),
+        }),
+        version,
+      )),
+    };
     let location_header = Header {
       definition: Some(ParameterDefinition::Content(BTreeMap::from_iter(vec![(
         "text/plain".to_string(),
         MediaType {
-          schema: Some(VersionSpecificSchema::OAS3_1(ApistosSchema::new(
-            schema,
-            apistos_models::OpenApiVersion::OAS3_1,
-          ))),
+          schema: Some(version_specific_schema),
           ..Default::default()
         },
       )]))),
@@ -110,6 +122,7 @@ impl Redirect {
     };
 
     Response {
+      description: "Redirect.".to_owned(),
       headers: BTreeMap::from_iter(vec![("Location".to_string(), ReferenceOr::Object(location_header))]),
       ..Default::default()
     }

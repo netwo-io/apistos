@@ -323,6 +323,7 @@ where
         acc
       });
     definition_holder.update_path_items(&mut open_api_spec.paths.paths);
+
     let mut paths = IndexMap::new();
     for (path, mut item) in mem::take(&mut open_api_spec.paths.paths) {
       let path = if path.starts_with('/') {

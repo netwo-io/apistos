@@ -10,8 +10,8 @@ use indexmap::IndexMap;
 use std::collections::BTreeMap;
 use std::mem;
 
-use super::actix::redirect::Redirect;
 use super::actix::METHODS;
+use super::actix::redirect::Redirect;
 
 pub trait DefinitionHolder {
   fn path(&self) -> &str;
