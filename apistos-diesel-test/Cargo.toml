@@ -1,7 +1,14 @@
 [package]
 name = "apistos-diesel-test"
-version = "0.1.0"
-edition = "2024"
+description = "Test to ensure Apistos can live with diesel-async"
+publish = false
+
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+license.workspace = true
 
 [dev-dependencies]
 schemars = { package = "apistos-schemars", version = "0.8" }
