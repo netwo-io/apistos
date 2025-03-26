@@ -29,7 +29,8 @@ impl ToTokens for Schemas {
       Some(m) => m.title = m.title.clone().or_else(|| Some(prop_name.clone())),
     });
     let update_single_enum_value = quote!(if enum_values.len() == 1 {
-      if let Some(schemars::_serde_json::Value::String(prop_name)) = enum_values.first() {
+      #[allow(clippy::get_first, reason = "https://github.com/netwo-io/apistos/issues/158, because of https://docs.diesel.rs/master/diesel/query_dsl/methods/trait.LimitDsl.html")]
+      if let Some(schemars::_serde_json::Value::String(prop_name)) = enum_values.get(0) {
         #update_metadata_title
       }
     });

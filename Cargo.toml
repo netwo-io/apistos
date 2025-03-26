@@ -5,6 +5,7 @@ members = [
     "apistos-core",
     "apistos-gen",
     "apistos-gen-test",
+    "apistos-diesel-test",
     "apistos-models",
     "apistos-plugins",
     "apistos-rapidoc",

@@ -1,0 +1,12 @@
+[package]
+name = "apistos-diesel-test"
+version = "0.1.0"
+edition = "2024"
+
+[dev-dependencies]
+schemars = { package = "apistos-schemars", version = "0.8" }
+apistos = { path = "../apistos", version = "0.5.0" }
+diesel-async = { version = "0.5.2", features = ["postgres", "deadpool"]}
+
+[lints]
+workspace = true

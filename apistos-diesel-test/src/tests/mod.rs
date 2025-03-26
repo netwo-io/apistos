@@ -1,0 +1,1 @@
+mod could_compile;
