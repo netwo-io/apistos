@@ -46,6 +46,8 @@ apistos-redoc = { path = "../apistos-redoc", version = "0.5.0" }
 apistos-scalar = { path = "../apistos-scalar", version = "0.5.0" }
 apistos-swagger-ui = { path = "../apistos-swagger-ui", version = "0.5.0" }
 
+diesel-async = { version = "0.5.2", features = ["postgres", "deadpool"]}
+
 [lints]
 workspace = true
 

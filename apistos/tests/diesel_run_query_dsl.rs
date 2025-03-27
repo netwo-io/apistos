@@ -13,8 +13,8 @@ struct ChangeAnalysisMethod {
 #[test]
 #[expect(
   clippy::print_stdout,
-  reason = "derive(ApiComponent) should not raise an error diesel::query_builder::Query` is not implemented for `&mut std::vec::Vec<serde_json::Value>"
+  reason = "derive(ApiComponent) Should not raise error diesel::query_builder::Query` is not implemented for `&mut std::vec::Vec<serde_json::Value>"
 )]
-fn could_build() {
+fn apistos_could_build_with_diesel_runquerydsl() {
   println!("ApiComponent can live with diesel_async::RunQueryDsl");
 }
