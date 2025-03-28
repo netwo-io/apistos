@@ -201,7 +201,7 @@ impl RouteWrapper {
         }
         OperationTypeDoc::AllMethods => {
           for path_item_type in METHODS {
-            operations.insert(path_item_type.clone(), operation.clone());
+            operations.insert(*path_item_type, operation.clone());
           }
         }
         OperationTypeDoc::Undocumented => {}
