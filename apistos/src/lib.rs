@@ -183,5 +183,6 @@ pub mod web;
 #[cfg(test)]
 mod test {
   use actix_web_lab as _;
+  use assert_json_diff as _;
   use garde_actix_web as _;
 }

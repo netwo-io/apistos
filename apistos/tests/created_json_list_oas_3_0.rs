@@ -11,10 +11,11 @@ use apistos::app::OpenApiWrapper;
 use apistos::spec::Spec;
 use apistos::web::{get, scope};
 use apistos_models::OpenApi;
+use assert_json_diff::assert_json_eq;
 use core::fmt::Formatter;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-
+use serde_json::json;
 use std::fmt::Display;
 
 #[actix_web::test]
@@ -60,33 +61,56 @@ async fn created_json_list() {
   assert!(resp.status().is_success());
 
   let body: OpenApi = try_read_body_json(resp).await.expect("Unable to read body");
-  let json_body = serde_json::to_value(&body).unwrap();
+  let json = serde_json::to_value(&body).unwrap();
 
-  let schema = json_body
-    .get("paths")
-    .unwrap()
-    .get("/test/test2")
-    .unwrap()
-    .get("get")
-    .unwrap()
-    .get("responses")
-    .unwrap()
-    .get("201")
-    .unwrap()
-    .get("content")
-    .unwrap()
-    .get("application/json")
-    .unwrap()
-    .get("schema")
-    .unwrap();
-  let Value::String(schema_type) = schema.get("type").unwrap() else {
-    panic!();
-  };
-  assert_eq!(schema_type, "array");
-  let Value::String(schema_vec_ref) = schema.get("items").unwrap().get("$ref").unwrap() else {
-    panic!();
-  };
-  assert_eq!(schema_vec_ref, "#/components/schemas/Test");
+  assert_json_eq!(
+    json,
+    json!({
+      "openapi": "3.0.3",
+      "info": {
+        "title": "",
+        "version": ""
+      },
+      "servers": [],
+      "paths": {
+        "/test/test2": {
+          "get": {
+            "tags": [
+              "pet"
+            ],
+            "operationId": "get_test-test2-82ec344dad380013ef60df45e872a141",
+            "responses": {
+              "201": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Test"
+                      }
+                    }
+                  }
+                }
+              },
+              "403": {
+                "description": "Forbidden"
+              }
+            },
+            "deprecated": false
+          }
+        }
+      },
+      "components": {
+        "schemas": {
+          "Test": {
+            "title": "Test",
+            "type": "string"
+          }
+        }
+      }
+    })
+  );
 }
 
 // Imports bellow aim at making clippy happy. Those dependencies are necessary for integration-test.
@@ -106,4 +130,3 @@ use log as _;
 use md5 as _;
 use once_cell as _;
 use regex as _;
-use serde_json::{self as _, Value};
