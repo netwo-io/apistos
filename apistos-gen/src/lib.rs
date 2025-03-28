@@ -119,7 +119,7 @@ pub fn derive_api_type(input: TokenStream) -> TokenStream {
           std::borrow::Cow::Borrowed(#component_name)
         }
 
-        fn json_schema(_gen: &mut schemars::gen::SchemaGenerator) -> apistos::Schema {
+        fn json_schema(_gen: &mut schemars::generate::SchemaGenerator) -> apistos::Schema {
           let instance_type = <Self as TypedSchema>::schema_type();
           match <Self as TypedSchema>::format() {
             Some(format) => apistos::Schema::try_from(schemars::_private::serde_json::json!({
