@@ -1,26 +1,18 @@
 use actix_web::App;
-
-use apistos::paths::OperationType;
-use apistos::web::{get, scope};
-
+use actix_web::ResponseError;
+use actix_web::http::StatusCode;
 use actix_web::test::{TestRequest, call_service, init_service, try_read_body_json};
+use apistos::ApiComponent;
+use apistos::ApiErrorComponent;
 use apistos::actix::CreatedJson;
+use apistos::api_operation;
 use apistos::app::OpenApiWrapper;
 use apistos::spec::Spec;
-use apistos::{ApiComponent, InstanceType, SingleOrVec};
+use apistos::web::{get, scope};
 use apistos_models::OpenApi;
-
-use actix_web::http::StatusCode;
-
-use actix_web::ResponseError;
-use apistos::ApiErrorComponent;
-
-use apistos::api_operation;
-
 use core::fmt::Formatter;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use std::ops::Deref;
 
 use std::fmt::Display;
 
@@ -64,43 +56,32 @@ async fn created_json_list() {
   assert!(resp.status().is_success());
 
   let body: OpenApi = try_read_body_json(resp).await.expect("Unable to read body");
-
-  let schema_for_reponse_201 = body
-    .paths
-    .paths
-    .get("/test/test2")
-    .cloned()
-    .unwrap_or_default()
-    .operations
-    .get(&OperationType::Get)
-    .cloned()
-    .unwrap_or_default()
-    .responses
-    .responses
-    .get("201")
-    .cloned()
+  let json_body = serde_json::to_value(&body).unwrap();
+  let schema = json_body
+    .get("paths")
     .unwrap()
-    .get_object()
-    .unwrap_or_default()
-    .content
+    .get("/test/test2")
+    .unwrap()
+    .get("get")
+    .unwrap()
+    .get("responses")
+    .unwrap()
+    .get("201")
+    .unwrap()
+    .get("content")
+    .unwrap()
     .get("application/json")
-    .cloned()
-    .unwrap_or_default()
-    .schema
+    .unwrap()
+    .get("schema")
     .unwrap();
-  let schema = schema_for_reponse_201.get_object().unwrap().into_object();
-  let instance_type = schema.instance_type.unwrap();
-  let SingleOrVec::Single(instance_type) = instance_type else {
-    panic!()
+  let Value::String(schema_type) = schema.get("type").unwrap() else {
+    panic!();
   };
-  assert_eq!(*instance_type, InstanceType::Array);
-  let SingleOrVec::Single(array) = schema.array.unwrap().items.unwrap() else {
-    panic!()
+  assert_eq!(schema_type, "array");
+  let Value::String(schema_vec_ref) = schema.get("items").unwrap().get("$ref").unwrap() else {
+    panic!();
   };
-  assert_eq!(
-    array.deref().clone().into_object().reference.unwrap(),
-    "#/components/schemas/Test".to_owned()
-  );
+  assert_eq!(schema_vec_ref, "#/components/schemas/Test");
 }
 
 // Imports bellow aim at making clippy happy. Those dependencies are necessary for integration-test.
@@ -120,4 +101,4 @@ use log as _;
 use md5 as _;
 use once_cell as _;
 use regex as _;
-use serde_json as _;
+use serde_json::{self as _, Value};
