@@ -135,7 +135,7 @@ where
 }
 
 fn response_from_schema(status: StatusCode, schema: Option<(String, ReferenceOr<Schema>)>) -> Option<Responses> {
-  schema.map(|(name, schema)| match schema {
+  schema.map(|(_name, schema)| match schema {
     ReferenceOr::Reference { _ref } => Responses {
       responses: BTreeMap::from_iter(vec![(status.as_str().to_string(), ReferenceOr::Reference { _ref })]),
       ..Default::default()
@@ -145,9 +145,7 @@ fn response_from_schema(status: StatusCode, schema: Option<(String, ReferenceOr<
         content: BTreeMap::from_iter(vec![(
           "application/json".to_string(),
           MediaType {
-            schema: Some(ReferenceOr::Reference {
-              _ref: format!("#/components/schemas/{}", name),
-            }),
+            schema: Some(schema),
             ..Default::default()
           },
         )]),

@@ -633,7 +633,18 @@ fn api_operation_created_json() {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/TestResult"
+                "properties": {
+                  "id": {
+                    "format": "uint32",
+                    "minimum": 0.0,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "id"
+                ],
+                "title": "TestResult",
+                "type": "object"
               }
             }
           },
@@ -807,7 +818,18 @@ fn api_operation_accepted_json() {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/TestResult"
+                "properties": {
+                  "id": {
+                    "format": "uint32",
+                    "minimum": 0.0,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "id"
+                ],
+                "title": "TestResult",
+                "type": "object"
               }
             }
           },
@@ -900,7 +922,18 @@ fn api_operation_deprecated() {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/TestResult"
+                "properties": {
+                  "id": {
+                    "format": "uint32",
+                    "minimum": 0.0,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "id"
+                ],
+                "title": "TestResult",
+                "type": "object"
               }
             }
           },
@@ -991,7 +1024,18 @@ fn api_operation_deprecated() {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/TestResult"
+                "properties": {
+                  "id": {
+                    "format": "uint32",
+                    "minimum": 0.0,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "id"
+                ],
+                "title": "TestResult",
+                "type": "object"
               }
             }
           },
@@ -1111,7 +1155,18 @@ fn api_operation_error() {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/TestResult"
+                "properties": {
+                  "id": {
+                    "format": "uint32",
+                    "minimum": 0.0,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "id"
+                ],
+                "title": "TestResult",
+                "type": "object"
               }
             }
           },
@@ -1223,7 +1278,18 @@ fn api_operation_security() {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/TestResult"
+                "properties": {
+                  "id": {
+                    "format": "uint32",
+                    "minimum": 0.0,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "id"
+                ],
+                "title": "TestResult",
+                "type": "object"
               }
             }
           },
