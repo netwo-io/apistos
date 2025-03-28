@@ -182,7 +182,6 @@ use apistos_rapidoc as _;
 use apistos_redoc as _;
 use apistos_scalar as _;
 use apistos_swagger_ui as _;
-use diesel_async as _;
 use futures_util as _;
 use garde_actix_web as _;
 use indexmap as _;
