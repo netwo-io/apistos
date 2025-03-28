@@ -9,16 +9,14 @@ pub fn response_from_schema(
   status: &str,
   schema: Option<(String, ReferenceOr<ApistosSchema>)>,
 ) -> Option<Responses> {
-  schema.map(|(name, schema)| match schema {
+  schema.map(|(_name, schema)| match schema {
     ReferenceOr::Reference { _ref } => Responses {
       responses: BTreeMap::from_iter(vec![(status.to_string(), ReferenceOr::Reference { _ref })]),
       ..Default::default()
     },
     ReferenceOr::Object(sch) => {
       let schema = match oas_version {
-        OpenApiVersion::OAS3_0 => VersionSpecificSchema::OAS3_0(ReferenceOr::Reference {
-          _ref: format!("#/components/schemas/{}", name),
-        }),
+        OpenApiVersion::OAS3_0 => VersionSpecificSchema::OAS3_0(ReferenceOr::Object(sch)),
         OpenApiVersion::OAS3_1 => VersionSpecificSchema::OAS3_1(sch),
       };
       let response = Response {
