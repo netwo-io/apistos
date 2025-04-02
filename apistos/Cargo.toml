@@ -39,6 +39,7 @@ apistos-swagger-ui = { path = "../apistos-swagger-ui", version = "0.5.0", option
 [dev-dependencies]
 actix-web-lab = { workspace = true }
 garde-actix-web = { workspace = true }
+assert-json-diff = { workspace = true }
 
 apistos-models = { path = "../apistos-models", version = "0.5.0", features = ["deserialize"] }
 apistos-rapidoc = { path = "../apistos-rapidoc", version = "0.5.0" }

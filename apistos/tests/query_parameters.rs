@@ -281,6 +281,7 @@ use apistos_rapidoc as _;
 use apistos_redoc as _;
 use apistos_scalar as _;
 use apistos_swagger_ui as _;
+use assert_json_diff as _;
 use futures_util as _;
 use indexmap as _;
 use log as _;
