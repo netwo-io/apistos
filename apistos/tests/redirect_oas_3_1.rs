@@ -6,8 +6,8 @@ use apistos::OpenApiVersion;
 use apistos::app::OpenApiWrapper;
 use apistos::spec::Spec;
 use apistos_models::OpenApi;
-
-#[allow(clippy::panic)]
+use assert_json_diff::assert_json_eq;
+use serde_json::json;
 #[actix_web::test]
 async fn actix_redirect_oas_3_1() {
   let app = App::new()
@@ -24,30 +24,281 @@ async fn actix_redirect_oas_3_1() {
   assert!(resp.status().is_success());
 
   let body: OpenApi = try_read_body_json(resp).await.expect("Unable to read body");
-  let json_body = serde_json::to_value(&body).unwrap();
-  let methods = json_body.get("paths").unwrap().get("/duck").unwrap();
-  let Value::Object(methods) = methods else {
-    panic!();
-  };
-  assert_eq!(methods.keys().len(), 7);
-  let response_307 = methods
-    .get("get")
-    .unwrap()
-    .get("responses")
-    .unwrap()
-    .get("307")
-    .unwrap();
-  let location_header = response_307.get("headers").unwrap().get("Location").unwrap();
-  let redirect_value = location_header
-    .get("content")
-    .unwrap()
-    .get("text/plain")
-    .unwrap()
-    .get("schema")
-    .unwrap()
-    .get("const")
-    .unwrap();
-  assert_eq!(redirect_value, &Value::String("https://duck.com".to_owned()))
+  let json = serde_json::to_value(&body).unwrap();
+  assert_json_eq!(
+    json,
+    json!({
+      "openapi": "3.1.0",
+      "info": {
+        "title": "",
+        "version": ""
+      },
+      "servers": [],
+      "paths": {
+        "/duck": {
+          "get": {
+            "operationId": "get_duck-1e3015160cf5faf17daf6c059ad0697d",
+            "responses": {
+              "default": {
+                "description": "Redirect.",
+                "headers": {
+                  "Location": {
+                    "description": "Redirection URL",
+                    "content": {
+                      "text/plain": {
+                        "schema": {
+                          "type": "string",
+                          "const": "https://duck.com"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "307": {
+                "description": "Redirect.",
+                "headers": {
+                  "Location": {
+                    "description": "Redirection URL",
+                    "content": {
+                      "text/plain": {
+                        "schema": {
+                          "type": "string",
+                          "const": "https://duck.com"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "put": {
+            "operationId": "put_duck-1e3015160cf5faf17daf6c059ad0697d",
+            "responses": {
+              "default": {
+                "description": "Redirect.",
+                "headers": {
+                  "Location": {
+                    "description": "Redirection URL",
+                    "content": {
+                      "text/plain": {
+                        "schema": {
+                          "type": "string",
+                          "const": "https://duck.com"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "307": {
+                "description": "Redirect.",
+                "headers": {
+                  "Location": {
+                    "description": "Redirection URL",
+                    "content": {
+                      "text/plain": {
+                        "schema": {
+                          "type": "string",
+                          "const": "https://duck.com"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "post": {
+            "operationId": "post_duck-1e3015160cf5faf17daf6c059ad0697d",
+            "responses": {
+              "default": {
+                "description": "Redirect.",
+                "headers": {
+                  "Location": {
+                    "description": "Redirection URL",
+                    "content": {
+                      "text/plain": {
+                        "schema": {
+                          "type": "string",
+                          "const": "https://duck.com"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "307": {
+                "description": "Redirect.",
+                "headers": {
+                  "Location": {
+                    "description": "Redirection URL",
+                    "content": {
+                      "text/plain": {
+                        "schema": {
+                          "type": "string",
+                          "const": "https://duck.com"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "delete": {
+            "operationId": "delete_duck-1e3015160cf5faf17daf6c059ad0697d",
+            "responses": {
+              "default": {
+                "description": "Redirect.",
+                "headers": {
+                  "Location": {
+                    "description": "Redirection URL",
+                    "content": {
+                      "text/plain": {
+                        "schema": {
+                          "type": "string",
+                          "const": "https://duck.com"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "307": {
+                "description": "Redirect.",
+                "headers": {
+                  "Location": {
+                    "description": "Redirection URL",
+                    "content": {
+                      "text/plain": {
+                        "schema": {
+                          "type": "string",
+                          "const": "https://duck.com"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "options": {
+            "operationId": "options_duck-1e3015160cf5faf17daf6c059ad0697d",
+            "responses": {
+              "default": {
+                "description": "Redirect.",
+                "headers": {
+                  "Location": {
+                    "description": "Redirection URL",
+                    "content": {
+                      "text/plain": {
+                        "schema": {
+                          "type": "string",
+                          "const": "https://duck.com"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "307": {
+                "description": "Redirect.",
+                "headers": {
+                  "Location": {
+                    "description": "Redirection URL",
+                    "content": {
+                      "text/plain": {
+                        "schema": {
+                          "type": "string",
+                          "const": "https://duck.com"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "head": {
+            "operationId": "head_duck-1e3015160cf5faf17daf6c059ad0697d",
+            "responses": {
+              "default": {
+                "description": "Redirect.",
+                "headers": {
+                  "Location": {
+                    "description": "Redirection URL",
+                    "content": {
+                      "text/plain": {
+                        "schema": {
+                          "type": "string",
+                          "const": "https://duck.com"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "307": {
+                "description": "Redirect.",
+                "headers": {
+                  "Location": {
+                    "description": "Redirection URL",
+                    "content": {
+                      "text/plain": {
+                        "schema": {
+                          "type": "string",
+                          "const": "https://duck.com"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "patch": {
+            "operationId": "patch_duck-1e3015160cf5faf17daf6c059ad0697d",
+            "responses": {
+              "default": {
+                "description": "Redirect.",
+                "headers": {
+                  "Location": {
+                    "description": "Redirection URL",
+                    "content": {
+                      "text/plain": {
+                        "schema": {
+                          "type": "string",
+                          "const": "https://duck.com"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "307": {
+                "description": "Redirect.",
+                "headers": {
+                  "Location": {
+                    "description": "Redirection URL",
+                    "content": {
+                      "text/plain": {
+                        "schema": {
+                          "type": "string",
+                          "const": "https://duck.com"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    })
+  );
 }
 
 // Imports bellow aim at making clippy happy. Those dependencies are necessary for integration-test.
@@ -69,4 +320,4 @@ use once_cell as _;
 use regex as _;
 use schemars as _;
 use serde as _;
-use serde_json::{self as _, Value};
+use serde_json as _;
