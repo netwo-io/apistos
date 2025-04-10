@@ -18,7 +18,7 @@ pub fn response_from_schema(
     ReferenceOr::Object(sch) => {
       let schema = match oas_version {
         OpenApiVersion::OAS3_0 => {
-          let is_array_schema = matches!(sch.inner().as_object().and_then(|obj| obj.get("type")), Some(Value::String(string)) if string == "Array");
+          let is_array_schema = matches!(sch.inner().as_object().and_then(|obj| obj.get("type")), Some(Value::String(string)) if string == "array");
           if is_array_schema {
             VersionSpecificSchema::OAS3_0(ReferenceOr::Object(ApistosSchema::new(json_schema!({
               "type": "array",

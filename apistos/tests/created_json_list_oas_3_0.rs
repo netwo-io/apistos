@@ -85,7 +85,10 @@ async fn created_json_list() {
                 "content": {
                   "application/json": {
                     "schema": {
-                      "$ref": "#/components/schemas/Test"
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Test"
+                      }
                     }
                   }
                 }
