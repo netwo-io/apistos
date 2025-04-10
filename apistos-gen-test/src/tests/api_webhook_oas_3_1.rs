@@ -76,7 +76,7 @@ mod test_models {
         .transpose()
         .map_err(|_e| ParseError::Header)?
         .map(|value| OrganizationSlug(value.to_string()))
-        .ok_or_else(|| ParseError::Header)
+        .ok_or(ParseError::Header)
     }
   }
 }
