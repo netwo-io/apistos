@@ -1,22 +1,37 @@
-use std::collections::BTreeMap;
-
 use apistos_models::paths::{MediaType, Response, Responses};
 use apistos_models::reference_or::ReferenceOr;
 use apistos_models::{ApistosSchema, OpenApiVersion, VersionSpecificSchema};
+use schemars::json_schema;
+use serde_json::Value;
+use std::collections::BTreeMap;
 
 pub fn response_from_schema(
   oas_version: OpenApiVersion,
   status: &str,
   schema: Option<(String, ReferenceOr<ApistosSchema>)>,
 ) -> Option<Responses> {
-  schema.map(|(_name, schema)| match schema {
+  schema.map(|(name, schema)| match schema {
     ReferenceOr::Reference { _ref } => Responses {
       responses: BTreeMap::from_iter(vec![(status.to_string(), ReferenceOr::Reference { _ref })]),
       ..Default::default()
     },
     ReferenceOr::Object(sch) => {
       let schema = match oas_version {
-        OpenApiVersion::OAS3_0 => VersionSpecificSchema::OAS3_0(ReferenceOr::Object(sch)),
+        OpenApiVersion::OAS3_0 => {
+          let is_array_schema = matches!(sch.inner().as_object().and_then(|obj| obj.get("type")), Some(Value::String(string)) if string == "Array");
+          if is_array_schema {
+            VersionSpecificSchema::OAS3_0(ReferenceOr::Object(ApistosSchema::new(json_schema!({
+              "type": "array",
+              "items": {
+                "$ref": format!("#/components/schemas/{}", name)
+              }
+            }), oas_version)))
+          } else {
+            VersionSpecificSchema::OAS3_0(ReferenceOr::Reference {
+              _ref: format!("#/components/schemas/{}", name),
+            })
+          }
+        },
         OpenApiVersion::OAS3_1 => VersionSpecificSchema::OAS3_1(sch),
       };
       let response = Response {
