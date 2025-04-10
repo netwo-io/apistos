@@ -39,23 +39,6 @@ async fn actix_redirect_oas_3_0() {
           "get": {
             "operationId": "get_duck-1e3015160cf5faf17daf6c059ad0697d",
             "responses": {
-              "default": {
-                "description": "Redirect.",
-                "headers": {
-                  "Location": {
-                    "description": "Redirection URL",
-                    "content": {
-                      "text/plain": {
-                        "schema": {
-                          "enum": [
-                            "https://duck.com"
-                          ]
-                        }
-                      }
-                    }
-                  }
-                }
-              },
               "307": {
                 "description": "Redirect.",
                 "headers": {
@@ -78,23 +61,6 @@ async fn actix_redirect_oas_3_0() {
           "put": {
             "operationId": "put_duck-1e3015160cf5faf17daf6c059ad0697d",
             "responses": {
-              "default": {
-                "description": "Redirect.",
-                "headers": {
-                  "Location": {
-                    "description": "Redirection URL",
-                    "content": {
-                      "text/plain": {
-                        "schema": {
-                          "enum": [
-                            "https://duck.com"
-                          ]
-                        }
-                      }
-                    }
-                  }
-                }
-              },
               "307": {
                 "description": "Redirect.",
                 "headers": {
@@ -117,23 +83,6 @@ async fn actix_redirect_oas_3_0() {
           "post": {
             "operationId": "post_duck-1e3015160cf5faf17daf6c059ad0697d",
             "responses": {
-              "default": {
-                "description": "Redirect.",
-                "headers": {
-                  "Location": {
-                    "description": "Redirection URL",
-                    "content": {
-                      "text/plain": {
-                        "schema": {
-                          "enum": [
-                            "https://duck.com"
-                          ]
-                        }
-                      }
-                    }
-                  }
-                }
-              },
               "307": {
                 "description": "Redirect.",
                 "headers": {
@@ -156,23 +105,6 @@ async fn actix_redirect_oas_3_0() {
           "delete": {
             "operationId": "delete_duck-1e3015160cf5faf17daf6c059ad0697d",
             "responses": {
-              "default": {
-                "description": "Redirect.",
-                "headers": {
-                  "Location": {
-                    "description": "Redirection URL",
-                    "content": {
-                      "text/plain": {
-                        "schema": {
-                          "enum": [
-                            "https://duck.com"
-                          ]
-                        }
-                      }
-                    }
-                  }
-                }
-              },
               "307": {
                 "description": "Redirect.",
                 "headers": {
@@ -195,23 +127,6 @@ async fn actix_redirect_oas_3_0() {
           "options": {
             "operationId": "options_duck-1e3015160cf5faf17daf6c059ad0697d",
             "responses": {
-              "default": {
-                "description": "Redirect.",
-                "headers": {
-                  "Location": {
-                    "description": "Redirection URL",
-                    "content": {
-                      "text/plain": {
-                        "schema": {
-                          "enum": [
-                            "https://duck.com"
-                          ]
-                        }
-                      }
-                    }
-                  }
-                }
-              },
               "307": {
                 "description": "Redirect.",
                 "headers": {
@@ -234,23 +149,6 @@ async fn actix_redirect_oas_3_0() {
           "head": {
             "operationId": "head_duck-1e3015160cf5faf17daf6c059ad0697d",
             "responses": {
-              "default": {
-                "description": "Redirect.",
-                "headers": {
-                  "Location": {
-                    "description": "Redirection URL",
-                    "content": {
-                      "text/plain": {
-                        "schema": {
-                          "enum": [
-                            "https://duck.com"
-                          ]
-                        }
-                      }
-                    }
-                  }
-                }
-              },
               "307": {
                 "description": "Redirect.",
                 "headers": {
@@ -273,23 +171,6 @@ async fn actix_redirect_oas_3_0() {
           "patch": {
             "operationId": "patch_duck-1e3015160cf5faf17daf6c059ad0697d",
             "responses": {
-              "default": {
-                "description": "Redirect.",
-                "headers": {
-                  "Location": {
-                    "description": "Redirection URL",
-                    "content": {
-                      "text/plain": {
-                        "schema": {
-                          "enum": [
-                            "https://duck.com"
-                          ]
-                        }
-                      }
-                    }
-                  }
-                }
-              },
               "307": {
                 "description": "Redirect.",
                 "headers": {

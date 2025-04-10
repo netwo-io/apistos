@@ -118,7 +118,6 @@ impl DefinitionHolder for Redirect {
           *method,
           Operation {
             responses: Responses {
-              default: Some(ReferenceOr::Object(response.clone())),
               responses: BTreeMap::from_iter(vec![(
                 self.code.as_u16().to_string(),
                 ReferenceOr::Object(response.clone()),
