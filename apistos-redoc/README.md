@@ -24,7 +24,7 @@ This crate is exposed through Apistos `redoc` feature.
 
 ```toml
 [dependencies]
-schemars = "1.0.0-alpha.14"
+schemars = "1.0.0-alpha.17"
 apistos = { version = "1.0.0-pre-release.9", feature = ["redoc"] }
 ```
 
