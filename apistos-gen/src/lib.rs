@@ -1064,8 +1064,23 @@ pub fn api_callback(attr: TokenStream, item: TokenStream) -> TokenStream {
 /// - `path = "path"`: Raw literal string with path for which to register handler.
 /// - `name = "resource_name"`: Specifies resource name for the handler. If not set, the function
 ///   name of handler is used.
-/// - `method = "HTTP_METHOD"`: Registers HTTP method to provide guard for. Upper-case string,
-///   "GET", "POST" for example.
+/// - `method(...)`: Registers HTTP method to provide guard for.
+///   - `method = "..."` Upper-case string, "GET", "POST" for example.
+///   - `operation_id = "..."` an optional operation id for this operation. Default is the handler's fn name.
+///   - `summary = "..."` an optional summary
+///   - `description = "..."` an optional description
+///   - `tag = "..."` an optional list of tags associated with this operation (define tag multiple times to add to the list)
+///   - `security_scope(...)` an optional list representing which security scopes apply for a given operation with
+///       - `name = "..."` a mandatory name referencing one of the security definitions
+///       - `scope(...)` a list of scopes applying to this operation
+///   - `error_code = 00` an optional list of error codes to document only theses
+///   - `consumes = "..."` allow to override body content type
+///   - `produces = "..."` allow to override response content type
+///   - `callbacks(...)` an optional list of callbacks attached to this operation
+///       - `name = "..."` a mandatory name for a set of callbacks
+///       - `callback(...)` a list of callback operation
+///         - `path = "..."` URL to use for the callback operation
+///         - `[verb] = ...` any of the http verbs with an associated function. The given function should be available in scope and be annotated with `api_operation`
 /// - `guard = "function_name"`: Registers function as guard using `actix_web::guard::fn_guard`.
 /// - `wrap = "Middleware"`: Registers a resource middleware.
 /// - `key = "value"` any [`api_operation`](https://docs.rs/apistos/latest/apistos/attr.api_operation.html) option
@@ -1075,7 +1090,7 @@ pub fn api_callback(attr: TokenStream, item: TokenStream) -> TokenStream {
 /// use actix_web::HttpResponse;
 /// use apistos::route;
 ///
-/// #[route("/test", method = "GET", method = "HEAD", method = "CUSTOM")]
+/// #[route(path = "/test", method(method = "GET"), method(method = "HEAD"), method(method = "CUSTOM"))]
 /// async fn example() -> HttpResponse {
 ///     HttpResponse::Ok().finish()
 /// }
@@ -1180,7 +1195,7 @@ pub fn route(attr: TokenStream, item: TokenStream) -> TokenStream {
 /// # Examples
 /// ```
 /// use actix_web::HttpResponse;
-/// use apistos::routes;
+/// use apistos::{routes, get, delete};
 ///
 /// #[routes]
 /// #[get(path = "/test")]
@@ -1459,11 +1474,13 @@ pub fn connect(attr: TokenStream, item: TokenStream) -> TokenStream {
 /// # Example
 ///
 /// ```
-/// use apistos::{scope, get};
-/// use actix_web::Responder;
+/// use apistos::scope;
 ///
 /// #[scope("/api")]
 /// mod api {
+///     use actix_web::Responder;
+///     use apistos::get;
+///
 ///     #[get(path = "/hello")]
 ///     pub async fn hello() -> impl Responder {
 ///         // this has path /api/hello

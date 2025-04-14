@@ -30,8 +30,8 @@ serde_json = { workspace = true }
 uuid = { workspace = true, features = ["v4"] }
 
 apistos = { path = "../apistos", features = ["multipart", "uuid"] }
-apistos-core = { path = "../apistos-core", version = "1.0.0-pre-release.9", features = ["actix-web-grants"] }
-apistos-gen = { path = "../apistos-gen", version = "1.0.0-pre-release.9", features = ["actix-web-macros"] }
+apistos-core = { path = "../apistos-core", features = ["actix-web-grants"] }
+apistos-gen = { path = "../apistos-gen", features = ["actix-web-macros"] }
 
 [lints]
 workspace = true

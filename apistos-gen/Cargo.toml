@@ -26,7 +26,7 @@ syn = { workspace = true, features = ["full", "extra-traits"] }
 garde = { workspace = true }
 schemars = { workspace = true }
 serde = { workspace = true }
-apistos = { path = "../apistos", version = "1.0.0-pre-release.9" }
+apistos = { path = "../apistos", features = ["actix-web-macros"] }
 
 [lints]
 workspace = true
