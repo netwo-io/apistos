@@ -799,7 +799,6 @@ fn api_component_derive_named_enums_deep() {
   let name_schema = <Query as ApiComponent>::schema(OpenApiVersion::OAS3_1);
   let name_child_schemas = <Query as ApiComponent>::child_schemas(OpenApiVersion::OAS3_1);
   assert!(name_schema.is_some());
-
   assert_eq!(name_child_schemas.len(), 5);
   let (schema_name, schema) = name_schema.expect("schema should be defined");
   assert_eq!(schema_name, "Query");

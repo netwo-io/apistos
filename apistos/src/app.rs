@@ -315,7 +315,8 @@ where
     let mut components = definition_holder
       .components(oas_version)
       .into_iter()
-      .chain(components).reduce(|mut acc, component| {
+      .chain(components)
+      .reduce(|mut acc, component| {
         acc.schemas.extend(component.schemas);
         acc.responses.extend(component.responses);
         acc.security_schemes.extend(component.security_schemes);
