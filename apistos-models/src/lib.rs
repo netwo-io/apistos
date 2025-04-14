@@ -15,16 +15,6 @@ pub use schemars::*;
 use serde::Serialize;
 use serde_json::Value;
 
-use std::collections::BTreeMap;
-use std::fmt::Debug;
-
-use indexmap::IndexMap;
-pub use schema::ApistosSchema;
-use schemars::generate::SchemaSettings;
-pub use schemars::*;
-use serde::Serialize;
-use serde_json::Value;
-
 use crate::components::Components;
 use crate::info::Info;
 use crate::paths::{ExternalDocumentation, PathItem, Paths};
@@ -132,10 +122,6 @@ pub enum VersionSpecificSchema {
 
 #[cfg(test)]
 mod test {
-  use std::collections::BTreeMap;
-
-  use indexmap::IndexMap;
-
   use std::collections::BTreeMap;
 
   use indexmap::IndexMap;
