@@ -745,10 +745,19 @@ fn api_component_derive_named_enums_deep() {
   }
 
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  #[schemars(rename_all = "snake_case")]
+  #[schemars(tag = "type", content = "c")]
+  pub(crate) enum Level4BisQuery {
+    Something(TestStuff),
+    Other(TestStuff),
+  }
+
+  #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
   pub(crate) struct ActiveOrInactiveQuery {
     pub(crate) id: u32,
     pub(crate) description: String,
     pub(crate) level4: Level4Query,
+    pub(crate) level4bis: Level4BisQuery,
   }
 
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
@@ -776,7 +785,8 @@ fn api_component_derive_named_enums_deep() {
   let name_schema = <Query as ApiComponent>::schema(OpenApiVersion::OAS3_0);
   let name_child_schemas = <Query as ApiComponent>::child_schemas(OpenApiVersion::OAS3_0);
   assert!(name_schema.is_some());
-  assert_eq!(name_child_schemas.len(), 5);
+
+  assert_eq!(name_child_schemas.len(), 7);
   let (schema_name, schema) = name_schema.expect("schema should be defined");
   assert_eq!(schema_name, "Query");
   assert_schema(&schema.clone());
@@ -906,12 +916,16 @@ fn api_component_derive_named_enums_deep() {
         },
         "level4": {
           "$ref": "#/components/schemas/Level4Query"
+        },
+        "level4bis": {
+          "$ref": "#/components/schemas/Level4BisQuery"
         }
       },
       "required": [
         "id",
         "description",
-        "level4"
+        "level4",
+        "level4bis"
       ],
       "type": "object"
     })
@@ -928,6 +942,48 @@ fn api_component_derive_named_enums_deep() {
     json!({
       "oneOf": [
         {
+          "title": "type",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "something"
+            }
+          },
+          "$ref": "#/components/schemas/TestStuff",
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "title": "type",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "other"
+            }
+          },
+          "$ref": "#/components/schemas/TestStuff",
+          "required": [
+            "type"
+          ]
+        }
+      ]
+    })
+  );
+
+  let (_, child_schema) = name_child_schemas
+    .iter()
+    .find(|(name, _)| name == "Level4BisQuery")
+    .expect("missing child schema");
+  assert_schema(&child_schema.clone());
+  let json = serde_json::to_value(child_schema).expect("Unable to serialize as Json");
+  assert_json_eq!(
+    json,
+    json!({
+      "oneOf": [
+        {
           "title": "something",
           "type": "object",
           "properties": {
@@ -935,13 +991,13 @@ fn api_component_derive_named_enums_deep() {
               "type": "string",
               "const": "something"
             },
-            "name": {
-              "type": "string"
+            "c": {
+              "$ref": "#/components/schemas/TestStuff"
             }
           },
           "required": [
             "type",
-            "name"
+            "c"
           ]
         },
         {
@@ -952,13 +1008,13 @@ fn api_component_derive_named_enums_deep() {
               "type": "string",
               "const": "other"
             },
-            "name": {
-              "type": "string"
+            "c": {
+              "$ref": "#/components/schemas/TestStuff"
             }
           },
           "required": [
             "type",
-            "name"
+            "c"
           ]
         }
       ]
