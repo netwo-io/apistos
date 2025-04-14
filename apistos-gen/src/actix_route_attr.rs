@@ -1,9 +1,9 @@
 use crate::operation_attr::{OperationAttr, OperationAttrInternal};
-use darling::ast::NestedMeta;
 use darling::FromMeta;
-use proc_macro2::TokenStream;
+use darling::ast::NestedMeta;
 use proc_macro_error2::abort;
-use quote::{quote, ToTokens};
+use proc_macro2::TokenStream;
+use quote::{ToTokens, quote};
 
 pub(crate) fn parse_actix_route_attrs(attrs: &[NestedMeta]) -> ActixRouteAttr {
   match ActixRouteAttrInternal::from_list(attrs) {

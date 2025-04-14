@@ -1,5 +1,5 @@
-use proc_macro2::{Span, TokenStream as TokenStream2};
 use proc_macro_error2::{abort, emit_error};
+use proc_macro2::{Span, TokenStream as TokenStream2};
 use quote::quote;
 
 use syn::{FnArg, Ident, ItemFn, Pat, ReturnType, Token, Type, TypeGenerics, TypeTraitObject};

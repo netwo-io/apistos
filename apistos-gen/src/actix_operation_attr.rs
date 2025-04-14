@@ -1,6 +1,6 @@
 use crate::operation_attr::{OperationAttr, OperationAttrInternal};
-use darling::ast::NestedMeta;
 use darling::FromMeta;
+use darling::ast::NestedMeta;
 use proc_macro_error2::abort;
 
 pub(crate) fn parse_actix_openapi_operation_attrs(attrs: &[NestedMeta], macro_identifier: &str) -> ActixOperationAttr {

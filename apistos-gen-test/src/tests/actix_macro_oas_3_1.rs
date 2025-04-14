@@ -8,8 +8,8 @@ use schemars::_private::serde_json::json;
 use std::collections::HashSet;
 use uuid::Uuid;
 
-use apistos::actix::{AcceptedJson, CreatedJson, NoContent};
 use apistos::OpenApiVersion;
+use apistos::actix::{AcceptedJson, CreatedJson, NoContent};
 use apistos_core::PathItemDefinition;
 use apistos_gen::get;
 

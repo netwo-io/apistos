@@ -1,4 +1,4 @@
-use actix_web::{guard::GuardContext, http, http::header, web, App, HttpResponse, Responder};
+use actix_web::{App, HttpResponse, Responder, guard::GuardContext, http, http::header, web};
 use apistos_gen::{delete, get, post, route, routes, scope};
 
 pub(crate) fn image_guard(ctx: &GuardContext<'_>) -> bool {

@@ -3,7 +3,7 @@ use crate::internal::extract_fn_arguments_types;
 use crate::internal::operation::Operation;
 use crate::operation_attr::OperationAttr;
 use proc_macro2::{Ident, TokenStream};
-use quote::{quote, ToTokens};
+use quote::{ToTokens, quote};
 use syn::{Expr, ImplGenerics, ItemFn, Lit, Meta, TypeGenerics, WhereClause};
 
 pub(crate) struct PathItem<'a> {
@@ -24,7 +24,7 @@ pub(crate) enum SourceDefinitionKind<'a> {
   },
 }
 
-impl<'a> ToTokens for PathItem<'a> {
+impl ToTokens for PathItem<'_> {
   fn to_tokens(&self, tokens: &mut TokenStream) {
     let openapi_struct = self.openapi_struct.clone();
     let path_item_def_impl = if self.operation_attribute.skip {

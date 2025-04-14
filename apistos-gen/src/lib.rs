@@ -4,7 +4,7 @@
 
 #[cfg(feature = "actix-web-macros")]
 use crate::actix_operation_attr::{
-  parse_actix_openapi_operation_attrs, ActixOperationAttr, ActixOperationAttrInternal,
+  ActixOperationAttr, ActixOperationAttrInternal, parse_actix_openapi_operation_attrs,
 };
 #[cfg(feature = "actix-web-macros")]
 use crate::actix_route_attr::parse_actix_route_attrs;
@@ -18,13 +18,13 @@ use crate::openapi_error_attr::parse_openapi_error_attrs;
 use crate::openapi_header_attr::parse_openapi_header_attrs;
 use crate::openapi_security_attr::parse_openapi_security_attrs;
 use crate::openapi_type_attr::parse_openapi_type_attrs;
-use crate::operation_attr::{parse_openapi_operation_attrs, ActixOperationTypePath, OperationType};
+use crate::operation_attr::{ActixOperationTypePath, OperationType, parse_openapi_operation_attrs};
 #[cfg(feature = "actix-web-macros")]
 use crate::utils::{method_from_attr_path, modify_attribute_with_scope};
 use crate::webhook_attr::parse_openapi_derive_webhook_attrs;
 use convert_case::{Case, Casing};
-use darling::Error;
 use darling::ast::NestedMeta;
+use darling::{Error, FromMeta};
 use proc_macro::TokenStream;
 use proc_macro_error2::{OptionExt, abort, proc_macro_error};
 use proc_macro2::Span;
@@ -1435,7 +1435,10 @@ pub fn scope(attr: TokenStream, item: TokenStream) -> TokenStream {
   if scope_prefix_value.ends_with('/') {
     // trailing slashes cause non-obvious problems
     // it's better to point them out to developers rather than
-    abort!(scope_prefix.span(), "scopes should not have trailing slashes; see https://docs.rs/actix-web/4/actix_web/struct.Scope.html#avoid-trailing-slashes")
+    abort!(
+      scope_prefix.span(),
+      "scopes should not have trailing slashes; see https://docs.rs/actix-web/4/actix_web/struct.Scope.html#avoid-trailing-slashes"
+    )
   }
 
   let mut module = match syn::parse::<syn::ItemMod>(item) {

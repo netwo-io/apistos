@@ -78,8 +78,8 @@ impl DefinitionHolder for ServiceConfig<'_> {
 }
 
 impl DefinitionHolder for Redirect {
-  fn operations(&mut self, oas_version: OpenApiVersion) -> IndexMap<OperationType, Operation> {
-    let mut index_map: IndexMap<OperationType, Operation> = IndexMap::new();
+  fn operations(&mut self, oas_version: OpenApiVersion) -> IndexMap<String, IndexMap<OperationType, Operation>> {
+    let mut operations_map: IndexMap<OperationType, Operation> = IndexMap::new();
     let methods = match self.code {
       StatusCode::TEMPORARY_REDIRECT | StatusCode::PERMANENT_REDIRECT => METHODS,
       StatusCode::SEE_OTHER => &[OperationType::Get],
@@ -89,7 +89,7 @@ impl DefinitionHolder for Redirect {
     if !methods.is_empty() {
       let response = self.get_open_api_response(oas_version);
       for method in methods {
-        index_map.insert(
+        operations_map.insert(
           *method,
           Operation {
             responses: Responses {
@@ -104,7 +104,7 @@ impl DefinitionHolder for Redirect {
         );
       }
     }
-    index_map
+    IndexMap::from_iter(vec![(self.path.clone(), operations_map)])
   }
 
   fn components(&mut self, _oas_version: OpenApiVersion) -> Vec<Components> {

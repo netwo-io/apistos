@@ -4,8 +4,8 @@ use crate::internal::gen_item_ast;
 use crate::internal::path_item::{PathItem, SourceDefinitionKind};
 use crate::operation_attr::{OperationAttr, OperationType};
 use proc_macro::TokenStream;
-use proc_macro2::{Ident, Span};
 use proc_macro_error2::abort;
+use proc_macro2::{Ident, Span};
 use quote::{format_ident, quote};
 use syn::{GenericParam, ItemFn};
 

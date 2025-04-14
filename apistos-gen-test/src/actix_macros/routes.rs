@@ -1,14 +1,14 @@
 use std::future::Future;
 
-use actix_utils::future::{ok, Ready};
+use actix_utils::future::{Ready, ok};
 use actix_web::{
+  App, Error, HttpRequest, HttpResponse, Responder,
   dev::{Service, ServiceRequest, ServiceResponse, Transform},
   http::{
-    self,
+    self, StatusCode,
     header::{HeaderName, HeaderValue},
-    StatusCode,
   },
-  web, App, Error, HttpRequest, HttpResponse, Responder,
+  web,
 };
 use apistos_gen::{connect, delete, get, head, options, patch, post, put, route, routes, trace};
 use futures_core::future::LocalBoxFuture;
@@ -133,7 +133,7 @@ async fn routes_overlapping_inaccessible_test(req: HttpRequest) -> impl Responde
   HttpResponse::Ok()
 }
 
-#[allow(unused_lifetimes)]
+#[allow(unused_lifetimes, clippy::extra_unused_lifetimes)]
 #[get(path = "/custom_resource_name", name = "custom")]
 async fn custom_resource_name_test<'a>(req: HttpRequest) -> impl Responder {
   assert!(req.url_for_static("custom").is_ok());
