@@ -26,10 +26,13 @@ syn = { workspace = true, features = ["full", "extra-traits"] }
 garde = { workspace = true }
 schemars = { workspace = true }
 serde = { workspace = true }
-apistos = { path = "../apistos" }
+apistos = { path = "../apistos", features = ["actix-web-macros"] }
 
 [lints]
 workspace = true
 
 [lib]
 proc-macro = true
+
+[features]
+actix-web-macros = []

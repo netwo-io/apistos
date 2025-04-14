@@ -2,26 +2,40 @@
 //!
 //! ⚠️ This crate is not indented to be used by itself. Please use [**apistos**](https://crates.io/crates/apistos) instead.
 
+#[cfg(feature = "actix-web-macros")]
+use crate::actix_operation_attr::{
+  ActixOperationAttr, ActixOperationAttrInternal, parse_actix_openapi_operation_attrs,
+};
+#[cfg(feature = "actix-web-macros")]
+use crate::actix_route_attr::parse_actix_route_attrs;
 use crate::callback_attr::parse_openapi_callback_attrs;
+use crate::internal::gen_item_ast;
+use crate::internal::path_item::{PathItem, SourceDefinitionKind};
 use crate::internal::schemas::Schemas;
 use crate::internal::utils::extract_deprecated_from_attr;
-use crate::internal::{gen_item_ast, gen_open_api_impl};
 use crate::openapi_cookie_attr::parse_openapi_cookie_attrs;
 use crate::openapi_error_attr::parse_openapi_error_attrs;
 use crate::openapi_header_attr::parse_openapi_header_attrs;
 use crate::openapi_security_attr::parse_openapi_security_attrs;
 use crate::openapi_type_attr::parse_openapi_type_attrs;
-use crate::operation_attr::parse_openapi_operation_attrs;
+use crate::operation_attr::{ActixOperationTypePath, OperationType, parse_openapi_operation_attrs};
+#[cfg(feature = "actix-web-macros")]
+use crate::utils::{method_from_attr_path, modify_attribute_with_scope};
 use crate::webhook_attr::parse_openapi_derive_webhook_attrs;
 use convert_case::{Case, Casing};
-use darling::Error;
 use darling::ast::NestedMeta;
+use darling::{Error, FromMeta};
 use proc_macro::TokenStream;
 use proc_macro_error2::{OptionExt, abort, proc_macro_error};
 use proc_macro2::Span;
 use quote::{format_ident, quote};
+use std::str::FromStr;
 use syn::{DeriveInput, GenericParam, Ident, ItemFn};
 
+#[cfg(feature = "actix-web-macros")]
+mod actix_operation_attr;
+#[cfg(feature = "actix-web-macros")]
+mod actix_route_attr;
 mod callback_attr;
 mod internal;
 mod openapi_cookie_attr;
@@ -30,6 +44,8 @@ mod openapi_header_attr;
 mod openapi_security_attr;
 mod openapi_type_attr;
 mod operation_attr;
+#[cfg(feature = "actix-web-macros")]
+mod utils;
 mod webhook_attr;
 
 const OPENAPI_STRUCT_PREFIX: &str = "__openapi_";
@@ -168,7 +184,7 @@ pub fn derive_api_type(input: TokenStream) -> TokenStream {
       }
     };
   )
-  .into()
+    .into()
 }
 
 /// Generates a reusable OpenAPI schema.
@@ -330,7 +346,7 @@ pub fn derive_api_security(input: TokenStream) -> TokenStream {
       }
     };
   )
-  .into()
+    .into()
 }
 
 /// Generates a reusable OpenAPI header schema.
@@ -812,22 +828,31 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
     quote!(struct #openapi_struct;)
   };
 
-  let (responder_wrapper, generated_item_ast) =
-    gen_item_ast(default_span, item_ast, &openapi_struct, &ty_generics, &generics_call);
+  let (responder_wrapper, generated_item_ast) = gen_item_ast(
+    default_span,
+    item_ast,
+    &openapi_struct,
+    Some(&ty_generics),
+    &generics_call,
+    false,
+  );
   let generated_item_fn = match syn::parse::<ItemFn>(generated_item_ast.clone().into()) {
     Ok(v) => v,
     Err(e) => abort!(e.span(), format!("{e}")),
   };
-  let open_api_def = gen_open_api_impl(
-    &generated_item_fn,
+
+  let open_api_def = PathItem {
+    source: SourceDefinitionKind::Apistos {
+      impl_generics,
+      ty_generics,
+      where_clause,
+      openapi_struct_def: &openapi_struct_def,
+    },
+    openapi_struct: &openapi_struct,
+    item_ast: &generated_item_fn,
     operation_attribute,
-    &openapi_struct,
-    &openapi_struct_def,
-    &impl_generics,
-    &ty_generics,
-    where_clause,
-    &responder_wrapper,
-  );
+    responder_wrapper: &responder_wrapper,
+  };
 
   quote!(
     #open_api_def
@@ -949,6 +974,493 @@ pub fn api_callback(attr: TokenStream, item: TokenStream) -> TokenStream {
     }
   )
   .into()
+}
+
+#[cfg(feature = "actix-web-macros")]
+/// Replacement for [actix-web route macro](https://docs.rs/actix-web/latest/actix_web/attr.route.html)
+///
+/// # Syntax
+/// ```plain
+/// #[route(path = "path", method="HTTP_METHOD"[, attributes])]
+/// ```
+///
+/// # Attributes
+/// - `path = "path"`: Raw literal string with path for which to register handler.
+/// - `name = "resource_name"`: Specifies resource name for the handler. If not set, the function
+///   name of handler is used.
+/// - `method(...)`: Registers HTTP method to provide guard for.
+///   - `method = "..."` Upper-case string, "GET", "POST" for example.
+///   - `operation_id = "..."` an optional operation id for this operation. Default is the handler's fn name.
+///   - `summary = "..."` an optional summary
+///   - `description = "..."` an optional description
+///   - `tag = "..."` an optional list of tags associated with this operation (define tag multiple times to add to the list)
+///   - `security_scope(...)` an optional list representing which security scopes apply for a given operation with
+///       - `name = "..."` a mandatory name referencing one of the security definitions
+///       - `scope(...)` a list of scopes applying to this operation
+///   - `error_code = 00` an optional list of error codes to document only theses
+///   - `consumes = "..."` allow to override body content type
+///   - `produces = "..."` allow to override response content type
+///   - `callbacks(...)` an optional list of callbacks attached to this operation
+///       - `name = "..."` a mandatory name for a set of callbacks
+///       - `callback(...)` a list of callback operation
+///         - `path = "..."` URL to use for the callback operation
+///         - `[verb] = ...` any of the http verbs with an associated function. The given function should be available in scope and be annotated with `api_operation`
+/// - `guard = "function_name"`: Registers function as guard using `actix_web::guard::fn_guard`.
+/// - `wrap = "Middleware"`: Registers a resource middleware.
+/// - `key = "value"` any [`api_operation`](https://docs.rs/apistos/latest/apistos/attr.api_operation.html) option
+///
+/// # Examples
+/// ```
+/// use actix_web::HttpResponse;
+/// use apistos::route;
+///
+/// #[route(path = "/test", method(method = "GET"), method(method = "HEAD"), method(method = "CUSTOM"))]
+/// async fn example() -> HttpResponse {
+///     HttpResponse::Ok().finish()
+/// }
+/// ```
+#[proc_macro_error]
+#[proc_macro_attribute]
+pub fn route(attr: TokenStream, item: TokenStream) -> TokenStream {
+  let item_ast = match syn::parse::<ItemFn>(item) {
+    Ok(v) => v,
+    Err(e) => abort!(e.span(), format!("Failed to part itemFn: {e}")),
+  };
+
+  let attr_args = match NestedMeta::parse_meta_list(attr.into()) {
+    Ok(v) => v,
+    Err(e) => {
+      return TokenStream::from(Error::from(e).write_errors());
+    }
+  };
+
+  let route_attribute = parse_actix_route_attrs(&attr_args);
+
+  let operations = route_attribute
+    .methods
+    .into_iter()
+    .map(|m| {
+      OperationType::from_str(&m.method).map(|operation_type| {
+        (
+          operation_type,
+          ActixOperationAttr {
+            path: route_attribute.path.clone(),
+            name: route_attribute.name.clone(),
+            guard: route_attribute.guard.clone(),
+            wrap: route_attribute.wrap.clone(),
+            operation: m.operation_attr,
+          },
+        )
+      })
+    })
+    .collect::<Result<Vec<_>, _>>();
+  let operations = match operations {
+    Ok(op) => op,
+    Err(e) => abort!(Span::call_site(), format!("{e}")),
+  };
+
+  let mut actix_methods = vec![];
+  for (operation, _) in &operations {
+    let operation_str = operation.to_string().to_uppercase();
+    actix_methods.push(quote!(#operation_str))
+  }
+
+  let operation_def = internal::actix_macros::gen_open_api_def_actix_routes_macro(operations, &item_ast);
+
+  let path = route_attribute.path;
+  let name = if let Some(name) = route_attribute.name {
+    quote!(name = #name,)
+  } else {
+    quote!()
+  };
+  let guard = if let Some(guard) = route_attribute.guard {
+    quote!(guard = #guard,)
+  } else {
+    quote!()
+  };
+  let wrap = if let Some(wrap) = route_attribute.wrap {
+    quote!(wrap = #wrap,)
+  } else {
+    quote!()
+  };
+
+  quote!(
+    #operation_def
+
+    #[::actix_web::route(
+      #path,
+      #name
+      #guard
+      #wrap
+      #(method = #actix_methods,)*
+    )]
+    #item_ast
+  )
+  .into()
+}
+
+#[cfg(feature = "actix-web-macros")]
+/// Replacement for [actix-web routes macro](https://docs.rs/actix-web/latest/actix_web/attr.routes.html)
+///
+/// # Syntax
+/// ```plain
+/// #[routes]
+/// #[<method>(path = "path", ...)]
+/// #[<method>(path = "path", ...)]
+/// ...
+/// ```
+///
+/// # Attributes
+/// The `routes` macro itself has no parameters, but allows specifying the attribute macros for
+/// the multiple paths and/or methods, e.g. [`GET`](get) and [`POST`](post).
+///
+/// These helper attributes take the same parameters as the single method macros.
+///
+/// # Examples
+/// ```
+/// use actix_web::HttpResponse;
+/// use apistos::{routes, get, delete};
+///
+/// #[routes]
+/// #[get(path = "/test")]
+/// #[get(path = "/test2")]
+/// #[delete(path = "/test")]
+/// async fn example() -> HttpResponse {
+///     HttpResponse::Ok().finish()
+/// }
+/// ```
+#[proc_macro_error]
+#[proc_macro_attribute]
+pub fn routes(_: TokenStream, item: TokenStream) -> TokenStream {
+  let mut item_ast = match syn::parse::<ItemFn>(item) {
+    Ok(v) => v,
+    Err(e) => abort!(e.span(), format!("Failed to part itemFn: {e}")),
+  };
+
+  let (operations, others) = item_ast
+    .attrs
+    .into_iter()
+    .map(|attr| (method_from_attr_path(attr.path()), attr))
+    .partition::<Vec<_>, _>(|(operation, _)| operation.is_some());
+
+  item_ast.attrs = others.into_iter().map(|(_, attr)| attr).collect();
+
+  let operations = operations
+    .into_iter()
+    .filter_map(|(operation_type, attr)| operation_type.map(|ot| (ot, attr)))
+    .map(|(operation_type, attr)| {
+      ActixOperationAttrInternal::from_meta(&attr.meta)
+        .map(|actix_operation_attr| (operation_type, actix_operation_attr.into()))
+    })
+    .collect::<Result<Vec<_>, _>>();
+  let operations: Vec<(OperationType, ActixOperationAttr)> = match operations {
+    Ok(methods) if methods.is_empty() => {
+      abort!(
+        Span::call_site(),
+        "The #[routes] macro requires at least one `#[<method>(..)]` attribute."
+      );
+    }
+    Ok(methods) => methods,
+    Err(err) => abort!(err.span(), format!("Error parsing #[routes] child macros: {err:?}")),
+  };
+
+  let mut actix_macros = quote!();
+  for (operation_type, operation_attr) in &operations {
+    let actix_operation_type_path: ActixOperationTypePath = match operation_type.clone().try_into() {
+      Ok(op) => op,
+      Err(e) => abort!(Span::call_site(), format!("{e}")),
+    };
+    let path = operation_attr.path.clone();
+
+    let name = if let Some(name) = operation_attr.name.clone() {
+      quote!(name = #name,)
+    } else {
+      quote!()
+    };
+    let guard = if let Some(guard) = operation_attr.guard.clone() {
+      quote!(guard = #guard,)
+    } else {
+      quote!()
+    };
+    let wrap = if let Some(wrap) = operation_attr.wrap.clone() {
+      quote!(wrap = #wrap,)
+    } else {
+      quote!()
+    };
+
+    actix_macros.extend(quote!(
+      #[#actix_operation_type_path(#path, #name #guard #wrap)]
+    ));
+  }
+  let operation_def = internal::actix_macros::gen_open_api_def_actix_routes_macro(operations, &item_ast);
+
+  quote!(
+    #operation_def
+
+    #[::actix_web::routes]
+    #actix_macros
+    #item_ast
+  )
+  .into()
+}
+
+#[cfg(feature = "actix-web-macros")]
+macro_rules! actix_method_macro {
+    ($variant:ident, $method:ident) => {
+        #[doc = concat!("Replacement for [actix-web ", stringify!($variant), " macro](https://docs.rs/actix-web/latest/actix_web/attr.", stringify!($variant), ".html)")]
+        ///
+        /// # Syntax
+        /// ```plain
+        #[doc = concat!("#[", stringify!($method), r#"(path = "path"[, attributes])]"#)]
+        /// ```
+        ///
+        /// # Attributes
+        /// - `path = "path"`: Raw literal string with path for which to register handler.
+        /// - `name = "resource_name"`: Specifies resource name for the handler. If not set, the
+        ///   function name of handler is used.
+        /// - `guard = "function_name"`: Registers function as guard using `actix_web::guard::fn_guard`.
+        /// - `wrap = "Middleware"`: Registers a resource middleware.
+        ///  - `key = "value"` any [`api_operation`](https://docs.rs/apistos/latest/apistos/attr.api_operation.html) option
+        ///
+        /// # Examples
+        /// ```
+        /// use actix_web::HttpResponse;
+        #[doc = concat!("use apistos::", stringify!($method), ";")]
+        ///
+        #[doc = concat!("#[", stringify!($method), r#"(path = "/")]"#)]
+        /// async fn example() -> HttpResponse {
+        ///     HttpResponse::Ok().finish()
+        /// }
+        /// ```
+        #[proc_macro_error]
+        #[proc_macro_attribute]
+        pub fn $method(attr: TokenStream, item: TokenStream) -> TokenStream {
+            let attr_args = match NestedMeta::parse_meta_list(attr.into()) {
+              Ok(v) => v,
+              Err(e) => {
+                return TokenStream::from(Error::from(e).write_errors());
+              }
+            };
+            let operation_attribute = parse_actix_openapi_operation_attrs(&attr_args, stringify!($method));
+            let path = operation_attribute.path;
+            let name = if let Some(name) = operation_attribute.name {
+              quote!(name = #name,)
+            } else {
+              quote!()
+            };
+            let guard = if let Some(guard) = operation_attribute.guard {
+              quote!(guard = #guard,)
+            } else {
+              quote!()
+            };
+            let wrap = if let Some(wrap) = operation_attribute.wrap {
+              quote!(wrap = #wrap,)
+            } else {
+              quote!()
+            };
+
+            internal::actix_macros::gen_open_api_def_actix_macro(
+              operation_attribute.operation,
+              item,
+              &quote!{#[::actix_web::$method(#path, #name #guard #wrap)]},
+              &path,
+              &OperationType::$variant,
+            ).into()
+        }
+    };
+}
+
+#[cfg(feature = "actix-web-macros")]
+actix_method_macro!(Get, get);
+#[cfg(feature = "actix-web-macros")]
+actix_method_macro!(Post, post);
+#[cfg(feature = "actix-web-macros")]
+actix_method_macro!(Put, put);
+#[cfg(feature = "actix-web-macros")]
+actix_method_macro!(Delete, delete);
+#[cfg(feature = "actix-web-macros")]
+actix_method_macro!(Head, head);
+#[cfg(feature = "actix-web-macros")]
+actix_method_macro!(Options, options);
+#[cfg(feature = "actix-web-macros")]
+actix_method_macro!(Trace, trace);
+#[cfg(feature = "actix-web-macros")]
+actix_method_macro!(Patch, patch);
+
+#[cfg(feature = "actix-web-macros")]
+/// Replacement for [actix-web connect macro](https://docs.rs/actix-web/latest/actix_web/attr.connect.html)")]
+///
+/// # Syntax
+/// ```plain
+/// #[connect(path = "path"[, attributes])]
+/// ```
+///
+/// # Attributes
+/// - `path = "path"`: Raw literal string with path for which to register handler.
+/// - `name = "resource_name"`: Specifies resource name for the handler. If not set, the
+///   function name of handler is used.
+/// - `guard = "function_name"`: Registers function as guard using `actix_web::guard::fn_guard`.
+/// - `wrap = "Middleware"`: Registers a resource middleware.
+///  - `key = "value"` any [`api_operation`](https://docs.rs/apistos/latest/apistos/attr.api_operation.html) option
+///
+/// # Examples
+/// ```
+/// use actix_web::HttpResponse;
+/// use apistos::connect;
+///
+/// #[connect(path = "/")]
+/// async fn example() -> HttpResponse {
+///     HttpResponse::Ok().finish()
+/// }
+/// ```
+#[proc_macro_error]
+#[proc_macro_attribute]
+pub fn connect(attr: TokenStream, item: TokenStream) -> TokenStream {
+  let attr_args = match NestedMeta::parse_meta_list(attr.into()) {
+    Ok(v) => v,
+    Err(e) => {
+      return TokenStream::from(Error::from(e).write_errors());
+    }
+  };
+  let operation_attribute = parse_actix_openapi_operation_attrs(&attr_args, "connect");
+  let path = operation_attribute.path;
+  let name = if let Some(name) = operation_attribute.name {
+    quote!(name = #name,)
+  } else {
+    quote!()
+  };
+  let guard = if let Some(guard) = operation_attribute.guard {
+    quote!(guard = #guard,)
+  } else {
+    quote!()
+  };
+  let wrap = if let Some(wrap) = operation_attribute.wrap {
+    quote!(wrap = #wrap,)
+  } else {
+    quote!()
+  };
+
+  let item_ast = match syn::parse::<ItemFn>(item) {
+    Ok(v) => v,
+    Err(e) => abort!(e.span(), format!("{e}")),
+  };
+  let openapi_struct = &item_ast.sig.ident;
+
+  let definition_holder_impl = quote!(
+    #[automatically_derived]
+    impl ::apistos::DefinitionHolder for #openapi_struct {
+      fn operations(&mut self, _oas_version: apistos::OpenApiVersion) -> apistos::IndexMap<String, apistos::IndexMap<apistos::paths::OperationType, apistos::paths::Operation>> {
+        apistos::IndexMap::default()
+      }
+      fn components(&mut self, _oas_version: apistos::OpenApiVersion) -> Vec<apistos::components::Components> {
+        Default::default()
+      }
+    }
+  );
+
+  let open_api_def = quote!(
+    #[automatically_derived]
+    impl apistos::PathItemDefinition for #openapi_struct {
+      fn is_visible() -> bool {
+        false
+      }
+    }
+  );
+
+  quote!(
+    #open_api_def
+
+    #definition_holder_impl
+    #[::actix_web::connect(#path, #name #guard #wrap)]
+    #item_ast
+  )
+  .into()
+}
+
+#[cfg(feature = "actix-web-macros")]
+/// Drop in replacement for [actix-web scope macro](https://docs.rs/actix-web/latest/actix_web/attr.scope.html)")]
+///
+/// # Syntax
+///
+/// ```
+/// use apistos::scope;
+///
+/// #[scope("/prefix")]
+/// mod api {
+///     // ...
+/// }
+/// ```
+///
+/// # Arguments
+///
+/// - `"/prefix"` - Raw literal string to be prefixed onto contained handlers' paths.
+///
+/// # Example
+///
+/// ```
+/// use apistos::scope;
+///
+/// #[scope("/api")]
+/// mod api {
+///     use actix_web::Responder;
+///     use apistos::get;
+///
+///     #[get(path = "/hello")]
+///     pub async fn hello() -> impl Responder {
+///         // this has path /api/hello
+///         "Hello, world!"
+///     }
+/// }
+/// # fn main() {}
+/// ```
+#[proc_macro_error]
+#[proc_macro_attribute]
+pub fn scope(attr: TokenStream, item: TokenStream) -> TokenStream {
+  if attr.is_empty() {
+    abort!(
+      Span::call_site(),
+      "missing arguments for scope macro, expected: #[scope(\"/prefix\")]",
+    )
+  }
+
+  let scope_prefix = match syn::parse::<syn::LitStr>(attr.clone()) {
+    Ok(v) => v,
+    Err(e) => abort!(
+      e.span(),
+      "argument to scope macro is not a string literal, expected: #[scope(\"/prefix\")]"
+    ),
+  };
+  let scope_prefix_value = scope_prefix.value();
+
+  if scope_prefix_value.ends_with('/') {
+    // trailing slashes cause non-obvious problems
+    // it's better to point them out to developers rather than
+    abort!(
+      scope_prefix.span(),
+      "scopes should not have trailing slashes; see https://docs.rs/actix-web/4/actix_web/struct.Scope.html#avoid-trailing-slashes"
+    )
+  }
+
+  let mut module = match syn::parse::<syn::ItemMod>(item) {
+    Ok(v) => v,
+    Err(e) => abort!(e.span(), "#[scope] macro must be attached to a module"),
+  };
+
+  // modify any routing macros (method or route[s]) attached to
+  // functions by prefixing them with this scope macro's argument
+  if let Some((_, items)) = &mut module.content {
+    for item in items {
+      if let syn::Item::Fn(fun) = item {
+        fun.attrs = fun
+          .attrs
+          .iter()
+          .map(|attr| modify_attribute_with_scope(attr, &scope_prefix_value))
+          .collect();
+      }
+    }
+  }
+
+  quote!(#module).into()
 }
 
 // Imports bellow aim at making clippy happy. Those dependencies are necessary for doc-test.

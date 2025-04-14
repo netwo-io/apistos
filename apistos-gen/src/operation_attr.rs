@@ -5,6 +5,9 @@ use proc_macro_error2::abort;
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{ToTokens, quote};
 use std::collections::BTreeMap;
+use std::convert::Infallible;
+use std::fmt::{Display, Formatter};
+use std::str::FromStr;
 
 pub(crate) fn parse_openapi_operation_attrs(attrs: &[NestedMeta]) -> OperationAttr {
   match OperationAttrInternal::from_list(attrs) {
@@ -14,7 +17,7 @@ pub(crate) fn parse_openapi_operation_attrs(attrs: &[NestedMeta]) -> OperationAt
 }
 
 #[derive(FromMeta, Clone)]
-struct OperationAttrInternal {
+pub(crate) struct OperationAttrInternal {
   #[darling(default)]
   skip: bool,
   #[darling(default)]
@@ -36,11 +39,66 @@ struct OperationAttrInternal {
   callbacks: Vec<NamedOperationCallbackInternal>,
 }
 
+#[cfg(feature = "actix-web-macros")]
+impl ToTokens for OperationAttrInternal {
+  fn to_tokens(&self, tokens: &mut TokenStream) {
+    let OperationAttrInternal {
+      skip,
+      deprecated,
+      operation_id,
+      summary,
+      description,
+      tags,
+      scopes,
+      error_codes,
+      consumes,
+      produces,
+      skip_args,
+      callbacks,
+    } = self;
+    let operation_id = operation_id
+      .clone()
+      .map(|v| quote!(operation_id = #v, ))
+      .unwrap_or_default();
+    let summary = summary.clone().map(|v| quote!(summary = #v, )).unwrap_or_default();
+    let description = description
+      .clone()
+      .map(|v| quote!(description = #v, ))
+      .unwrap_or_default();
+    let consumes = consumes.clone().map(|v| quote!(consumes = #v, )).unwrap_or_default();
+    let produces = produces.clone().map(|v| quote!(produces = #v, )).unwrap_or_default();
+    let error_codes: Vec<String> = error_codes.iter().map(ToString::to_string).collect();
+
+    tokens.extend(quote!(
+      skip = #skip,
+      deprecated = #deprecated,
+      #operation_id
+      #summary
+      #description
+      #(tag = #tags,)*
+      #(#scopes,)*
+      #(error_code = #error_codes,)*
+      #consumes
+      #produces
+      #(skip_args = #skip_args,)*
+      #(#callbacks,)*
+    ))
+  }
+}
+
 #[derive(FromMeta, Clone)]
 struct NamedOperationCallbackInternal {
   name: String,
   #[darling(multiple)]
   callback: Vec<OperationCallbackInternal>,
+}
+
+#[cfg(feature = "actix-web-macros")]
+impl ToTokens for NamedOperationCallbackInternal {
+  fn to_tokens(&self, tokens: &mut TokenStream) {
+    let NamedOperationCallbackInternal { name, callback } = self;
+    tokens.extend(quote!(callbacks(name = #name, #(#callback,)*)))
+  }
 }
 
 #[derive(FromMeta, Clone)]
@@ -56,11 +114,56 @@ struct OperationCallbackInternal {
   trace: Option<Ident>,
 }
 
+#[cfg(feature = "actix-web-macros")]
+impl ToTokens for OperationCallbackInternal {
+  fn to_tokens(&self, tokens: &mut TokenStream) {
+    let OperationCallbackInternal {
+      path,
+      get,
+      put,
+      post,
+      delete,
+      options,
+      head,
+      patch,
+      trace,
+    } = self;
+
+    let get = get.clone().map(|m| quote!(get = #m, )).unwrap_or_default();
+    let put = put.clone().map(|m| quote!(put = #m, )).unwrap_or_default();
+    let post = post.clone().map(|m| quote!(post = #m, )).unwrap_or_default();
+    let delete = delete.clone().map(|m| quote!(delete = #m, )).unwrap_or_default();
+    let options = options.clone().map(|m| quote!(options = #m, )).unwrap_or_default();
+    let head = head.clone().map(|m| quote!(head = #m, )).unwrap_or_default();
+    let patch = patch.clone().map(|m| quote!(patch = #m, )).unwrap_or_default();
+    let trace = trace.clone().map(|m| quote!(trace = #m, )).unwrap_or_default();
+    tokens.extend(quote!(callback(
+      path = #path,
+      #get
+      #put
+      #post
+      #delete
+      #options
+      #head
+      #patch
+      #trace
+    )))
+  }
+}
+
 #[derive(FromMeta, Clone)]
 struct SecurityScopes {
   name: String,
   #[darling(multiple, rename = "scope")]
   scopes: Vec<String>,
+}
+
+#[cfg(feature = "actix-web-macros")]
+impl ToTokens for SecurityScopes {
+  fn to_tokens(&self, tokens: &mut TokenStream) {
+    let SecurityScopes { name, scopes } = self;
+    tokens.extend(quote!(security_scope(name = #name, #(scope = #scopes, )*)))
+  }
 }
 
 pub(crate) struct OperationCallbacks {
@@ -159,7 +262,7 @@ impl From<OperationAttrInternal> for OperationAttr {
   }
 }
 
-#[derive(Ord, PartialOrd, Eq, PartialEq)]
+#[derive(Ord, PartialOrd, Eq, PartialEq, Clone)]
 pub(crate) enum OperationType {
   Get,
   Put,
@@ -169,6 +272,8 @@ pub(crate) enum OperationType {
   Head,
   Patch,
   Trace,
+  Connect,
+  Custom(String),
 }
 
 impl ToTokens for OperationType {
@@ -182,6 +287,91 @@ impl ToTokens for OperationType {
       OperationType::Head => tokens.extend(quote!(apistos::paths::OperationType::Head)),
       OperationType::Patch => tokens.extend(quote!(apistos::paths::OperationType::Patch)),
       OperationType::Trace => tokens.extend(quote!(apistos::paths::OperationType::Trace)),
+      OperationType::Connect => {}
+      OperationType::Custom(_) => {}
+    }
+  }
+}
+
+impl FromStr for OperationType {
+  type Err = Infallible;
+
+  fn from_str(s: &str) -> Result<Self, Self::Err> {
+    match s.to_lowercase().as_str() {
+      "get" => Ok(OperationType::Get),
+      "put" => Ok(OperationType::Put),
+      "post" => Ok(OperationType::Post),
+      "delete" => Ok(OperationType::Delete),
+      "options" => Ok(OperationType::Options),
+      "head" => Ok(OperationType::Head),
+      "patch" => Ok(OperationType::Patch),
+      "trace" => Ok(OperationType::Trace),
+      str => Ok(OperationType::Custom(str.to_string())),
+    }
+  }
+}
+
+impl Display for OperationType {
+  fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    match self {
+      OperationType::Get => write!(f, "get"),
+      OperationType::Put => write!(f, "put"),
+      OperationType::Post => write!(f, "post"),
+      OperationType::Delete => write!(f, "delete"),
+      OperationType::Options => write!(f, "options"),
+      OperationType::Head => write!(f, "head"),
+      OperationType::Patch => write!(f, "patch"),
+      OperationType::Trace => write!(f, "trace"),
+      OperationType::Connect => write!(f, "connect"),
+      OperationType::Custom(op) => write!(f, "{op}"),
+    }
+  }
+}
+
+#[derive(Ord, PartialOrd, Eq, PartialEq, Clone, Copy)]
+pub(crate) enum ActixOperationTypePath {
+  Get,
+  Put,
+  Post,
+  Delete,
+  Options,
+  Head,
+  Patch,
+  Trace,
+  Connect,
+}
+
+impl ToTokens for ActixOperationTypePath {
+  fn to_tokens(&self, tokens: &mut TokenStream) {
+    match self {
+      ActixOperationTypePath::Get => tokens.extend(quote!(get)),
+      ActixOperationTypePath::Put => tokens.extend(quote!(put)),
+      ActixOperationTypePath::Post => tokens.extend(quote!(post)),
+      ActixOperationTypePath::Delete => tokens.extend(quote!(delete)),
+      ActixOperationTypePath::Options => tokens.extend(quote!(options)),
+      ActixOperationTypePath::Head => tokens.extend(quote!(head)),
+      ActixOperationTypePath::Patch => tokens.extend(quote!(patch)),
+      ActixOperationTypePath::Trace => tokens.extend(quote!(trace)),
+      ActixOperationTypePath::Connect => tokens.extend(quote!(connect)),
+    }
+  }
+}
+
+impl TryFrom<OperationType> for ActixOperationTypePath {
+  type Error = syn::Error;
+
+  fn try_from(value: OperationType) -> Result<Self, Self::Error> {
+    match value {
+      OperationType::Get => Ok(Self::Get),
+      OperationType::Put => Ok(Self::Put),
+      OperationType::Post => Ok(Self::Post),
+      OperationType::Delete => Ok(Self::Delete),
+      OperationType::Options => Ok(Self::Options),
+      OperationType::Head => Ok(Self::Head),
+      OperationType::Patch => Ok(Self::Patch),
+      OperationType::Trace => Ok(Self::Trace),
+      OperationType::Connect => Ok(Self::Connect),
+      OperationType::Custom(_) => Err(syn::Error::new(Span::call_site(), "Custom operation type found")),
     }
   }
 }

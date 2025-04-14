@@ -2,6 +2,7 @@ use crate::internal::actix::route::{Route, RouteWrapper};
 use crate::internal::actix::service_config::ServiceConfig;
 use crate::internal::actix::utils::OperationUpdater;
 use crate::internal::definition_holder::DefinitionHolder;
+use crate::internal::get_oas_version;
 use actix_service::{ServiceFactory, Transform};
 use actix_web::Error;
 use actix_web::body::MessageBody;
@@ -174,10 +175,11 @@ where
   }
 
   fn update_from_def_holder<D: DefinitionHolder>(&mut self, dh: &mut D) {
+    let oas_version = get_oas_version();
     let mut item_map: IndexMap<String, PathItem> = IndexMap::new();
-    dh.update_path_items(&mut item_map);
+    dh.update_path_items(oas_version, &mut item_map);
 
-    self.components.extend(dh.components());
+    self.components.extend(dh.components(oas_version));
 
     for (path, mut path_item) in item_map {
       let p = [self.path.clone(), path]

@@ -161,6 +161,8 @@ pub use apistos_gen::{
   ApiComponent, ApiCookie, ApiErrorComponent, ApiHeader, ApiSecurity, ApiType, ApiWebhookComponent, api_callback,
   api_operation,
 };
+#[cfg(feature = "actix-web-macros")]
+pub use apistos_gen::{connect, delete, get, head, options, patch, post, put, route, routes, scope, trace};
 pub use apistos_models::*;
 #[cfg(feature = "rapidoc")]
 pub use apistos_rapidoc::RapidocConfig;
@@ -171,6 +173,7 @@ pub use apistos_scalar::ScalarConfig;
 #[cfg(feature = "swagger-ui")]
 pub use apistos_swagger_ui::SwaggerUIConfig;
 pub use futures_util::future::FutureExt;
+pub use internal::definition_holder::*;
 
 mod internal;
 
