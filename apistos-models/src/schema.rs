@@ -250,37 +250,31 @@ mod test {
       json!({
         "oneOf": [
           {
-            "title": "Test",
+            "title": "type",
             "type": "object",
             "properties": {
               "type": {
                 "type": "string",
                 "const": "Test"
-              },
-              "name": {
-                "type": "string"
               }
             },
+            "$ref": "#/components/schemas/TestStruct",
             "required": [
-              "type",
-              "name"
+              "type"
             ]
           },
           {
-            "title": "Test2",
+            "title": "type",
             "type": "object",
             "properties": {
               "type": {
                 "type": "string",
                 "const": "Test2"
-              },
-              "surname": {
-                "type": "string"
               }
             },
+            "$ref": "#/components/schemas/TestStruct2",
             "required": [
-              "type",
-              "surname"
+              "type"
             ]
           }
         ]
@@ -403,37 +397,31 @@ mod test {
       json!({
         "oneOf": [
           {
-            "title": "Test",
+            "title": "type",
             "type": "object",
             "properties": {
               "type": {
                 "type": "string",
                 "const": "Test"
-              },
-              "name": {
-                "type": "string"
               }
             },
+            "$ref": "#/$defs/TestStruct",
             "required": [
-              "type",
-              "name"
+              "type"
             ]
           },
           {
-            "title": "Test2",
+            "title": "type",
             "type": "object",
             "properties": {
               "type": {
                 "type": "string",
                 "const": "Test2"
-              },
-              "surname": {
-                "type": "string"
               }
             },
+            "$ref": "#/$defs/TestStruct2",
             "required": [
-              "type",
-              "surname"
+              "type"
             ]
           }
         ]
