@@ -66,6 +66,7 @@ actix-web-grants = ["apistos-core/actix-web-grants"]
 
 # extra types related features
 chrono = ["apistos-core/chrono"]
+ipnetwork_0_20 = ["apistos-core/ipnetwork_0_20"]
 ipnetwork = ["apistos-core/ipnetwork"]
 multipart = ["apistos-core/multipart"]
 rust_decimal = ["apistos-core/rust_decimal"]

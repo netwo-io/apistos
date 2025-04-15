@@ -2,6 +2,8 @@ pub(crate) mod custom;
 
 #[cfg(feature = "ipnetwork")]
 pub use custom::ipnetwork;
+#[cfg(feature = "ipnetwork_0_20")]
+pub use custom::ipnetwork_20;
 
 #[cfg(feature = "actix")]
 pub mod empty;
