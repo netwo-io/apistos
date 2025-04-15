@@ -71,7 +71,8 @@ impl ToTokens for PathItem<'_> {
         .into_iter()
         .skip(1)
         .collect::<Vec<String>>()
-        .join("\\\n");
+        .join("\n")
+        .replace("\\n", "\n");
 
       let operation = Operation {
         args: &args,

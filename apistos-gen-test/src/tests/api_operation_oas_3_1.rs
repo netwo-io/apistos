@@ -146,7 +146,7 @@ fn api_operation() {
         "pet"
       ],
       "summary": "Add a new pet to the store",
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -239,7 +239,7 @@ fn api_operation_impl_responder() {
         "pet"
       ],
       "summary": "Add a new pet to the store",
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -281,7 +281,7 @@ fn api_operation_impl_responder() {
         "pet"
       ],
       "summary": "Add a new pet to the store",
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -334,7 +334,7 @@ fn api_operation_simple_response() {
         "pet"
       ],
       "summary": "Add a new pet to the store",
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -404,7 +404,7 @@ fn api_operation_without_parameters() {
         "pet"
       ],
       "summary": "Add a new pet to the store",
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "responses": {
         "200": {
           "description": "",
@@ -463,7 +463,7 @@ fn api_operation_no_content() {
         "pet"
       ],
       "summary": "Add a new pet to the store",
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -544,7 +544,7 @@ fn api_operation_created_json() {
         "pet"
       ],
       "summary": "Add a new pet to the store",
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -623,7 +623,7 @@ fn api_operation_created_json_simple_response() {
         "pet"
       ],
       "summary": "Add a new pet to the store",
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -695,7 +695,7 @@ fn api_operation_accepted_json() {
         "pet"
       ],
       "summary": "Add a new pet to the store",
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -775,7 +775,7 @@ fn api_operation_deprecated() {
         "pet"
       ],
       "summary": "Add a new pet to the store",
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -853,7 +853,7 @@ fn api_operation_deprecated() {
         "pet"
       ],
       "summary": "Add a new pet to the store",
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "operationId": "test2",
       "requestBody": {
         "content": {
@@ -960,7 +960,7 @@ fn api_operation_error() {
         "pet"
       ],
       "summary": "Add a new pet to the store",
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -1062,7 +1062,7 @@ fn api_operation_security() {
     operation,
     json!({
       "summary": "Add a new pet to the store",
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -1156,7 +1156,7 @@ fn api_operation_multipart() {
     operation,
     json!({
       "summary": "Add a new pet to the store",
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "multipart/form-data": {
@@ -1224,7 +1224,7 @@ fn api_operation_consumes_produces() {
     operation,
     json!({
       "summary": "Add a new pet to the store",
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/problem+json": {
@@ -1321,7 +1321,7 @@ fn api_operation_root_vec() {
         "pet"
       ],
       "summary": "Add a new pet to the store",
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -1423,7 +1423,7 @@ fn api_operation_actix_web_grant() {
         "pet"
       ],
       "summary": "Add a new pet to the store",
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -1454,6 +1454,87 @@ fn api_operation_actix_web_grant() {
                 "items": {
                   "$ref": "#/components/schemas/TestResult"
                 }
+              }
+            }
+          }
+        },
+        "405": {
+          "description": "Invalid input"
+        }
+      },
+      "deprecated": false
+    })
+  );
+}
+
+#[test]
+fn api_operation_description_comment() {
+  /// Add a new pet to the store
+  ///
+  /// # Parameters
+  /// * `body` - A JSON-formatted request body containing the data for the resource to be created.
+  /// # Return Value
+  /// * If creation is successful, returns a `Json<TestResult>`, indicating that the resource has been created.
+  /// * If an error occurs, returns an `ErrorResponse`.
+  ///
+  /// Test\nNew line
+  #[api_operation(tag = "pet")]
+  pub(crate) async fn test(
+    _body: Json<test_models::Test>,
+  ) -> Result<Json<test_models::TestResult>, test_models::ErrorResponse> {
+    Ok(Json(test_models::TestResult { id: 0 }))
+  }
+
+  let operation = __openapi_test::operation(OpenApiVersion::OAS3_1);
+  let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
+
+  assert_json_eq!(
+    operation,
+    json!({
+      "tags": [
+        "pet"
+      ],
+      "summary": "Add a new pet to the store",
+      "description": "\n# Parameters\n* `body` - A JSON-formatted request body containing the data for the resource to be created.\n# Return Value\n* If creation is successful, returns a `Json<TestResult>`, indicating that the resource has been created.\n* If an error occurs, returns an `ErrorResponse`.\n\nTest\nNew line",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "title": "Test",
+              "type": "object",
+              "properties": {
+                "test": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "test"
+              ]
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "title": "TestResult",
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "format": "uint32",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "id"
+                ]
               }
             }
           }
