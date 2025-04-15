@@ -179,6 +179,7 @@ For a complete example, see [the sample petstore](https://github.com/netwo-io/ap
 | `swagger-ui`       | Enables Swagger UI to expose the generated openapi file                                                                 |                                                                 |
 | `qs_query`         | Enables documenting types from `serde_qs`                                                                               | [`serde_qs`](https://crates.io/crates/serde-qs)                 |
 | `chrono`           | Enables documenting types from `chrono`                                                                                 | [`chrono`](https://crates.io/crates/chrono)                     |
+| `ipnetwork_0_20`   | Enables documenting types from `ipnetwork` v0.20. Supported via `apistos::ipnetwork_20` mod.                            | [`ipnetwork`](https://crates.io/crates/ipnetwork)               |
 | `ipnetwork`        | Enables documenting types from `ipnetwork`. Supported via `apistos::ipnetwork` mod.                                     | [`ipnetwork`](https://crates.io/crates/ipnetwork)               |
 | `multipart`        | Enables documenting types from `actix-multipart`. `Tempfile` is supported though `apistos::multipart::Tempfile` struct. | [`actix-multipart`](https://crates.io/crates/actix-multipart)   |
 | `rust_decimal`     | Enables documenting types from `rust_decimal`                                                                           | [`rust_decimal`](https://crates.io/crates/rust-decimal)         |
