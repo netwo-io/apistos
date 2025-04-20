@@ -85,7 +85,11 @@ fn api_webhook() {
   use test_models::OrganizationSlug;
 
   #[derive(ApiWebhookComponent)]
-  #[openapi_webhook(name = "TestWebhook", component = "Header<OrganizationSlug>", response(code = 200))]
+  #[openapi_webhook(
+    name = "TestWebhook",
+    component(component = "Header<OrganizationSlug>"),
+    response(code = 200)
+  )]
   struct TestStruct {}
 
   let components = TestStruct {}.components(OpenApiVersion::OAS3_0);

@@ -21,7 +21,7 @@ fn api_header_derive() {
 
   let schema = <OrganizationSlug as ApiComponent>::schema(OpenApiVersion::OAS3_0);
   let child_schemas = <OrganizationSlug as ApiComponent>::child_schemas(OpenApiVersion::OAS3_0);
-  let header_parameter = <Header<OrganizationSlug> as ApiComponent>::parameters(OpenApiVersion::OAS3_0);
+  let header_parameter = <Header<OrganizationSlug> as ApiComponent>::parameters(OpenApiVersion::OAS3_0, None);
   assert!(schema.is_some());
   assert!(child_schemas.is_empty());
   assert!(!header_parameter.is_empty());

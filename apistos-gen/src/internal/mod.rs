@@ -121,7 +121,7 @@ pub(crate) fn gen_item_ast(
   (responder_wrapper, quote!(#item_ast))
 }
 
-fn extract_fn_arguments_types(item_ast: &ItemFn, skipped_args: &[Ident]) -> Vec<Type> {
+fn extract_fn_arguments_types(item_ast: &ItemFn, skipped_args: &[Ident]) -> Vec<(Option<Ident>, Type)> {
   item_ast
     .sig
     .inputs
@@ -133,10 +133,10 @@ fn extract_fn_arguments_types(item_ast: &ItemFn, skipped_args: &[Ident]) -> Vec<
           if skipped_args.contains(&pi.ident) {
             None
           } else {
-            Some(*t.ty.clone())
+            Some((Some(pi.ident), *t.ty.clone()))
           }
         }
-        _ => Some(*t.ty.clone()),
+        _ => Some((None, *t.ty.clone())),
       },
     })
     .collect()

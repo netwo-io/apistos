@@ -37,7 +37,7 @@ impl ApiComponent for NoContent {
     None
   }
 
-  fn responses(_: OpenApiVersion, _content_type: Option<String>) -> Option<Responses> {
+  fn responses(_: OpenApiVersion, _content_type: Option<String>, _description: Option<String>) -> Option<Responses> {
     let status = StatusCode::NO_CONTENT;
     Some(Responses {
       responses: BTreeMap::from_iter(vec![(
@@ -85,14 +85,23 @@ where
     T::schema(oas_version)
   }
 
-  fn request_body(_: OpenApiVersion) -> Option<RequestBody> {
+  fn request_body(_: OpenApiVersion, _description: Option<String>) -> Option<RequestBody> {
     None
   }
 
-  fn responses(oas_version: OpenApiVersion, _content_type: Option<String>) -> Option<Responses> {
+  fn responses(
+    oas_version: OpenApiVersion,
+    _content_type: Option<String>,
+    description: Option<String>,
+  ) -> Option<Responses> {
     let status = StatusCode::ACCEPTED;
-    response_from_schema(oas_version, status.as_str(), Self::schema(oas_version))
-      .or_else(|| response_from_raw_schema(oas_version, status.as_str(), Self::raw_schema(oas_version)))
+    response_from_schema(
+      oas_version,
+      status.as_str(),
+      Self::schema(oas_version),
+      description.clone(),
+    )
+    .or_else(|| response_from_raw_schema(oas_version, status.as_str(), Self::raw_schema(oas_version), description))
   }
 }
 
@@ -132,10 +141,19 @@ where
     T::schema(oas_version)
   }
 
-  fn responses(oas_version: OpenApiVersion, _content_type: Option<String>) -> Option<Responses> {
+  fn responses(
+    oas_version: OpenApiVersion,
+    _content_type: Option<String>,
+    description: Option<String>,
+  ) -> Option<Responses> {
     let status = StatusCode::CREATED;
-    response_from_schema(oas_version, status.as_str(), Self::schema(oas_version))
-      .or_else(|| response_from_raw_schema(oas_version, status.as_str(), Self::raw_schema(oas_version)))
+    response_from_schema(
+      oas_version,
+      status.as_str(),
+      Self::schema(oas_version),
+      description.clone(),
+    )
+    .or_else(|| response_from_raw_schema(oas_version, status.as_str(), Self::raw_schema(oas_version), description))
   }
 }
 
@@ -155,7 +173,7 @@ mod test {
 
   #[test]
   fn no_content_generate_valid_response_oas_3_0() {
-    let responses = <NoContent as ApiComponent>::responses(OpenApiVersion::OAS3_0, None);
+    let responses = <NoContent as ApiComponent>::responses(OpenApiVersion::OAS3_0, None, None);
     assert!(responses.is_some());
 
     let responses = responses.expect("missing responses");
@@ -168,7 +186,7 @@ mod test {
 
   #[test]
   fn no_content_generate_valid_response_oas_3_1() {
-    let responses = <NoContent as ApiComponent>::responses(OpenApiVersion::OAS3_1, None);
+    let responses = <NoContent as ApiComponent>::responses(OpenApiVersion::OAS3_1, None, None);
     assert!(responses.is_some());
 
     let responses = responses.expect("missing responses");
@@ -186,7 +204,7 @@ mod test {
       test: String,
     }
 
-    let responses = <AcceptedJson<Test> as ApiComponent>::responses(OpenApiVersion::OAS3_0, None);
+    let responses = <AcceptedJson<Test> as ApiComponent>::responses(OpenApiVersion::OAS3_0, None, None);
     assert!(responses.is_some());
 
     let responses = responses.expect("missing responses");
@@ -201,7 +219,7 @@ mod test {
       test: String,
     }
 
-    let responses = <AcceptedJson<Test> as ApiComponent>::responses(OpenApiVersion::OAS3_1, None);
+    let responses = <AcceptedJson<Test> as ApiComponent>::responses(OpenApiVersion::OAS3_1, None, None);
     assert!(responses.is_some());
 
     let responses = responses.expect("missing responses");
@@ -216,7 +234,7 @@ mod test {
       test: String,
     }
 
-    let responses = <CreatedJson<Test> as ApiComponent>::responses(OpenApiVersion::OAS3_0, None);
+    let responses = <CreatedJson<Test> as ApiComponent>::responses(OpenApiVersion::OAS3_0, None, None);
     assert!(responses.is_some());
 
     let responses = responses.expect("missing responses");
@@ -231,7 +249,7 @@ mod test {
       test: String,
     }
 
-    let responses = <CreatedJson<Test> as ApiComponent>::responses(OpenApiVersion::OAS3_1, None);
+    let responses = <CreatedJson<Test> as ApiComponent>::responses(OpenApiVersion::OAS3_1, None, None);
     assert!(responses.is_some());
 
     let responses = responses.expect("missing responses");

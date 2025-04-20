@@ -539,13 +539,13 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
 /// }
 ///
 /// #[derive(Clone, ApiWebhookComponent)]
-/// #[openapi_webhook(name = "TestWebhook", component = "actix_web::web::Json<Test>", response(code = 200))]
+/// #[openapi_webhook(name = "TestWebhook", component(component = "actix_web::web::Json<Test>"), response(code = 200))]
 /// pub struct WebhookStruct {}
 ///
 /// // Or
 /// #[derive(Clone, ApiWebhookComponent)]
 /// pub enum WebhookEnum {
-///   #[openapi_webhook(name = "TestWebhook", component = "actix_web::web::Json<Test>", response(code = 200))]
+///   #[openapi_webhook(name = "TestWebhook", component(component = "actix_web::web::Json<Test>", description = "A super description"), response(code = 200))]
 ///   VisibleWebhook,
 ///   #[openapi_webhook(skip)]
 ///   SkippedWebhook
@@ -553,7 +553,7 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
 ///
 /// // Or
 /// #[derive(Clone, ApiWebhookComponent)]
-/// #[openapi_webhook(component = "actix_web::web::Json<Test>", response(code = 200))]
+/// #[openapi_webhook(component(component = "actix_web::web::Json<Test>"), response(code = 200))]
 /// pub enum WebhookEnumWithDefault {
 ///   VisibleWebhook,
 ///   #[openapi_webhook(skip)]
@@ -570,10 +570,15 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
 ///  with rust `#[deprecated]` decorator.
 /// - `summary = "..."` an optional summary
 /// - `description = "..."` an optional description
-/// - `component = "..."` an optional list of components attached to this webhook operation (parameters, body...)
+/// - `component(...)` an optional list of components attached to this webhook operation (parameters, body...)
+///     - `component = "..."` the type of this component
+///     - `description = "..."` an optional description attached to this component (parameters description, body description, response description, ...). If used
+///        on a header, overrides the previously set header's description)
 /// - `response(...)` an optional list of responses attached to this webhook operation
 ///   - `code = "..."` Http response code
-///   - `component = "..."` a component attached to the given webhook response. Must derive [ApiComponent] and [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
+///   - `component(...)` an option component attached to the given webhook response.
+///       - `component = "..."` the component type, must derive [ApiComponent] and [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
+///       - `description = "..."` an optional description attached to this component. If used on a header, overrides the previously set header's description)
 #[proc_macro_error]
 #[proc_macro_derive(ApiWebhookComponent, attributes(openapi_webhook))]
 pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
@@ -663,6 +668,10 @@ pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
 ///   - `operation_id = "..."` an optional operation id for this operation. Default is the handler's fn name.
 ///   - `summary = "..."` an optional summary
 ///   - `description = "..."` an optional description
+///   - `success_description` = "..." an optional description for a success response
+///   - `body_description` = "..." an optional description for a success response
+///   - `parameter_description(...)` an optional key = value list of descriptions for parameters. (If used on a header, overrides the previously
+/// set header's description)
 ///   - `tag = "..."` an optional list of tags associated with this operation (define tag multiple times to add to the list)
 ///   - `security_scope(...)` an optional list representing which security scopes apply for a given operation with
 ///       - `name = "..."` a mandatory name referencing one of the security definitions
@@ -906,7 +915,7 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
 /// }
 ///
 /// #[api_callback(
-///   response(code = 200, component = "TestCallbackResult")
+///   response(code = 200, component(component = "TestCallbackResult"))
 /// )]
 /// pub(crate) async fn callback_test(
 ///   body: Json<Test>,
@@ -929,10 +938,15 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
 ///  with rust `#[deprecated]` decorator.
 ///   - `summary = "..."` an optional summary
 ///   - `description = "..."` an optional description
-///   - `component = "..."` an optional list of components attached to this callback operation (parameters, body...)
+///   - `component(...)` an optional list of components attached to this callback operation (parameters, body...)
+///     - `component = "..."` a type for this component
+///     - `description = "..."` an optional description attached to this component (parameters description, body description, response description, ...). If used
+///        on a header, overrides the previously set header's description)
 ///   - `response(...)` an optional list of responses attached to this callback operation
 ///     - `code = "..."` Http response code
-///     - `component = "..."` a component attached to the given callback response. Must derive [ApiComponent] and [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
+///     - `component(...)` an option component attached to the given callback response.
+///       - `component = "..."` the component type, must derive [ApiComponent] and [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
+///       - `description = "..."` an optional description attached to this component. If used on a header, overrides the previously set header's description)
 ///
 /// If `summary` or `description` are not provided, a default value will be extracted from the comments. The first line will be used as summary while the rest will be part of the description.
 #[proc_macro_error]

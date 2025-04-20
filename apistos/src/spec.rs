@@ -8,20 +8,20 @@ use apistos_models::{ApistosSchema, OpenApiVersion};
 
 /// Defines an accessor for `DefaultParameters`
 pub trait DefaultParameterAccessor {
-  fn get_default_parameter(_: OpenApiVersion) -> DefaultParameters;
+  fn get_default_parameter(_: OpenApiVersion, _description: Option<String>) -> DefaultParameters;
 }
 
 impl<T> DefaultParameterAccessor for T
 where
   T: ApiComponent,
 {
-  fn get_default_parameter(oas_version: OpenApiVersion) -> DefaultParameters {
+  fn get_default_parameter(oas_version: OpenApiVersion, description: Option<String>) -> DefaultParameters {
     let mut components = T::child_schemas(oas_version);
     if let Some(sch) = T::schema(oas_version) {
       components.push(sch)
     }
     DefaultParameters {
-      parameters: T::parameters(oas_version),
+      parameters: T::parameters(oas_version, description),
       components,
     }
   }

@@ -1675,3 +1675,63 @@ fn api_operation_description_comment() {
     })
   );
 }
+
+#[test]
+fn api_operation_parameter_description() {
+  /// Add a new pet to the store
+  #[api_operation(
+    tag = "pet",
+    success_description = r#"
+  # Return
+  Return something usefull
+  # Why ?
+  Because:
+  * why not
+  * we have to test this
+  "#
+  )]
+  pub(crate) async fn test(
+    _body: Json<test_models::Test>,
+  ) -> Result<Json<test_models::TestResult>, test_models::ErrorResponse> {
+    Ok(Json(test_models::TestResult { id: 0 }))
+  }
+
+  let operation = __openapi_test::operation(OpenApiVersion::OAS3_0);
+  let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
+
+  assert_json_eq!(
+    operation,
+    json!({
+      "tags": [
+        "pet"
+      ],
+      "summary": "Add a new pet to the store",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Test"
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "description": "# Return\n  Return something usefull\n  # Why ?\n  Because:\n  * why not\n  * we have to test this",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TestResult"
+              }
+            }
+          }
+        },
+        "405": {
+          "description": "Invalid input"
+        }
+      },
+      "deprecated": false
+    })
+  );
+}
