@@ -28,6 +28,7 @@ futures-core = { workspace = true, optional = true }
 garde-actix-web = { workspace = true, optional = true }
 chrono = { workspace = true, optional = true }
 ipnetwork = { workspace = true, optional = true }
+ipnetwork_0_20 = { workspace = true, optional = true }
 rust_decimal = { workspace = true, optional = true }
 serde = { workspace = true, optional = true }
 serde_qs = { workspace = true, features = ["actix4"], optional = true }
@@ -58,6 +59,7 @@ garde = ["actix", "dep:garde-actix-web"]
 
 # extra types related features
 chrono = ["dep:chrono", "schemars/chrono04"]
+ipnetwork_0_20 = ["dep:serde", "dep:ipnetwork_0_20"]
 ipnetwork = ["dep:serde", "dep:ipnetwork"]
 multipart = ["actix", "dep:serde", "dep:actix-multipart", "dep:futures-core"]
 rust_decimal = ["dep:rust_decimal", "schemars/rust_decimal1"]

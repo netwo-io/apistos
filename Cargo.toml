@@ -57,6 +57,7 @@ actix-session = "0.10"
 garde-actix-web = "0.11"
 chrono = "0.4.20"
 garde = { version = "0.22", features = ["derive", "serde"] }
+ipnetwork_0_20 = { package = "ipnetwork", version = "0.20", features = ["serde"] }
 ipnetwork = { version = "0.21", features = ["serde"] }
 rust_decimal = "1"
 serde_qs = "0.14"
