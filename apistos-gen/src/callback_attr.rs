@@ -22,7 +22,7 @@ pub(crate) struct CallbackAttrInternal {
   pub(crate) summary: Option<String>,
   pub(crate) description: Option<String>,
   #[darling(default, multiple, rename = "component")]
-  pub(crate) components: Vec<Type>,
+  pub(crate) components: Vec<CallbackComponentDefinition>,
   #[darling(multiple, rename = "response")]
   pub(crate) responses: Vec<CallbackResponseDefinition>,
 }
@@ -31,7 +31,15 @@ pub(crate) struct CallbackAttrInternal {
 pub(crate) struct CallbackResponseDefinition {
   pub(crate) code: u16,
   #[darling(default)]
-  pub(crate) component: Option<Type>,
+  pub(crate) component: Option<CallbackComponentDefinition>,
+}
+
+#[derive(FromMeta, Clone)]
+pub(crate) struct CallbackComponentDefinition {
+  #[darling(rename = "component")]
+  pub(crate) _type: Type,
+  #[darling(default)]
+  pub(crate) description: Option<String>,
 }
 
 #[derive(Clone)]
@@ -39,7 +47,7 @@ pub(crate) struct CallbackAttr {
   pub(crate) deprecated: Option<bool>,
   pub(crate) summary: Option<String>,
   pub(crate) description: Option<String>,
-  pub(crate) components: Vec<Type>,
+  pub(crate) components: Vec<CallbackComponentDefinition>,
   pub(crate) tags: Vec<String>,
   pub(crate) responses: Vec<CallbackResponseDefinition>,
 }
@@ -89,38 +97,55 @@ impl CallbackAttr {
     let mut responses = vec![];
     for response in &self.responses {
       let status = response.code;
-      let (response_type_schema, response_type_raw_schema) = match &response.component {
-        None => (quote!(None), quote!(None)),
-        Some(response_type) => (
-          quote!(<#response_type>::schema(oas_version)),
-          quote!(<#response_type>::raw_schema(oas_version)),
-        ),
+      let (response_type_schema, response_type_raw_schema, description) = match &response.component {
+        None => (quote!(None), quote!(None), quote!(None)),
+        Some(response_type) => {
+          let CallbackComponentDefinition { _type, description } = response_type;
+          (
+            quote!(<#_type>::schema(oas_version)),
+            quote!(<#_type>::raw_schema(oas_version)),
+            if let Some(description) = description {
+              let description = description.replace('\n', "\\\n").trim().to_string();
+              quote!(Some(#description.to_string()))
+            } else {
+              quote!(None)
+            },
+          )
+        }
       };
       responses.push(quote!({
-        apistos::__internal::response_from_schema(oas_version, #status.to_string().as_str(), #response_type_schema)
-            .or_else(|| apistos::__internal::response_from_raw_schema(oas_version, #status.to_string().as_str(), #response_type_raw_schema))
+        apistos::__internal::response_from_schema(oas_version, #status.to_string().as_str(), #response_type_schema, #description)
+            .or_else(|| apistos::__internal::response_from_raw_schema(oas_version, #status.to_string().as_str(), #response_type_raw_schema, #description))
             .unwrap_or_else(|| apistos::__internal::response_for_status(#status.to_string().as_str()))
       }));
+    }
+
+    let mut body_requests =
+      quote!(let mut body_requests: Vec<std::option::Option<apistos::paths::RequestBody>> = vec![];);
+    let mut parameters = quote!(let mut parameters: Vec<apistos::paths::Parameter> = vec![];);
+    for component in components {
+      let CallbackComponentDefinition { _type, description } = component;
+      let description = if let Some(description) = description {
+        let description = description.replace('\n', "\\\n").trim().to_string();
+        quote!(Some(#description.to_string()))
+      } else {
+        quote!(None)
+      };
+      body_requests.extend(quote! { body_requests.push(<#_type>::request_body(oas_version, #description)); });
+      parameters.extend(quote! { parameters.append(&mut <#_type>::parameters(oas_version, #description)); });
     }
 
     quote!(
       use apistos::ApiComponent;
       let mut operation_builder = apistos::paths::Operation::default();
 
-      let mut body_requests: Vec<std::option::Option<apistos::paths::RequestBody>> = vec![];
-      #(
-        let mut request_body = <#components>::request_body(oas_version);
-        body_requests.push(request_body);
-      )*
+      #body_requests
       let body_requests = body_requests.into_iter().flatten().collect::<Vec<apistos::paths::RequestBody>>();
       for body_request in body_requests {
         operation_builder.request_body = Some(apistos::reference_or::ReferenceOr::Object(body_request));
       }
 
-      let mut parameters: Vec<apistos::paths::Parameter> = vec![];
-      #(
-        parameters.append(&mut <#components>::parameters(oas_version));
-      )*
+      #parameters
       if !parameters.is_empty() {
         operation_builder.parameters = parameters.into_iter().map(apistos::reference_or::ReferenceOr::Object).collect();
       }
@@ -147,9 +172,14 @@ impl CallbackAttr {
   }
 
   pub(crate) fn components(&self) -> TokenStream {
-    let components = &self.components;
+    let components: &[Type] = &self.components.iter().map(|c| c._type.clone()).collect::<Vec<_>>();
 
-    let responses_components: Vec<Type> = self.responses.iter().filter_map(|r| r.component.clone()).collect();
+    let responses_components: Vec<Type> = self
+      .responses
+      .iter()
+      .filter_map(|r| r.component.clone())
+      .map(|c| c._type)
+      .collect();
 
     quote!(
       use apistos::ApiComponent;

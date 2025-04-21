@@ -76,10 +76,11 @@ impl ApiComponent for Multipart {
     None
   }
 
-  fn request_body(_: apistos_models::OpenApiVersion) -> Option<RequestBody> {
+  fn request_body(_: apistos_models::OpenApiVersion, description: Option<String>) -> Option<RequestBody> {
     Some(RequestBody {
       content: BTreeMap::from_iter(vec![(Self::content_type(), MediaType::default())]),
       required: Some(Self::required()),
+      description,
       ..Default::default()
     })
   }

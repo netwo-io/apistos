@@ -42,7 +42,7 @@ pub trait ApiComponent {
     None
   }
 
-  fn request_body(oas_version: OpenApiVersion) -> Option<RequestBody> {
+  fn request_body(oas_version: OpenApiVersion, description: Option<String>) -> Option<RequestBody> {
     Self::schema(oas_version).map(|(name, sch)| {
       let schema = match oas_version {
         OpenApiVersion::OAS3_0 => VersionSpecificSchema::OAS3_0(ReferenceOr::Reference {
@@ -58,6 +58,7 @@ pub trait ApiComponent {
       };
 
       RequestBody {
+        description,
         content: BTreeMap::from_iter(vec![(
           Self::content_type(),
           MediaType {
@@ -79,11 +80,15 @@ pub trait ApiComponent {
     BTreeMap::default()
   }
 
-  fn responses(_oas_version: OpenApiVersion, _content_type: Option<String>) -> Option<Responses> {
+  fn responses(
+    _oas_version: OpenApiVersion,
+    _content_type: Option<String>,
+    _description: Option<String>,
+  ) -> Option<Responses> {
     None
   }
 
-  fn parameters(_oas_version: OpenApiVersion) -> Vec<Parameter> {
+  fn parameters(_oas_version: OpenApiVersion, _description: Option<String>) -> Vec<Parameter> {
     vec![]
   }
 }
@@ -193,8 +198,12 @@ where
     E::schemas_by_status_code(oas_version)
   }
 
-  fn responses(oas_version: OpenApiVersion, content_type: Option<String>) -> Option<Responses> {
-    T::responses(oas_version, content_type)
+  fn responses(
+    oas_version: OpenApiVersion,
+    content_type: Option<String>,
+    description: Option<String>,
+  ) -> Option<Responses> {
+    T::responses(oas_version, content_type, description)
   }
 }
 
@@ -316,13 +325,17 @@ where
     error_schemas
   }
 
-  fn responses(oas_version: OpenApiVersion, content_type: Option<String>) -> Option<Responses> {
-    let responses = T::responses(oas_version, content_type.clone());
+  fn responses(
+    oas_version: OpenApiVersion,
+    content_type: Option<String>,
+    description: Option<String>,
+  ) -> Option<Responses> {
+    let responses = T::responses(oas_version, content_type.clone(), description);
     match responses {
-      None => E::responses(oas_version, content_type),
+      None => E::responses(oas_version, content_type, None),
       Some(mut responses) => {
         responses.responses.append(
-          &mut E::responses(oas_version, content_type)
+          &mut E::responses(oas_version, content_type, None)
             .map(|r| r.responses)
             .unwrap_or_default(),
         );
@@ -381,9 +394,13 @@ where
     R::error_schemas(oas_version)
   }
 
-  fn responses(oas_version: OpenApiVersion, content_type: Option<String>) -> Option<Responses> {
+  fn responses(
+    oas_version: OpenApiVersion,
+    content_type: Option<String>,
+    description: Option<String>,
+  ) -> Option<Responses> {
     let mut responses = vec![];
-    if let Some(response) = R::responses(oas_version, content_type.clone()) {
+    if let Some(response) = R::responses(oas_version, content_type.clone(), description.clone()) {
       responses.append(
         &mut response
           .responses
@@ -423,6 +440,7 @@ where
       responses.push((
         "200".to_owned(),
         ReferenceOr::Object(Response {
+          description: description.unwrap_or_default(),
           content: BTreeMap::from_iter(vec![(
             content_type.unwrap_or_else(Self::content_type),
             MediaType {
@@ -447,6 +465,7 @@ where
       responses.push((
         "200".to_owned(),
         ReferenceOr::Object(Response {
+          description: description.unwrap_or_default(),
           content: BTreeMap::from_iter(vec![(
             content_type.unwrap_or_else(Self::content_type),
             MediaType {
@@ -461,6 +480,7 @@ where
       responses.push((
         "200".to_owned(),
         ReferenceOr::Object(Response {
+          description: description.unwrap_or_default(),
           content: BTreeMap::from_iter(vec![(content_type, MediaType::default())]),
           ..Default::default()
         }),

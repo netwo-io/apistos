@@ -4,7 +4,7 @@ use crate::internal::operation::Operation;
 use crate::operation_attr::OperationAttr;
 use proc_macro2::{Ident, TokenStream};
 use quote::{ToTokens, quote};
-use syn::{Expr, ImplGenerics, ItemFn, Lit, Meta, TypeGenerics, WhereClause};
+use syn::{Expr, ImplGenerics, ItemFn, Lit, Meta, Type, TypeGenerics, WhereClause};
 
 pub(crate) struct PathItem<'a> {
   pub(crate) source: SourceDefinitionKind<'a>,
@@ -71,7 +71,8 @@ impl ToTokens for PathItem<'_> {
         .into_iter()
         .skip(1)
         .collect::<Vec<String>>()
-        .join("\\\n");
+        .join("\n")
+        .replace("\\n", "\n");
 
       let operation = Operation {
         args: &args,
@@ -90,6 +91,9 @@ impl ToTokens for PathItem<'_> {
             Some(description)
           }
         }),
+        success_description: self.operation_attribute.success_description.as_deref(),
+        body_description: self.operation_attribute.body_description.as_deref(),
+        parameter_description: self.operation_attribute.parameter_description.clone(),
         tags: &self.operation_attribute.tags,
         scopes: self.operation_attribute.scopes.clone(),
         callbacks: &self.operation_attribute.callbacks,
@@ -97,6 +101,7 @@ impl ToTokens for PathItem<'_> {
         consumes: self.operation_attribute.consumes.as_ref(),
         produces: self.operation_attribute.produces.as_ref(),
       };
+      let args = args.clone().into_iter().map(|(_, _type)| _type).collect::<Vec<Type>>();
       let components = Components {
         args: &args,
         responder_wrapper: self.responder_wrapper,

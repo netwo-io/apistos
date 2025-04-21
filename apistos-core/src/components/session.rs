@@ -29,16 +29,17 @@ impl ApiComponent for actix_session::Session {
     None
   }
 
-  fn request_body(_oas_version: apistos_models::OpenApiVersion) -> Option<RequestBody> {
+  fn request_body(_oas_version: apistos_models::OpenApiVersion, _description: Option<String>) -> Option<RequestBody> {
     None
   }
 
-  fn parameters(oas_version: apistos_models::OpenApiVersion) -> Vec<Parameter> {
+  fn parameters(oas_version: apistos_models::OpenApiVersion, description: Option<String>) -> Vec<Parameter> {
     vec![Parameter {
       name: "id".to_string(), // from default actix-session's CookieConfiguration
       _in: ParameterIn::Cookie,
       required: Some(true),
       definition: Self::raw_schema(oas_version).map(ParameterDefinition::Schema),
+      description,
       ..Default::default()
     }]
   }

@@ -106,8 +106,8 @@ fn api_callback() {
   /// Add a new pet to the store
   /// Plop
   #[api_callback(
-    component = "Header<OrganizationSlug>",
-    response(code = 200, component = "TestCallbackResult")
+    component(component = "Header<OrganizationSlug>"),
+    response(code = 200, component(component = "TestCallbackResult"))
   )]
   pub(crate) async fn test_callback(
     _body: Json<test_models::Test>,
@@ -179,7 +179,7 @@ fn api_callback() {
         "pet"
       ],
       "summary": "Add a new pet to the store",
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {

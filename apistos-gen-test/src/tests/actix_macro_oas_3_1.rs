@@ -146,7 +146,7 @@ fn api_operation() {
         "pet"
       ],
       "summary": "Add a new pet to the store",
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -239,7 +239,7 @@ fn api_operation_impl_responder() {
         "pet"
       ],
       "summary": "Add a new pet to the store",
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -281,7 +281,7 @@ fn api_operation_impl_responder() {
         "pet"
       ],
       "summary": "Add a new pet to the store",
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -334,7 +334,7 @@ fn api_operation_simple_response() {
         "pet"
       ],
       "summary": "Add a new pet to the store",
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -404,7 +404,7 @@ fn api_operation_without_parameters() {
         "pet"
       ],
       "summary": "Add a new pet to the store",
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "responses": {
         "200": {
           "description": "",
@@ -463,7 +463,7 @@ fn api_operation_no_content() {
         "pet"
       ],
       "summary": "Add a new pet to the store",
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -544,7 +544,7 @@ fn api_operation_created_json() {
         "pet"
       ],
       "summary": "Add a new pet to the store",
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -623,7 +623,7 @@ fn api_operation_created_json_simple_response() {
         "pet"
       ],
       "summary": "Add a new pet to the store",
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -695,7 +695,7 @@ fn api_operation_accepted_json() {
         "pet"
       ],
       "summary": "Add a new pet to the store",
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -776,7 +776,7 @@ fn api_operation_deprecated() {
         "pet"
       ],
       "summary": "Add a new pet to the store",
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -854,7 +854,7 @@ fn api_operation_deprecated() {
         "pet"
       ],
       "summary": "Add a new pet to the store",
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "operationId": "test2",
       "requestBody": {
         "content": {
@@ -961,7 +961,7 @@ fn api_operation_error() {
         "pet"
       ],
       "summary": "Add a new pet to the store",
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -1063,7 +1063,7 @@ fn api_operation_security() {
     operation,
     json!({
       "summary": "Add a new pet to the store",
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -1157,7 +1157,7 @@ fn api_operation_multipart() {
     operation,
     json!({
       "summary": "Add a new pet to the store",
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "multipart/form-data": {
@@ -1225,7 +1225,7 @@ fn api_operation_consumes_produces() {
     operation,
     json!({
       "summary": "Add a new pet to the store",
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/problem+json": {
@@ -1322,7 +1322,7 @@ fn api_operation_root_vec() {
         "pet"
       ],
       "summary": "Add a new pet to the store",
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -1424,7 +1424,7 @@ fn api_operation_actix_web_grant() {
         "pet"
       ],
       "summary": "Add a new pet to the store",
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {

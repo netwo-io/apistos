@@ -177,7 +177,7 @@ fn api_operation() {
     operation,
     json!({
       "deprecated": false,
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -268,7 +268,7 @@ fn api_operation_impl_responder() {
     operation,
     json!({
       "deprecated": false,
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -320,7 +320,7 @@ fn api_operation_impl_responder() {
     operation,
     json!({
       "deprecated": false,
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -383,7 +383,7 @@ fn api_operation_simple_response() {
     operation,
     json!({
       "deprecated": false,
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -464,7 +464,7 @@ fn api_operation_without_parameters() {
     operation,
     json!({
       "deprecated": false,
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "responses": {
         "200": {
           "content": {
@@ -531,7 +531,7 @@ fn api_operation_no_content() {
     operation,
     json!({
       "deprecated": false,
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -628,7 +628,7 @@ fn api_operation_created_json() {
     operation,
     json!({
       "deprecated": false,
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -705,7 +705,7 @@ fn api_operation_created_json_simple_response() {
     operation,
     json!({
       "deprecated": false,
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -800,7 +800,7 @@ fn api_operation_accepted_json() {
     operation,
     json!({
       "deprecated": false,
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -892,7 +892,7 @@ fn api_operation_deprecated() {
     operation,
     json!({
       "deprecated": true,
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -982,7 +982,7 @@ fn api_operation_deprecated() {
     operation,
     json!({
       "deprecated": true,
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "operationId": "test2",
       "requestBody": {
         "content": {
@@ -1101,7 +1101,7 @@ fn api_operation_error() {
     operation,
     json!({
       "deprecated": false,
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -1212,7 +1212,7 @@ fn api_operation_security() {
     operation,
     json!({
       "deprecated": false,
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -1304,7 +1304,7 @@ fn api_operation_multipart() {
     operation,
     json!({
       "deprecated": false,
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "multipart/form-data": {
@@ -1382,7 +1382,7 @@ fn api_operation_consumes_produces() {
     operation,
     json!({
       "deprecated": false,
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/problem+json": {
@@ -1477,7 +1477,7 @@ fn api_operation_root_vec() {
     operation,
     json!({
       "deprecated": false,
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -1580,7 +1580,7 @@ fn api_operation_actix_web_grant() {
     operation,
     json!({
       "deprecated": false,
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -1613,6 +1613,125 @@ fn api_operation_actix_web_grant() {
       "tags": [
         "pet"
       ]
+    })
+  );
+}
+
+#[test]
+fn api_operation_description_comment() {
+  /// Add a new pet to the store
+  ///
+  /// # Parameters
+  /// * `body` - A JSON-formatted request body containing the data for the resource to be created.
+  /// # Return Value
+  /// * If creation is successful, returns a `Json<TestResult>`, indicating that the resource has been created.
+  /// * If an error occurs, returns an `ErrorResponse`.
+  ///
+  /// Test\nNew line
+  #[api_operation(tag = "pet")]
+  pub(crate) async fn test(
+    _body: Json<test_models::Test>,
+  ) -> Result<Json<test_models::TestResult>, test_models::ErrorResponse> {
+    Ok(Json(test_models::TestResult { id: 0 }))
+  }
+
+  let operation = __openapi_test::operation(OpenApiVersion::OAS3_0);
+  let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
+
+  assert_json_eq!(
+    operation,
+    json!({
+      "deprecated": false,
+      "description": "\n# Parameters\n* `body` - A JSON-formatted request body containing the data for the resource to be created.\n# Return Value\n* If creation is successful, returns a `Json<TestResult>`, indicating that the resource has been created.\n* If an error occurs, returns an `ErrorResponse`.\n\nTest\nNew line",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Test"
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TestResult"
+              }
+            }
+          },
+          "description": ""
+        },
+        "405": {
+          "description": "Invalid input"
+        }
+      },
+      "summary": "Add a new pet to the store",
+      "tags": [
+        "pet"
+      ]
+    })
+  );
+}
+
+#[test]
+fn api_operation_parameter_description() {
+  /// Add a new pet to the store
+  #[api_operation(
+    tag = "pet",
+    success_description = r#"
+  # Return
+  Return something usefull
+  # Why ?
+  Because:
+  * why not
+  * we have to test this
+  "#
+  )]
+  pub(crate) async fn test(
+    _body: Json<test_models::Test>,
+  ) -> Result<Json<test_models::TestResult>, test_models::ErrorResponse> {
+    Ok(Json(test_models::TestResult { id: 0 }))
+  }
+
+  let operation = __openapi_test::operation(OpenApiVersion::OAS3_0);
+  let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
+
+  assert_json_eq!(
+    operation,
+    json!({
+      "tags": [
+        "pet"
+      ],
+      "summary": "Add a new pet to the store",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Test"
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "description": "# Return\n  Return something usefull\n  # Why ?\n  Because:\n  * why not\n  * we have to test this",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TestResult"
+              }
+            }
+          }
+        },
+        "405": {
+          "description": "Invalid input"
+        }
+      },
+      "deprecated": false
     })
   );
 }

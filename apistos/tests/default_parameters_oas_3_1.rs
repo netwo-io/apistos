@@ -87,9 +87,11 @@ async fn default_parameters() {
   }];
 
   let default_parameters_macro =
-    <Header<SomeHeader> as DefaultParameterAccessor>::get_default_parameter(OpenApiVersion::OAS3_1);
-  let default_complex_parameters_macro =
-    <Header<SomeComplexHeader> as DefaultParameterAccessor>::get_default_parameter(OpenApiVersion::OAS3_1);
+    <Header<SomeHeader> as DefaultParameterAccessor>::get_default_parameter(OpenApiVersion::OAS3_1, None);
+  let default_complex_parameters_macro = <Header<SomeComplexHeader> as DefaultParameterAccessor>::get_default_parameter(
+    OpenApiVersion::OAS3_1,
+    Some("A simple description".to_string()),
+  );
   let simple_default_parameters = DefaultParameters {
     parameters: vec![Parameter {
       name: "X-SomeParam".to_string(),

@@ -4,7 +4,7 @@ use darling::ast::NestedMeta;
 use proc_macro_error2::abort;
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{ToTokens, quote};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 use std::convert::Infallible;
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
@@ -25,6 +25,10 @@ pub(crate) struct OperationAttrInternal {
   operation_id: Option<String>,
   summary: Option<String>,
   description: Option<String>,
+  success_description: Option<String>,
+  body_description: Option<String>,
+  #[darling(default)]
+  parameter_description: HashMap<String, String>,
   #[darling(multiple, rename = "tag")]
   tags: Vec<String>,
   #[darling(multiple, rename = "security_scope")]
@@ -48,6 +52,9 @@ impl ToTokens for OperationAttrInternal {
       operation_id,
       summary,
       description,
+      success_description,
+      body_description,
+      parameter_description,
       tags,
       scopes,
       error_codes,
@@ -65,6 +72,23 @@ impl ToTokens for OperationAttrInternal {
       .clone()
       .map(|v| quote!(description = #v, ))
       .unwrap_or_default();
+    let success_description = success_description
+      .clone()
+      .map(|v| quote!(success_description = #v, ))
+      .unwrap_or_default();
+    let body_description = body_description
+      .clone()
+      .map(|v| quote!(body_description = #v, ))
+      .unwrap_or_default();
+    let parameter_description = if parameter_description.is_empty() {
+      quote!()
+    } else {
+      let mut tokens = TokenStream::new();
+      for (k, v) in parameter_description {
+        tokens.extend(quote!(#k = #v, ));
+      }
+      quote!(parameter_description(#tokens),)
+    };
     let consumes = consumes.clone().map(|v| quote!(consumes = #v, )).unwrap_or_default();
     let produces = produces.clone().map(|v| quote!(produces = #v, )).unwrap_or_default();
     let error_codes: Vec<String> = error_codes.iter().map(ToString::to_string).collect();
@@ -75,6 +99,9 @@ impl ToTokens for OperationAttrInternal {
       #operation_id
       #summary
       #description
+      #success_description
+      #body_description
+      #parameter_description
       #(tag = #tags,)*
       #(#scopes,)*
       #(error_code = #error_codes,)*
@@ -224,12 +251,16 @@ impl From<NamedOperationCallbackInternal> for OperationCallbacks {
   }
 }
 
+#[allow(dead_code)]
 pub(crate) struct OperationAttr {
   pub(crate) skip: bool,
   pub(crate) deprecated: bool,
   pub(crate) operation_id: Option<String>,
   pub(crate) summary: Option<String>,
   pub(crate) description: Option<String>,
+  pub(crate) success_description: Option<String>,
+  pub(crate) body_description: Option<String>,
+  pub(crate) parameter_description: BTreeMap<String, String>,
   pub(crate) tags: Vec<String>,
   pub(crate) callbacks: Vec<OperationCallbacks>,
   pub(crate) scopes: BTreeMap<String, Vec<String>>,
@@ -247,6 +278,13 @@ impl From<OperationAttrInternal> for OperationAttr {
       operation_id: value.operation_id,
       summary: value.summary,
       description: value.description.map(|d| d.replace('\n', "\\\n")),
+      success_description: value.success_description.map(|d| d.trim().to_string()),
+      body_description: value.body_description.map(|d| d.trim().to_string()),
+      parameter_description: value
+        .parameter_description
+        .into_iter()
+        .map(|(k, v)| (k, v.trim().to_string()))
+        .collect(),
       tags: value.tags,
       callbacks: value.callbacks.into_iter().map(Into::into).collect(),
       scopes: value

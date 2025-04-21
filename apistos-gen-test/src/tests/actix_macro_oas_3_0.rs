@@ -177,7 +177,7 @@ fn api_operation() {
     operation,
     json!({
       "deprecated": false,
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -268,7 +268,7 @@ fn api_operation_impl_responder() {
     operation,
     json!({
       "deprecated": false,
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -320,7 +320,7 @@ fn api_operation_impl_responder() {
     operation,
     json!({
       "deprecated": false,
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -383,7 +383,7 @@ fn api_operation_simple_response() {
     operation,
     json!({
       "deprecated": false,
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -464,7 +464,7 @@ fn api_operation_without_parameters() {
     operation,
     json!({
       "deprecated": false,
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "responses": {
         "200": {
           "content": {
@@ -531,7 +531,7 @@ fn api_operation_no_content() {
     operation,
     json!({
       "deprecated": false,
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -628,7 +628,7 @@ fn api_operation_created_json() {
     operation,
     json!({
       "deprecated": false,
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -705,7 +705,7 @@ fn api_operation_created_json_simple_response() {
     operation,
     json!({
       "deprecated": false,
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -800,7 +800,7 @@ fn api_operation_accepted_json() {
     operation,
     json!({
       "deprecated": false,
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -893,7 +893,7 @@ fn api_operation_deprecated() {
     operation,
     json!({
       "deprecated": true,
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -983,7 +983,7 @@ fn api_operation_deprecated() {
     operation,
     json!({
       "deprecated": true,
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "operationId": "test2",
       "requestBody": {
         "content": {
@@ -1102,7 +1102,7 @@ fn api_operation_error() {
     operation,
     json!({
       "deprecated": false,
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -1213,7 +1213,7 @@ fn api_operation_security() {
     operation,
     json!({
       "deprecated": false,
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -1305,7 +1305,7 @@ fn api_operation_multipart() {
     operation,
     json!({
       "deprecated": false,
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "multipart/form-data": {
@@ -1383,7 +1383,7 @@ fn api_operation_consumes_produces() {
     operation,
     json!({
       "deprecated": false,
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/problem+json": {
@@ -1478,7 +1478,7 @@ fn api_operation_root_vec() {
     operation,
     json!({
       "deprecated": false,
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {
@@ -1581,7 +1581,7 @@ fn api_operation_actix_web_grant() {
     operation,
     json!({
       "deprecated": false,
-      "description": "Add a new pet to the store\\\nPlop",
+      "description": "Add a new pet to the store\nPlop",
       "requestBody": {
         "content": {
           "application/json": {

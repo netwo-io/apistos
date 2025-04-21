@@ -20,7 +20,7 @@ fn api_cookie_derive() {
 
   let schema = <OrganizationSlugCookie as ApiComponent>::schema(OpenApiVersion::OAS3_1);
   let child_schemas = <OrganizationSlugCookie as ApiComponent>::child_schemas(OpenApiVersion::OAS3_1);
-  let header_parameter = <OrganizationSlugCookie as ApiComponent>::parameters(OpenApiVersion::OAS3_1);
+  let header_parameter = <OrganizationSlugCookie as ApiComponent>::parameters(OpenApiVersion::OAS3_1, None);
   assert!(schema.is_some());
   assert!(child_schemas.is_empty());
   assert!(!header_parameter.is_empty());
@@ -71,7 +71,7 @@ fn api_cookie_derive_deprecated() {
 
   let schema = <OrganizationSlugCookie as ApiComponent>::schema(OpenApiVersion::OAS3_1);
   let child_schemas = <OrganizationSlugCookie as ApiComponent>::child_schemas(OpenApiVersion::OAS3_1);
-  let header_parameter = <OrganizationSlugCookie as ApiComponent>::parameters(OpenApiVersion::OAS3_1);
+  let header_parameter = <OrganizationSlugCookie as ApiComponent>::parameters(OpenApiVersion::OAS3_1, None);
   assert!(schema.is_some());
   assert!(child_schemas.is_empty());
   assert!(!header_parameter.is_empty());
@@ -123,7 +123,7 @@ fn api_cookie_derive_deprecated_attribute() {
 
   let schema = <OrganizationSlugCookie2 as ApiComponent>::schema(OpenApiVersion::OAS3_1);
   let child_schemas = <OrganizationSlugCookie2 as ApiComponent>::child_schemas(OpenApiVersion::OAS3_1);
-  let header_parameter = <OrganizationSlugCookie2 as ApiComponent>::parameters(OpenApiVersion::OAS3_1);
+  let header_parameter = <OrganizationSlugCookie2 as ApiComponent>::parameters(OpenApiVersion::OAS3_1, None);
   assert!(schema.is_some());
   assert!(child_schemas.is_empty());
   assert!(!header_parameter.is_empty());

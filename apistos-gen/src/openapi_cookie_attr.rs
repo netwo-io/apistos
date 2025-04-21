@@ -66,11 +66,11 @@ impl ToTokens for OpenapiCookieAttributeExtended {
     tokens.extend(quote! {
       #schema_impl
 
-      fn request_body(_: apistos::OpenApiVersion) -> Option<apistos::paths::RequestBody> {
+      fn request_body(_: apistos::OpenApiVersion, _description: Option<String>) -> Option<apistos::paths::RequestBody> {
         None
       }
 
-      fn parameters(oas_version: apistos::OpenApiVersion) -> Vec<apistos::paths::Parameter> {
+      fn parameters(oas_version: apistos::OpenApiVersion, _description: Option<String>) -> Vec<apistos::paths::Parameter> {
         vec![
           apistos::paths::Parameter {
             name: #name.to_string(),

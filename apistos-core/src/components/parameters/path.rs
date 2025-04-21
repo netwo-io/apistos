@@ -27,17 +27,17 @@ where
     None
   }
 
-  fn request_body(_: OpenApiVersion) -> Option<RequestBody> {
+  fn request_body(_: OpenApiVersion, _description: Option<String>) -> Option<RequestBody> {
     None
   }
 
-  fn parameters(oas_version: OpenApiVersion) -> Vec<Parameter> {
+  fn parameters(oas_version: OpenApiVersion, description: Option<String>) -> Vec<Parameter> {
     let schema = T::schema(oas_version)
       .map(|(_, sch)| sch)
       .or_else(|| Self::raw_schema(oas_version));
 
     if let Some(schema) = schema {
-      parameters_for_schema(oas_version, schema, Self::required())
+      parameters_for_schema(oas_version, schema, Self::required(), description)
     } else {
       vec![]
     }
@@ -66,16 +66,16 @@ where
     None
   }
 
-  fn request_body(_: OpenApiVersion) -> Option<RequestBody> {
+  fn request_body(_: OpenApiVersion, _description: Option<String>) -> Option<RequestBody> {
     None
   }
 
-  fn parameters(oas_version: OpenApiVersion) -> Vec<Parameter> {
+  fn parameters(oas_version: OpenApiVersion, description: Option<String>) -> Vec<Parameter> {
     let schema = T::schema(oas_version)
       .map(|(_, sch)| sch)
       .or_else(|| Self::raw_schema(oas_version));
     if let Some(schema) = schema {
-      parameters_for_schema(oas_version, schema, Self::required())
+      parameters_for_schema(oas_version, schema, Self::required(), description)
     } else {
       vec![]
     }
@@ -104,17 +104,17 @@ macro_rules! impl_path_tuple ({ $($ty:ident),+ } => {
       None
     }
 
-    fn request_body(_: OpenApiVersion) -> Option<RequestBody> {
+    fn request_body(_: OpenApiVersion, _description: Option<String>) -> Option<RequestBody> {
       None
     }
 
-    fn parameters(oas_version: OpenApiVersion) -> Vec<Parameter> {
+    fn parameters(oas_version: OpenApiVersion, description: Option<String>) -> Vec<Parameter> {
       let mut parameters = vec![];
       $(
         let schema = $ty::schema(oas_version).map(|(_, sch)| sch).or_else(|| $ty::raw_schema(oas_version));
 
         if let Some(schema) = schema {
-          parameters.append(&mut parameters_for_schema(oas_version, schema, Self::required()));
+          parameters.append(&mut parameters_for_schema(oas_version, schema, Self::required(), description.clone()));
         }
       )+
       parameters
@@ -143,17 +143,17 @@ macro_rules! impl_path_tuple ({ $($ty:ident),+ } => {
       None
     }
 
-    fn request_body(_: OpenApiVersion) -> Option<RequestBody> {
+    fn request_body(_: OpenApiVersion, _description: Option<String>) -> Option<RequestBody> {
       None
     }
 
-    fn parameters(oas_version: OpenApiVersion) -> Vec<Parameter> {
+    fn parameters(oas_version: OpenApiVersion, description: Option<String>) -> Vec<Parameter> {
       let mut parameters = vec![];
       $(
         let schema = $ty::schema(oas_version).map(|(_, sch)| sch).or_else(|| $ty::raw_schema(oas_version));
 
         if let Some(schema) = schema {
-          parameters.append(&mut parameters_for_schema(oas_version, schema, Self::required()));
+          parameters.append(&mut parameters_for_schema(oas_version, schema, Self::required(), description.clone()));
         }
       )+
       parameters
@@ -179,12 +179,13 @@ fn parameters_for_schema(
   oas_version: OpenApiVersion,
   schema: ReferenceOr<ApistosSchema>,
   required: bool,
+  description: Option<String>,
 ) -> Vec<Parameter> {
   let mut parameters = vec![];
 
   match schema {
     r @ ReferenceOr::Reference { .. } => {
-      parameters.push(gen_simple_path_parameter(r, required));
+      parameters.push(gen_simple_path_parameter(r, required, description));
     }
     ReferenceOr::Object(schema) => {
       let sch = schema.inner().as_object();
@@ -203,6 +204,7 @@ fn parameters_for_schema(
                 .unwrap_or_default()
                 .into(),
               required,
+              description.clone(),
             ));
           }
         }
@@ -210,9 +212,15 @@ fn parameters_for_schema(
         let _type = obj.get("type");
         if let Some(Value::String(string)) = _type {
           if string == "object" {
-            parameters.append(&mut gen_path_parameter_for_object(oas_version, &schema, obj, required))
+            parameters.append(&mut gen_path_parameter_for_object(
+              oas_version,
+              &schema,
+              obj,
+              required,
+              description,
+            ));
           } else if processable_instance_type(string) {
-            parameters.push(gen_simple_path_parameter(schema.into(), required));
+            parameters.push(gen_simple_path_parameter(schema.into(), required, description));
           }
         }
       }
@@ -227,6 +235,7 @@ fn gen_path_parameter_for_object(
   schema: &ApistosSchema,
   obj: &Map<String, Value>,
   required: bool,
+  description: Option<String>,
 ) -> Vec<Parameter> {
   let properties = obj
     .get("properties")
@@ -234,7 +243,7 @@ fn gen_path_parameter_for_object(
     .cloned()
     .unwrap_or_default();
   if properties.is_empty() {
-    vec![gen_simple_path_parameter(schema.clone().into(), required)]
+    vec![gen_simple_path_parameter(schema.clone().into(), required, description)]
   } else {
     properties
       .clone()
@@ -245,6 +254,7 @@ fn gen_path_parameter_for_object(
         definition: Some(ParameterDefinition::Schema(
           ApistosSchema::from_value(&schema, oas_version).into(),
         )),
+        description: description.clone().clone(),
         required: Some(required),
         ..Default::default()
       })
@@ -252,12 +262,17 @@ fn gen_path_parameter_for_object(
   }
 }
 
-fn gen_simple_path_parameter(component: ReferenceOr<ApistosSchema>, required: bool) -> Parameter {
+fn gen_simple_path_parameter(
+  component: ReferenceOr<ApistosSchema>,
+  required: bool,
+  description: Option<String>,
+) -> Parameter {
   Parameter {
     name: "".to_string(), // this name is overridden later because it is contained in the path
     _in: ParameterIn::Path,
     definition: Some(ParameterDefinition::Schema(component)),
     required: Some(required),
+    description,
     ..Default::default()
   }
 }

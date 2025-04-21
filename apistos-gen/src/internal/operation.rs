@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use proc_macro2::TokenStream;
+use proc_macro2::{Ident, TokenStream};
 use quote::{ToTokens, quote};
 use syn::Type;
 
@@ -8,12 +8,15 @@ use crate::internal::security::Security;
 use crate::operation_attr::OperationCallbacks;
 
 pub(crate) struct Operation<'a> {
-  pub(crate) args: &'a [Type],
+  pub(crate) args: &'a [(Option<Ident>, Type)],
   pub(crate) responder_wrapper: &'a TokenStream,
   pub(crate) operation_id: Option<&'a String>,
   pub(crate) deprecated: Option<bool>,
   pub(crate) summary: Option<&'a String>,
   pub(crate) description: Option<&'a str>,
+  pub(crate) success_description: Option<&'a str>,
+  pub(crate) body_description: Option<&'a str>,
+  pub(crate) parameter_description: BTreeMap<String, String>,
   pub(crate) tags: &'a [String],
   pub(crate) scopes: BTreeMap<String, Vec<String>>,
   pub(crate) callbacks: &'a [OperationCallbacks],
@@ -47,6 +50,18 @@ impl ToTokens for Operation<'_> {
         quote!(operation_builder.description = Some(#d.to_string());)
       }
     };
+    let success_description = match self.success_description {
+      None => quote!(None),
+      Some(d) => {
+        quote!(Some(#d.to_string()))
+      }
+    };
+    let body_description = match self.body_description {
+      None => quote!(None),
+      Some(d) => {
+        quote!(Some(#d.to_string()))
+      }
+    };
     let tags = if self.tags.is_empty() {
       quote!()
     } else {
@@ -58,6 +73,21 @@ impl ToTokens for Operation<'_> {
         operation_builder.tags = tags;
       }
     };
+    let mut parameters = quote!(let mut parameters = vec![];);
+    for (parameter_ident, parameter_type) in args {
+      let parameter_description = parameter_ident
+        .clone()
+        .and_then(|ident| self.parameter_description.get(&ident.to_string()));
+      let parameter_description = if let Some(parameter_description) = parameter_description {
+        quote!(Some(#parameter_description.to_string()))
+      } else {
+        quote!(None)
+      };
+      parameters
+        .extend(quote!(parameters.append(&mut <#parameter_type>::parameters(oas_version, #parameter_description));));
+    }
+
+    let args = &args.iter().map(|(_, _type)| _type).cloned().collect::<Vec<Type>>();
     let security = Security {
       args,
       scopes: &self.scopes,
@@ -137,6 +167,7 @@ impl ToTokens for Operation<'_> {
     } else {
       quote!(None)
     };
+
     tokens.extend(quote!(
       fn operation(oas_version: apistos::OpenApiVersion) -> apistos::paths::Operation {
         use apistos::ApiComponent;
@@ -144,7 +175,7 @@ impl ToTokens for Operation<'_> {
 
         let mut body_requests: Vec<std::option::Option<apistos::paths::RequestBody>> = vec![];
         #(
-          let mut request_body = <#args>::request_body(oas_version);
+          let mut request_body = <#args>::request_body(oas_version, #body_description);
           let consumes: Option<String> = #consumes;
           if let Some(consumes) = consumes {
             request_body
@@ -163,15 +194,12 @@ impl ToTokens for Operation<'_> {
           operation_builder.request_body = Some(apistos::reference_or::ReferenceOr::Object(body_request));
         }
 
-        let mut parameters = vec![];
-        #(
-          parameters.append(&mut <#args>::parameters(oas_version));
-        )*
+        #parameters
         if !parameters.is_empty() {
           operation_builder.parameters = parameters.into_iter().map(apistos::reference_or::ReferenceOr::Object).collect();
         }
 
-        if let Some(responses) = <#responder_wrapper>::responses(oas_version, #produces) {
+        if let Some(responses) = <#responder_wrapper>::responses(oas_version, #produces, #success_description) {
           #error_codes_filter
           operation_builder.responses = responses;
         }

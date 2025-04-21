@@ -9,6 +9,7 @@ pub fn response_from_schema(
   oas_version: OpenApiVersion,
   status: &str,
   schema: Option<(String, ReferenceOr<ApistosSchema>)>,
+  description: Option<String>,
 ) -> Option<Responses> {
   schema.map(|(name, schema)| match schema {
     ReferenceOr::Reference { _ref } => Responses {
@@ -42,6 +43,7 @@ pub fn response_from_schema(
             ..Default::default()
           },
         )]),
+        description: description.unwrap_or_default(),
         ..Default::default()
       };
       Responses {
@@ -56,6 +58,7 @@ pub fn response_from_raw_schema(
   oas_version: OpenApiVersion,
   status: &str,
   raw_schema: Option<ReferenceOr<ApistosSchema>>,
+  description: Option<String>,
 ) -> Option<Responses> {
   raw_schema.map(|schema| match schema {
     ReferenceOr::Reference { _ref } => Responses {
@@ -75,6 +78,7 @@ pub fn response_from_raw_schema(
             ..Default::default()
           },
         )]),
+        description: description.unwrap_or_default(),
         ..Default::default()
       };
       Responses {

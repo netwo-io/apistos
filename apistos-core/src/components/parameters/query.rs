@@ -54,13 +54,13 @@ macro_rules! impl_query {
         None
       }
 
-      fn request_body(_: OpenApiVersion) -> Option<RequestBody> {
+      fn request_body(_: OpenApiVersion, _description: Option<String>) -> Option<RequestBody> {
         None
       }
 
-      fn parameters(oas_version: OpenApiVersion) -> Vec<Parameter> {
+      fn parameters(oas_version: OpenApiVersion, description: Option<String>) -> Vec<Parameter> {
         let schema = T::schema(oas_version).map(|(_, sch)| sch).or_else(|| Self::raw_schema(oas_version));
-        parameters_from_schema(oas_version, schema, None, &None, &$style, $explode)
+        parameters_from_schema(oas_version, schema, None, &description, &$style, $explode)
       }
     }
 
@@ -84,13 +84,13 @@ macro_rules! impl_query {
         None
       }
 
-      fn request_body(_: OpenApiVersion) -> Option<RequestBody> {
+      fn request_body(_: OpenApiVersion, _description: Option<String>) -> Option<RequestBody> {
         None
       }
 
-      fn parameters(oas_version: OpenApiVersion) -> Vec<Parameter> {
+      fn parameters(oas_version: OpenApiVersion, description: Option<String>) -> Vec<Parameter> {
         let schema = V::schema(oas_version).map(|(_, sch)| sch).or_else(|| Self::raw_schema(oas_version));
-        parameters_from_hashmap(oas_version, schema, $hashmap_style)
+        parameters_from_hashmap(oas_version, schema, $hashmap_style, description)
       }
     }
   };
@@ -196,6 +196,7 @@ fn parameters_from_hashmap(
   oas_version: OpenApiVersion,
   schema: Option<ReferenceOr<ApistosSchema>>,
   style: Option<ParameterStyle>,
+  description: Option<String>,
 ) -> Vec<Parameter> {
   let parameters;
   if let Some(schema) = schema {
@@ -207,6 +208,7 @@ fn parameters_from_hashmap(
           definition: Some(ParameterDefinition::Schema(ReferenceOr::Object(
             ApistosSchema::default(),
           ))),
+          description,
           ..Default::default()
         }];
       }
@@ -228,6 +230,7 @@ fn parameters_from_hashmap(
             .unwrap_or_default()
             .into(),
           )),
+          description,
           ..Default::default()
         }];
       }
@@ -240,6 +243,7 @@ fn parameters_from_hashmap(
       definition: Some(ParameterDefinition::Schema(ReferenceOr::Object(
         ApistosSchema::default(),
       ))),
+      description,
       ..Default::default()
     }];
   }
@@ -354,7 +358,7 @@ mod test {
 
   #[test]
   fn test_query_parameter_oas_3_0() {
-    let parameters_schema = <Query<Test> as ApiComponent>::parameters(OpenApiVersion::OAS3_0);
+    let parameters_schema = <Query<Test> as ApiComponent>::parameters(OpenApiVersion::OAS3_0, None);
     assert_eq!(parameters_schema.len(), 2);
 
     let id_number_parameter_schema = parameters_schema
@@ -410,7 +414,7 @@ mod test {
 
   #[test]
   fn test_query_parameter_oas_3_1() {
-    let parameters_schema = <Query<Test> as ApiComponent>::parameters(OpenApiVersion::OAS3_1);
+    let parameters_schema = <Query<Test> as ApiComponent>::parameters(OpenApiVersion::OAS3_1, None);
     assert_eq!(parameters_schema.len(), 2);
 
     let id_number_parameter_schema = parameters_schema
@@ -467,7 +471,7 @@ mod test {
   #[cfg(feature = "qs_query")]
   #[test]
   fn test_qs_query_parameter_oas_3_0() {
-    let parameters_schema = <QsQuery<Test> as ApiComponent>::parameters(OpenApiVersion::OAS3_0);
+    let parameters_schema = <QsQuery<Test> as ApiComponent>::parameters(OpenApiVersion::OAS3_0, None);
     assert_eq!(parameters_schema.len(), 2);
 
     let id_number_parameter_schema = parameters_schema
@@ -524,7 +528,7 @@ mod test {
   #[cfg(feature = "qs_query")]
   #[test]
   fn test_qs_query_parameter_oas_3_1() {
-    let parameters_schema = <QsQuery<Test> as ApiComponent>::parameters(OpenApiVersion::OAS3_1);
+    let parameters_schema = <QsQuery<Test> as ApiComponent>::parameters(OpenApiVersion::OAS3_1, None);
     assert_eq!(parameters_schema.len(), 2);
 
     let id_number_parameter_schema = parameters_schema
@@ -581,7 +585,7 @@ mod test {
   #[cfg(feature = "lab_query")]
   #[test]
   fn test_lab_query_parameter_os_3_0() {
-    let parameters_schema = <LabQuery<Test> as ApiComponent>::parameters(OpenApiVersion::OAS3_0);
+    let parameters_schema = <LabQuery<Test> as ApiComponent>::parameters(OpenApiVersion::OAS3_0, None);
     assert_eq!(parameters_schema.len(), 2);
 
     let id_number_parameter_schema = parameters_schema
@@ -642,7 +646,7 @@ mod test {
   #[cfg(feature = "lab_query")]
   #[test]
   fn test_lab_query_parameter_os_3_1() {
-    let parameters_schema = <LabQuery<Test> as ApiComponent>::parameters(OpenApiVersion::OAS3_1);
+    let parameters_schema = <LabQuery<Test> as ApiComponent>::parameters(OpenApiVersion::OAS3_1, None);
     assert_eq!(parameters_schema.len(), 2);
 
     let id_number_parameter_schema = parameters_schema

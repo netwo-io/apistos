@@ -33,15 +33,15 @@ where
     None
   }
 
-  fn request_body(_: OpenApiVersion) -> Option<RequestBody> {
+  fn request_body(_: OpenApiVersion, _description: Option<String>) -> Option<RequestBody> {
     None
   }
 
-  fn parameters(oas_version: OpenApiVersion) -> Vec<Parameter> {
+  fn parameters(oas_version: OpenApiVersion, description: Option<String>) -> Vec<Parameter> {
     vec![Parameter {
       name: T::name(),
       _in: ParameterIn::Header,
-      description: T::description(),
+      description: description.or_else(|| T::description()),
       required: Some(<T as ApiHeader>::required()),
       deprecated: Some(<T as ApiHeader>::deprecated()),
       style: Some(ParameterStyle::Simple),
@@ -71,15 +71,15 @@ where
     None
   }
 
-  fn request_body(_: OpenApiVersion) -> Option<RequestBody> {
+  fn request_body(_: OpenApiVersion, _description: Option<String>) -> Option<RequestBody> {
     None
   }
 
-  fn parameters(oas_version: OpenApiVersion) -> Vec<Parameter> {
+  fn parameters(oas_version: OpenApiVersion, description: Option<String>) -> Vec<Parameter> {
     vec![Parameter {
       name: T::name(),
       _in: ParameterIn::Header,
-      description: T::description(),
+      description: description.or_else(|| T::description()),
       required: Some(<T as ApiHeader>::required()),
       deprecated: Some(<T as ApiHeader>::deprecated()),
       style: Some(ParameterStyle::Simple),
