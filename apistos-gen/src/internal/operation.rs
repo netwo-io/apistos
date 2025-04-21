@@ -15,7 +15,6 @@ pub(crate) struct Operation<'a> {
   pub(crate) summary: Option<&'a String>,
   pub(crate) description: Option<&'a str>,
   pub(crate) success_description: Option<&'a str>,
-  pub(crate) body_description: Option<&'a str>,
   pub(crate) parameter_description: BTreeMap<String, String>,
   pub(crate) tags: &'a [String],
   pub(crate) scopes: BTreeMap<String, Vec<String>>,
@@ -56,12 +55,6 @@ impl ToTokens for Operation<'_> {
         quote!(Some(#d.to_string()))
       }
     };
-    let body_description = match self.body_description {
-      None => quote!(None),
-      Some(d) => {
-        quote!(Some(#d.to_string()))
-      }
-    };
     let tags = if self.tags.is_empty() {
       quote!()
     } else {
@@ -73,7 +66,21 @@ impl ToTokens for Operation<'_> {
         operation_builder.tags = tags;
       }
     };
+
+    let consumes = if let Some(consumes) = self.consumes {
+      quote!(Some(#consumes.to_string()))
+    } else {
+      quote!(None)
+    };
+    let produces = if let Some(produces) = self.produces {
+      quote!(Some(#produces.to_string()))
+    } else {
+      quote!(None)
+    };
+
     let mut parameters = quote!(let mut parameters = vec![];);
+    let mut body_requests =
+      quote!(let mut body_requests: Vec<std::option::Option<apistos::paths::RequestBody>> = vec![];);
     for (parameter_ident, parameter_type) in args {
       let parameter_description = parameter_ident
         .clone()
@@ -85,6 +92,21 @@ impl ToTokens for Operation<'_> {
       };
       parameters
         .extend(quote!(parameters.append(&mut <#parameter_type>::parameters(oas_version, #parameter_description));));
+      body_requests.extend(quote! {
+        let mut request_body = <#parameter_type>::request_body(oas_version, #parameter_description);
+          let consumes: Option<String> = #consumes;
+          if let Some(consumes) = consumes {
+            request_body
+              .as_mut()
+              .map(|t|
+                t.content = t
+                  .content
+                  .values()
+                  .map(|v| (consumes.clone(), v.clone())).collect::<std::collections::BTreeMap<String, apistos::paths::MediaType>>()
+              );
+          }
+          body_requests.push(request_body);
+      })
     }
 
     let args = &args.iter().map(|(_, _type)| _type).cloned().collect::<Vec<Type>>();
@@ -157,38 +179,12 @@ impl ToTokens for Operation<'_> {
       }
     };
 
-    let consumes = if let Some(consumes) = self.consumes {
-      quote!(Some(#consumes.to_string()))
-    } else {
-      quote!(None)
-    };
-    let produces = if let Some(produces) = self.produces {
-      quote!(Some(#produces.to_string()))
-    } else {
-      quote!(None)
-    };
-
     tokens.extend(quote!(
       fn operation(oas_version: apistos::OpenApiVersion) -> apistos::paths::Operation {
         use apistos::ApiComponent;
         let mut operation_builder = apistos::paths::Operation::default();
 
-        let mut body_requests: Vec<std::option::Option<apistos::paths::RequestBody>> = vec![];
-        #(
-          let mut request_body = <#args>::request_body(oas_version, #body_description);
-          let consumes: Option<String> = #consumes;
-          if let Some(consumes) = consumes {
-            request_body
-              .as_mut()
-              .map(|t|
-                t.content = t
-                  .content
-                  .values()
-                  .map(|v| (consumes.clone(), v.clone())).collect::<std::collections::BTreeMap<String, apistos::paths::MediaType>>()
-              );
-          }
-          body_requests.push(request_body);
-        )*
+        #body_requests
         let body_requests = body_requests.into_iter().flatten().collect::<Vec<apistos::paths::RequestBody>>();
         for body_request in body_requests {
           operation_builder.request_body = Some(apistos::reference_or::ReferenceOr::Object(body_request));

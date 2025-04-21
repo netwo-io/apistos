@@ -92,7 +92,6 @@ impl ToTokens for PathItem<'_> {
           }
         }),
         success_description: self.operation_attribute.success_description.as_deref(),
-        body_description: self.operation_attribute.body_description.as_deref(),
         parameter_description: self.operation_attribute.parameter_description.clone(),
         tags: &self.operation_attribute.tags,
         scopes: self.operation_attribute.scopes.clone(),

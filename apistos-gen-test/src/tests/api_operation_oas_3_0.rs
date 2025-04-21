@@ -123,7 +123,7 @@ fn api_operation() {
   /// Add a new pet to the store
   /// Add a new pet to the store
   /// Plop
-  #[api_operation(tag = "pet")]
+  #[api_operation(tag = "pet", parameter_description(_body = "A super description"))]
   pub(crate) async fn test(
     _body: Json<test_models::Test>,
   ) -> Result<Json<test_models::TestResult>, test_models::ErrorResponse> {
@@ -186,6 +186,7 @@ fn api_operation() {
             }
           }
         },
+        "description": "A super description",
         "required": true
       },
       "responses": {

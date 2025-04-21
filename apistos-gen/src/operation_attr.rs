@@ -26,7 +26,6 @@ pub(crate) struct OperationAttrInternal {
   summary: Option<String>,
   description: Option<String>,
   success_description: Option<String>,
-  body_description: Option<String>,
   #[darling(default)]
   parameter_description: HashMap<String, String>,
   #[darling(multiple, rename = "tag")]
@@ -53,7 +52,6 @@ impl ToTokens for OperationAttrInternal {
       summary,
       description,
       success_description,
-      body_description,
       parameter_description,
       tags,
       scopes,
@@ -76,10 +74,6 @@ impl ToTokens for OperationAttrInternal {
       .clone()
       .map(|v| quote!(success_description = #v, ))
       .unwrap_or_default();
-    let body_description = body_description
-      .clone()
-      .map(|v| quote!(body_description = #v, ))
-      .unwrap_or_default();
     let parameter_description = if parameter_description.is_empty() {
       quote!()
     } else {
@@ -100,7 +94,6 @@ impl ToTokens for OperationAttrInternal {
       #summary
       #description
       #success_description
-      #body_description
       #parameter_description
       #(tag = #tags,)*
       #(#scopes,)*
@@ -259,7 +252,6 @@ pub(crate) struct OperationAttr {
   pub(crate) summary: Option<String>,
   pub(crate) description: Option<String>,
   pub(crate) success_description: Option<String>,
-  pub(crate) body_description: Option<String>,
   pub(crate) parameter_description: BTreeMap<String, String>,
   pub(crate) tags: Vec<String>,
   pub(crate) callbacks: Vec<OperationCallbacks>,
@@ -279,7 +271,6 @@ impl From<OperationAttrInternal> for OperationAttr {
       summary: value.summary,
       description: value.description.map(|d| d.replace('\n', "\\\n")),
       success_description: value.success_description.map(|d| d.trim().to_string()),
-      body_description: value.body_description.map(|d| d.trim().to_string()),
       parameter_description: value
         .parameter_description
         .into_iter()
