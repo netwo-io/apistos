@@ -679,8 +679,7 @@ fn api_component_derive_named_enums_documented() {
 fn api_component_derive_named_tagged_enums() {
   #[derive(Serialize, Debug, ApiComponent, JsonSchema)]
   #[cfg_attr(test, derive(Deserialize))]
-  #[serde(tag = "kind")]
-  #[serde(rename_all = "snake_case")]
+  #[serde(tag = "kind", rename_all = "snake_case")]
   pub(crate) enum TestStruct {
     Variant1 {
       expiration: DateTime<Utc>,
@@ -760,16 +759,14 @@ fn api_component_derive_named_enums_deep() {
   }
 
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
-  #[schemars(rename_all = "snake_case")]
-  #[schemars(tag = "type")]
+  #[serde(rename_all = "snake_case", tag = "type")]
   pub(crate) enum Level4Query {
     Something(TestStuff),
     Other(TestStuff),
   }
 
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
-  #[schemars(rename_all = "snake_case")]
-  #[schemars(tag = "type", content = "c")]
+  #[serde(rename_all = "snake_case", tag = "type", content = "c")]
   pub(crate) enum Level4BisQuery {
     Something(TestStuff),
     Other(TestStuff),

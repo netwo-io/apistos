@@ -17,9 +17,9 @@ impl ApistosSchema {
       None => Self(schema),
       Some(obj) => {
         // set title for each one_of if not set
-        if let Some(one_of) = obj.get_mut("oneOf").and_then(|v| v.as_array_mut()) {
-          Self::set_title_for_enum_variants(one_of);
-        }
+        // if let Some(one_of) = obj.get_mut("oneOf").and_then(|v| v.as_array_mut()) {
+        //   Self::set_title_for_enum_variants(one_of);
+        // }
 
         // remove definitions from schema
         Self::remove_definition_from_schema(obj, &oas_version.get_schema_settings().into_generator());
