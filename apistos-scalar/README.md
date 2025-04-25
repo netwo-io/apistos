@@ -25,7 +25,7 @@ This crate is exposed through Apistos `scalar` feature.
 ```toml
 [dependencies]
 schemars = "=1.0.0-alpha.15"
-apistos = { version = "1.0.0-pre-release.10", feature = ["scalar"] }
+apistos = { version = "=1.0.0-pre-release.11", feature = ["scalar"] }
 ```
 
 ### About us
