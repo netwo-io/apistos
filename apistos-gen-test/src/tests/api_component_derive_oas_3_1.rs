@@ -756,6 +756,7 @@ fn api_component_derive_named_enums_deep() {
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
   pub(crate) struct TestStuff {
     pub(crate) name: String,
+    pub(crate) plop: String,
   }
 
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
@@ -962,31 +963,45 @@ fn api_component_derive_named_enums_deep() {
     json!({
       "oneOf": [
         {
-          "title": "type",
+          "title": "something",
           "type": "object",
           "properties": {
             "type": {
               "type": "string",
               "const": "something"
+            },
+            "name": {
+              "type": "string"
+            },
+            "plop": {
+              "type": "string"
             }
           },
-          "$ref": "#/components/schemas/TestStuff",
           "required": [
-            "type"
+            "type",
+            "name",
+            "plop"
           ]
         },
         {
-          "title": "type",
+          "title": "other",
           "type": "object",
           "properties": {
             "type": {
               "type": "string",
               "const": "other"
+            },
+            "name": {
+              "type": "string"
+            },
+            "plop": {
+              "type": "string"
             }
           },
-          "$ref": "#/components/schemas/TestStuff",
           "required": [
-            "type"
+            "type",
+            "name",
+            "plop"
           ]
         }
       ]
