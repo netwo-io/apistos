@@ -17,9 +17,9 @@ impl ApistosSchema {
       None => Self(schema),
       Some(obj) => {
         // set title for each one_of if not set
-        // if let Some(one_of) = obj.get_mut("oneOf").and_then(|v| v.as_array_mut()) {
-        //   Self::set_title_for_enum_variants(one_of);
-        // }
+        if let Some(one_of) = obj.get_mut("oneOf").and_then(|v| v.as_array_mut()) {
+          Self::set_title_for_enum_variants(one_of);
+        }
 
         // remove definitions from schema
         Self::remove_definition_from_schema(obj, &oas_version.get_schema_settings().into_generator());
@@ -73,8 +73,19 @@ impl ApistosSchema {
       if let Some(sch_obj) = s.as_object_mut() {
         if let Some(props) = sch_obj.clone().get("properties").and_then(|v| v.as_object()) {
           if props.len() == 1 {
-            if let Some((prop_name, _)) = props.iter().next() {
-              sch_obj.entry("title").or_insert_with(|| prop_name.clone().into());
+            if let Some((prop_name, prop_value)) = props.iter().next() {
+              if let Some(prop_obj) = prop_value.as_object() {
+                if let Some(Value::String(prop_name)) = prop_obj.get("const") {
+                  // if const is set, use it as title if not already set
+                  sch_obj.entry("title").or_insert_with(|| prop_name.clone().into());
+                } else {
+                  // else, use the property name as title if not already set
+                  sch_obj.entry("title").or_insert_with(|| prop_name.clone().into());
+                }
+              } else {
+                // use the property name as title if not already set
+                sch_obj.entry("title").or_insert_with(|| prop_name.clone().into());
+              }
             }
           } else if let Some(enum_values) = props.iter().find_map(|(_, p)| {
             p.as_object()
