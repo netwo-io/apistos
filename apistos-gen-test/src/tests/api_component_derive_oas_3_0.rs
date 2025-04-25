@@ -942,31 +942,37 @@ fn api_component_derive_named_enums_deep() {
     json!({
       "oneOf": [
         {
-          "title": "type",
+          "title": "something",
           "type": "object",
           "properties": {
             "type": {
               "type": "string",
               "const": "something"
+            },
+            "name": {
+              "type": "string"
             }
           },
-          "$ref": "#/components/schemas/TestStuff",
           "required": [
-            "type"
+            "type",
+            "name"
           ]
         },
         {
-          "title": "type",
+          "title": "other",
           "type": "object",
           "properties": {
             "type": {
               "type": "string",
               "const": "other"
+            },
+            "name": {
+              "type": "string"
             }
           },
-          "$ref": "#/components/schemas/TestStuff",
           "required": [
-            "type"
+            "type",
+            "name"
           ]
         }
       ]
