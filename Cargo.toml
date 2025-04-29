@@ -22,7 +22,7 @@ documentation = "https://docs.rs/apistos/"
 license = "MIT OR Apache-2.0"
 rust-version = "1.85.1"
 publish = true
-version = "1.0.0-pre-release.11"
+version = "1.0.0-pre-release.12"
 
 [workspace.dependencies]
 actix-service = "2"
@@ -54,13 +54,13 @@ actix-test = "0.1"
 actix-utils = "3"
 actix-web-grants = "4"
 actix-session = "0.10"
-garde-actix-web = "0.11"
+garde-actix-web = "0.12"
 chrono = "0.4.20"
 garde = { version = "0.22", features = ["derive", "serde"] }
 ipnetwork_0_20 = { package = "ipnetwork", version = "0.20", features = ["serde"] }
 ipnetwork = { version = "0.21", features = ["serde"] }
 rust_decimal = "1"
-serde_qs = "0.14"
+serde_qs = "0.15"
 shuttle-runtime = { version = "0.53", default-features = false }
 uuid = { version = "1", features = ["serde", "v4"] }
 url = "2"

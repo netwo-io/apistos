@@ -28,7 +28,7 @@ These models are not linked to any web framework.
 ```toml
 [dependencies]
 schemars = "=1.0.0-alpha.15"
-apistos-models = "=1.0.0-pre-release.11"
+apistos-models = "=1.0.0-pre-release.12"
 ```
 
 ### About us
