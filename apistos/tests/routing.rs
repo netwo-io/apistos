@@ -155,7 +155,7 @@ async fn actix_routing_multiple_root_definition_holder() {
 
   let app = App::new()
     .document(spec)
-    .service(scope("test").service(resource("/{plop_id}/{clap_name}").route(get().to(test))))
+    .service(scope("test").service(resource("/{plop_id}/{clap_name}").route(get().to(test).wrap(Logger::default()))))
     .service(scope("test2").service(resource("/{clap_name}").route(get().to(test2))))
     .build("/openapi.json");
   let app = init_service(app).await;
