@@ -61,7 +61,7 @@ ipnetwork_0_20 = { package = "ipnetwork", version = "0.20", features = ["serde"]
 ipnetwork = { version = "0.21", features = ["serde"] }
 rust_decimal = "1"
 serde_qs = "0.15"
-shuttle-runtime = { version = "0.53", default-features = false }
+shuttle-runtime = { version = "0.55", default-features = false }
 uuid = { version = "1", features = ["serde", "v4"] }
 url = "2"
 
