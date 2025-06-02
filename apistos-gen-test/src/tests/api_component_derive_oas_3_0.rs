@@ -263,18 +263,23 @@ fn api_component_derive_recursive() {
   assert_json_eq!(
     json,
     json!({
+      "title": "Name",
+      "type": "object",
       "properties": {
         "old_name": {
-          "allOf": [
+          "anyOf": [
             {
               "$ref": "#/components/schemas/Name"
+            },
+            {
+              "nullable": true,
+              "enum": [
+                null
+              ]
             }
-          ],
-          "nullable": true
+          ]
         }
-      },
-      "title": "Name",
-      "type": "object"
+      }
     })
   );
 
@@ -288,8 +293,14 @@ fn api_component_derive_recursive() {
       "type": "object",
       "properties": {
         "old_name": {
-          "$ref": "#/components/schemas/Name",
-          "nullable": true
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/Name"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       }
     })
@@ -415,12 +426,17 @@ fn api_component_derive_optional_enums() {
           "type": "integer"
         },
         "status": {
-          "allOf": [
+          "anyOf": [
             {
               "$ref": "#/components/schemas/StatusQuery"
+            },
+            {
+              "nullable": true,
+              "enum": [
+                null
+              ]
             }
           ],
-          "nullable": true
         },
         "test": {
           "nullable": true,
@@ -948,14 +964,15 @@ fn api_component_derive_named_enums_deep() {
             "type": {
               "type": "string",
               "const": "something"
-            },
-            "name": {
-              "type": "string"
             }
           },
           "required": [
-            "type",
-            "name"
+            "type"
+          ],
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/TestStuff"
+            }
           ]
         },
         {
@@ -965,14 +982,15 @@ fn api_component_derive_named_enums_deep() {
             "type": {
               "type": "string",
               "const": "other"
-            },
-            "name": {
-              "type": "string"
             }
           },
           "required": [
-            "type",
-            "name"
+            "type"
+          ],
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/TestStuff"
+            }
           ]
         }
       ]

@@ -969,18 +969,15 @@ fn api_component_derive_named_enums_deep() {
             "type": {
               "type": "string",
               "const": "something"
-            },
-            "name": {
-              "type": "string"
-            },
-            "plop": {
-              "type": "string"
             }
           },
           "required": [
-            "type",
-            "name",
-            "plop"
+            "type"
+          ],
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/TestStuff"
+            }
           ]
         },
         {
@@ -990,18 +987,15 @@ fn api_component_derive_named_enums_deep() {
             "type": {
               "type": "string",
               "const": "other"
-            },
-            "name": {
-              "type": "string"
-            },
-            "plop": {
-              "type": "string"
             }
           },
           "required": [
-            "type",
-            "name",
-            "plop"
+            "type"
+          ],
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/TestStuff"
+            }
           ]
         }
       ]

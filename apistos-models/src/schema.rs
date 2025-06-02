@@ -1,8 +1,78 @@
 use crate::OpenApiVersion;
 use log::warn;
+use schemars::transform::Transform;
 use schemars::{Schema, SchemaGenerator};
 use serde::Serialize;
-use serde_json::Value;
+use serde_json::{Value, json};
+
+#[derive(Debug, Clone)]
+pub(crate) struct EnumNewTypeInternallyTaggedEnumWrapRef;
+
+impl Transform for EnumNewTypeInternallyTaggedEnumWrapRef {
+  fn transform(&mut self, schema: &mut Schema) {
+    let Some(root) = schema.as_object_mut() else { return };
+
+    let mut one_of = match root.remove("oneOf") {
+      Some(Value::Array(arr)) => arr,
+      _ => vec![],
+    };
+
+    for v in &mut one_of {
+      if let Some(v) = v.as_object_mut() {
+        if let Some(component_ref) = v.remove("$ref") {
+          let properties = v.entry("allOf").or_insert_with(|| Value::Array(vec![])).as_array_mut();
+          if let Some(properties) = properties {
+            properties.push(json!({
+              "$ref": component_ref
+            }));
+          }
+        }
+      }
+    }
+
+    if !one_of.is_empty() {
+      root.insert("oneOf".to_string(), Value::Array(one_of));
+    }
+
+    let components = root.get_mut("components").and_then(|c| {
+      c.as_object_mut()
+        .and_then(|c| c.get_mut("schemas").and_then(|s| s.as_object_mut()))
+    });
+
+    let components = match components {
+      None => &mut serde_json::Map::new(),
+      Some(obj) => obj,
+    };
+
+    for (_component_name, component) in components {
+      let Some(component) = component.as_object_mut() else {
+        return;
+      };
+
+      let mut one_of = match component.remove("oneOf") {
+        Some(Value::Array(arr)) => arr,
+        _ => vec![],
+      };
+
+      for v in &mut one_of {
+        if let Some(v) = v.as_object_mut() {
+          if let Some(component_ref) = v.remove("$ref") {
+            let properties = v.entry("allOf").or_insert_with(|| Value::Array(vec![])).as_array_mut();
+            if let Some(properties) = properties {
+              properties.push(json!({
+                "$ref": component_ref
+              }));
+            }
+          }
+        }
+      }
+
+      if !one_of.is_empty() {
+        component.insert("oneOf".to_string(), Value::Array(one_of));
+      }
+    }
+  }
+}
 
 #[derive(Serialize, Clone, Debug, Default)]
 #[cfg_attr(any(test, feature = "deserialize"), derive(serde::Deserialize, PartialEq))]
@@ -267,14 +337,11 @@ mod test {
               "type": {
                 "type": "string",
                 "const": "Test"
-              },
-              "name": {
-                "type": "string"
               }
             },
+            "$ref": "#/components/schemas/TestStruct",
             "required": [
-              "type",
-              "name"
+              "type"
             ]
           },
           {
@@ -284,14 +351,11 @@ mod test {
               "type": {
                 "type": "string",
                 "const": "Test2"
-              },
-              "surname": {
-                "type": "string"
               }
             },
+            "$ref": "#/components/schemas/TestStruct2",
             "required": [
-              "type",
-              "surname"
+              "type"
             ]
           }
         ]
@@ -420,14 +484,11 @@ mod test {
               "type": {
                 "type": "string",
                 "const": "Test"
-              },
-              "name": {
-                "type": "string"
               }
             },
+            "$ref": "#/$defs/TestStruct",
             "required": [
-              "type",
-              "name"
+              "type"
             ]
           },
           {
@@ -437,14 +498,11 @@ mod test {
               "type": {
                 "type": "string",
                 "const": "Test2"
-              },
-              "surname": {
-                "type": "string"
               }
             },
+            "$ref": "#/$defs/TestStruct2",
             "required": [
-              "type",
-              "surname"
+              "type"
             ]
           }
         ]
