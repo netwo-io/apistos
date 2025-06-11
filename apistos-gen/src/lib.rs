@@ -182,6 +182,8 @@ pub fn derive_api_component(input: TokenStream) -> TokenStream {
 ///       - `bearer_format = "..."` a **required** parameter
 ///     - `open_id_connect(open_id_connect_url = "...")`
 ///
+/// _To define multiple elements of a list, repeat the property multiple times_
+///
 /// # Examples:
 ///
 /// ## **oauth2**
@@ -411,6 +413,8 @@ pub fn derive_api_cookie(input: TokenStream) -> TokenStream {
 /// - `status(...)` a list of possible error status with
 ///   - `code = 000` a **required** http status code
 ///   - `description = "..."` an optional description, default is the canonical reason of the given status code
+///
+/// _To define multiple elements of a list, repeat the property multiple times_
 #[proc_macro_error]
 #[proc_macro_derive(ApiErrorComponent, attributes(openapi_error))]
 pub fn derive_api_error(input: TokenStream) -> TokenStream {
@@ -458,9 +462,13 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
 /// #[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
 /// #[openapi_error(
 ///   status(code = 405, description = "Invalid input"),
+///   status(code = 401),
+///   status(code = 403),
 /// )]
 /// pub enum ErrorResponse {
 ///   MethodNotAllowed(String),
+///   Unauthorized(String),
+///   Forbidden(String),
 /// }
 ///
 /// impl Display for ErrorResponse {
@@ -480,6 +488,7 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
 ///   summary = "Add a new pet to the store",
 ///   description = r###"Add a new pet to the store
 ///     Plop"###,
+///   error_code = 401,
 ///   error_code = 405
 /// )]
 /// pub(crate) async fn test(
@@ -506,6 +515,8 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
 ///   - `error_code = 00` an optional list of error codes to document only theses
 ///   - `consumes = "..."` allow to override body content type
 ///   - `produces = "..."` allow to override response content type
+///
+/// _To define multiple elements of a list, repeat the property multiple times_
 ///
 /// If `summary` or `description` are not provided, a default value will be extracted from the comments. The first line will be used as summary while the rest will be part of the description.
 ///
