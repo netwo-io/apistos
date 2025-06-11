@@ -728,12 +728,12 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
 /// - `component(...)` an optional list of components attached to this webhook operation (parameters, body...)
 ///     - `component = "..."` the type of this component
 ///     - `description = "..."` an optional description attached to this component (parameters description, body description, response description, ...). If used
-///        on a header, overrides the previously set header's description)
+///        on a header, override the previously set header's description
 /// - `response(...)` an optional list of responses attached to this webhook operation
 ///   - `code = "..."` Http response code
 ///   - `component(...)` an option component attached to the given webhook response.
-///       - `component = "..."` the component type, must derive [ApiComponent] and [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
-///       - `description = "..."` an optional description attached to this component. If used on a header, overrides the previously set header's description)
+///       - `component = "..."` the component type must derive [ApiComponent] and [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
+///       - `description = "..."` an optional description attached to this component. If used on a header, overrides the previously set header's description
 #[proc_macro_error]
 #[proc_macro_derive(ApiWebhookComponent, attributes(openapi_webhook))]
 pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
@@ -816,7 +816,7 @@ pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
 ///
 /// # `#[api_operation(...)]` options:
 ///   - `skip` a bool allowing to skip documentation for the decorated handler. No component
-///  strictly associated to this operation will be documented in the resulting openapi definition.
+///  strictly associated with this operation will be documented in the resulting openapi definition.
 ///   - `skip_args = "..."` an optional list of arguments to skip. `Apistos` will not try to generate the
 ///  documentation for those args which prevent errors linked to missing `ApiComponent` implementation.
 ///   - `deprecated` a bool indicating the operation is deprecated. Deprecation can also be declared
@@ -1102,12 +1102,12 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
 ///   - `component(...)` an optional list of components attached to this callback operation (parameters, body...)
 ///     - `component = "..."` a type for this component
 ///     - `description = "..."` an optional description attached to this component (parameters description, body description, response description, ...). If used
-///        on a header, overrides the previously set header's description)
+///        on a header, override the previously set header's description
 ///   - `response(...)` an optional list of responses attached to this callback operation
 ///     - `code = "..."` Http response code
 ///     - `component(...)` an option component attached to the given callback response.
-///       - `component = "..."` the component type, must derive [ApiComponent] and [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
-///       - `description = "..."` an optional description attached to this component. If used on a header, overrides the previously set header's description)
+///       - `component = "..."` the component type must derive [ApiComponent] and [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
+///       - `description = "..."` an optional description attached to this component. If used on a header, overrides the previously set header's description
 ///
 /// If `summary` or `description` are not provided, a default value will be extracted from the comments. The first line will be used as summary while the rest will be part of the description.
 #[proc_macro_error]
@@ -1160,7 +1160,7 @@ pub fn api_callback(attr: TokenStream, item: TokenStream) -> TokenStream {
 /// ```
 ///
 /// # Attributes
-/// - `path = "path"`: Raw literal string with path for which to register handler.
+/// - `path = "path"`: Raw literal string with a path for which to register handler.
 /// - `name = "resource_name"`: Specifies resource name for the handler. If not set, the function
 ///   name of handler is used.
 /// - `method(...)`: Registers HTTP method to provide guard for.
@@ -1471,11 +1471,11 @@ actix_method_macro!(Patch, patch);
 /// ```
 ///
 /// # Attributes
-/// - `path = "path"`: Raw literal string with path for which to register handler.
+/// - `path = "path"`: Raw literal string with a path for which to register handler.
 /// - `name = "resource_name"`: Specifies resource name for the handler. If not set, the
 ///   function name of handler is used.
 /// - `guard = "function_name"`: Registers function as guard using `actix_web::guard::fn_guard`.
-/// - `wrap = "Middleware"`: Registers a resource middleware.
+/// - `wrap = "Middleware"`: Registers resource middleware.
 ///  - `key = "value"` any [`api_operation`](https://docs.rs/apistos/latest/apistos/attr.api_operation.html) option
 ///
 /// # Examples
