@@ -33,6 +33,8 @@ macro_rules! simple_modifier {
 pub(crate) use simple_modifier;
 
 simple_modifier!(char);
+simple_modifier!(&'static str);
+simple_modifier!(&'static [u8]);
 simple_modifier!(String);
 simple_modifier!(bool);
 simple_modifier!(f32);
