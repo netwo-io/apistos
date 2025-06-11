@@ -30,7 +30,7 @@ use proc_macro_error2::{OptionExt, abort, proc_macro_error};
 use proc_macro2::Span;
 use quote::{format_ident, quote};
 use std::str::FromStr;
-use syn::{DeriveInput, GenericParam, Ident, ItemFn, ItemStruct};
+use syn::{DeriveInput, GenericParam, Ident, Item, ItemFn};
 
 #[cfg(feature = "actix-web-macros")]
 mod actix_operation_attr;
@@ -267,7 +267,14 @@ pub fn derive_api_component(input: TokenStream) -> TokenStream {
 #[proc_macro_error]
 #[proc_macro_attribute]
 pub fn api_component(_attr: TokenStream, item: TokenStream) -> TokenStream {
-  let input = syn::parse_macro_input!(item as ItemStruct);
+  let input = syn::parse_macro_input!(item as Item);
+
+  if !matches!(input, Item::Enum(_)) && !matches!(input, Item::Struct(_)) {
+    abort!(
+      Span::call_site(),
+      "#[api_component] can only be used on structs and enums".to_string()
+    )
+  }
 
   quote!(
     #[derive(apistos::ApiComponent, apistos::schemars::JsonSchema)]
@@ -502,7 +509,14 @@ pub fn derive_api_header(input: TokenStream) -> TokenStream {
 #[proc_macro_error]
 #[proc_macro_attribute]
 pub fn api_header(_attr: TokenStream, item: TokenStream) -> TokenStream {
-  let input = syn::parse_macro_input!(item as ItemStruct);
+  let input = syn::parse_macro_input!(item as Item);
+
+  if !matches!(input, Item::Enum(_)) && !matches!(input, Item::Struct(_)) {
+    abort!(
+      Span::call_site(),
+      "#[api_header] can only be used on structs and enums".to_string()
+    )
+  }
 
   quote!(
     #[derive(apistos::ApiHeader, apistos::schemars::JsonSchema)]
@@ -615,7 +629,14 @@ pub fn derive_api_cookie(input: TokenStream) -> TokenStream {
 #[proc_macro_error]
 #[proc_macro_attribute]
 pub fn api_cookie(_attr: TokenStream, item: TokenStream) -> TokenStream {
-  let input = syn::parse_macro_input!(item as ItemStruct);
+  let input = syn::parse_macro_input!(item as Item);
+
+  if !matches!(input, Item::Enum(_)) && !matches!(input, Item::Struct(_)) {
+    abort!(
+      Span::call_site(),
+      "#[api_cookie] can only be used on structs and enums".to_string()
+    )
+  }
 
   quote!(
     #[derive(apistos::ApiCookie, apistos::schemars::JsonSchema)]
@@ -1625,7 +1646,7 @@ pub fn scope(attr: TokenStream, item: TokenStream) -> TokenStream {
   // functions by prefixing them with this scope macro's argument
   if let Some((_, items)) = &mut module.content {
     for item in items {
-      if let syn::Item::Fn(fun) = item {
+      if let Item::Fn(fun) = item {
         fun.attrs = fun
           .attrs
           .iter()
