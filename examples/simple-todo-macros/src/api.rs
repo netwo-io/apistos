@@ -9,7 +9,7 @@ pub mod test {
     use actix_web::web::{Json, Path};
     use actix_web::Error;
     use apistos::{get, post, routes, ApiComponent};
-    use schemars::JsonSchema;
+    use apistos_models::schemars::JsonSchema;
     use serde::{Deserialize, Serialize};
     use uuid::Uuid;
 

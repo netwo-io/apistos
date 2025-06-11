@@ -12,8 +12,8 @@ use apistos_models::OpenApi;
 use apistos_models::info::Info;
 use apistos_models::paths::{OperationType, Parameter, ParameterDefinition};
 use apistos_models::reference_or::ReferenceOr;
+use apistos_models::schemars::JsonSchema;
 use apistos_models::tag::Tag;
-use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
 
@@ -38,6 +38,7 @@ async fn path_parameter_replacement() {
   }
 
   #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
+  #[schemars(crate = "apistos")]
   struct Test {
     id_number: u32,
     id_string: String,

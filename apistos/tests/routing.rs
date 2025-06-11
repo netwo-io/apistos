@@ -9,8 +9,8 @@ use apistos::web::{ServiceConfig, delete, get, patch, post, put, resource, scope
 use apistos_gen::{ApiComponent, api_operation};
 use apistos_models::OpenApi;
 use apistos_models::info::Info;
+use apistos_models::schemars::JsonSchema;
 use apistos_models::tag::Tag;
-use schemars::JsonSchema;
 use serde::Serialize;
 
 #[actix_web::test]
@@ -104,11 +104,13 @@ async fn actix_routing() {
 #[actix_web::test]
 async fn actix_routing_multiple_root_definition_holder() {
   #[derive(ApiComponent, JsonSchema, Serialize)]
+  #[schemars(crate = "apistos")]
   pub(crate) struct TestResponse {
     pub(crate) value: String,
   }
 
   #[derive(ApiComponent, JsonSchema, Serialize)]
+  #[schemars(crate = "apistos")]
   pub(crate) struct TestResponse2 {
     pub(crate) value: String,
   }

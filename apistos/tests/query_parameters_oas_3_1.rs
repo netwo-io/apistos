@@ -3,28 +3,31 @@ use actix_web::web::Query;
 use actix_web_lab::extract::Query as LabQuery;
 use apistos_core::ApiComponent;
 use apistos_gen::ApiComponent;
+use apistos_models::schemars::JsonSchema;
 #[cfg(all(feature = "lab_query", feature = "garde"))]
 use garde_actix_web::web::LabQuery as GardeLabQuery;
 #[cfg(feature = "garde")]
 use garde_actix_web::web::Query as GardeQuery;
-use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 #[actix_web::test]
 async fn query_parameters() {
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  #[schemars(crate = "apistos")]
   pub(crate) enum StatusQuery {
     Active,
     Inactive,
   }
 
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  #[schemars(crate = "apistos")]
   pub(crate) struct PaginationQuery {
     pub(crate) limit: u32,
     pub(crate) offset: Option<u32>,
   }
 
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  #[schemars(crate = "apistos")]
   pub(crate) struct StructQuery {
     pub(crate) test: Option<String>,
     pub(crate) status: Option<StatusQuery>,
@@ -65,18 +68,21 @@ async fn query_parameters() {
 #[actix_web::test]
 async fn lab_query_parameters() {
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  #[schemars(crate = "apistos")]
   pub(crate) enum StatusQuery {
     Active,
     Inactive,
   }
 
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  #[schemars(crate = "apistos")]
   pub(crate) struct PaginationQuery {
     pub(crate) limit: u32,
     pub(crate) offset: Option<u32>,
   }
 
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  #[schemars(crate = "apistos")]
   pub(crate) struct StructQuery {
     pub(crate) test: Option<String>,
     pub(crate) status: Option<StatusQuery>,
@@ -116,18 +122,21 @@ async fn lab_query_parameters() {
 #[actix_web::test]
 async fn garde_query_parameters() {
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  #[schemars(crate = "apistos")]
   pub(crate) enum StatusQuery {
     Active,
     Inactive,
   }
 
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  #[schemars(crate = "apistos")]
   pub(crate) struct PaginationQuery {
     pub(crate) limit: u32,
     pub(crate) offset: Option<u32>,
   }
 
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  #[schemars(crate = "apistos")]
   pub(crate) struct StructQuery {
     pub(crate) test: Option<String>,
     pub(crate) status: Option<StatusQuery>,
@@ -170,18 +179,21 @@ async fn garde_query_parameters() {
 #[actix_web::test]
 async fn garde_lab_query_parameters() {
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  #[schemars(crate = "apistos")]
   pub(crate) enum StatusQuery {
     Active,
     Inactive,
   }
 
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  #[schemars(crate = "apistos")]
   pub(crate) struct PaginationQuery {
     pub(crate) limit: u32,
     pub(crate) offset: Option<u32>,
   }
 
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  #[schemars(crate = "apistos")]
   pub(crate) struct StructQuery {
     pub(crate) test: Option<String>,
     pub(crate) status: Option<StatusQuery>,
@@ -220,18 +232,21 @@ async fn garde_lab_query_parameters() {
 #[actix_web::test]
 async fn query_parameters_with_flatten_enums() {
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  #[schemars(crate = "apistos")]
   pub(crate) enum StatusQuery {
     Active(u32),
     Inactive(u32),
   }
 
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  #[schemars(crate = "apistos")]
   pub(crate) enum KindQuery {
     Big(String),
     Small(String),
   }
 
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  #[schemars(crate = "apistos")]
   pub(crate) struct StructQuery {
     pub(crate) test: Option<String>,
     #[serde(flatten)]

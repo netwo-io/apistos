@@ -1,7 +1,7 @@
 use apistos::OpenApiVersion;
+use apistos::schemars::JsonSchema;
 use assert_json_diff::assert_json_eq;
 use chrono::{DateTime, Utc};
-use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
@@ -13,6 +13,7 @@ use apistos_gen::ApiComponent;
 #[expect(dead_code)]
 fn api_component_derive() {
   #[derive(JsonSchema, ApiComponent)]
+  #[schemars(crate = "apistos")]
   struct Name {
     name: String,
   }
@@ -47,6 +48,7 @@ fn api_component_derive() {
 #[expect(dead_code)]
 fn api_component_derive_with_generic() {
   #[derive(JsonSchema, ApiComponent)]
+  #[schemars(crate = "apistos")]
   struct Name<T>
   where
     T: JsonSchema,
@@ -56,6 +58,7 @@ fn api_component_derive_with_generic() {
   }
 
   #[derive(JsonSchema, ApiComponent)]
+  #[schemars(crate = "apistos")]
   struct Test {
     id_number: u32,
     id_string: String,
@@ -120,6 +123,7 @@ fn api_component_derive_with_generic() {
 #[expect(dead_code)]
 fn api_component_derive_with_flatten() {
   #[derive(JsonSchema, ApiComponent)]
+  #[schemars(crate = "apistos")]
   struct Name {
     name: String,
     #[schemars(flatten)] // also works with #[serde(flatten)]
@@ -127,6 +131,7 @@ fn api_component_derive_with_flatten() {
   }
 
   #[derive(JsonSchema, ApiComponent)]
+  #[schemars(crate = "apistos")]
   struct Test {
     id_number: u32,
     id_string: String,
@@ -172,6 +177,7 @@ fn api_component_derive_with_flatten() {
 #[expect(dead_code)]
 fn api_component_derive_with_deprecated_field() {
   #[derive(JsonSchema, ApiComponent)]
+  #[schemars(crate = "apistos")]
   struct Name {
     #[deprecated]
     name: Option<String>,
@@ -215,6 +221,7 @@ fn api_component_derive_with_deprecated_field() {
 #[expect(dead_code)]
 fn api_component_derive_with_format() {
   #[derive(JsonSchema, ApiComponent)]
+  #[schemars(crate = "apistos")]
   struct Name {
     #[schemars(length(min = 1, max = 10))]
     usernames: Vec<String>,
@@ -255,6 +262,7 @@ fn api_component_derive_with_format() {
 #[expect(dead_code)]
 fn api_component_derive_recursive() {
   #[derive(JsonSchema, ApiComponent)]
+  #[schemars(crate = "apistos")]
   struct Name {
     old_name: Option<Box<Name>>,
   }
@@ -292,6 +300,7 @@ fn api_component_derive_recursive() {
 #[test]
 fn api_component_derive_flatten_algebraic_enums() {
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  #[schemars(crate = "apistos")]
   pub(crate) enum IdOrDateQuery {
     #[serde(rename = "after_id")]
     Id(u64),
@@ -300,6 +309,7 @@ fn api_component_derive_flatten_algebraic_enums() {
   }
 
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  #[schemars(crate = "apistos")]
   pub(crate) struct Query {
     #[serde(flatten)]
     pub(crate) after: IdOrDateQuery,
@@ -366,18 +376,21 @@ fn api_component_derive_flatten_algebraic_enums() {
 #[test]
 fn api_component_derive_optional_enums() {
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  #[schemars(crate = "apistos")]
   pub(crate) enum StatusQuery {
     Active,
     Inactive,
   }
 
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  #[schemars(crate = "apistos")]
   pub(crate) struct PaginationQuery {
     pub(crate) limit: u32,
     pub(crate) offset: Option<u32>,
   }
 
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  #[schemars(crate = "apistos")]
   pub(crate) struct Query {
     pub(crate) test: Option<String>,
     pub(crate) status: Option<StatusQuery>,
@@ -440,18 +453,21 @@ fn api_component_derive_optional_enums() {
 #[test]
 fn api_component_derive_named_enums() {
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  #[schemars(crate = "apistos")]
   pub(crate) struct ActiveOrInactiveQuery {
     pub(crate) id: u32,
     pub(crate) description: String,
   }
 
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  #[schemars(crate = "apistos")]
   pub(crate) enum KindQuery {
     Active(ActiveOrInactiveQuery),
     Inactive(ActiveOrInactiveQuery),
   }
 
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  #[schemars(crate = "apistos")]
   pub(crate) struct Query {
     pub(crate) test: String,
     #[serde(flatten)]
@@ -584,6 +600,7 @@ fn api_component_derive_named_enums() {
 #[test]
 fn api_component_derive_named_enums_documented() {
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  #[schemars(crate = "apistos")]
   pub(crate) enum Kind {
     Complex,
     /// A simple stuff
@@ -591,6 +608,7 @@ fn api_component_derive_named_enums_documented() {
   }
 
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  #[schemars(crate = "apistos")]
   pub(crate) struct Query {
     pub(crate) test: String,
     pub(crate) kind: Kind,
@@ -655,6 +673,7 @@ fn api_component_derive_named_enums_documented() {
 #[test]
 fn api_component_derive_named_tagged_enums() {
   #[derive(Serialize, Debug, ApiComponent, JsonSchema)]
+  #[schemars(crate = "apistos")]
   #[cfg_attr(test, derive(Deserialize))]
   #[serde(tag = "kind", rename_all = "snake_case")]
   pub(crate) enum TestStruct {
@@ -731,12 +750,14 @@ fn api_component_derive_named_tagged_enums() {
 #[allow(unused_qualifications)]
 fn api_component_derive_named_enums_deep() {
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  #[schemars(crate = "apistos")]
   pub(crate) struct TestStuff {
     pub(crate) name: String,
     pub(crate) plop: String,
   }
 
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  #[schemars(crate = "apistos")]
   #[serde(rename_all = "snake_case", tag = "type")]
   pub(crate) enum Level4Query {
     Something(TestStuff),
@@ -744,6 +765,7 @@ fn api_component_derive_named_enums_deep() {
   }
 
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  #[schemars(crate = "apistos")]
   #[serde(rename_all = "snake_case", tag = "type", content = "c")]
   pub(crate) enum Level4BisQuery {
     Something(TestStuff),
@@ -751,6 +773,7 @@ fn api_component_derive_named_enums_deep() {
   }
 
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  #[schemars(crate = "apistos")]
   pub(crate) struct ActiveOrInactiveQuery {
     pub(crate) id: u32,
     pub(crate) description: String,
@@ -759,22 +782,26 @@ fn api_component_derive_named_enums_deep() {
   }
 
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  #[schemars(crate = "apistos")]
   pub(crate) enum KindQuery {
     Active(ActiveOrInactiveQuery),
     Inactive(ActiveOrInactiveQuery),
   }
 
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  #[schemars(crate = "apistos")]
   pub(crate) struct Level3Query {
     pub(crate) kinds: Vec<KindQuery>,
   }
 
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  #[schemars(crate = "apistos")]
   pub(crate) struct Level2Query {
     pub(crate) level3: Level3Query,
   }
 
   #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, ApiComponent, JsonSchema)]
+  #[schemars(crate = "apistos")]
   pub(crate) struct Query {
     pub(crate) test: String,
     pub(crate) level2: Level2Query,

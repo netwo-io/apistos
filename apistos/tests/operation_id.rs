@@ -11,8 +11,8 @@ use apistos_gen::{ApiComponent, ApiErrorComponent, api_operation};
 use apistos_models::OpenApi;
 use apistos_models::info::Info;
 use apistos_models::paths::OperationType;
+use apistos_models::schemars::JsonSchema;
 use apistos_models::tag::Tag;
-use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
 
@@ -37,6 +37,7 @@ async fn default_operation_id() {
   }
 
   #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
+  #[schemars(crate = "apistos")]
   struct Test {
     id_number: u32,
     id_string: String,

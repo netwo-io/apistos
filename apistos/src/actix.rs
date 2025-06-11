@@ -162,11 +162,11 @@ mod test {
   use serde::Serialize;
 
   use apistos_core::ApiComponent;
-  use apistos_gen::ApiComponent;
+  use apistos_gen::{ApiComponent, api_component};
   use apistos_models::OpenApiVersion;
   use apistos_models::paths::Response;
   use apistos_models::reference_or::ReferenceOr;
-  use schemars::JsonSchema;
+  use apistos_models::schemars::JsonSchema;
 
   use crate as apistos;
   use crate::actix::{AcceptedJson, CreatedJson, NoContent};
@@ -200,6 +200,7 @@ mod test {
   #[test]
   fn accepted_json_generate_valid_response_oas_3_0() {
     #[derive(Serialize, ApiComponent, JsonSchema)]
+    #[schemars(crate = "apistos")]
     struct Test {
       test: String,
     }
@@ -215,6 +216,7 @@ mod test {
   #[test]
   fn accepted_json_generate_valid_response_oas_3_1() {
     #[derive(Serialize, ApiComponent, JsonSchema)]
+    #[schemars(crate = "apistos")]
     struct Test {
       test: String,
     }
@@ -230,6 +232,7 @@ mod test {
   #[test]
   fn created_json_generate_valid_response_oas_3_0() {
     #[derive(Serialize, ApiComponent, JsonSchema)]
+    #[schemars(crate = "apistos")]
     struct Test {
       test: String,
     }
@@ -244,7 +247,8 @@ mod test {
 
   #[test]
   fn created_json_generate_valid_response_oas_3_1() {
-    #[derive(Serialize, ApiComponent, JsonSchema)]
+    #[derive(Serialize)]
+    #[api_component]
     struct Test {
       test: String,
     }

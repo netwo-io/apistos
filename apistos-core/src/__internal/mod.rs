@@ -1,7 +1,7 @@
 use apistos_models::paths::{MediaType, Response, Responses};
 use apistos_models::reference_or::ReferenceOr;
+use apistos_models::schemars::json_schema;
 use apistos_models::{ApistosSchema, OpenApiVersion, VersionSpecificSchema};
-use schemars::json_schema;
 use serde_json::Value;
 use std::collections::BTreeMap;
 

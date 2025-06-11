@@ -18,7 +18,10 @@
 
 [OASv3.md]: https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md
 
-An OpenAPI documentation tool exposing [OAS 3.0][OASv3.md] models as well as an actix-web wrapper similar
+[OASv3.1.md]: https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.1.md
+
+An OpenAPI documentation tool exposing [OAS 3.0][OASv3.md] and [OpenAPI v3.1.1][OASv3.1.md] models as well as an
+actix-web wrapper similar
 to [paperclip](https://github.com/paperclip-rs/paperclip).
 
 **Apistos** is composed of these crates:
@@ -26,8 +29,10 @@ to [paperclip](https://github.com/paperclip-rs/paperclip).
 - [`apistos`](./apistos): [actix-web](https://github.com/actix/actix-web) wrapper to generate an OpenAPI v3.0.3
   documentation file
 - [`apistos-core`](./apistos-core): A set of traits and common models around [OpenAPI v3.0.3][OASv3.md]
-- [`apistos-gen`](./apistos-gen): macro utilities to generate [OpenAPI v3.0.3][OASv3.md] documentation from Rust models
-- [`apistos-models`](./apistos-models): [OpenAPI v3.0.3][OASv3.md] models
+  and [OpenAPI v3.1.1][OASv3.1.md]
+- [`apistos-gen`](./apistos-gen): macro utilities to generate [OpenAPI v3.0.3][OASv3.md]
+  and [OpenAPI v3.1.1][OASv3.1.md] documentation from Rust models
+- [`apistos-models`](./apistos-models): [OpenAPI v3.0.3][OASv3.md] and [OpenAPI v3.1.1][OASv3.1.md] models
   with [`Schema`](https://docs.rs/schemars/latest/schemars/schema/enum.Schema.html) based
   on [schemars](https://github.com/GREsau/schemars) definition
 - [`apistos-plugins`](./apistos-plugins): traits and utilities to extend apistos
@@ -59,7 +64,6 @@ carpenters, craftsmen, metallurgy ... which can also be considered by some as th
 
 ```toml
 [dependencies]
-schemars = "=1.0.0-alpha.15"
 apistos = "=1.0.0-pre-release.12"
 ```
 
@@ -80,19 +84,27 @@ use apistos::api_operation;
 use apistos::ApiComponent;
 use apistos::ApiErrorComponent;
 use apistos::app::OpenApiWrapper;
+use apistos::info::Info;
+use apistos::schemars::JsonSchema;
 use apistos::spec::Spec;
 use apistos::web::{post, resource, scope};
-use apistos_models::info::Info;
 use core::fmt::Formatter;
-use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::error::Error;
 use std::net::Ipv4Addr;
 
 #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
+#[schemars(crate = "apistos")]
 pub struct Test {
   pub test: String
 }
+
+// or
+// #[derive(Serialize, Deserialize, Debug, Clone)]
+// #[apistos::api_component]
+// pub struct Test {
+//   pub test: String
+// }
 
 #[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
 #[openapi_error(

@@ -24,7 +24,6 @@ syn = { workspace = true, features = ["full", "extra-traits"] }
 
 [dev-dependencies]
 garde = { workspace = true }
-schemars = { workspace = true }
 serde = { workspace = true }
 apistos = { path = "../apistos", features = ["actix-web-macros"] }
 

@@ -2,13 +2,13 @@ use std::collections::HashMap;
 
 #[cfg(feature = "query")]
 use actix_web::web::Query;
+use apistos_models::schemars::Schema;
 #[cfg(all(feature = "lab_query", feature = "garde"))]
 use garde_actix_web::web::LabQuery as GardeLabQuery;
 #[cfg(all(feature = "qs_query", feature = "garde"))]
 use garde_actix_web::web::QsQuery as GardeQsQuery;
 #[cfg(all(feature = "query", feature = "garde"))]
 use garde_actix_web::web::Query as GardeQuery;
-use schemars::Schema;
 use serde_json::{Map, Value, json};
 #[cfg(feature = "qs_query")]
 use serde_qs::actix::QsQuery;
@@ -319,7 +319,7 @@ fn extract_required_from_schema(sch_props: &Map<String, Value>, property_name: &
 #[cfg(test)]
 mod test {
   use actix_web::web::Query;
-  use schemars::{JsonSchema, json_schema};
+  use apistos_models::schemars::{JsonSchema, json_schema};
   use serde::{Deserialize, Serialize};
   #[cfg(feature = "qs_query")]
   use serde_qs::actix::QsQuery;
@@ -335,6 +335,7 @@ mod test {
   use crate::ApiComponent;
 
   #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema)]
+  #[schemars(crate = "apistos_models::schemars")]
   struct Test {
     id_number: u32,
     id_string: String,

@@ -1,8 +1,8 @@
-use actix_web::web::{Json, Path};
 use actix_web::Error;
+use actix_web::web::{Json, Path};
 use apistos::actix::CreatedJson;
-use apistos::{api_operation, ApiComponent};
-use schemars::JsonSchema;
+use apistos::{ApiComponent, api_operation};
+use apistos_models::schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 

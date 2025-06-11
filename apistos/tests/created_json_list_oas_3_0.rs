@@ -11,9 +11,9 @@ use apistos::app::OpenApiWrapper;
 use apistos::spec::Spec;
 use apistos::web::{get, scope};
 use apistos_models::OpenApi;
+use apistos_models::schemars::JsonSchema;
 use assert_json_diff::assert_json_eq;
 use core::fmt::Formatter;
-use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::fmt::Display;
@@ -40,6 +40,7 @@ async fn created_json_list() {
   }
 
   #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
+  #[schemars(crate = "apistos")]
   pub(crate) struct Test(String);
 
   #[api_operation(tag = "pet")]

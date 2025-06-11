@@ -104,6 +104,5 @@ use log as _;
 use md5 as _;
 use once_cell as _;
 use regex as _;
-use schemars as _;
 use serde as _;
 use serde_json as _;

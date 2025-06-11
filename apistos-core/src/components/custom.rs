@@ -2,7 +2,7 @@
 #[cfg(feature = "ipnetwork")]
 pub mod ipnetwork {
   use crate::simple::simple_modifier;
-  use schemars::{JsonSchema, Schema, SchemaGenerator, json_schema};
+  use apistos_models::schemars::{JsonSchema, Schema, SchemaGenerator, json_schema};
   use serde::{Deserialize, Serialize};
   use std::borrow::Cow;
 
@@ -134,15 +134,16 @@ pub mod ipnetwork {
     use crate::ApiComponent;
     use crate::custom::ipnetwork::IpNetwork;
     use apistos_models::reference_or::ReferenceOr;
+    use apistos_models::schemars::{JsonSchema, SchemaGenerator};
     use apistos_models::{ApistosSchema, OpenApiVersion};
     use assert_json_diff::assert_json_eq;
-    use schemars::{JsonSchema, SchemaGenerator};
     use serde_json::json;
 
     #[test]
     #[expect(dead_code)]
     fn ip_network_schema() {
       #[derive(JsonSchema)]
+      #[schemars(crate = "apistos_models::schemars")]
       struct Test {
         ip: IpNetwork,
         label: String,
@@ -234,7 +235,7 @@ pub mod ipnetwork {
 #[cfg(feature = "ipnetwork_0_20")]
 pub mod ipnetwork_20 {
   use crate::simple::simple_modifier;
-  use schemars::{JsonSchema, Schema, SchemaGenerator, json_schema};
+  use apistos_models::schemars::{JsonSchema, Schema, SchemaGenerator, json_schema};
   use serde::{Deserialize, Serialize};
   use std::borrow::Cow;
 
@@ -366,15 +367,16 @@ pub mod ipnetwork_20 {
     use crate::ApiComponent;
     use crate::custom::ipnetwork_20::IpNetwork;
     use apistos_models::reference_or::ReferenceOr;
+    use apistos_models::schemars::{JsonSchema, SchemaGenerator};
     use apistos_models::{ApistosSchema, OpenApiVersion};
     use assert_json_diff::assert_json_eq;
-    use schemars::{JsonSchema, SchemaGenerator};
     use serde_json::json;
 
     #[test]
     #[expect(dead_code)]
     fn ip_network_schema() {
       #[derive(JsonSchema)]
+      #[schemars(crate = "apistos_models::schemars")]
       struct Test {
         ip: IpNetwork,
         label: String,

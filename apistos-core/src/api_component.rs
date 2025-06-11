@@ -504,9 +504,9 @@ where
 
 #[cfg(test)]
 mod test {
+  use apistos_models::schemars::JsonSchema;
+  use apistos_models::schemars::generate::SchemaGenerator;
   use apistos_models::{ApistosSchema, OpenApiVersion};
-  use schemars::JsonSchema;
-  use schemars::generate::SchemaGenerator;
   use serde_json::json;
 
   use apistos_models::reference_or::ReferenceOr;
@@ -518,6 +518,7 @@ mod test {
   #[expect(dead_code)]
   fn api_component_schema_vec_oas_3_0() {
     #[derive(JsonSchema)]
+    #[schemars(crate = "apistos_models::schemars")]
     struct TestChild {
       surname: String,
     }
@@ -538,6 +539,7 @@ mod test {
     }
 
     #[derive(JsonSchema)]
+    #[schemars(crate = "apistos_models::schemars")]
     struct Test {
       name: String,
       surname: TestChild,
@@ -623,6 +625,7 @@ mod test {
   #[expect(dead_code)]
   fn api_component_schema_vec_oas_3_1() {
     #[derive(JsonSchema)]
+    #[schemars(crate = "apistos_models::schemars")]
     struct TestChild {
       surname: String,
     }
@@ -643,6 +646,7 @@ mod test {
     }
 
     #[derive(JsonSchema)]
+    #[schemars(crate = "apistos_models::schemars")]
     struct Test {
       name: String,
       surname: TestChild,

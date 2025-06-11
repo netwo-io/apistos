@@ -1,6 +1,6 @@
 use apistos::OpenApiVersion;
+use apistos::schemars::JsonSchema;
 use assert_json_diff::assert_json_eq;
-use schemars::JsonSchema;
 use serde_json::json;
 
 use crate::utils::assert_schema;
@@ -11,6 +11,7 @@ use apistos_gen::ApiCookie;
 #[expect(dead_code)]
 fn api_cookie_derive() {
   #[derive(JsonSchema, ApiCookie)]
+  #[schemars(crate = "apistos")]
   #[openapi_cookie(
     name = "X-Organization-Slug",
     description = "Organization of the current caller",
@@ -59,6 +60,7 @@ fn api_cookie_derive() {
 #[expect(deprecated)]
 fn api_cookie_derive_deprecated() {
   #[derive(JsonSchema, ApiCookie)]
+  #[schemars(crate = "apistos")]
   #[openapi_cookie(
     name = "X-Organization-Slug",
     description = "Organization of the current caller",
@@ -109,6 +111,7 @@ fn api_cookie_derive_deprecated() {
 #[expect(dead_code)]
 fn api_cookie_derive_deprecated_attribute() {
   #[derive(JsonSchema, ApiCookie)]
+  #[schemars(crate = "apistos")]
   #[openapi_cookie(
     name = "X-Organization-Slug",
     description = "Organization of the current caller",

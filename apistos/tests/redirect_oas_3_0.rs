@@ -8,6 +8,7 @@ use apistos::spec::Spec;
 use apistos_models::OpenApi;
 use assert_json_diff::assert_json_eq;
 use serde_json::json;
+
 #[actix_web::test]
 async fn actix_redirect_oas_3_0() {
   let app = App::new()
@@ -213,6 +214,5 @@ use log as _;
 use md5 as _;
 use once_cell as _;
 use regex as _;
-use schemars as _;
 use serde as _;
 use serde_json as _;
