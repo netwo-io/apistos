@@ -315,6 +315,8 @@ pub fn api_component(_attr: TokenStream, item: TokenStream) -> TokenStream {
 ///       - `bearer_format = "..."` a **required** parameter
 ///     - `open_id_connect(open_id_connect_url = "...")`
 ///
+/// _To define multiple elements of a list, repeat the property multiple times_
+///
 /// # Examples:
 ///
 /// ## **oauth2**
@@ -673,6 +675,8 @@ pub fn api_cookie(_attr: TokenStream, item: TokenStream) -> TokenStream {
 /// - `status(...)` a list of possible error status with
 ///   - `code = 000` a **required** http status code
 ///   - `description = "..."` an optional description, default is the canonical reason of the given status code
+///
+/// _To define multiple elements of a list, repeat the property multiple times_
 #[proc_macro_error]
 #[proc_macro_derive(ApiErrorComponent, attributes(openapi_error))]
 pub fn derive_api_error(input: TokenStream) -> TokenStream {
@@ -755,6 +759,8 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
 ///   - `component(...)` an option component attached to the given webhook response.
 ///       - `component = "..."` the component type must derive [ApiComponent] and [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
 ///       - `description = "..."` an optional description attached to this component. If used on a header, overrides the previously set header's description
+///
+/// _To define multiple elements of a list, repeat the property multiple times_
 #[proc_macro_error]
 #[proc_macro_derive(ApiWebhookComponent, attributes(openapi_webhook))]
 pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
@@ -861,6 +867,8 @@ pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
 ///         - `path = "..."` URL to use for the callback operation
 ///         - `[verb] = ...` any of the http verbs with an associated function. The given function should be available in scope and be annotated with `api_operation`
 ///
+/// _To define multiple elements of a list, repeat the property multiple times_
+///
 /// If `summary` or `description` are not provided, a default value will be extracted from the comments. The first line will be used as summary while the rest will be part of the description.
 ///
 /// For example:
@@ -884,9 +892,13 @@ pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
 /// #[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
 /// #[openapi_error(
 ///   status(code = 405, description = "Invalid input"),
+///   status(code = 401),
+///   status(code = 403),
 /// )]
 /// pub enum ErrorResponse {
 ///   MethodNotAllowed(String),
+///   Unauthorized(String),
+///   Forbidden(String),
 /// }
 ///
 /// impl Display for ErrorResponse {
@@ -906,7 +918,9 @@ pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
 ///   summary = "Add a new pet to the store",
 ///   description = r###"Add a new pet to the store
 ///     Plop"###,
-///   parameter_description(body = "A super description")
+///   parameter_description(body = "A super description"),
+///   error_code = "401",
+///   error_code = "405"
 /// )]
 /// pub(crate) async fn test(
 ///   body: Json<Test>,
@@ -1130,6 +1144,8 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
 ///       - `component = "..."` the component type must derive [ApiComponent] and [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
 ///       - `description = "..."` an optional description attached to this component. If used on a header, overrides the previously set header's description
 ///
+/// _To define multiple elements of a list, repeat the property multiple times_
+///
 /// If `summary` or `description` are not provided, a default value will be extracted from the comments. The first line will be used as summary while the rest will be part of the description.
 #[proc_macro_error]
 #[proc_macro_attribute]
@@ -1204,6 +1220,8 @@ pub fn api_callback(attr: TokenStream, item: TokenStream) -> TokenStream {
 /// - `guard = "function_name"`: Registers function as guard using `actix_web::guard::fn_guard`.
 /// - `wrap = "Middleware"`: Registers a resource middleware.
 /// - `key = "value"` any [`api_operation`](https://docs.rs/apistos/latest/apistos/attr.api_operation.html) option
+///
+/// _To define multiple elements of a list, repeat the property multiple times_
 ///
 /// # Examples
 /// ```
