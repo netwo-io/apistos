@@ -38,10 +38,10 @@ async fn main() -> Result<(), impl Error> {
       .build_with(
         "/openapi.json",
         BuildConfig::default()
-          .with(RapidocConfig::new(&"/rapidoc"))
-          .with(RedocConfig::new(&"/redoc"))
-          .with(ScalarConfig::new(&"/scalar"))
-          .with(SwaggerUIConfig::new(&"/swagger")),
+          .with_ui(RapidocConfig::new(&"/rapidoc"))
+          .with_ui(RedocConfig::new(&"/redoc"))
+          .with_ui(ScalarConfig::new(&"/scalar"))
+          .with_ui(SwaggerUIConfig::new(&"/swagger")),
       )
   })
   .bind((Ipv4Addr::UNSPECIFIED, 8080))?

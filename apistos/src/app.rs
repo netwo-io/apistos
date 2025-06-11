@@ -56,10 +56,10 @@ pub struct App<T> {
 ///   .build_with(
 ///     "/openapi.json",
 ///     BuildConfig::default()
-///       .with(RapidocConfig::new(&"/rapidoc")) // with rapidoc feature enable
-///       .with(RedocConfig::new(&"/redoc")) // with redoc feature enable
-///       .with(Scalar::new(&"/scalar")) // with scalar feature enable
-///       .with(SwaggerUIConfig::new(&"/swagger")), // with swagger-ui feature enable
+///       .with_ui(RapidocConfig::new(&"/rapidoc")) // with rapidoc feature enable
+///       .with_ui(RedocConfig::new(&"/redoc")) // with redoc feature enable
+///       .with_ui(Scalar::new(&"/scalar")) // with scalar feature enable
+///       .with_ui(SwaggerUIConfig::new(&"/swagger")), // with swagger-ui feature enable
 ///   );
 /// ```
 #[derive(Default)]
@@ -70,7 +70,7 @@ pub struct BuildConfig {
 }
 
 impl BuildConfig {
-  pub fn with<T: UIPluginConfig + 'static>(mut self, plugin: T) -> Self {
+  pub fn with_ui<T: UIPluginConfig + 'static>(mut self, plugin: T) -> Self {
     self.ui_plugin_configs.push(Box::new(plugin));
     self
   }
@@ -274,10 +274,10 @@ where
   ///   .build_with(
   ///     "/openapi.json",
   ///     BuildConfig::default()
-  ///       .with(RapidocConfig::new(&"/rapidoc")) // with rapidoc feature enable
-  ///       .with(RedocConfig::new(&"/redoc")) // with redoc feature enable
-  ///       .with(ScalarConfig::new(&"/scalar")) // with scalar feature enable
-  ///       .with(SwaggerUIConfig::new(&"/swagger")), // with swagger-ui feature enable
+  ///       .with_ui(RapidocConfig::new(&"/rapidoc")) // with rapidoc feature enable
+  ///       .with_ui(RedocConfig::new(&"/redoc")) // with redoc feature enable
+  ///       .with_ui(ScalarConfig::new(&"/scalar")) // with scalar feature enable
+  ///       .with_ui(SwaggerUIConfig::new(&"/swagger")), // with swagger-ui feature enable
   ///   );
   /// ```
   #[expect(clippy::unwrap_used, clippy::expect_used)]
@@ -481,7 +481,7 @@ mod test {
 
     let app = App::new().document(Spec::default()).build_with(
       openapi_path,
-      BuildConfig::default().with(RapidocConfig::new(&rapidoc_path)),
+      BuildConfig::default().with_ui(RapidocConfig::new(&rapidoc_path)),
     );
     let app = init_service(app).await;
 
@@ -499,9 +499,10 @@ mod test {
     let openapi_path = "/test.json";
     let redoc_path = "/redoc";
 
-    let app = App::new()
-      .document(Spec::default())
-      .build_with(openapi_path, BuildConfig::default().with(RedocConfig::new(&redoc_path)));
+    let app = App::new().document(Spec::default()).build_with(
+      openapi_path,
+      BuildConfig::default().with_ui(RedocConfig::new(&redoc_path)),
+    );
     let app = init_service(app).await;
 
     let req = TestRequest::get().uri(openapi_path).to_request();
@@ -520,7 +521,7 @@ mod test {
 
     let app = App::new().document(Spec::default()).build_with(
       openapi_path,
-      BuildConfig::default().with(ScalarConfig::new(&scalar_path)),
+      BuildConfig::default().with_ui(ScalarConfig::new(&scalar_path)),
     );
     let app = init_service(app).await;
 
@@ -540,7 +541,7 @@ mod test {
 
     let app = App::new().document(Spec::default()).build_with(
       openapi_path,
-      BuildConfig::default().with(SwaggerUIConfig::new(&swagger_path)),
+      BuildConfig::default().with_ui(SwaggerUIConfig::new(&swagger_path)),
     );
     let app = init_service(app).await;
 
@@ -695,7 +696,7 @@ mod test {
       openapi_path,
       BuildConfig::default()
         .with_spec_path(spec_path)
-        .with(RapidocConfig::new(&rapidoc_path)),
+        .with_ui(RapidocConfig::new(&rapidoc_path)),
     );
     let app = init_service(app).await;
 
