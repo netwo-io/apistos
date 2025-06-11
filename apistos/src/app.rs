@@ -61,6 +61,7 @@ pub struct App<T> {
 pub struct BuildConfig {
   ui_plugin_configs: Vec<Box<dyn UIPluginConfig>>,
   spec_path: Option<String>,
+  disable_openapi_route: bool,
 }
 
 impl BuildConfig {
@@ -72,6 +73,18 @@ impl BuildConfig {
   /// Override the openapi spec path
   pub fn with_spec_path<T: Into<String>>(mut self, spec_path: T) -> Self {
     self.spec_path = Some(spec_path.into());
+    self
+  }
+
+  /// Prevent openapi route from being exposed
+  pub fn disable_openapi_route(mut self) -> Self {
+    self.disable_openapi_route = true;
+    self
+  }
+
+  /// Expose openapi route (the default)
+  pub fn enable_openapi_route(mut self) -> Self {
+    self.disable_openapi_route = false;
     self
   }
 }
@@ -221,7 +234,7 @@ where
       .service(resource(openapi_path).route(get().to(OASHandler::new(open_api_spec))))
   }
 
-  /// Add a new resource at **`openapi_path`** to expose the generated openapi schema optionnaly exposing it through UIs and return an [actix_web::App](https://docs.rs/actix-web/latest/actix_web/struct.App.html)
+  /// Add a new resource at **`openapi_path`** to expose the generated openapi schema optionally exposing it through UIs and return an [actix_web::App](https://docs.rs/actix-web/latest/actix_web/struct.App.html)
   ///
   /// ```rust,ignore
   /// use actix_web::App;
@@ -243,9 +256,13 @@ where
   /// ```
   #[allow(clippy::unwrap_used, clippy::expect_used)]
   pub fn build_with(self, openapi_path: &str, config: BuildConfig) -> actix_web::App<T> {
-    let open_api_spec = self.open_api_spec.read().unwrap().clone();
-
     let mut actix_app = self.inner.expect("Missing app");
+
+    if config.disable_openapi_route {
+      return actix_app;
+    }
+
+    let open_api_spec = self.open_api_spec.read().unwrap().clone();
 
     let spec_path = config.spec_path.as_ref().map_or(openapi_path, String::as_str);
 
