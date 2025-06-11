@@ -64,7 +64,7 @@ carpenters, craftsmen, metallurgy ... which can also be considered by some as th
 
 ```toml
 [dependencies]
-apistos = "=1.0.0-pre-release.12"
+apistos = "=1.0.0-pre-release.13"
 ```
 
 ### Usage example

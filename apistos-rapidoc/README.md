@@ -24,8 +24,7 @@ This crate is exposed through Apistos `rapidoc` feature.
 
 ```toml
 [dependencies]
-schemars = "=1.0.0-alpha.15"
-apistos = { version = "=1.0.0-pre-release.12", feature = ["rapidoc"] }
+apistos = { version = "=1.0.0-pre-release.13", feature = ["rapidoc"] }
 ```
 
 ### About us
