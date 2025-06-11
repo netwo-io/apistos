@@ -11,8 +11,8 @@ use apistos_gen::{ApiComponent, ApiErrorComponent, api_operation};
 use apistos_models::OpenApi;
 use apistos_models::info::Info;
 use apistos_models::paths::OperationType;
+use apistos_models::schemars::JsonSchema;
 use apistos_models::tag::Tag;
-use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
 
@@ -96,6 +96,7 @@ async fn operation_skip_args() {
   }
 
   #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
+  #[schemars(crate = "apistos")]
   struct Test {
     id_number: u32,
     id_string: String,
@@ -209,6 +210,7 @@ async fn operation_generics() {
   }
 
   #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
+  #[schemars(crate = "apistos")]
   struct Test {
     id_number: u32,
     id_string: String,
@@ -283,6 +285,7 @@ async fn operation_pattern_path() {
   }
 
   #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
+  #[schemars(crate = "apistos")]
   struct Test {
     id_number: u32,
     id_string: String,
@@ -353,6 +356,5 @@ use log as _;
 use md5 as _;
 use once_cell as _;
 use regex as _;
-use schemars as _;
 use serde as _;
 use serde_json as _;

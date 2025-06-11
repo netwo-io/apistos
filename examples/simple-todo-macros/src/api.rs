@@ -8,18 +8,19 @@ pub mod test {
   pub mod todo {
     use actix_web::web::{Json, Path};
     use actix_web::Error;
-    use apistos::{get, post, routes, ApiComponent};
-    use schemars::JsonSchema;
+    use apistos::{api_component, get, post, routes};
     use serde::{Deserialize, Serialize};
     use uuid::Uuid;
 
-    #[derive(Deserialize, JsonSchema, ApiComponent)]
+    #[derive(Deserialize)]
+    #[api_component]
     pub struct NewTodo {
       pub title: String,
       pub description: Option<String>,
     }
 
-    #[derive(Serialize, JsonSchema, ApiComponent)]
+    #[derive(Serialize)]
+    #[api_component]
     pub struct Todo {
       pub id: Uuid,
       pub title: String,

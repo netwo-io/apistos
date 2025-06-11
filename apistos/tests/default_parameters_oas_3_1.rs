@@ -11,9 +11,9 @@ use apistos_gen::{ApiComponent, ApiErrorComponent, ApiHeader, api_operation};
 use apistos_models::info::Info;
 use apistos_models::paths::{OperationType, Parameter, ParameterIn};
 use apistos_models::reference_or::ReferenceOr;
+use apistos_models::schemars::JsonSchema;
 use apistos_models::tag::Tag;
 use apistos_models::{OpenApi, OpenApiVersion};
-use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
 
@@ -38,12 +38,14 @@ async fn default_parameters() {
   }
 
   #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
+  #[schemars(crate = "apistos")]
   struct Test {
     id_number: u32,
     id_string: String,
   }
 
   #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
+  #[schemars(crate = "apistos")]
   struct TestHeaderStruct {
     plop: u32,
     plap: String,
@@ -51,6 +53,7 @@ async fn default_parameters() {
 
   #[expect(dead_code)]
   #[derive(Clone, Debug, JsonSchema, ApiHeader)]
+  #[schemars(crate = "apistos")]
   #[openapi_header(
     name = "X-Env-Complex",
     description = "`X-Env-Complx` header should contain the current env",
@@ -60,6 +63,7 @@ async fn default_parameters() {
 
   #[expect(dead_code)]
   #[derive(Clone, Debug, JsonSchema, ApiHeader)]
+  #[schemars(crate = "apistos")]
   #[openapi_header(
     name = "X-Env",
     description = "`X-Env` header should contain the current env",

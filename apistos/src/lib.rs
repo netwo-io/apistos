@@ -8,7 +8,6 @@
 //!
 //! ```toml
 //! [dependencies]
-//! schemars = "=1.0.0-alpha.15"
 //! apistos = "=1.0.0-pre-release.12"
 //! ```
 //!
@@ -29,16 +28,17 @@
 //! use apistos::ApiComponent;
 //! use apistos::ApiErrorComponent;
 //! use apistos::app::OpenApiWrapper;
+//! use apistos::info::Info;
+//! use apistos::schemars::JsonSchema;
 //! use apistos::spec::Spec;
 //! use apistos::web::{post, resource, scope};
-//! use apistos_models::info::Info;
 //! use core::fmt::Formatter;
-//! use schemars::JsonSchema;
 //! use serde::{Deserialize, Serialize};
 //! use std::error::Error;
 //! use std::net::Ipv4Addr;
 //!
 //! #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
+//! #[schemars(crate = "apistos")]
 //! pub struct Test {
 //!   pub test: String
 //! }
@@ -162,7 +162,7 @@ pub use apistos_core::parameters::header::ApiHeader;
 pub use apistos_core::{__internal, ApiComponent, ApiErrorComponent, ApiWebhook, ApiWebhookDef, TypedSchema};
 pub use apistos_gen::{
   ApiComponent, ApiCookie, ApiErrorComponent, ApiHeader, ApiSecurity, ApiType, ApiWebhookComponent, api_callback,
-  api_operation,
+  api_component, api_cookie, api_header, api_operation,
 };
 #[cfg(feature = "actix-web-macros")]
 pub use apistos_gen::{connect, delete, get, head, options, patch, post, put, route, routes, scope, trace};

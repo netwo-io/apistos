@@ -30,7 +30,7 @@ use proc_macro_error2::{OptionExt, abort, proc_macro_error};
 use proc_macro2::Span;
 use quote::{format_ident, quote};
 use std::str::FromStr;
-use syn::{DeriveInput, GenericParam, Ident, ItemFn};
+use syn::{DeriveInput, GenericParam, Ident, Item, ItemFn};
 
 #[cfg(feature = "actix-web-macros")]
 mod actix_operation_attr;
@@ -126,7 +126,7 @@ pub fn derive_api_type(input: TokenStream) -> TokenStream {
 
       #typed_schema_derived
       #[automatically_derived]
-      impl #impl_generics schemars::JsonSchema for #ident #ty_generics #where_clause {
+      impl #impl_generics apistos::schemars::JsonSchema for #ident #ty_generics #where_clause {
          fn always_inline_schema() -> bool {
           true
         }
@@ -135,14 +135,14 @@ pub fn derive_api_type(input: TokenStream) -> TokenStream {
           std::borrow::Cow::Borrowed(#component_name)
         }
 
-        fn json_schema(_gen: &mut schemars::generate::SchemaGenerator) -> apistos::Schema {
+        fn json_schema(_gen: &mut apistos::schemars::generate::SchemaGenerator) -> apistos::Schema {
           let instance_type = <Self as TypedSchema>::schema_type();
           match <Self as TypedSchema>::format() {
-            Some(format) => apistos::Schema::try_from(schemars::_private::serde_json::json!({
+            Some(format) => apistos::Schema::try_from(apistos::schemars::_private::serde_json::json!({
               "type": instance_type,
               "format": format,
             })),
-            None => apistos::Schema::try_from(schemars::_private::serde_json::json!({
+            None => apistos::Schema::try_from(apistos::schemars::_private::serde_json::json!({
               "type": instance_type,
             }))
           }
@@ -164,11 +164,11 @@ pub fn derive_api_type(input: TokenStream) -> TokenStream {
           Some((
             #component_name.to_string(),
             apistos::Schema::try_from(match <#ident #ty_generics>::format() {
-              Some(format) => schemars::_private::serde_json::json!({
+              Some(format) => apistos::schemars::_private::serde_json::json!({
                 "type": <#ident #ty_generics>::schema_type(),
                 "format": format,
               }),
-              None => schemars::_private::serde_json::json!({
+              None => apistos::schemars::_private::serde_json::json!({
                 "type": <#ident #ty_generics>::schema_type(),
               }),
             })
@@ -195,10 +195,11 @@ pub fn derive_api_type(input: TokenStream) -> TokenStream {
 ///
 /// ```rust
 /// use apistos::ApiComponent;
-/// use schemars::JsonSchema;
+/// use apistos::schemars::JsonSchema;
 /// use garde::Validate;
 ///
 /// #[derive(Debug, Clone, JsonSchema, ApiComponent, Validate)]
+/// #[schemars(crate = "apistos")]
 /// pub(crate) struct QueryTag {
 ///   #[garde(length(min = 2))]
 ///   pub(crate) tags: Vec<String>,
@@ -228,6 +229,57 @@ pub fn derive_api_component(input: TokenStream) -> TokenStream {
         #schema_impl
       }
     };
+  )
+  .into()
+}
+
+/// Generates a reusable OpenAPI schema.
+///
+/// This macro should be used in combination with [api_operation](attr.api_operation.html).
+///
+/// This macro is a helper deriving both [ApiComponent](derive.ApiComponent.html) and [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html) use the schemars version re-exposed by apistos.
+///
+///
+/// ```rust
+/// use apistos::api_component;
+/// use garde::Validate;
+///
+/// #[derive(Debug, Clone, Validate)]
+/// #[api_component]
+/// pub(crate) struct QueryTag {
+///   #[garde(length(min = 2))]
+///   pub(crate) tags: Vec<String>,
+/// }
+/// ```
+/// is equivalent to
+/// ```rust
+/// use apistos::ApiComponent;
+/// use apistos::schemars::JsonSchema;
+/// use garde::Validate;
+///
+/// #[derive(Debug, Clone, JsonSchema, ApiComponent, Validate)]
+/// #[schemars(crate = "apistos")]
+/// pub(crate) struct QueryTag {
+///   #[garde(length(min = 2))]
+///   pub(crate) tags: Vec<String>,
+/// }
+/// ```
+#[proc_macro_error]
+#[proc_macro_attribute]
+pub fn api_component(_attr: TokenStream, item: TokenStream) -> TokenStream {
+  let input = syn::parse_macro_input!(item as Item);
+
+  if !matches!(input, Item::Enum(_)) && !matches!(input, Item::Struct(_)) {
+    abort!(
+      Span::call_site(),
+      "#[api_component] can only be used on structs and enums".to_string()
+    )
+  }
+
+  quote!(
+    #[derive(apistos::ApiComponent, apistos::schemars::JsonSchema)]
+    #[schemars(crate = "apistos")]
+    #input
   )
   .into()
 }
@@ -358,9 +410,10 @@ pub fn derive_api_security(input: TokenStream) -> TokenStream {
 ///
 /// ```rust
 /// use apistos::ApiHeader;
-/// use schemars::JsonSchema;
+/// use apistos::schemars::JsonSchema;
 ///
 /// #[derive(Debug, Clone, JsonSchema, ApiHeader)]
+/// #[schemars(crate = "apistos")]
 /// #[openapi_header(
 ///   name = "X-Organization-Slug",
 ///   description = "Organization of the current caller",
@@ -414,6 +467,65 @@ pub fn derive_api_header(input: TokenStream) -> TokenStream {
   .into()
 }
 
+/// Generates a reusable OpenAPI header schema.
+///
+/// This macro should be used in combination with [api_operation](attr.api_operation.html).
+/// The macro requires one and only one `openapi_header`.
+///
+/// This macro is a helper deriving both [ApiHeader](derive.ApiHeader.html) and [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html) use the schemars version re-exposed by apistos.
+///
+/// ```rust
+/// use apistos::api_header;
+///
+/// #[derive(Debug, Clone)]
+/// #[api_header]
+/// #[openapi_header(
+///   name = "X-Organization-Slug",
+///   description = "Organization of the current caller",
+///   required = true
+/// )]
+/// pub struct OrganizationSlug(String);
+/// ```
+/// is equivalent to
+/// ```rust
+/// use apistos::ApiHeader;
+/// use apistos::schemars::JsonSchema;
+///
+/// #[derive(Debug, Clone, JsonSchema, ApiHeader)]
+/// #[schemars(crate = "apistos")]
+/// #[openapi_header(
+///   name = "X-Organization-Slug",
+///   description = "Organization of the current caller",
+///   required = true
+/// )]
+/// pub struct OrganizationSlug(String);
+/// ```
+///
+/// # `#[openapi_header(...)]` options:
+/// - `name = "..."` a **required** parameter with the header name
+/// - `description = "..."` an optional description for the header
+/// - `required = false` an optional parameter, default value is false
+/// - `deprecated = false` an optional parameter, default value is false
+#[proc_macro_error]
+#[proc_macro_attribute]
+pub fn api_header(_attr: TokenStream, item: TokenStream) -> TokenStream {
+  let input = syn::parse_macro_input!(item as Item);
+
+  if !matches!(input, Item::Enum(_)) && !matches!(input, Item::Struct(_)) {
+    abort!(
+      Span::call_site(),
+      "#[api_header] can only be used on structs and enums".to_string()
+    )
+  }
+
+  quote!(
+    #[derive(apistos::ApiHeader, apistos::schemars::JsonSchema)]
+    #[schemars(crate = "apistos")]
+    #input
+  )
+  .into()
+}
+
 /// Generates a reusable OpenAPI parameter schema in cookie.
 ///
 /// This `#[derive]` macro should be used in combination with [api_operation](attr.api_operation.html).
@@ -423,9 +535,10 @@ pub fn derive_api_header(input: TokenStream) -> TokenStream {
 ///
 /// ```rust
 /// use apistos::ApiCookie;
-/// use schemars::JsonSchema;
+/// use apistos::schemars::JsonSchema;
 ///
 /// #[derive(Debug, Clone, JsonSchema, ApiCookie)]
+/// #[schemars(crate = "apistos")]
 /// #[openapi_cookie(
 ///   name = "X-Organization-Slug",
 ///   description = "Organization of the current caller",
@@ -467,6 +580,68 @@ pub fn derive_api_cookie(input: TokenStream) -> TokenStream {
         #openapi_cookie_attributes
       }
     };
+  )
+  .into()
+}
+
+/// Generates a reusable OpenAPI parameter schema in cookie.
+///
+/// This macro should be used in combination with [api_operation](attr.api_operation.html).
+/// The macro requires one and only one `openapi_cookie`.
+///
+/// This macro is a helper deriving both [ApiCookie](derive.ApiCookie.html) and [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html) use the schemars version re-exposed by apistos.
+///
+/// ```rust
+/// use apistos::api_cookie;
+///
+/// #[derive(Debug, Clone)]
+/// #[api_cookie]
+/// #[openapi_cookie(
+///   name = "X-Organization-Slug",
+///   description = "Organization of the current caller",
+///   required = true
+/// )]
+/// pub struct OrganizationSlugCookie(String);
+/// ```
+/// is equivalent to
+/// ```rust
+/// use apistos::ApiCookie;
+/// use apistos::schemars::JsonSchema;
+///
+/// #[derive(Debug, Clone, JsonSchema, ApiCookie)]
+/// #[schemars(crate = "apistos")]
+/// #[openapi_cookie(
+///   name = "X-Organization-Slug",
+///   description = "Organization of the current caller",
+///   required = true
+/// )]
+/// pub struct OrganizationSlugCookie(String);
+/// ```
+///
+/// # `#[openapi_cookie(...)]` options:
+/// - `name = "..."` a **required** parameter with the header name
+/// - `description = "..."` an optional description for the header
+/// - `required = false` an optional parameter, default value is false
+/// - `deprecated = false` an optional parameter, default value is false
+///
+/// Because this macro requires [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html), all attributes supported by [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html) are forwarded to
+/// this implementation.
+#[proc_macro_error]
+#[proc_macro_attribute]
+pub fn api_cookie(_attr: TokenStream, item: TokenStream) -> TokenStream {
+  let input = syn::parse_macro_input!(item as Item);
+
+  if !matches!(input, Item::Enum(_)) && !matches!(input, Item::Struct(_)) {
+    abort!(
+      Span::call_site(),
+      "#[api_cookie] can only be used on structs and enums".to_string()
+    )
+  }
+
+  quote!(
+    #[derive(apistos::ApiCookie, apistos::schemars::JsonSchema)]
+    #[schemars(crate = "apistos")]
+    #input
   )
   .into()
 }
@@ -531,9 +706,10 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
 ///
 /// ```rust
 /// use apistos::{ApiWebhookComponent, ApiComponent};
-/// use schemars::JsonSchema;
+/// use apistos::schemars::JsonSchema;
 ///
 /// #[derive(ApiComponent, JsonSchema)]
+/// #[schemars(crate = "apistos")]
 /// pub struct Test {
 ///   pub id: u32
 /// }
@@ -573,12 +749,12 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
 /// - `component(...)` an optional list of components attached to this webhook operation (parameters, body...)
 ///     - `component = "..."` the type of this component
 ///     - `description = "..."` an optional description attached to this component (parameters description, body description, response description, ...). If used
-///        on a header, overrides the previously set header's description)
+///        on a header, override the previously set header's description
 /// - `response(...)` an optional list of responses attached to this webhook operation
 ///   - `code = "..."` Http response code
 ///   - `component(...)` an option component attached to the given webhook response.
-///       - `component = "..."` the component type, must derive [ApiComponent] and [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
-///       - `description = "..."` an optional description attached to this component. If used on a header, overrides the previously set header's description)
+///       - `component = "..."` the component type must derive [ApiComponent] and [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
+///       - `description = "..."` an optional description attached to this component. If used on a header, overrides the previously set header's description
 #[proc_macro_error]
 #[proc_macro_derive(ApiWebhookComponent, attributes(openapi_webhook))]
 pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
@@ -616,10 +792,11 @@ pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
 /// use core::fmt::Formatter;
 /// use apistos::actix::CreatedJson;
 /// use apistos::{api_operation, ApiComponent, ApiErrorComponent};
-/// use schemars::JsonSchema;
+/// use apistos::schemars::JsonSchema;
 /// use serde::{Serialize, Deserialize};
 ///
 /// #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
+/// #[schemars(crate = "apistos")]
 /// pub struct Test {
 ///   pub test: String
 /// }
@@ -660,7 +837,7 @@ pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
 ///
 /// # `#[api_operation(...)]` options:
 ///   - `skip` a bool allowing to skip documentation for the decorated handler. No component
-///  strictly associated to this operation will be documented in the resulting openapi definition.
+///  strictly associated with this operation will be documented in the resulting openapi definition.
 ///   - `skip_args = "..."` an optional list of arguments to skip. `Apistos` will not try to generate the
 ///  documentation for those args which prevent errors linked to missing `ApiComponent` implementation.
 ///   - `deprecated` a bool indicating the operation is deprecated. Deprecation can also be declared
@@ -695,10 +872,11 @@ pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
 /// use core::fmt::Formatter;
 /// use apistos::actix::CreatedJson;
 /// use apistos::{api_operation, ApiComponent, ApiErrorComponent};
-/// use schemars::JsonSchema;
+/// use apistos::schemars::JsonSchema;
 /// use serde::{Serialize, Deserialize};
 ///
 /// #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
+/// #[schemars(crate = "apistos")]
 /// pub struct Test {
 ///   pub test: String
 /// }
@@ -746,10 +924,11 @@ pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
 /// use core::fmt::Formatter;
 /// use apistos::actix::CreatedJson;
 /// use apistos::{api_operation, ApiComponent, ApiErrorComponent};
-/// use schemars::JsonSchema;
+/// use apistos::schemars::JsonSchema;
 /// use serde::{Serialize, Deserialize};
 ///
 /// #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
+/// #[schemars(crate = "apistos")]
 /// pub struct Test {
 ///   pub test: String
 /// }
@@ -882,15 +1061,17 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
 /// use core::fmt::Formatter;
 /// use apistos::actix::CreatedJson;
 /// use apistos::{api_operation, api_callback, ApiComponent, ApiErrorComponent};
-/// use schemars::JsonSchema;
+/// use apistos::schemars::JsonSchema;
 /// use serde::{Serialize, Deserialize};
 ///
 /// #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
+/// #[schemars(crate = "apistos")]
 /// pub struct Test {
 ///   pub test: String
 /// }
 ///
 /// #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
+/// #[schemars(crate = "apistos")]
 ///  pub(crate) struct TestCallbackResult {
 ///   pub(crate) id: u32,
 /// }
@@ -942,12 +1123,12 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
 ///   - `component(...)` an optional list of components attached to this callback operation (parameters, body...)
 ///     - `component = "..."` a type for this component
 ///     - `description = "..."` an optional description attached to this component (parameters description, body description, response description, ...). If used
-///        on a header, overrides the previously set header's description)
+///        on a header, override the previously set header's description
 ///   - `response(...)` an optional list of responses attached to this callback operation
 ///     - `code = "..."` Http response code
 ///     - `component(...)` an option component attached to the given callback response.
-///       - `component = "..."` the component type, must derive [ApiComponent] and [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
-///       - `description = "..."` an optional description attached to this component. If used on a header, overrides the previously set header's description)
+///       - `component = "..."` the component type must derive [ApiComponent] and [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
+///       - `description = "..."` an optional description attached to this component. If used on a header, overrides the previously set header's description
 ///
 /// If `summary` or `description` are not provided, a default value will be extracted from the comments. The first line will be used as summary while the rest will be part of the description.
 #[proc_macro_error]
@@ -1000,7 +1181,7 @@ pub fn api_callback(attr: TokenStream, item: TokenStream) -> TokenStream {
 /// ```
 ///
 /// # Attributes
-/// - `path = "path"`: Raw literal string with path for which to register handler.
+/// - `path = "path"`: Raw literal string with a path for which to register handler.
 /// - `name = "resource_name"`: Specifies resource name for the handler. If not set, the function
 ///   name of handler is used.
 /// - `method(...)`: Registers HTTP method to provide guard for.
@@ -1311,11 +1492,11 @@ actix_method_macro!(Patch, patch);
 /// ```
 ///
 /// # Attributes
-/// - `path = "path"`: Raw literal string with path for which to register handler.
+/// - `path = "path"`: Raw literal string with a path for which to register handler.
 /// - `name = "resource_name"`: Specifies resource name for the handler. If not set, the
 ///   function name of handler is used.
 /// - `guard = "function_name"`: Registers function as guard using `actix_web::guard::fn_guard`.
-/// - `wrap = "Middleware"`: Registers a resource middleware.
+/// - `wrap = "Middleware"`: Registers resource middleware.
 ///  - `key = "value"` any [`api_operation`](https://docs.rs/apistos/latest/apistos/attr.api_operation.html) option
 ///
 /// # Examples
@@ -1465,7 +1646,7 @@ pub fn scope(attr: TokenStream, item: TokenStream) -> TokenStream {
   // functions by prefixing them with this scope macro's argument
   if let Some((_, items)) = &mut module.content {
     for item in items {
-      if let syn::Item::Fn(fun) = item {
+      if let Item::Fn(fun) = item {
         fun.attrs = fun
           .attrs
           .iter()
@@ -1483,7 +1664,5 @@ pub fn scope(attr: TokenStream, item: TokenStream) -> TokenStream {
 use apistos as _;
 #[cfg(test)]
 use garde as _;
-#[cfg(test)]
-use schemars as _;
 #[cfg(test)]
 use serde as _;

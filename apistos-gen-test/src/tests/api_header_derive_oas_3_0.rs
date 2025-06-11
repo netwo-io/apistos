@@ -1,7 +1,7 @@
 use actix_web::web::Header;
 use apistos::OpenApiVersion;
+use apistos::schemars::JsonSchema;
 use assert_json_diff::assert_json_eq;
-use schemars::JsonSchema;
 use serde_json::json;
 
 use crate::utils::assert_schema;
@@ -12,6 +12,7 @@ use apistos_gen::ApiHeader;
 #[expect(dead_code)]
 fn api_header_derive() {
   #[derive(JsonSchema, ApiHeader)]
+  #[schemars(crate = "apistos")]
   #[openapi_header(
     name = "X-Organization-Slug",
     description = "Organization of the current caller",

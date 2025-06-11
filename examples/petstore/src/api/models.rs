@@ -2,15 +2,15 @@ use actix_web::dev::Payload;
 use actix_web::error::ParseError;
 use actix_web::http::header::{Header, HeaderName, HeaderValue, InvalidHeaderValue, TryIntoHeaderValue};
 use actix_web::{Error, FromRequest, HttpMessage, HttpRequest};
-use apistos::{ApiComponent, ApiCookie, ApiHeader, ApiType, ApiWebhookComponent, TypedSchema};
+use apistos::{ApiType, ApiWebhookComponent, TypedSchema, api_component, api_cookie, api_header};
 use num_traits::Float;
 use rust_decimal::Decimal;
-use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::future::Ready;
 use url::Url;
 
-#[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[api_component]
 pub(crate) struct Pet {
   pub(crate) id: Option<i64>,
   pub(crate) name: String,
@@ -22,7 +22,8 @@ pub(crate) struct Pet {
 }
 
 /// A category for a pet
-#[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[api_component]
 pub(crate) struct Category {
   pub(crate) id: Option<Finite<f32>>,
   pub(crate) name: Option<Name>,
@@ -60,7 +61,8 @@ impl TypedSchema for Name {
 }
 
 /// pet status in the store
-#[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[api_component]
 #[serde(rename_all = "snake_case")]
 pub(crate) enum Status {
   Available,
@@ -69,29 +71,34 @@ pub(crate) enum Status {
 }
 
 /// A tag for a pet
-#[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[api_component]
 pub(crate) struct Tag {
   pub(crate) id: Option<Decimal>,
   pub(crate) name: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[api_component]
 pub(crate) struct QueryStatus {
   pub(crate) status: Status,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[api_component]
 pub(crate) struct QueryTag {
   pub(crate) tags: Vec<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[api_component]
 pub(crate) struct PetUpdatesQuery {
   pub(crate) name: String,
   pub(crate) status: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiHeader)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[api_header]
 #[openapi_header(
   name = "X-Organization-Slug",
   description = "Organization of the current caller",
@@ -124,7 +131,8 @@ impl Header for OrganizationSlug {
   }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiCookie)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[api_cookie]
 #[openapi_cookie(name = "X-Realm", description = "Realm of the current caller", deprecated = true)]
 pub(crate) struct Realm(String);
 

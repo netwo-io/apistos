@@ -32,6 +32,8 @@ pub mod security;
 pub mod server;
 pub mod tag;
 
+pub use schemars;
+
 mod schema;
 
 #[derive(Serialize, Clone, Copy, Debug)]

@@ -1,18 +1,19 @@
-use actix_web::web::{Json, Path};
 use actix_web::Error;
+use actix_web::web::{Json, Path};
 use apistos::actix::CreatedJson;
-use apistos::{api_operation, ApiComponent};
-use schemars::JsonSchema;
+use apistos::{ApiComponent, api_component, api_operation};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Deserialize, JsonSchema, ApiComponent)]
+#[derive(Deserialize)]
+#[api_component]
 pub struct NewTodo {
   pub title: String,
   pub description: Option<String>,
 }
 
-#[derive(Serialize, JsonSchema, ApiComponent)]
+#[derive(Serialize)]
+#[api_component]
 pub struct Todo {
   pub id: Uuid,
   pub title: String,

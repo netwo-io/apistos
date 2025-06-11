@@ -45,7 +45,7 @@ impl ToTokens for Schemas {
 
       fn schema(oas_version: apistos::OpenApiVersion) -> Option<(String, apistos::reference_or::ReferenceOr<apistos::ApistosSchema>)> {
         let (name, schema) = {
-          let schema_name = <Self as schemars::JsonSchema>::schema_name();
+          let schema_name = <Self as apistos::schemars::JsonSchema>::schema_name();
           let settings = oas_version.get_schema_settings();
           let mut generator = settings.into_generator();
           let mut schema: apistos::Schema = generator.into_root_schema_for::<Self>();

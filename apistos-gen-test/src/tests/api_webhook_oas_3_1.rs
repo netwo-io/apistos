@@ -1,6 +1,6 @@
 use actix_web::web::Json;
+use apistos::schemars::_private::serde_json::json;
 use assert_json_diff::assert_json_eq;
-use schemars::_private::serde_json::json;
 
 use crate::tests::api_webhook_oas_3_1::test_models::Test;
 use apistos::{ApiWebhook, OpenApiVersion};
@@ -14,17 +14,19 @@ mod test_models {
   use actix_web::error::ParseError;
   use actix_web::http::StatusCode;
   use actix_web::{HttpMessage, ResponseError};
-  use schemars::JsonSchema;
+  use apistos::schemars::JsonSchema;
   use serde::{Deserialize, Serialize};
 
   use apistos_gen::{ApiComponent, ApiErrorComponent, ApiHeader};
 
   #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
+  #[schemars(crate = "apistos")]
   pub(crate) struct Test {
     pub(crate) test: String,
   }
 
   #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
+  #[schemars(crate = "apistos")]
   pub(crate) struct TestResult {
     pub(crate) id: u32,
   }
@@ -48,6 +50,7 @@ mod test_models {
   }
 
   #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiHeader)]
+  #[schemars(crate = "apistos")]
   #[openapi_header(
     name = "X-Organization-Slug",
     description = "Organization of the current caller",

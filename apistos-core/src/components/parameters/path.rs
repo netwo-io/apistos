@@ -2,8 +2,8 @@ use crate::ApiComponent;
 use actix_web::web::Path;
 use apistos_models::paths::{Parameter, ParameterDefinition, ParameterIn, RequestBody};
 use apistos_models::reference_or::ReferenceOr;
+use apistos_models::schemars::Schema;
 use apistos_models::{ApistosSchema, OpenApiVersion};
-use schemars::Schema;
 use serde_json::{Map, Value};
 
 impl<T> ApiComponent for Path<T>

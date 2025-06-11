@@ -1,7 +1,7 @@
 use apistos::OpenApiVersion;
+use apistos::schemars::JsonSchema;
 use apistos_core::ApiErrorComponent;
 use apistos_gen::ApiErrorComponent;
-use schemars::JsonSchema;
 use std::collections::{BTreeMap, HashSet};
 
 #[test]
@@ -56,6 +56,7 @@ fn api_component_derive() {
 #[expect(dead_code)]
 fn api_component_with_schema() {
   #[derive(JsonSchema)]
+  #[schemars(crate = "apistos")]
   struct AuthorizeError {
     reason: String,
     code: String,

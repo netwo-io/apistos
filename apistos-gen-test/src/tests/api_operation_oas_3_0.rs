@@ -3,8 +3,8 @@ use actix_web::dev::ServiceRequest;
 use actix_web::http::header::ContentType;
 use actix_web::web::Json;
 use actix_web::{Error, HttpResponse, Responder};
+use apistos::schemars::_private::serde_json::json;
 use assert_json_diff::assert_json_eq;
-use schemars::_private::serde_json::json;
 use std::collections::HashSet;
 use uuid::Uuid;
 
@@ -23,22 +23,25 @@ mod test_models {
   use actix_web::dev::Payload;
   use actix_web::http::StatusCode;
   use actix_web::{Error, FromRequest, HttpRequest, ResponseError};
-  use schemars::JsonSchema;
+  use apistos::schemars::JsonSchema;
   use serde::{Deserialize, Serialize};
 
   use apistos_gen::{ApiComponent, ApiErrorComponent, ApiSecurity};
 
   #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
+  #[schemars(crate = "apistos")]
   pub(crate) struct Test {
     pub(crate) test: String,
   }
 
   #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
+  #[schemars(crate = "apistos")]
   pub(crate) struct TestWrapper {
     pub(crate) test: Test,
   }
 
   #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema, ApiComponent)]
+  #[schemars(crate = "apistos")]
   pub(crate) struct TestResult {
     pub(crate) id: u32,
   }

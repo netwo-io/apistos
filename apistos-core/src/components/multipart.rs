@@ -93,9 +93,9 @@ pub mod tempfile {
   use actix_multipart::{Field, MultipartError};
   use actix_web::HttpRequest;
   use apistos_models::reference_or::ReferenceOr;
+  use apistos_models::schemars::{JsonSchema, Schema, SchemaGenerator, json_schema};
   use apistos_models::{ApistosSchema, OpenApiVersion};
   use futures_core::future::LocalBoxFuture;
-  use schemars::{JsonSchema, Schema, SchemaGenerator, json_schema};
   use std::borrow::Cow;
 
   #[derive(Debug)]
@@ -170,15 +170,16 @@ pub mod tempfile {
     use crate::ApiComponent;
     use crate::multipart::tempfile::Tempfile;
     use apistos_models::reference_or::ReferenceOr;
+    use apistos_models::schemars::{JsonSchema, SchemaGenerator};
     use apistos_models::{ApistosSchema, OpenApiVersion};
     use assert_json_diff::assert_json_eq;
-    use schemars::{JsonSchema, SchemaGenerator};
     use serde_json::json;
 
     #[test]
     #[expect(dead_code)]
     fn multipart_tempfile_schema() {
       #[derive(JsonSchema)]
+      #[schemars(crate = "apistos_models::schemars")]
       struct Test {
         file: Tempfile,
         label: String,

@@ -1,7 +1,7 @@
 use crate::OpenApiVersion;
+use crate::schemars::{Schema, SchemaGenerator};
 use log::warn;
 use schemars::transform::Transform;
-use schemars::{Schema, SchemaGenerator};
 use serde::Serialize;
 use serde_json::{Value, json};
 

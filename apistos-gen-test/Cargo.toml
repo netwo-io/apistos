@@ -23,8 +23,6 @@ actix-web-grants = { workspace = true }
 assert-json-diff = { workspace = true }
 chrono = { workspace = true, features = ["serde"] }
 futures-core = { workspace = true }
-# we use the "preserve_order" feature from schemars here following https://github.com/netwo-io/apistos/pull/78
-schemars = { workspace = true, features = ["preserve_order"] }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 uuid = { workspace = true, features = ["v4"] }
