@@ -24,7 +24,7 @@ This crate is exposed through Apistos `swagger-ui` feature.
 
 ```toml
 [dependencies]
-apistos = { version = "=1.0.0-pre-release.13", feature = ["swagger-ui"] }
+apistos = { version = "=1.0.0-pre-release.14", feature = ["swagger-ui"] }
 ```
 
 ### About us

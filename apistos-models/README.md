@@ -27,7 +27,7 @@ These models are not linked to any web framework.
 
 ```toml
 [dependencies]
-apistos-models = "=1.0.0-pre-release.13"
+apistos-models = "=1.0.0-pre-release.14"
 ```
 
 ### About us

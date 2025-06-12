@@ -8,7 +8,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! apistos = "=1.0.0-pre-release.13"
+//! apistos = "=1.0.0-pre-release.14"
 //! ```
 //!
 //! # Usage example
