@@ -5,6 +5,123 @@ use schemars::transform::Transform;
 use serde::Serialize;
 use serde_json::{Value, json};
 
+#[derive(Debug, Clone, Default)]
+pub(crate) struct RecursiveReferenceCreateComponent {
+  oas_version: OpenApiVersion,
+  schema_title: Option<String>,
+  transformed: bool,
+}
+
+impl Transform for RecursiveReferenceCreateComponent {
+  fn transform(&mut self, schema: &mut Schema) {
+    if let Some(Value::String(title)) = schema.clone().get("title") {
+      self.schema_title = Some(title.clone());
+
+      self.transform_inner(schema);
+
+      if self.transformed {
+        let mut transformed_schema_value = schema.as_value().clone();
+        let Some(root) = schema.as_object_mut() else { return };
+
+        let mut defs = Some(root);
+        let schema_settings = self.oas_version.get_schema_settings();
+        let definition_path_elements = schema_settings.definitions_path.trim_matches('/').split('/');
+        for definition_path_element in definition_path_elements {
+          defs = defs.and_then(|defs| {
+            defs
+              .entry(definition_path_element)
+              .or_insert_with(|| Value::Object(serde_json::Map::new()))
+              .as_object_mut()
+          });
+        }
+
+        if let Some(defs) = defs {
+          let Some(sub_schema) = transformed_schema_value.as_object_mut() else {
+            return;
+          };
+          sub_schema.remove("title");
+          sub_schema.remove("$schema");
+
+          defs.insert(title.clone(), Value::Object(sub_schema.clone()));
+        }
+      }
+    }
+  }
+}
+
+impl RecursiveReferenceCreateComponent {
+  pub(crate) fn new(oas_version: OpenApiVersion) -> Self {
+    Self {
+      oas_version,
+      ..Default::default()
+    }
+  }
+
+  fn transform_inner(&mut self, schema: &mut Schema) {
+    self.transform_subschemas(schema);
+
+    if let Some(Value::String(_ref)) = schema.get("$ref") {
+      if _ref != "#" {
+        return;
+      }
+
+      if let Some(title) = &self.schema_title {
+        schema.insert(
+          "$ref".into(),
+          Value::String(format!(
+            "#{}/{}",
+            self.oas_version.get_schema_settings().definitions_path,
+            title
+          )),
+        );
+        self.transformed = true;
+      }
+    }
+  }
+
+  fn transform_subschemas(&mut self, schema: &mut Schema) {
+    for (key, value) in schema.as_object_mut().into_iter().flatten() {
+      match key.as_str() {
+        "not" | "if" | "then" | "else" | "contains" | "additionalProperties" | "propertyNames" | "additionalItems" => {
+          if let Ok(subschema) = value.try_into() {
+            self.transform_inner(subschema);
+          }
+        }
+        "allOf" | "anyOf" | "oneOf" | "prefixItems" => {
+          if let Some(array) = value.as_array_mut() {
+            for value in array {
+              if let Ok(subschema) = value.try_into() {
+                self.transform_inner(subschema);
+              }
+            }
+          }
+        }
+        "items" => {
+          if let Some(array) = value.as_array_mut() {
+            for value in array {
+              if let Ok(subschema) = value.try_into() {
+                self.transform_inner(subschema);
+              }
+            }
+          } else if let Ok(subschema) = value.try_into() {
+            self.transform_inner(subschema);
+          }
+        }
+        "properties" | "patternProperties" | "$defs" | "definitions" => {
+          if let Some(obj) = value.as_object_mut() {
+            for value in obj.values_mut() {
+              if let Ok(subschema) = value.try_into() {
+                self.transform_inner(subschema);
+              }
+            }
+          }
+        }
+        _ => {}
+      }
+    }
+  }
+}
+
 #[derive(Debug, Clone)]
 pub(crate) struct EnumNewTypeInternallyTaggedEnumWrapRef;
 

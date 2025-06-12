@@ -270,7 +270,7 @@ fn api_component_derive_recursive() {
   let name_schema = <Name as ApiComponent>::schema(OpenApiVersion::OAS3_1);
   let name_child_schemas = <Name as ApiComponent>::child_schemas(OpenApiVersion::OAS3_1);
   assert!(name_schema.is_some());
-  assert!(name_child_schemas.is_empty());
+  assert_eq!(name_child_schemas.len(), 1);
   let (schema_name, schema) = name_schema.expect("schema should be defined");
   assert_eq!(schema_name, "Name");
   assert_schema(&schema.clone());
@@ -285,7 +285,30 @@ fn api_component_derive_recursive() {
         "old_name": {
           "anyOf": [
             {
-              "$ref": "#"
+              "$ref": "#/components/schemas/Name"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    })
+  );
+
+  let (child_schema_name, child_schema) = name_child_schemas.first().expect("missing child schema");
+  assert_eq!(child_schema_name, "Name");
+  assert_schema(&child_schema.clone());
+  let json = serde_json::to_value(child_schema).expect("Unable to serialize as Json");
+  assert_json_eq!(
+    json,
+    json!({
+      "type": "object",
+      "properties": {
+        "old_name": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/Name"
             },
             {
               "type": "null"

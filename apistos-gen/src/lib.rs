@@ -222,7 +222,7 @@ pub fn derive_api_component(input: TokenStream) -> TokenStream {
 
   let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
   let schema_impl = Schemas { deprecated: false };
-  quote!(
+  let res = quote!(
     const _: () = {
       #[automatically_derived]
       impl #impl_generics apistos::ApiComponent for #ident #ty_generics #where_clause {
@@ -230,7 +230,9 @@ pub fn derive_api_component(input: TokenStream) -> TokenStream {
       }
     };
   )
-  .into()
+  .into();
+  // eprintln!("{:#}", res);
+  res
 }
 
 /// Generates a reusable OpenAPI schema.

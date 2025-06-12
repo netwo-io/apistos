@@ -19,7 +19,7 @@ use crate::components::Components;
 use crate::info::Info;
 use crate::paths::{ExternalDocumentation, PathItem, Paths};
 use crate::reference_or::ReferenceOr;
-use crate::schema::EnumNewTypeInternallyTaggedEnumWrapRef;
+use crate::schema::{EnumNewTypeInternallyTaggedEnumWrapRef, RecursiveReferenceCreateComponent};
 use crate::security::SecurityRequirement;
 use crate::server::Server;
 use crate::tag::Tag;
@@ -54,10 +54,13 @@ impl Default for OpenApiVersion {
 impl OpenApiVersion {
   pub fn get_schema_settings(self) -> SchemaSettings {
     match self {
-      OpenApiVersion::OAS3_0 => SchemaSettings::openapi3().with_transform(EnumNewTypeInternallyTaggedEnumWrapRef),
+      OpenApiVersion::OAS3_0 => SchemaSettings::openapi3()
+        .with_transform(EnumNewTypeInternallyTaggedEnumWrapRef)
+        .with_transform(RecursiveReferenceCreateComponent::new(self)),
       OpenApiVersion::OAS3_1 => SchemaSettings::draft2020_12()
         .with(|s| s.definitions_path = "/components/schemas".into())
-        .with_transform(EnumNewTypeInternallyTaggedEnumWrapRef),
+        .with_transform(EnumNewTypeInternallyTaggedEnumWrapRef)
+        .with_transform(RecursiveReferenceCreateComponent::new(self)),
     }
   }
 }
