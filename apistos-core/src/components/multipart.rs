@@ -114,7 +114,7 @@ pub mod tempfile {
   }
 
   impl JsonSchema for Tempfile {
-    fn always_inline_schema() -> bool {
+    fn inline_schema() -> bool {
       true
     }
 

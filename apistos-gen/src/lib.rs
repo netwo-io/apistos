@@ -127,7 +127,7 @@ pub fn derive_api_type(input: TokenStream) -> TokenStream {
       #typed_schema_derived
       #[automatically_derived]
       impl #impl_generics apistos::schemars::JsonSchema for #ident #ty_generics #where_clause {
-         fn always_inline_schema() -> bool {
+         fn inline_schema() -> bool {
           true
         }
 
@@ -222,7 +222,7 @@ pub fn derive_api_component(input: TokenStream) -> TokenStream {
 
   let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
   let schema_impl = Schemas { deprecated: false };
-  let res = quote!(
+  quote!(
     const _: () = {
       #[automatically_derived]
       impl #impl_generics apistos::ApiComponent for #ident #ty_generics #where_clause {
@@ -230,9 +230,7 @@ pub fn derive_api_component(input: TokenStream) -> TokenStream {
       }
     };
   )
-  .into();
-  // eprintln!("{:#}", res);
-  res
+  .into()
 }
 
 /// Generates a reusable OpenAPI schema.

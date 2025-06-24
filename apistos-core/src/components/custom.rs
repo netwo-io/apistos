@@ -23,7 +23,7 @@ pub mod ipnetwork {
   simple_modifier!(Ipv6Network);
 
   impl JsonSchema for IpNetwork {
-    fn always_inline_schema() -> bool {
+    fn inline_schema() -> bool {
       true
     }
 
@@ -52,7 +52,7 @@ pub mod ipnetwork {
   }
 
   impl JsonSchema for Ipv4Network {
-    fn always_inline_schema() -> bool {
+    fn inline_schema() -> bool {
       true
     }
 
@@ -73,7 +73,7 @@ pub mod ipnetwork {
   }
 
   impl JsonSchema for Ipv6Network {
-    fn always_inline_schema() -> bool {
+    fn inline_schema() -> bool {
       true
     }
 
@@ -256,7 +256,7 @@ pub mod ipnetwork_20 {
   simple_modifier!(Ipv6Network);
 
   impl JsonSchema for IpNetwork {
-    fn always_inline_schema() -> bool {
+    fn inline_schema() -> bool {
       true
     }
 
@@ -285,7 +285,7 @@ pub mod ipnetwork_20 {
   }
 
   impl JsonSchema for Ipv4Network {
-    fn always_inline_schema() -> bool {
+    fn inline_schema() -> bool {
       true
     }
 
@@ -306,7 +306,7 @@ pub mod ipnetwork_20 {
   }
 
   impl JsonSchema for Ipv6Network {
-    fn always_inline_schema() -> bool {
+    fn inline_schema() -> bool {
       true
     }
 
