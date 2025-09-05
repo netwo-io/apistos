@@ -1,1 +1,5 @@
-1.85.0
+[toolchain]
+channel = "nightly-2025-06-09"
+
+components = ["clippy", "rustfmt"]
+profile = "minimal"

@@ -68,7 +68,8 @@ multipart = ["apistos-core/multipart"]
 rust_decimal = ["apistos-core/rust_decimal"]
 uuid = ["apistos-core/uuid"]
 url = ["apistos-core/url"]
-extras = ["chrono", "multipart", "rust_decimal", "uuid", "url"]
+alloy_primitives = ["apistos-core/alloy_primitives"]
+extras = ["chrono", "multipart", "rust_decimal", "uuid", "url", "alloy_primitives"]
 
 # ui features
 rapidoc = ["dep:apistos-rapidoc"]

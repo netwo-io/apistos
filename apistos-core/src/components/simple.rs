@@ -52,6 +52,157 @@ simple_modifier!(chrono::NaiveDate);
 simple_modifier!(chrono::NaiveTime);
 #[cfg(feature = "chrono")]
 simple_modifier!(chrono::NaiveDateTime);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::U8);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::U16);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::U24);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::U32);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::U40);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::U48);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::U56);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::U64);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::U72);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::U80);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::U88);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::U96);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::U104);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::U112);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::U120);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::U128);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::U136);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::U144);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::U152);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::U160);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::U168);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::U176);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::U184);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::U192);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::U200);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::U208);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::U216);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::U224);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::U232);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::U240);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::U248);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::U256);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::I8);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::I16);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::I24);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::I32);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::I40);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::I48);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::I56);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::I64);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::I72);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::I80);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::I88);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::I96);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::I104);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::I112);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::I120);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::I128);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::I136);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::I144);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::I152);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::I160);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::I168);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::I176);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::I184);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::I192);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::I200);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::I208);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::I216);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::I224);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::I232);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::I240);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::I248);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::I256);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::B8);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::B16);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::B32);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::B64);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::B96);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::B128);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::B160);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::B192);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::B224);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::aliases::B256);
+#[cfg(feature = "alloy_primitives")]
+simple_modifier!(alloy_primitives::Address);
+
 #[cfg(feature = "rust_decimal")]
 simple_modifier!(rust_decimal::Decimal);
 #[cfg(feature = "uuid")]

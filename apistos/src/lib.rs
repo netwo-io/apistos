@@ -165,6 +165,8 @@ pub use apistos_scalar::ScalarConfig;
 pub use apistos_swagger_ui::SwaggerUIConfig;
 pub use futures_util::future::FutureExt;
 
+pub use schemars;
+
 mod internal;
 
 pub mod actix;

@@ -11,3 +11,4 @@ Cargo.lock
 .gitlab-ci-local
 
 *.iml
+**/.DS_Store
