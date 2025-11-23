@@ -3,8 +3,8 @@ use crate::actix_route_attr::ActixRouteAttrInternal;
 use crate::operation_attr::OperationType;
 use darling::FromMeta;
 use proc_macro_error2::abort;
-use quote::{ToTokens, quote};
-use syn::{Attribute, Expr, Meta, MetaList, Path};
+use quote::quote;
+use syn::{Attribute, Meta, MetaList, Path};
 
 pub(crate) fn method_from_attr_path(path: &Path) -> Option<OperationType> {
   if path.is_ident("get") {
@@ -91,81 +91,4 @@ pub(crate) fn modify_attribute_with_scope(attr: &Attribute, scope_path: &str) ->
       Err(_) => attr.clone(),
     }
   }
-}
-
-pub(crate) fn from_meta_inner_flat<T: FromMeta>(item: &Meta, property_name: &str) -> darling::Result<Vec<T>> {
-  let mut acc = Vec::new();
-
-  let expr = Expr::from_meta(item)?;
-  if let Expr::Array(arr) = &expr {
-    for elem in &arr.elems {
-      if let Expr::Call(call) = elem {
-        if let Expr::Path(path) = &*call.func {
-          if path.path.is_ident(property_name) {
-            let mut tokens = proc_macro2::TokenStream::new();
-            for (i, arg) in call.args.iter().enumerate() {
-              if i > 0 {
-                tokens.extend(quote::quote! { , });
-              }
-              arg.to_tokens(&mut tokens);
-            }
-
-            let meta_list = Meta::List(MetaList {
-              path: path.path.clone(),
-              delimiter: syn::MacroDelimiter::Paren(Default::default()),
-              tokens,
-            });
-
-            let nested = darling::ast::NestedMeta::Meta(meta_list);
-            acc.push(T::from_nested_meta(&nested)?);
-          }
-        }
-      }
-    }
-  }
-
-  Ok(acc)
-}
-
-pub(crate) fn from_list_inner<T: FromMeta>(
-  items: &[darling::ast::NestedMeta],
-  property_name: &str,
-  struct_name: &str,
-) -> darling::Result<Vec<T>> {
-  let mut acc = Vec::new();
-
-  for item in items {
-    if let darling::ast::NestedMeta::Meta(Meta::NameValue(nv)) = item {
-      if nv.path.is_ident(property_name) {
-        if let Expr::Array(arr) = &nv.value {
-          for elem in &arr.elems {
-            if let Expr::Call(call) = elem {
-              if let Expr::Path(path) = &*call.func {
-                if path.path.is_ident(struct_name) {
-                  let mut tokens = proc_macro2::TokenStream::new();
-                  for (i, arg) in call.args.iter().enumerate() {
-                    if i > 0 {
-                      tokens.extend(quote::quote! { , });
-                    }
-                    arg.to_tokens(&mut tokens);
-                  }
-
-                  let meta_list = Meta::List(MetaList {
-                    path: path.path.clone(),
-                    delimiter: syn::MacroDelimiter::Paren(Default::default()),
-                    tokens,
-                  });
-
-                  let nested = darling::ast::NestedMeta::Meta(meta_list);
-                  acc.push(T::from_nested_meta(&nested)?);
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  Ok(acc)
 }

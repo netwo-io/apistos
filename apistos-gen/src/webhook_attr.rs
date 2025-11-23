@@ -158,8 +158,8 @@ impl WebhookAttrEnumInternal {
       if self.attr.responses.is_empty() {
         self.attr.responses = struct_attrs.responses.clone();
       }
-      if self.attr.components.is_empty() {
-        self.attr.components = struct_attrs.components.clone();
+      if self.attr.components.components.is_empty() {
+        self.attr.components.components = struct_attrs.components.clone();
       }
     }
 

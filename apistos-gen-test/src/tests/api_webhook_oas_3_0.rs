@@ -90,7 +90,7 @@ fn api_webhook() {
   #[derive(ApiWebhookComponent)]
   #[openapi_webhook(
     name = "TestWebhook",
-    component(component = "Header<OrganizationSlug>"),
+    components = [component(name = "Header<OrganizationSlug>")],
     response(code = 200)
   )]
   struct TestStruct {}

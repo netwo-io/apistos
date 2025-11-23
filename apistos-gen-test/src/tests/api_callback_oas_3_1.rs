@@ -110,8 +110,8 @@ fn api_callback() {
   /// Add a new pet to the store
   /// Plop
   #[api_callback(
-    component(component = "Header<OrganizationSlug>", description = "A super description"),
-    response(code = 200, component(component = "TestCallbackResult"))
+    components = [component(name = "Header<OrganizationSlug>", description = "A super description")],
+    response(code = 200, component(name = "TestCallbackResult"))
   )]
   pub(crate) async fn test_callback(
     _body: Json<test_models::Test>,

@@ -1,5 +1,5 @@
 use crate::OPENAPI_CALLBACK_STRUCT_PREFIX;
-use crate::utils::{from_list_inner, from_meta_inner_flat};
+use crate::internal::utils::{from_list_inner, from_meta_inner_flat};
 use darling::FromMeta;
 use darling::ast::NestedMeta;
 use proc_macro_error2::abort;
