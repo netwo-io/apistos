@@ -1,7 +1,7 @@
 use actix_multipart::form::MultipartForm;
 use actix_web::dev::ServiceRequest;
 use actix_web::http::header::ContentType;
-use actix_web::web::Json;
+use actix_web::web::{Json, Path};
 use actix_web::{Error, HttpResponse, Responder};
 use apistos::schemars::_private::serde_json::json;
 use assert_json_diff::assert_json_eq;
@@ -126,9 +126,10 @@ fn api_operation() {
   /// Add a new pet to the store
   /// Add a new pet to the store
   /// Plop
-  #[api_operation(tags = ["pet"], parameter_description(_body = "A super description"))]
+  #[api_operation(tags = ["pet"], parameter_descriptions(_body = "A super description", _params = "Another one"))]
   pub(crate) async fn test(
     _body: Json<test_models::Test>,
+    _params: Path<u32>,
   ) -> Result<Json<test_models::TestResult>, test_models::ErrorResponse> {
     Ok(Json(test_models::TestResult { id: 0 }))
   }
@@ -150,7 +151,23 @@ fn api_operation() {
       ],
       "summary": "Add a new pet to the store",
       "description": "Add a new pet to the store\nPlop",
+      "parameters": [
+        {
+          "name": "",
+          "in": "path",
+          "description": "Another one",
+          "required": true,
+          "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "title": "uint32",
+            "type": "integer",
+            "format": "uint32",
+            "minimum": 0
+          }
+        }
+      ],
       "requestBody": {
+        "description": "A super description",
         "content": {
           "application/json": {
             "schema": {
@@ -168,7 +185,6 @@ fn api_operation() {
             }
           }
         },
-        "description": "A super description",
         "required": true
       },
       "responses": {

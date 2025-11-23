@@ -29,7 +29,7 @@ pub(crate) struct OperationAttrInternal {
   description: Option<String>,
   success_description: Option<String>,
   #[darling(default)]
-  parameter_description: HashMap<String, String>, //@todo switch to new "list" format
+  parameter_descriptions: HashMap<String, String>,
   #[darling(default)]
   tags: Vec<LitStr>,
   #[darling(default)]
@@ -94,7 +94,7 @@ impl ToTokens for OperationAttrInternal {
       summary,
       description,
       success_description,
-      parameter_description,
+      parameter_descriptions: parameter_description,
       tags,
       security_scopes,
       error_codes,
@@ -123,7 +123,7 @@ impl ToTokens for OperationAttrInternal {
       for (k, v) in parameter_description {
         tokens.extend(quote!(#k = #v, ));
       }
-      quote!(parameter_description(#tokens),)
+      quote!(parameter_descriptions(#tokens),)
     };
     let consumes = consumes.clone().map(|v| quote!(consumes = #v, )).unwrap_or_default();
     let produces = produces.clone().map(|v| quote!(produces = #v, )).unwrap_or_default();
@@ -317,7 +317,7 @@ impl TryFrom<OperationAttrInternal> for OperationAttr {
       description: value.description.map(|d| d.replace('\n', "\\\n")),
       success_description: value.success_description.map(|d| d.trim().to_string()),
       parameter_description: value
-        .parameter_description
+        .parameter_descriptions
         .into_iter()
         .map(|(k, v)| (k, v.trim().to_string()))
         .collect(),

@@ -852,7 +852,7 @@ pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
 ///   - `summary = "..."` an optional summary
 ///   - `description = "..."` an optional description
 ///   - `success_description` = "..." an optional description for a success response
-///   - `parameter_description(...)` an optional key = value list of descriptions for parameters. (If used on a header, overrides the previously
+///   - `parameter_descriptions(...)` an optional key = value list of descriptions for parameters. (If used on a header, overrides the previously
 /// set header's description)
 ///   - `tag = "..."` an optional list of tags associated with this operation (define tag multiple times to add to the list)
 ///   - `security_scopes = [...]` an optional list representing which security scopes apply for a given operation with
@@ -920,7 +920,7 @@ pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
 ///   summary = "Add a new pet to the store",
 ///   description = r###"Add a new pet to the store
 ///     Plop"###,
-///   parameter_description(body = "A super description"),
+///   parameter_descriptions(body = "A super description"),
 ///   error_codes = [401, 405]
 /// )]
 /// pub(crate) async fn test(
@@ -973,7 +973,7 @@ pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
 /// /// Plop
 /// #[api_operation(
 ///   tags = ["pet"],
-///   parameter_description(body = "A super description")
+///   parameter_descriptions(body = "A super description")
 /// )]
 /// pub(crate) async fn test(
 ///   body: Json<Test>,
