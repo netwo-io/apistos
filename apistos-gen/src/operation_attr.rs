@@ -38,8 +38,8 @@ pub(crate) struct OperationAttrInternal {
   error_codes: Vec<LitInt>,
   consumes: Option<String>,
   produces: Option<String>,
-  #[darling(multiple)]
-  skip_args: Vec<Ident>,
+  #[darling(default)]
+  skip_args: Vec<LitStr>,
   #[darling(multiple)]
   callbacks: Vec<NamedOperationCallbackInternal>,
 }
@@ -122,7 +122,7 @@ impl ToTokens for OperationAttrInternal {
       error_codes = [#(#error_codes,)*],
       #consumes
       #produces
-      #(skip_args = #skip_args,)*
+      skip_args = [#(#skip_args,)*],
       #(#callbacks,)*
     ))
   }
@@ -315,7 +315,11 @@ impl TryFrom<OperationAttrInternal> for OperationAttr {
         .collect::<Result<Vec<u16>, syn::Error>>()?,
       consumes: value.consumes,
       produces: value.produces,
-      skip_args: value.skip_args,
+      skip_args: value
+        .skip_args
+        .iter()
+        .map(|lit| Ident::from_string(&lit.value()))
+        .collect::<Result<_, _>>()?,
     })
   }
 }

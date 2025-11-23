@@ -844,7 +844,7 @@ pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
 /// # `#[api_operation(...)]` options:
 ///   - `skip` a bool allowing to skip documentation for the decorated handler. No component
 ///  strictly associated with this operation will be documented in the resulting openapi definition.
-///   - `skip_args = "..."` an optional list of arguments to skip. `Apistos` will not try to generate the
+///   - `skip_args = ["..."]` an optional list of arguments to skip. `Apistos` will not try to generate the
 ///  documentation for those args which prevent errors linked to missing `ApiComponent` implementation.
 ///   - `deprecated` a bool indicating the operation is deprecated. Deprecation can also be declared
 ///  with rust `#[deprecated]` decorator.
