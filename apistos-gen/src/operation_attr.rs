@@ -152,15 +152,35 @@ impl ToTokens for OperationAttrInternal {
 #[derive(FromMeta, Clone)]
 struct NamedOperationCallbackInternal {
   name: String,
-  #[darling(multiple)]
-  callback: Vec<OperationCallbackInternal>,
+  #[darling(default)]
+  callbacks: OperationCallbackInternalWrapper,
+}
+
+#[derive(Clone, Default)]
+struct OperationCallbackInternalWrapper {
+  callbacks: Vec<OperationCallbackInternal>,
+}
+
+impl FromMeta for OperationCallbackInternalWrapper {
+  fn from_list(items: &[NestedMeta]) -> darling::Result<Self> {
+    Ok(Self {
+      callbacks: from_list_inner::<OperationCallbackInternal>(items, "callbacks", "callbacks")?,
+    })
+  }
+
+  fn from_meta(item: &Meta) -> darling::Result<Self> {
+    Ok(Self {
+      callbacks: from_meta_inner_flat::<OperationCallbackInternal>(item, "callbacks")?,
+    })
+  }
 }
 
 #[cfg(feature = "actix-web-macros")]
 impl ToTokens for NamedOperationCallbackInternal {
   fn to_tokens(&self, tokens: &mut TokenStream) {
-    let NamedOperationCallbackInternal { name, callback } = self;
-    tokens.extend(quote!(callbacks(name = #name, #(#callback,)*)))
+    let NamedOperationCallbackInternal { name, callbacks } = self;
+    let callbacks = &callbacks.callbacks;
+    tokens.extend(quote!(callbacks(name = #name, callbacks = [#(#callbacks,)*])))
   }
 }
 
@@ -241,7 +261,7 @@ impl From<NamedOperationCallbackInternal> for OperationCallbacks {
     };
 
     let mut callbacks = BTreeMap::default();
-    for callback in value.callback {
+    for callback in value.callbacks.callbacks {
       let mut operations = vec![];
       callback
         .get

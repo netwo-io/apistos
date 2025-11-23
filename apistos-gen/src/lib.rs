@@ -865,9 +865,10 @@ pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
 ///   - `callbacks = [...]` an optional list of callbacks attached to this operation with
 ///       - `callbacks(...)` a struct containing
 ///           - `name = "..."` a mandatory name for a set of callbacks
-///           - `callback(...)` a list of callback operation
-///             - `path = "..."` URL to use for the callback operation
-///             - `[verb] = ...` any of the http verbs with an associated function. The given function should be available in scope and be annotated with `api_operation`
+///           - `callbacks = [...]` an list of callbacks operation with
+///             - `callback(...)` a list of callback operation
+///               - `path = "..."` URL to use for the callback operation
+///               - `[verb] = ...` any of the http verbs with an associated function. The given function should be available in scope and be annotated with `api_operation`
 ///
 /// _To define multiple elements of a list, repeat the property multiple times_
 ///
@@ -1121,7 +1122,7 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
 /// }
 ///
 /// #[api_operation(
-///   callbacks = [callbacks(name = "onData", callback(path = "{$request.body.test}/data", post = callback_test))]
+///   callbacks = [callbacks(name = "onData", callbacks = [callback(path = "{$request.body.test}/data", post = callback_test)])]
 /// )]
 /// pub(crate) async fn test(
 ///   body: Json<Test>,
@@ -1217,9 +1218,10 @@ pub fn api_callback(attr: TokenStream, item: TokenStream) -> TokenStream {
 ///   - `callbacks = [...]` an optional list of callbacks attached to this operation with
 ///       - `callbacks(...)` a struct containing
 ///           - `name = "..."` a mandatory name for a set of callbacks
-///           - `callback(...)` a list of callback operation
-///             - `path = "..."` URL to use for the callback operation
-///             - `[verb] = ...` any of the http verbs with an associated function. The given function should be available in scope and be annotated with `api_operation`
+///           - `callbacks = [...]` an list of callbacks operation with
+///             - `callback(...)` a list of callback operation
+///               - `path = "..."` URL to use for the callback operation
+///               - `[verb] = ...` any of the http verbs with an associated function. The given function should be available in scope and be annotated with `api_operation`
 /// - `guard = "function_name"`: Registers function as guard using `actix_web::guard::fn_guard`.
 /// - `wrap = "Middleware"`: Registers a resource middleware.
 /// - `key = "value"` any [`api_operation`](https://docs.rs/apistos/latest/apistos/attr.api_operation.html) option
