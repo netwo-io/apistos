@@ -107,7 +107,6 @@ impl ToTokens for OperationAttrInternal {
     };
     let consumes = consumes.clone().map(|v| quote!(consumes = #v, )).unwrap_or_default();
     let produces = produces.clone().map(|v| quote!(produces = #v, )).unwrap_or_default();
-    let error_codes: Vec<String> = error_codes.iter().map(ToString::to_string).collect();
     let security_scopes = &security_scopes.security_scopes;
 
     tokens.extend(quote!(
@@ -120,7 +119,7 @@ impl ToTokens for OperationAttrInternal {
       #parameter_description
       tags = [#(#tags,)*],
       security_scopes = [#(#security_scopes,)*],
-      #(error_code = #error_codes,)*
+      error_codes = [#(#error_codes,)*],
       #consumes
       #produces
       #(skip_args = #skip_args,)*
