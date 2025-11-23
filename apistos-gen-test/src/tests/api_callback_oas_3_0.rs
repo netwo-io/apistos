@@ -111,7 +111,7 @@ fn api_callback() {
   /// Plop
   #[api_callback(
     components = [component(name = "Header<OrganizationSlug>")],
-    response(code = 200, component(name = "TestCallbackResult"))
+    responses = [response(code = 200, component(name = "TestCallbackResult"))]
   )]
   pub(crate) async fn test_callback(
     _body: Json<test_models::Test>,

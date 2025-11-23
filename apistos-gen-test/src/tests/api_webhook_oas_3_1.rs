@@ -93,7 +93,7 @@ fn api_webhook() {
   #[openapi_webhook(
     name = "TestWebhook",
     components = [component(name = "Header<OrganizationSlug>")],
-    response(code = 200)
+    responses = [response(code = 200)]
   )]
   struct TestStruct {}
 
@@ -146,12 +146,12 @@ fn api_webhook_enum() {
     #[openapi_webhook(
       name = "TestWebhook",
       components = [component(name = "Header<OrganizationSlug>", description = "A super description")],
-      response(code = 200)
+      responses = [response(code = 200)]
     )]
     Test,
     #[openapi_webhook(skip)]
     TestSkipped,
-    #[openapi_webhook(name = "TestWebhook2", components = [component(name = "Json<Test>")], response(code = 200))]
+    #[openapi_webhook(name = "TestWebhook2", components = [component(name = "Json<Test>")], responses = [response(code = 200)])]
     Test2,
   }
 
@@ -232,7 +232,7 @@ fn api_webhook_enum_default() {
   #[derive(ApiWebhookComponent)]
   #[openapi_webhook(
     components = [component(name = "Header<OrganizationSlug>")],
-    response(code = 200),
+    responses = [response(code = 200)],
     tag = "tag1",
     tag = "tag2"
   )]
@@ -321,7 +321,7 @@ fn api_webhook_enum_default_and_override() {
   use test_models::OrganizationSlug;
 
   #[derive(ApiWebhookComponent)]
-  #[openapi_webhook(components = [component(name = "Header<OrganizationSlug>")], response(code = 200))]
+  #[openapi_webhook(components = [component(name = "Header<OrganizationSlug>")], responses = [response(code = 200)])]
   enum TestEnum {
     Test,
     #[openapi_webhook(skip)]
@@ -329,7 +329,7 @@ fn api_webhook_enum_default_and_override() {
     #[openapi_webhook(
       name = "TestWebhook2",
       components = [component(name = "Json<Test>", description = "A simple description")],
-      response(code = 200)
+      responses = [response(code = 200)]
     )]
     Test2,
   }

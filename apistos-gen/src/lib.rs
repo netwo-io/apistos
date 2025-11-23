@@ -719,13 +719,13 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
 /// }
 ///
 /// #[derive(Clone, ApiWebhookComponent)]
-/// #[openapi_webhook(name = "TestWebhook", components = [component(name = "actix_web::web::Json<Test>")], response(code = 200))]
+/// #[openapi_webhook(name = "TestWebhook", components = [component(name = "actix_web::web::Json<Test>")], responses = [response(code = 200)])]
 /// pub struct WebhookStruct {}
 ///
 /// // Or
 /// #[derive(Clone, ApiWebhookComponent)]
 /// pub enum WebhookEnum {
-///   #[openapi_webhook(name = "TestWebhook", components = [component(name = "actix_web::web::Json<Test>", description = "A super description")], response(code = 200))]
+///   #[openapi_webhook(name = "TestWebhook", components = [component(name = "actix_web::web::Json<Test>", description = "A super description")], responses = [response(code = 200)])]
 ///   VisibleWebhook,
 ///   #[openapi_webhook(skip)]
 ///   SkippedWebhook
@@ -733,7 +733,7 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
 ///
 /// // Or
 /// #[derive(Clone, ApiWebhookComponent)]
-/// #[openapi_webhook(components = [component(name = "actix_web::web::Json<Test>")], response(code = 200))]
+/// #[openapi_webhook(components = [component(name = "actix_web::web::Json<Test>")], responses = [response(code = 200)])]
 /// pub enum WebhookEnumWithDefault {
 ///   VisibleWebhook,
 ///   #[openapi_webhook(skip)]
@@ -755,11 +755,12 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
 ///       - `name = "..."` the type of this component
 ///       - `description = "..."` an optional description attached to this component (parameters description, body description, response description, ...). If used
 ///          on a header, override the previously set header's description
-/// - `response(...)` an optional list of responses attached to this webhook operation
-///   - `code = "..."` Http response code
-///   - `component(...)` an optionnal component attached to the given webhook response.
-///       - `name = "..."` the component type must derive [ApiComponent] and [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
-///       - `description = "..."` an optional description attached to this component. If used on a header, overrides the previously set header's description
+/// - `responses = ["..."]` an optional list of responses attached to this webhook operation with
+///   - `response(...)` a response definition
+///     - `code = "..."` Http response code
+///     - `component(...)` an optional component attached to the given webhook response.
+///         - `name = "..."` the component type must derive [ApiComponent] and [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
+///         - `description = "..."` an optional description attached to this component. If used on a header, overrides the previously set header's description
 ///
 /// _To define multiple elements of a list, repeat the property multiple times_
 #[proc_macro_error]
@@ -1114,7 +1115,7 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
 /// }
 ///
 /// #[api_callback(
-///   response(code = 200, component(name = "TestCallbackResult"))
+///   responses = [response(code = 200, component(name = "TestCallbackResult"))]
 /// )]
 /// pub(crate) async fn callback_test(
 ///   body: Json<Test>,
@@ -1142,11 +1143,12 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
 ///       - `name = "..."` the type of this component
 ///       - `description = "..."` an optional description attached to this component (parameters description, body description, response description, ...). If used
 ///          on a header, override the previously set header's description
-///   - `response(...)` an optional list of responses attached to this callback operation
+/// - `responses = ["..."]` an optional list of responses attached to this callback operation with
+///   - `response(...)` a response definition
 ///     - `code = "..."` Http response code
-///     - `component(...)` an option component attached to the given callback response.
-///       - `name = "..."` the component type must derive [ApiComponent] and [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
-///       - `description = "..."` an optional description attached to this component. If used on a header, overrides the previously set header's description
+///     - `component(...)` an optional component attached to the given callback response.
+///         - `name = "..."` the component type must derive [ApiComponent] and [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
+///         - `description = "..."` an optional description attached to this component. If used on a header, overrides the previously set header's description
 ///
 /// _To define multiple elements of a list, repeat the property multiple times_
 ///

@@ -128,7 +128,7 @@ pub(crate) struct WebhookAttr(BTreeMap<String, CallbackAttr>);
 
 impl WebhookAttrInternal {
   pub(crate) fn into_webhook_attr(self, default_name: String) -> Result<WebhookAttr, Error> {
-    if self.attr.responses.is_empty() {
+    if self.attr.responses.responses.is_empty() {
       return Err(Error::new(
         Span::call_site(),
         "Webhook should define at least one response",
@@ -155,15 +155,15 @@ impl WebhookAttrEnumInternal {
     }
 
     if let Some(struct_attrs) = struct_attrs {
-      if self.attr.responses.is_empty() {
-        self.attr.responses = struct_attrs.responses.clone();
+      if self.attr.responses.responses.is_empty() {
+        self.attr.responses.responses = struct_attrs.responses.clone();
       }
       if self.attr.components.components.is_empty() {
         self.attr.components.components = struct_attrs.components.clone();
       }
     }
 
-    if self.attr.responses.is_empty() {
+    if self.attr.responses.responses.is_empty() {
       return Err(Error::new(
         Span::call_site(),
         "Webhook should define at least one response.",
