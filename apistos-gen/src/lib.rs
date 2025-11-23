@@ -858,7 +858,7 @@ pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
 ///   - `security_scopes = [...]` an optional list representing which security scopes apply for a given operation with
 ///       - security_scopes(...) a struct containing
 ///         - `name = "..."` a mandatory name referencing one of the security definitions
-///         - `scope(...)` a list of scopes applying to this operation
+///         - `scope = [...]` a list of scopes applying to this operation
 ///   - `error_codes = [00]` an optional list of error codes to document only theses
 ///   - `consumes = "..."` allow to override body content type
 ///   - `produces = "..."` allow to override response content type
@@ -1210,7 +1210,7 @@ pub fn api_callback(attr: TokenStream, item: TokenStream) -> TokenStream {
 ///   - `security_scopes = [...]` an optional list representing which security scopes apply for a given operation with
 ///       - security_scopes(...) a struct containing
 ///         - `name = "..."` a mandatory name referencing one of the security definitions
-///         - `scope(...)` a list of scopes applying to this operation
+///         - `scope = [...]` a list of scopes applying to this operation
 ///   - `error_codes = [00]` an optional list of error codes to document only theses
 ///   - `consumes = "..."` allow to override body content type
 ///   - `produces = "..."` allow to override response content type

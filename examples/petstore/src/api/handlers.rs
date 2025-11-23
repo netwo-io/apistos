@@ -27,14 +27,14 @@ pub(crate) async fn add_pet(body: Json<Pet>, _key: ApiKey) -> Result<CreatedJson
 
 /// Find pet by ID
 /// Returns a single pet
-#[api_operation(tags = ["pet"], security_scopes = [security_scopes(name = "api_key", scope = "read:pets")]]
+#[api_operation(tags = ["pet"], security_scopes = [security_scopes(name = "api_key", scopes = ["read:pets"])]]
 pub(crate) async fn get_pet(_pet_id: Path<Uuid>, _key: Option<ApiKey>) -> Result<Option<Json<Pet>>, Error> // default undocumented error
 {
   Ok(None)
 }
 
 /// Delete pet by ID
-#[api_operation(tags = ["pet"], security_scopes = [security_scopes(name = "api_key", scope = "write:pets")]]
+#[api_operation(tags = ["pet"], security_scopes = [security_scopes(name = "api_key", scopes = ["write:pets"])]]
 pub(crate) async fn delete_pet(_pet_id: Path<Uuid>, _key: Option<ApiKey>) -> Result<NoContent, Error> // default undocumented error
 {
   Ok(NoContent)
@@ -42,7 +42,7 @@ pub(crate) async fn delete_pet(_pet_id: Path<Uuid>, _key: Option<ApiKey>) -> Res
 
 /// Find pet by status
 /// Returns a single pet
-#[api_operation(tags = ["pet"], security_scopes = [security_scopes(name = "api_key", scope = "read:pets")]]
+#[api_operation(tags = ["pet"], security_scopes = [security_scopes(name = "api_key", scopes = ["read:pets"])]]
 pub(crate) async fn find_by_status(
   _status: Query<QueryStatus>,
   _key: ApiKey,
@@ -53,7 +53,7 @@ pub(crate) async fn find_by_status(
 /// Find pet by tags
 /// Returns a single pet
 #[deprecated]
-#[api_operation(tags = ["pet"], security_scopes = [security_scopes(name = "api_key", scope = "read:pets")]]
+#[api_operation(tags = ["pet"], security_scopes = [security_scopes(name = "api_key", scopes = ["read:pets"])]]
 pub(crate) async fn find_by_tags(_tags: QsQuery<QueryTag>, _key: ApiKey) -> Result<Option<Json<Pet>>, ErrorResponse> {
   todo!()
 }

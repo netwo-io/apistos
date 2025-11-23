@@ -1041,7 +1041,7 @@ fn api_operation_security() {
   /// Add a new pet to the store
   /// Add a new pet to the store
   /// Plop
-  #[api_operation(security_scopes = [security_scopes(name = "api_key", scope = "read:pets")])]
+  #[api_operation(security_scopes = [security_scopes(name = "api_key", scopes = ["read:pets"])])]
   pub(crate) async fn test(
     _body: Json<test_models::Test>,
     _key: test_models::ApiKey,

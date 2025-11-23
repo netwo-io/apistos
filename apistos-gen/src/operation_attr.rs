@@ -217,15 +217,14 @@ impl ToTokens for OperationCallbackInternal {
 #[derive(FromMeta, Clone)]
 struct SecurityScopes {
   name: String,
-  #[darling(multiple, rename = "scope")]
-  scopes: Vec<String>,
+  scopes: Vec<LitStr>,
 }
 
 #[cfg(feature = "actix-web-macros")]
 impl ToTokens for SecurityScopes {
   fn to_tokens(&self, tokens: &mut TokenStream) {
     let SecurityScopes { name, scopes } = self;
-    tokens.extend(quote!(security_scopes(name = #name, #(scope = #scopes, )*)))
+    tokens.extend(quote!(security_scopes(name = #name, scopes = [#(#scopes,)*])))
   }
 }
 
@@ -327,7 +326,7 @@ impl TryFrom<OperationAttrInternal> for OperationAttr {
         .security_scopes
         .security_scopes
         .into_iter()
-        .map(|s| (s.name, s.scopes))
+        .map(|s| (s.name, s.scopes.iter().map(|s| s.value()).collect()))
         .collect::<BTreeMap<_, _>>(),
       error_codes: value
         .error_codes
