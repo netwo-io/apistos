@@ -19,7 +19,7 @@ pub(crate) async fn update_pet(body: Json<Pet>, _key: ApiKey) -> Result<Json<Pet
   summary = "Add a new pet to the store",
   description = r###"Add a new pet to the store
   Plop"###,
-  error_code = 405
+  error_codes = [405]
 )]
 pub(crate) async fn add_pet(body: Json<Pet>, _key: ApiKey) -> Result<CreatedJson<Pet>, ErrorResponse> {
   Ok(CreatedJson(body.0))

@@ -832,7 +832,7 @@ pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
 ///   summary = "Add a new pet to the store",
 ///   description = r###"Add a new pet to the store
 ///     Plop"###,
-///   error_code = 405
+///   error_codes = [405]
 /// )]
 /// pub(crate) async fn test(
 ///   body: Json<Test>,
@@ -919,8 +919,7 @@ pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
 ///   description = r###"Add a new pet to the store
 ///     Plop"###,
 ///   parameter_description(body = "A super description"),
-///   error_code = "401",
-///   error_code = "405"
+///   error_codes = [401, 405]
 /// )]
 /// pub(crate) async fn test(
 ///   body: Json<Test>,
@@ -1205,11 +1204,12 @@ pub fn api_callback(attr: TokenStream, item: TokenStream) -> TokenStream {
 ///   - `operation_id = "..."` an optional operation id for this operation. Default is the handler's fn name.
 ///   - `summary = "..."` an optional summary
 ///   - `description = "..."` an optional description
-///   - `tag = "..."` an optional list of tags associated with this operation (define tag multiple times to add to the list)
-///   - `security_scope(...)` an optional list representing which security scopes apply for a given operation with
-///       - `name = "..."` a mandatory name referencing one of the security definitions
-///       - `scope(...)` a list of scopes applying to this operation
-///   - `error_code = 00` an optional list of error codes to document only theses
+///   - `tags = ["..."]` an optional list of tags associated with this operation (define tag multiple times to add to the list)
+///   - `security_scopes = [...]` an optional list representing which security scopes apply for a given operation with
+///       - security_scopes(...) a struct containing
+///         - `name = "..."` a mandatory name referencing one of the security definitions
+///         - `scope(...)` a list of scopes applying to this operation
+///   - `error_codes = [00]` an optional list of error codes to document only theses
 ///   - `consumes = "..."` allow to override body content type
 ///   - `produces = "..."` allow to override response content type
 ///   - `callbacks(...)` an optional list of callbacks attached to this operation
@@ -1363,8 +1363,12 @@ pub fn routes(_: TokenStream, item: TokenStream) -> TokenStream {
     .into_iter()
     .filter_map(|(operation_type, attr)| operation_type.map(|ot| (ot, attr)))
     .map(|(operation_type, attr)| {
-      ActixOperationAttrInternal::from_meta(&attr.meta)
-        .map(|actix_operation_attr| (operation_type, actix_operation_attr.into()))
+      ActixOperationAttrInternal::from_meta(&attr.meta).and_then(|actix_operation_attr| {
+        actix_operation_attr
+          .try_into()
+          .map_err(Into::into)
+          .map(|op| (operation_type, op))
+      })
     })
     .collect::<Result<Vec<_>, _>>();
   let operations: Vec<(OperationType, ActixOperationAttr)> = match operations {

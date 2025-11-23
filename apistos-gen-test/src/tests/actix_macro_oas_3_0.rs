@@ -1052,7 +1052,7 @@ fn api_operation_error() {
   /// Add a new pet to the store
   /// Add a new pet to the store
   /// Plop
-  #[get(path = "/", tags = ["pet"], error_code = "404", error_code = "401")]
+  #[get(path = "/", tags = ["pet"], error_codes = [404, 401])]
   pub(crate) async fn test(
     _body: Json<test_models::Test>,
   ) -> Result<CreatedJson<test_models::TestResult>, test_models::MultipleErrorResponse> {

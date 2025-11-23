@@ -137,7 +137,7 @@ impl ResponseError for ErrorResponse {
   summary = "Add a new pet to the store",
   description = r###"Add a new pet to the store
     Plop"###,
-  error_code = 405
+  error_codes = [405]
 )]
 pub(crate) async fn test(
   body: Json<Test>,

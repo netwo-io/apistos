@@ -9,11 +9,11 @@ use std::collections::{BTreeMap, HashMap};
 use std::convert::Infallible;
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
-use syn::{LitStr, Meta};
+use syn::{LitInt, LitStr, Meta};
 
 pub(crate) fn parse_openapi_operation_attrs(attrs: &[NestedMeta]) -> OperationAttr {
-  match OperationAttrInternal::from_list(attrs) {
-    Ok(operation) => operation.into(),
+  match OperationAttrInternal::from_list(attrs).and_then(|op| op.try_into().map_err(Into::into)) {
+    Ok(operation) => operation,
     Err(e) => abort!(e.span(), "Unable to parse #[api_operation] attribute: {:?}", e),
   }
 }
@@ -34,8 +34,8 @@ pub(crate) struct OperationAttrInternal {
   tags: Vec<LitStr>,
   #[darling(default)]
   security_scopes: SecurityScopesWrapper,
-  #[darling(multiple, rename = "error_code")]
-  error_codes: Vec<u16>,
+  #[darling(default)]
+  error_codes: Vec<LitInt>,
   consumes: Option<String>,
   produces: Option<String>,
   #[darling(multiple)]
@@ -285,9 +285,11 @@ pub(crate) struct OperationAttr {
   pub(crate) skip_args: Vec<Ident>,
 }
 
-impl From<OperationAttrInternal> for OperationAttr {
-  fn from(value: OperationAttrInternal) -> Self {
-    Self {
+impl TryFrom<OperationAttrInternal> for OperationAttr {
+  type Error = syn::Error;
+
+  fn try_from(value: OperationAttrInternal) -> Result<Self, Self::Error> {
+    Ok(Self {
       skip: value.skip,
       deprecated: value.deprecated,
       operation_id: value.operation_id,
@@ -307,11 +309,15 @@ impl From<OperationAttrInternal> for OperationAttr {
         .into_iter()
         .map(|s| (s.name, s.scopes))
         .collect::<BTreeMap<_, _>>(),
-      error_codes: value.error_codes,
+      error_codes: value
+        .error_codes
+        .iter()
+        .map(|r| r.base10_parse::<u16>())
+        .collect::<Result<Vec<u16>, syn::Error>>()?,
       consumes: value.consumes,
       produces: value.produces,
       skip_args: value.skip_args,
-    }
+    })
   }
 }
 
