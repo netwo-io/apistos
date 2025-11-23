@@ -39,12 +39,12 @@ async fn operations() {
     scope(ACCOUNT_SUB_PATH_PREFIX).service(resource("").route(put().to(update_account)))
   }
 
-  #[api_operation(tag = "ticket")]
+  #[api_operation(tags = ["ticket"])]
   pub(crate) async fn update_ticket() -> Result<String, Error> {
     Ok("success".to_string())
   }
 
-  #[api_operation(tag = "account")]
+  #[api_operation(tags = ["account"])]
   pub(crate) async fn update_account() -> Result<String, Error> {
     Ok("success".to_string())
   }
@@ -102,17 +102,17 @@ async fn operation_skip_args() {
     id_string: String,
   }
 
-  #[api_operation(tag = "pet", skip_args = "_params")]
+  #[api_operation(tags = ["pet"], skip_args = "_params")]
   pub(crate) async fn test(_params: Path<(u32, String)>, _test: Json<Test>) -> Result<Json<Test>, ErrorResponse> {
     panic!()
   }
 
-  #[api_operation(tag = "pet", skip_args = "_params")]
+  #[api_operation(tags = ["pet"], skip_args = "_params")]
   pub(crate) async fn test2(_test: Json<Test>, _params: Path<u32>) -> Result<Json<Test>, ErrorResponse> {
     panic!()
   }
 
-  #[api_operation(tag = "pet", skip_args = "_params", skip_args = "_test")]
+  #[api_operation(tags = ["pet"], skip_args = "_params", skip_args = "_test")]
   pub(crate) async fn test3(mut _params: Path<u32>, _test: Json<Test>) -> Result<Json<Test>, ErrorResponse> {
     panic!()
   }
@@ -216,7 +216,7 @@ async fn operation_generics() {
     id_string: String,
   }
 
-  #[api_operation(tag = "pet", skip_args = "_params")]
+  #[api_operation(tags = ["pet"], skip_args = "_params")]
   pub(crate) async fn test<T, U>(_params: Path<(u32, String)>, _test: Json<Test>) -> Result<Json<Test>, ErrorResponse> {
     panic!()
   }
@@ -291,7 +291,7 @@ async fn operation_pattern_path() {
     id_string: String,
   }
 
-  #[api_operation(tag = "pet", skip_args = "_params")]
+  #[api_operation(tags = ["pet"], skip_args = "_params")]
   pub(crate) async fn test<T, U>(_params: Path<(u32, String)>, _test: Json<Test>) -> Result<Json<Test>, ErrorResponse> {
     panic!()
   }

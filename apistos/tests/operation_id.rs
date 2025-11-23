@@ -43,17 +43,17 @@ async fn default_operation_id() {
     id_string: String,
   }
 
-  #[api_operation(tag = "pet")]
+  #[api_operation(tags = ["pet"])]
   pub(crate) async fn test(_params: Path<(u32, String)>) -> Result<Json<Test>, ErrorResponse> {
     panic!()
   }
 
-  #[api_operation(tag = "pet")]
+  #[api_operation(tags = ["pet"])]
   pub(crate) async fn test2(_params: Path<u32>) -> Result<Json<Test>, ErrorResponse> {
     panic!()
   }
 
-  #[api_operation(tag = "pet", operation_id = "test3")]
+  #[api_operation(tags = ["pet"], operation_id = "test3")]
   pub(crate) async fn test3(_params: Path<u32>) -> Result<Json<Test>, ErrorResponse> {
     panic!()
   }

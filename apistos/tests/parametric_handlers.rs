@@ -45,7 +45,7 @@ async fn path_parameter_replacement() {
     id_string: String,
   }
 
-  #[api_operation(tag = "pet")]
+  #[api_operation(tags = ["pet"])]
   pub(crate) async fn test<T>(_params: Path<(u32, T)>) -> Result<Json<Test>, ErrorResponse>
   where
     T: ToString + Serialize + ApiComponent + JsonSchema,
@@ -53,7 +53,7 @@ async fn path_parameter_replacement() {
     panic!()
   }
 
-  #[api_operation(tag = "pet")]
+  #[api_operation(tags = ["pet"])]
   pub(crate) async fn test2<T: Serialize + ApiComponent + JsonSchema>(
     _params: Path<T>,
   ) -> Result<Json<Test>, ErrorResponse> {

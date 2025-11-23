@@ -23,7 +23,7 @@ async fn actix_routing() {
     );
   }
 
-  #[api_operation(tag = "pet")]
+  #[api_operation(tags = ["pet"])]
   pub(crate) async fn test(_params: Path<(u32, String)>) -> Result<Json<()>, Error> {
     Ok(Json(()))
   }
@@ -115,14 +115,14 @@ async fn actix_routing_multiple_root_definition_holder() {
     pub(crate) value: String,
   }
 
-  #[api_operation(tag = "pet")]
+  #[api_operation(tags = ["pet"])]
   pub(crate) async fn test(_params: Path<(u32, String)>) -> Result<Json<TestResponse>, Error> {
     Ok(Json(TestResponse {
       value: "plop".to_string(),
     }))
   }
 
-  #[api_operation(tag = "pet")]
+  #[api_operation(tags = ["pet"])]
   pub(crate) async fn test2(_params: Path<String>) -> Result<Json<TestResponse2>, Error> {
     Ok(Json(TestResponse2 {
       value: "plop".to_string(),

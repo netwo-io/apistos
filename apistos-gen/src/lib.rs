@@ -828,7 +828,7 @@ pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
 /// }
 ///
 /// #[api_operation(
-///   tag = "pet",
+///   tags = ["pet"],
 ///   summary = "Add a new pet to the store",
 ///   description = r###"Add a new pet to the store
 ///     Plop"###,
@@ -914,7 +914,7 @@ pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
 /// }
 ///
 /// #[api_operation(
-///   tag = "pet",
+///   tags = ["pet"],
 ///   summary = "Add a new pet to the store",
 ///   description = r###"Add a new pet to the store
 ///     Plop"###,
@@ -971,7 +971,7 @@ pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
 /// /// Add a new pet to the store
 /// /// Plop
 /// #[api_operation(
-///   tag = "pet",
+///   tags = ["pet"],
 ///   parameter_description(body = "A super description")
 /// )]
 /// pub(crate) async fn test(

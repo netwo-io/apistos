@@ -43,7 +43,7 @@ async fn created_json_list() {
   #[schemars(crate = "apistos")]
   pub(crate) struct Test(String);
 
-  #[api_operation(tag = "pet")]
+  #[api_operation(tags = ["pet"])]
   async fn get_array() -> Result<CreatedJson<Vec<Test>>, ErrorResponse> {
     Ok(CreatedJson(vec![Test("1".to_owned()), Test("2".to_owned())]))
   }

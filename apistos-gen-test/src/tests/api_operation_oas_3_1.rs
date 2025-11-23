@@ -126,7 +126,7 @@ fn api_operation() {
   /// Add a new pet to the store
   /// Add a new pet to the store
   /// Plop
-  #[api_operation(tag = "pet", parameter_description(_body = "A super description"))]
+  #[api_operation(tags = ["pet"], parameter_description(_body = "A super description"))]
   pub(crate) async fn test(
     _body: Json<test_models::Test>,
   ) -> Result<Json<test_models::TestResult>, test_models::ErrorResponse> {
@@ -208,7 +208,7 @@ fn api_operation_impl_responder() {
   /// Add a new pet to the store
   /// Add a new pet to the store
   /// Plop
-  #[api_operation(tag = "pet")]
+  #[api_operation(tags = ["pet"])]
   pub(crate) async fn test(_body: Json<test_models::Test>) -> impl Responder {
     HttpResponse::Ok()
   }
@@ -221,7 +221,7 @@ fn api_operation_impl_responder() {
   /// Add a new pet to the store
   /// Add a new pet to the store
   /// Plop
-  #[api_operation(tag = "pet")]
+  #[api_operation(tags = ["pet"])]
   pub(crate) async fn test_async(_body: Json<test_models::Test>) -> impl Responder {
     plop().await;
     HttpResponse::Ok()
@@ -317,7 +317,7 @@ fn api_operation_simple_response() {
   /// Add a new pet to the store
   /// Add a new pet to the store
   /// Plop
-  #[api_operation(tag = "pet")]
+  #[api_operation(tags = ["pet"])]
   pub(crate) async fn test(_body: Json<test_models::Test>) -> Result<Json<Uuid>, test_models::ErrorResponse> {
     Ok(Json(Uuid::new_v4()))
   }
@@ -387,7 +387,7 @@ fn api_operation_without_parameters() {
   /// Add a new pet to the store
   /// Add a new pet to the store
   /// Plop
-  #[api_operation(tag = "pet")]
+  #[api_operation(tags = ["pet"])]
   pub(crate) async fn test() -> Result<Json<test_models::TestResult>, test_models::ErrorResponse> {
     Ok(Json(test_models::TestResult { id: 0 }))
   }
@@ -446,7 +446,7 @@ fn api_operation_no_content() {
   /// Add a new pet to the store
   /// Add a new pet to the store
   /// Plop
-  #[api_operation(tag = "pet")]
+  #[api_operation(tags = ["pet"])]
   pub(crate) async fn test(_body: Json<test_models::Test>) -> Result<NoContent, test_models::ErrorResponse> {
     Ok(NoContent)
   }
@@ -506,7 +506,7 @@ fn api_operation_created_json() {
   /// Add a new pet to the store
   /// Add a new pet to the store
   /// Plop
-  #[api_operation(tag = "pet")]
+  #[api_operation(tags = ["pet"])]
   pub(crate) async fn test(
     _body: Json<test_models::TestWrapper>,
   ) -> Result<CreatedJson<test_models::TestResult>, test_models::ErrorResponse> {
@@ -606,7 +606,7 @@ fn api_operation_created_json_simple_response() {
   /// Add a new pet to the store
   /// Add a new pet to the store
   /// Plop
-  #[api_operation(tag = "pet")]
+  #[api_operation(tags = ["pet"])]
   pub(crate) async fn test(_body: Json<test_models::Test>) -> Result<CreatedJson<Uuid>, test_models::ErrorResponse> {
     Ok(CreatedJson(Uuid::new_v4()))
   }
@@ -676,7 +676,7 @@ fn api_operation_accepted_json() {
   /// Add a new pet to the store
   /// Add a new pet to the store
   /// Plop
-  #[api_operation(tag = "pet")]
+  #[api_operation(tags = ["pet"])]
   pub(crate) async fn test(
     _body: Json<test_models::Test>,
   ) -> Result<AcceptedJson<test_models::TestResult>, test_models::ErrorResponse> {
@@ -757,7 +757,7 @@ fn api_operation_deprecated() {
   /// Add a new pet to the store
   /// Add a new pet to the store
   /// Plop
-  #[api_operation(tag = "pet", deprecated)]
+  #[api_operation(tags = ["pet"], deprecated)]
   pub(crate) async fn test(
     _body: Json<test_models::Test>,
   ) -> Result<CreatedJson<test_models::TestResult>, test_models::ErrorResponse> {
@@ -834,7 +834,7 @@ fn api_operation_deprecated() {
   /// Add a new pet to the store
   /// Add a new pet to the store
   /// Plop
-  #[api_operation(tag = "pet", operation_id = "test2")]
+  #[api_operation(tags = ["pet"], operation_id = "test2")]
   #[deprecated]
   pub(crate) async fn test2(
     _body: Json<test_models::Test>,
@@ -916,7 +916,7 @@ fn api_operation_skip() {
   /// Add a new pet to the store
   /// Add a new pet to the store
   /// Plop
-  #[api_operation(tag = "pet", skip)]
+  #[api_operation(tags = ["pet"], skip)]
   pub(crate) async fn test(
     _body: Json<test_models::Test>,
   ) -> Result<CreatedJson<test_models::TestResult>, test_models::ErrorResponse> {
@@ -942,7 +942,7 @@ fn api_operation_error() {
   /// Add a new pet to the store
   /// Add a new pet to the store
   /// Plop
-  #[api_operation(tag = "pet", error_code = "404", error_code = "401")]
+  #[api_operation(tags = ["pet"], error_code = "404", error_code = "401")]
   pub(crate) async fn test(
     _body: Json<test_models::Test>,
   ) -> Result<CreatedJson<test_models::TestResult>, test_models::MultipleErrorResponse> {
@@ -1279,7 +1279,7 @@ fn api_operation_root_vec() {
   /// Add a new pet to the store
   /// Add a new pet to the store
   /// Plop
-  #[api_operation(tag = "pet")]
+  #[api_operation(tags = ["pet"])]
   pub(crate) async fn test(
     _body: Json<test_models::Test>,
   ) -> Result<Json<Vec<test_models::TestResult>>, test_models::ErrorResponse> {
@@ -1381,7 +1381,7 @@ fn api_operation_actix_web_grant() {
   /// Add a new pet to the store
   /// Plop
   #[actix_web_grants::protect("ADMIN")]
-  #[api_operation(tag = "pet")]
+  #[api_operation(tags = ["pet"])]
   pub(crate) async fn test(
     _body: Json<test_models::Test>,
   ) -> Result<Json<Vec<test_models::TestResult>>, test_models::ErrorResponse> {
@@ -1482,7 +1482,7 @@ fn api_operation_description_comment() {
   /// * If an error occurs, returns an `ErrorResponse`.
   ///
   /// Test\nNew line
-  #[api_operation(tag = "pet")]
+  #[api_operation(tags = ["pet"])]
   pub(crate) async fn test(
     _body: Json<test_models::Test>,
   ) -> Result<Json<test_models::TestResult>, test_models::ErrorResponse> {

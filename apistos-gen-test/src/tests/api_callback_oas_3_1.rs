@@ -93,7 +93,7 @@ fn api_callback() {
   /// Add a new pet to the store
   /// Add a new pet to the store
   /// Plop
-  #[api_operation(tag = "pet", callbacks(name = "onData", callback(path = "{$request.body.test}/data", post = test_callback)))]
+  #[api_operation(tags = ["pet"], callbacks(name = "onData", callback(path = "{$request.body.test}/data", post = test_callback)))]
   pub(crate) async fn test(
     _body: Json<test_models::Test>,
   ) -> Result<Json<test_models::TestResult>, test_models::ErrorResponse> {

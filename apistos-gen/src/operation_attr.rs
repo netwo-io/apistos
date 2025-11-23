@@ -8,6 +8,7 @@ use std::collections::{BTreeMap, HashMap};
 use std::convert::Infallible;
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
+use syn::LitStr;
 
 pub(crate) fn parse_openapi_operation_attrs(attrs: &[NestedMeta]) -> OperationAttr {
   match OperationAttrInternal::from_list(attrs) {
@@ -28,8 +29,8 @@ pub(crate) struct OperationAttrInternal {
   success_description: Option<String>,
   #[darling(default)]
   parameter_description: HashMap<String, String>,
-  #[darling(multiple, rename = "tag")]
-  tags: Vec<String>,
+  #[darling(default)]
+  tags: Vec<LitStr>,
   #[darling(multiple, rename = "security_scope")]
   scopes: Vec<SecurityScopes>,
   #[darling(multiple, rename = "error_code")]
@@ -95,7 +96,7 @@ impl ToTokens for OperationAttrInternal {
       #description
       #success_description
       #parameter_description
-      #(tag = #tags,)*
+      tags = [#(#tags,)*],
       #(#scopes,)*
       #(error_code = #error_codes,)*
       #consumes
@@ -276,7 +277,7 @@ impl From<OperationAttrInternal> for OperationAttr {
         .into_iter()
         .map(|(k, v)| (k, v.trim().to_string()))
         .collect(),
-      tags: value.tags,
+      tags: value.tags.iter().map(|t| t.value()).collect(),
       callbacks: value.callbacks.into_iter().map(Into::into).collect(),
       scopes: value
         .scopes

@@ -70,7 +70,7 @@
 //! }
 //!
 //! #[api_operation(
-//!   tag = "pet",
+//!   tags = ["pet"],
 //!   summary = "Add a new pet to the store",
 //!   description = r###"Add a new pet to the store
 //!     Plop"###,
