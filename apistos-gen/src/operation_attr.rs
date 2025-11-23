@@ -29,7 +29,7 @@ pub(crate) struct OperationAttrInternal {
   description: Option<String>,
   success_description: Option<String>,
   #[darling(default)]
-  parameter_description: HashMap<String, String>,
+  parameter_description: HashMap<String, String>, //@todo switch to new "list" format
   #[darling(default)]
   tags: Vec<LitStr>,
   #[darling(default)]
@@ -40,8 +40,8 @@ pub(crate) struct OperationAttrInternal {
   produces: Option<String>,
   #[darling(default)]
   skip_args: Vec<LitStr>,
-  #[darling(multiple)]
-  callbacks: Vec<NamedOperationCallbackInternal>,
+  #[darling(default)]
+  callbacks: CallbacksWrapper,
 }
 
 // This struct is essentially flatten when parsed by darling due to its from_meta implementation
@@ -60,6 +60,26 @@ impl FromMeta for SecurityScopesWrapper {
   fn from_meta(item: &Meta) -> darling::Result<Self> {
     Ok(Self {
       security_scopes: from_meta_inner_flat::<SecurityScopes>(item, "security_scopes")?,
+    })
+  }
+}
+
+// This struct is essentially flatten when parsed by darling due to its from_meta implementation
+#[derive(Clone, Default)]
+pub(crate) struct CallbacksWrapper {
+  callbacks: Vec<NamedOperationCallbackInternal>,
+}
+
+impl FromMeta for CallbacksWrapper {
+  fn from_list(items: &[NestedMeta]) -> darling::Result<Self> {
+    Ok(Self {
+      callbacks: from_list_inner::<NamedOperationCallbackInternal>(items, "callbacks", "callbacks")?,
+    })
+  }
+
+  fn from_meta(item: &Meta) -> darling::Result<Self> {
+    Ok(Self {
+      callbacks: from_meta_inner_flat::<NamedOperationCallbackInternal>(item, "callbacks")?,
     })
   }
 }
@@ -108,6 +128,7 @@ impl ToTokens for OperationAttrInternal {
     let consumes = consumes.clone().map(|v| quote!(consumes = #v, )).unwrap_or_default();
     let produces = produces.clone().map(|v| quote!(produces = #v, )).unwrap_or_default();
     let security_scopes = &security_scopes.security_scopes;
+    let callbacks = &callbacks.callbacks;
 
     tokens.extend(quote!(
       skip = #skip,
@@ -123,7 +144,7 @@ impl ToTokens for OperationAttrInternal {
       #consumes
       #produces
       skip_args = [#(#skip_args,)*],
-      #(#callbacks,)*
+      callbacks = [#(#callbacks,)*],
     ))
   }
 }
@@ -301,7 +322,7 @@ impl TryFrom<OperationAttrInternal> for OperationAttr {
         .map(|(k, v)| (k, v.trim().to_string()))
         .collect(),
       tags: value.tags.iter().map(|t| t.value()).collect(),
-      callbacks: value.callbacks.into_iter().map(Into::into).collect(),
+      callbacks: value.callbacks.callbacks.into_iter().map(Into::into).collect(),
       scopes: value
         .security_scopes
         .security_scopes

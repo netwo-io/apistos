@@ -855,17 +855,19 @@ pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
 ///   - `parameter_description(...)` an optional key = value list of descriptions for parameters. (If used on a header, overrides the previously
 /// set header's description)
 ///   - `tag = "..."` an optional list of tags associated with this operation (define tag multiple times to add to the list)
-///   - `security_scope(...)` an optional list representing which security scopes apply for a given operation with
-///       - `name = "..."` a mandatory name referencing one of the security definitions
-///       - `scope(...)` a list of scopes applying to this operation
-///   - `error_code = 00` an optional list of error codes to document only theses
+///   - `security_scopes = [...]` an optional list representing which security scopes apply for a given operation with
+///       - security_scopes(...) a struct containing
+///         - `name = "..."` a mandatory name referencing one of the security definitions
+///         - `scope(...)` a list of scopes applying to this operation
+///   - `error_codes = [00]` an optional list of error codes to document only theses
 ///   - `consumes = "..."` allow to override body content type
 ///   - `produces = "..."` allow to override response content type
-///   - `callbacks(...)` an optional list of callbacks attached to this operation
-///       - `name = "..."` a mandatory name for a set of callbacks
-///       - `callback(...)` a list of callback operation
-///         - `path = "..."` URL to use for the callback operation
-///         - `[verb] = ...` any of the http verbs with an associated function. The given function should be available in scope and be annotated with `api_operation`
+///   - `callbacks = [...]` an optional list of callbacks attached to this operation with
+///       - `callbacks(...)` a struct containing
+///           - `name = "..."` a mandatory name for a set of callbacks
+///           - `callback(...)` a list of callback operation
+///             - `path = "..."` URL to use for the callback operation
+///             - `[verb] = ...` any of the http verbs with an associated function. The given function should be available in scope and be annotated with `api_operation`
 ///
 /// _To define multiple elements of a list, repeat the property multiple times_
 ///
@@ -1119,7 +1121,7 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
 /// }
 ///
 /// #[api_operation(
-///   callbacks(name = "onData", callback(path = "{$request.body.test}/data", post = callback_test))
+///   callbacks = [callbacks(name = "onData", callback(path = "{$request.body.test}/data", post = callback_test))]
 /// )]
 /// pub(crate) async fn test(
 ///   body: Json<Test>,
@@ -1212,11 +1214,12 @@ pub fn api_callback(attr: TokenStream, item: TokenStream) -> TokenStream {
 ///   - `error_codes = [00]` an optional list of error codes to document only theses
 ///   - `consumes = "..."` allow to override body content type
 ///   - `produces = "..."` allow to override response content type
-///   - `callbacks(...)` an optional list of callbacks attached to this operation
-///       - `name = "..."` a mandatory name for a set of callbacks
-///       - `callback(...)` a list of callback operation
-///         - `path = "..."` URL to use for the callback operation
-///         - `[verb] = ...` any of the http verbs with an associated function. The given function should be available in scope and be annotated with `api_operation`
+///   - `callbacks = [...]` an optional list of callbacks attached to this operation with
+///       - `callbacks(...)` a struct containing
+///           - `name = "..."` a mandatory name for a set of callbacks
+///           - `callback(...)` a list of callback operation
+///             - `path = "..."` URL to use for the callback operation
+///             - `[verb] = ...` any of the http verbs with an associated function. The given function should be available in scope and be annotated with `api_operation`
 /// - `guard = "function_name"`: Registers function as guard using `actix_web::guard::fn_guard`.
 /// - `wrap = "Middleware"`: Registers a resource middleware.
 /// - `key = "value"` any [`api_operation`](https://docs.rs/apistos/latest/apistos/attr.api_operation.html) option
