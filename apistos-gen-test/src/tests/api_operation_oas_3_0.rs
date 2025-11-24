@@ -83,7 +83,6 @@ mod test_models {
     }
   }
 
-  #[expect(clippy::duplicated_attributes)]
   #[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
   #[openapi_error(status = [status(code = 401), status(code = 403), status(code = 404), status(code = 405)])]
   pub(crate) enum MultipleErrorResponse {
