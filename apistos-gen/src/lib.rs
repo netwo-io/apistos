@@ -660,10 +660,12 @@ pub fn api_cookie(_attr: TokenStream, item: TokenStream) -> TokenStream {
 ///
 /// #[derive(Clone, ApiErrorComponent)]
 /// #[openapi_error(
-///   status(code = 403),
-///   status(code = 404),
-///   status(code = 405, description = "Invalid input"),
-///   status(code = 409)
+///   status = [
+///     status(code = 403),
+///     status(code = 404),
+///     status(code = 405, description = "Invalid input"),
+///     status(code = 409)
+///   ]
 /// )]
 /// pub enum ErrorResponse {
 ///   MethodNotAllowed(String),
@@ -673,10 +675,11 @@ pub fn api_cookie(_attr: TokenStream, item: TokenStream) -> TokenStream {
 /// }
 /// ```
 ///
-/// # `#[openapi_error(...)]` options:
-/// - `status(...)` a list of possible error status with
-///   - `code = 000` a **required** http status code
-///   - `description = "..."` an optional description, default is the canonical reason of the given status code
+/// # `#[openapi_error(status = [...])]` options:
+/// - `status = [...]` a list of possible error status with
+///   - `status(...)` a status definition
+///     - `code = 000` a **required** http status code
+///     - `description = "..."` an optional description, default is the canonical reason of the given status code
 ///
 /// _To define multiple elements of a list, repeat the property multiple times_
 #[proc_macro_error]
@@ -692,7 +695,7 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
   } = input;
 
   let openapi_error_attributes = parse_openapi_error_attrs(&attrs).expect_or_abort(
-    "expected #[openapi_error(...)] attribute to be present when used with ApiErrorComponent derive trait",
+    "expected #[openapi_error(status = [...])] attribute to be present when used with ApiErrorComponent derive trait",
   );
 
   let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
@@ -813,7 +816,7 @@ pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
 ///
 /// #[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
 /// #[openapi_error(
-///   status(code = 405, description = "Invalid input"),
+///   status = [status(code = 405, description = "Invalid input")],
 /// )]
 /// pub enum ErrorResponse {
 ///   MethodNotAllowed(String),
@@ -898,9 +901,11 @@ pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
 ///
 /// #[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
 /// #[openapi_error(
-///   status(code = 405, description = "Invalid input"),
-///   status(code = 401),
-///   status(code = 403),
+///   status = [
+///     status(code = 405, description = "Invalid input"),
+///     status(code = 401),
+///     status(code = 403),
+///   ]
 /// )]
 /// pub enum ErrorResponse {
 ///   MethodNotAllowed(String),
@@ -955,7 +960,7 @@ pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
 ///
 /// #[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
 /// #[openapi_error(
-///   status(code = 405, description = "Invalid input"),
+///   status = [status(code = 405, description = "Invalid input")],
 /// )]
 /// pub enum ErrorResponse {
 ///   MethodNotAllowed(String),
@@ -1098,7 +1103,7 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
 ///
 /// #[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
 /// #[openapi_error(
-///   status(code = 405, description = "Invalid input"),
+///   status = [status(code = 405, description = "Invalid input")],
 /// )]
 /// pub enum ErrorResponse {
 ///   MethodNotAllowed(String),

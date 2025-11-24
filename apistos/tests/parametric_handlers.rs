@@ -21,7 +21,7 @@ use std::fmt::{Display, Formatter};
 #[actix_web::test]
 async fn path_parameter_replacement() {
   #[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
-  #[openapi_error(status(code = 405, description = "Invalid input"))]
+  #[openapi_error(status = [status(code = 405, description = "Invalid input")])]
   pub(crate) enum ErrorResponse {
     MethodNotAllowed(String),
   }

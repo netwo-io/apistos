@@ -1,9 +1,11 @@
+use crate::internal::utils::{from_list_inner, from_meta_inner_flat};
 use actix_web::http::StatusCode;
 use darling::FromMeta;
+use darling::ast::NestedMeta;
 use proc_macro_error2::abort;
 use proc_macro2::{Span, TokenStream};
 use quote::{ToTokens, quote};
-use syn::Attribute;
+use syn::{Attribute, Meta};
 
 pub(crate) fn parse_openapi_error_attrs(attrs: &[Attribute]) -> Option<OpenapiErrorAttribute> {
   let error_attribute = attrs
@@ -23,13 +25,13 @@ pub(crate) fn parse_openapi_error_attrs(attrs: &[Attribute]) -> Option<OpenapiEr
 
 #[derive(FromMeta, Clone)]
 pub(crate) struct OpenapiErrorAttribute {
-  #[darling(multiple)]
-  pub(crate) status: Vec<ErrorDefinition>,
+  #[darling(default)]
+  pub(crate) status: ErrorDefinitionWrapper,
 }
 
 impl ToTokens for OpenapiErrorAttribute {
   fn to_tokens(&self, tokens: &mut TokenStream) {
-    let defs = &self.status;
+    let defs = &self.status.status;
     tokens.extend(quote! {
       fn error_responses(_: apistos::OpenApiVersion) -> Vec<(String, apistos::paths::Response)> {
         let responses: Vec<((String, apistos::paths::Response), Option<(String, apistos::reference_or::ReferenceOr<apistos::ApistosSchema>)>)> = vec![#(#defs,)*];
@@ -45,6 +47,25 @@ impl ToTokens for OpenapiErrorAttribute {
         }
         schemas
       }
+    })
+  }
+}
+
+#[derive(Clone, Default)]
+pub(crate) struct ErrorDefinitionWrapper {
+  pub(crate) status: Vec<ErrorDefinition>,
+}
+
+impl FromMeta for ErrorDefinitionWrapper {
+  fn from_meta(item: &Meta) -> darling::Result<Self> {
+    Ok(Self {
+      status: from_meta_inner_flat::<ErrorDefinition>(item, "status")?,
+    })
+  }
+
+  fn from_list(items: &[NestedMeta]) -> darling::Result<Self> {
+    Ok(Self {
+      status: from_list_inner::<ErrorDefinition>(items, "status", "status")?,
     })
   }
 }

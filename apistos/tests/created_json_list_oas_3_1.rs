@@ -22,7 +22,7 @@ use std::fmt::Display;
 #[allow(clippy::panic)]
 async fn created_json_list() {
   #[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
-  #[openapi_error(status(code = 403))]
+  #[openapi_error(status = [status(code = 403)])]
   pub(crate) enum ErrorResponse {
     Fobidden(String),
   }

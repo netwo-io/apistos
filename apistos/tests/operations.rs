@@ -78,7 +78,7 @@ async fn operations() {
 #[actix_web::test]
 async fn operation_skip_args() {
   #[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
-  #[openapi_error(status(code = 405, description = "Invalid input"))]
+  #[openapi_error(status = [status(code = 405, description = "Invalid input")])]
   pub(crate) enum ErrorResponse {
     MethodNotAllowed(String),
   }
@@ -192,7 +192,7 @@ async fn operation_skip_args() {
 #[actix_web::test]
 async fn operation_generics() {
   #[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
-  #[openapi_error(status(code = 405, description = "Invalid input"))]
+  #[openapi_error(status = [status(code = 405, description = "Invalid input")])]
   pub(crate) enum ErrorResponse {
     MethodNotAllowed(String),
   }
@@ -267,7 +267,7 @@ async fn operation_generics() {
 #[actix_web::test]
 async fn operation_pattern_path() {
   #[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
-  #[openapi_error(status(code = 405, description = "Invalid input"))]
+  #[openapi_error(status = [status(code = 405, description = "Invalid input")])]
   pub(crate) enum ErrorResponse {
     MethodNotAllowed(String),
   }

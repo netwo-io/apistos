@@ -45,10 +45,12 @@
 //!
 //! #[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
 //! #[openapi_error(
-//!   status(code = 403),
-//!   status(code = 404),
-//!   status(code = 405, description = "Invalid input"),
-//!   status(code = 409)
+//!   status = [
+//!     status(code = 403),
+//!     status(code = 404),
+//!     status(code = 405, description = "Invalid input"),
+//!     status(code = 409)
+//!   ]
 //! )]
 //! pub enum ErrorResponse {
 //!   MethodNotAllowed(String),

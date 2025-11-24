@@ -10,10 +10,12 @@ fn api_component_derive() {
   #[expect(clippy::duplicated_attributes)]
   #[derive(ApiErrorComponent)]
   #[openapi_error(
-    status(code = 403),
-    status(code = 404),
-    status(code = 405, description = "Invalid input"),
-    status(code = 409)
+    status = [
+      status(code = 403),
+      status(code = 404),
+      status(code = 405, description = "Invalid input"),
+      status(code = 409)
+    ]
   )]
   enum ErrorResponse {
     MethodNotAllowed(String),
@@ -64,7 +66,7 @@ fn api_component_with_schema() {
 
   #[expect(clippy::duplicated_attributes)]
   #[derive(ApiErrorComponent)]
-  #[openapi_error(status(code = 403), status(code = 409, description = "Too many requests"))]
+  #[openapi_error(status = [status(code = 403), status(code = 409, description = "Too many requests")])]
   enum ErrorResponse {
     Forbidden(AuthorizeError),
     Conflict(String),
