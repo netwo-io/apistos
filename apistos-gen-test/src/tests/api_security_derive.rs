@@ -88,8 +88,10 @@ fn api_security_derive_oauth2_password() {
   #[openapi_security(scheme(security_type(oauth2(flows(password(
     token_url = "https://token.com",
     refresh_url = "https://refresh.com",
-    scopes(scope = "all:read", description = "Read all the things"),
-    scopes(scope = "all:write", description = "Write all the things")
+    scopes = [
+      scopes(scope = "all:read", description = "Read all the things"),
+      scopes(scope = "all:write", description = "Write all the things")
+    ]
   ))))))]
   struct ApiKey2;
 

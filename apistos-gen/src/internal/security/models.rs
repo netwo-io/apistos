@@ -203,8 +203,8 @@ impl FromMeta for ScopesWrapper {
 pub(crate) struct OauthToken {
   pub(crate) token_url: String,
   pub(crate) refresh_url: Option<String>,
-  #[darling(multiple)]
-  pub(crate) scopes: Vec<Scope>,
+  #[darling(default)]
+  pub(crate) scopes: ScopesWrapper,
 }
 
 impl ToTokens for OauthToken {
@@ -215,10 +215,10 @@ impl ToTokens for OauthToken {
       .clone()
       .map(|r| quote!(Some(#r.to_string())))
       .unwrap_or_else(|| quote!(None));
-    let scopes = if self.scopes.is_empty() {
+    let scopes = if self.scopes.scopes.is_empty() {
       quote!(std::collections::BTreeMap::default())
     } else {
-      let scopes = &self.scopes;
+      let scopes = &self.scopes.scopes;
       quote! {
         std::collections::BTreeMap::from_iter([
           #(#scopes,)*
