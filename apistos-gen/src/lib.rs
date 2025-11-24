@@ -315,8 +315,6 @@ pub fn api_component(_attr: TokenStream, item: TokenStream) -> TokenStream {
 ///       - `bearer_format = "..."` a **required** parameter
 ///     - `open_id_connect(open_id_connect_url = "...")`
 ///
-/// _To define multiple elements of a list, repeat the property multiple times_
-///
 /// # Examples:
 ///
 /// ## **oauth2**
@@ -680,8 +678,6 @@ pub fn api_cookie(_attr: TokenStream, item: TokenStream) -> TokenStream {
 ///   - `status(...)` a status definition
 ///     - `code = 000` a **required** http status code
 ///     - `description = "..."` an optional description, default is the canonical reason of the given status code
-///
-/// _To define multiple elements of a list, repeat the property multiple times_
 #[proc_macro_error]
 #[proc_macro_derive(ApiErrorComponent, attributes(openapi_error))]
 pub fn derive_api_error(input: TokenStream) -> TokenStream {
@@ -748,7 +744,7 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
 /// ```
 ///
 /// # `#[api_webhook(...)]` options:
-/// - `tag = "..."` an optional list of tags for the webhook
+/// - `tags = ["..."]` an optional list of tags for the webhook
 /// - `skip` allow to skip an enum variant (for enum only)
 /// - `name = "..."` an optional name for the webhook. Default to the Struct or Variant name
 /// - `deprecated` a bool indicating the operation is deprecated. Deprecation can also be declared
@@ -766,8 +762,6 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
 ///     - `component(...)` an optional component attached to the given webhook response.
 ///         - `name = "..."` the component type must derive [ApiComponent] and [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
 ///         - `description = "..."` an optional description attached to this component. If used on a header, overrides the previously set header's description
-///
-/// _To define multiple elements of a list, repeat the property multiple times_
 #[proc_macro_error]
 #[proc_macro_derive(ApiWebhookComponent, attributes(openapi_webhook))]
 pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
@@ -876,8 +870,6 @@ pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
 ///             - `callback(...)` a list of callback operation
 ///               - `path = "..."` URL to use for the callback operation
 ///               - `[verb] = ...` any of the http verbs with an associated function. The given function should be available in scope and be annotated with `api_operation`
-///
-/// _To define multiple elements of a list, repeat the property multiple times_
 ///
 /// If `summary` or `description` are not provided, a default value will be extracted from the comments. The first line will be used as summary while the rest will be part of the description.
 ///
@@ -1157,8 +1149,6 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
 ///         - `name = "..."` the component type must derive [ApiComponent] and [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
 ///         - `description = "..."` an optional description attached to this component. If used on a header, overrides the previously set header's description
 ///
-/// _To define multiple elements of a list, repeat the property multiple times_
-///
 /// If `summary` or `description` are not provided, a default value will be extracted from the comments. The first line will be used as summary while the rest will be part of the description.
 #[proc_macro_error]
 #[proc_macro_attribute]
@@ -1236,8 +1226,6 @@ pub fn api_callback(attr: TokenStream, item: TokenStream) -> TokenStream {
 /// - `guard = "function_name"`: Registers function as guard using `actix_web::guard::fn_guard`.
 /// - `wrap = "Middleware"`: Registers a resource middleware.
 /// - `key = "value"` any [`api_operation`](https://docs.rs/apistos/latest/apistos/attr.api_operation.html) option
-///
-/// _To define multiple elements of a list, repeat the property multiple times_
 ///
 /// # Examples
 /// ```

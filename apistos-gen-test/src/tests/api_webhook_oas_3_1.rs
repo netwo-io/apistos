@@ -233,14 +233,13 @@ fn api_webhook_enum_default() {
   #[openapi_webhook(
     components = [component(name = "Header<OrganizationSlug>")],
     responses = [response(code = 200)],
-    tag = "tag1",
-    tag = "tag2"
+    tags = ["tag1", "tag2"]
   )]
   enum TestEnum {
     Test,
     #[openapi_webhook(skip)]
     TestSkipped,
-    #[openapi_webhook(tag = "tag3")]
+    #[openapi_webhook(tags = ["tag3"])]
     Test2,
   }
 
