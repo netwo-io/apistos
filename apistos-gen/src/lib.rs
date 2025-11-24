@@ -303,10 +303,10 @@ pub fn api_component(_attr: TokenStream, item: TokenStream) -> TokenStream {
 ///   - `description = "..."` an optional description
 ///   - `security_type(...)` a **required** parameter with one of
 ///     - `oauth2(flows(...))` with
-///       - `implicit(...)` with `authorization_url = "..."` a **required** parameter, `refresh_url = "..."` an optional parameter and `scopes(scope = "...", description = "...")` a list of scopes
-///       - `password(...)` with `token_url = "..."` a **required** parameter, `refresh_url = "..."` an optional parameter and `scopes(scope = "...", description = "...")` a list of scopes
-///       - `client_credentials(...)` with `token_url = "..."` a **required** parameter, `refresh_url = "..."` an optional parameter and `scopes(scope = "...", description = "...")` a list of scopes
-///       - `authorization_code(...)` with `token_url = "..."` a **required** parameter, `refresh_url = "..."` an optional parameter and `scopes(scope = "...", description = "...")` a list of scopes
+///       - `implicit(...)` with `authorization_url = "..."` a **required** parameter, `refresh_url = "..."` an optional parameter and `scopes = [scopes(scope = "...", description = "..."), ...]` a list of scopes
+///       - `password(...)` with `token_url = "..."` a **required** parameter, `refresh_url = "..."` an optional parameter and `scopes = [scopes(scope = "...", description = "..."), ...]` a list of scopes
+///       - `client_credentials(...)` with `token_url = "..."` a **required** parameter, `refresh_url = "..."` an optional parameter and `scopes = [scopes(scope = "...", description = "..."), ...]` a list of scopes
+///       - `authorization_code(...)` with `token_url = "..."` a **required** parameter, `refresh_url = "..."` an optional parameter and `scopes = [scopes(scope = "...", description = "..."), ...]` a list of scopes
 ///     - `api_key(...)` with
 ///       - `name = "..."` a **required** parameter
 ///       - `api_key_in = "..."` a **required** parameter being one of `query`, `header` or `cookie`
@@ -327,8 +327,10 @@ pub fn api_component(_attr: TokenStream, item: TokenStream) -> TokenStream {
 /// #[openapi_security(scheme(security_type(oauth2(flows(implicit(
 ///   authorization_url = "https://authorize.com",
 ///   refresh_url = "https://refresh.com",
-///   scopes(scope = "all:read", description = "Read all the things"),
-///   scopes(scope = "all:write", description = "Write all the things")
+///   scopes = [
+///     scopes(scope = "all:read", description = "Read all the things"),
+///     scopes(scope = "all:write", description = "Write all the things")
+///   ]
 /// ))))))]
 /// pub struct ApiKey;
 /// ```

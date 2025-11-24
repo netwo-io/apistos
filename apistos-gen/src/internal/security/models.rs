@@ -1,6 +1,9 @@
+use crate::internal::utils::{from_list_inner, from_meta_inner_flat};
 use darling::FromMeta;
+use darling::ast::NestedMeta;
 use proc_macro2::TokenStream;
 use quote::{ToTokens, quote};
+use syn::Meta;
 
 #[derive(FromMeta, Clone)]
 #[darling(rename_all = "snake_case")]
@@ -145,8 +148,8 @@ impl ToTokens for OauthFlows {
 pub(crate) struct OauthImplicit {
   pub(crate) authorization_url: String,
   pub(crate) refresh_url: Option<String>,
-  #[darling(multiple)]
-  pub(crate) scopes: Vec<Scope>,
+  #[darling(default)]
+  pub(crate) scopes: ScopesWrapper,
 }
 
 impl ToTokens for OauthImplicit {
@@ -157,10 +160,10 @@ impl ToTokens for OauthImplicit {
       .clone()
       .map(|r| quote!(Some(#r.to_string())))
       .unwrap_or_else(|| quote!(None));
-    let scopes = if self.scopes.is_empty() {
+    let scopes = if self.scopes.scopes.is_empty() {
       quote!(std::collections::BTreeMap::default())
     } else {
-      let scopes = &self.scopes;
+      let scopes = &self.scopes.scopes;
       quote! {
         std::collections::BTreeMap::from_iter([
           #(#scopes,)*
@@ -174,6 +177,25 @@ impl ToTokens for OauthImplicit {
         scopes: #scopes,
       }
     });
+  }
+}
+
+#[derive(Clone, Default)]
+pub(crate) struct ScopesWrapper {
+  pub(crate) scopes: Vec<Scope>,
+}
+
+impl FromMeta for ScopesWrapper {
+  fn from_list(items: &[NestedMeta]) -> darling::Result<Self> {
+    Ok(Self {
+      scopes: from_list_inner::<Scope>(items, "scopes", "scopes")?,
+    })
+  }
+
+  fn from_meta(item: &Meta) -> darling::Result<Self> {
+    Ok(Self {
+      scopes: from_meta_inner_flat::<Scope>(item, "scopes")?,
+    })
   }
 }
 

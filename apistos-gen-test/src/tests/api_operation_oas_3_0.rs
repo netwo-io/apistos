@@ -106,8 +106,10 @@ mod test_models {
   #[openapi_security(scheme(security_type(oauth2(flows(implicit(
     authorization_url = "https://authorize.com",
     refresh_url = "https://refresh.com",
-    scopes(scope = "all:read", description = "Read all the things"),
-    scopes(scope = "all:write", description = "Write all the things")
+    scopes = [
+      scopes(scope = "all:read", description = "Read all the things"),
+      scopes(scope = "all:write", description = "Write all the things")
+    ]
   ))))))]
   pub(crate) struct ApiKey;
 
