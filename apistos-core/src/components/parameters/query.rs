@@ -185,6 +185,27 @@ fn parameters_from_schema(
               ));
             }
           }
+          if let Some(any_of) = obj.get("anyOf").and_then(|v| v.as_array()) {
+            for sch in any_of {
+              parameters.append(&mut parameters_from_schema(
+                oas_version,
+                Some(
+                  Schema::try_from(sch.clone())
+                    .map_err(|err| {
+                      log::warn!("Error generating json schema: {err:?}");
+                      err
+                    })
+                    .map(|sch| ApistosSchema::new(sch, oas_version))
+                    .unwrap_or_default()
+                    .into(),
+                ),
+                required,
+                default_description,
+                style,
+                explode,
+              ));
+            }
+          }
         }
       }
     }

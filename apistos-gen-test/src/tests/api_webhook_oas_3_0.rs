@@ -30,7 +30,7 @@ mod test_models {
   }
 
   #[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
-  #[openapi_error(status(code = 405, description = "Invalid input"))]
+  #[openapi_error(status = [status(code = 405, description = "Invalid input")])]
   pub(crate) enum ErrorResponse {
     MethodNotAllowed(String),
   }
@@ -90,8 +90,8 @@ fn api_webhook() {
   #[derive(ApiWebhookComponent)]
   #[openapi_webhook(
     name = "TestWebhook",
-    component(component = "Header<OrganizationSlug>"),
-    response(code = 200)
+    components = [component(name = "Header<OrganizationSlug>")],
+    responses = [response(code = 200)]
   )]
   struct TestStruct {}
 

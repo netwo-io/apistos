@@ -1,25 +1,25 @@
 use crate::api::error::ErrorResponse;
 use crate::api::models::{OrganizationSlug, Pet, QueryStatus, QueryTag, Realm};
 use crate::api::security::ApiKey;
-use actix_web::web::{Header, Json, Path, Query};
 use actix_web::Error;
+use actix_web::web::{Header, Json, Path, Query};
 use apistos::actix::{CreatedJson, NoContent};
 use apistos::api_operation;
 use serde_qs::actix::QsQuery;
 use std::collections::HashMap;
 use uuid::Uuid;
 
-#[api_operation(tag = "pet")]
+#[api_operation(tags = ["pet"])]
 pub(crate) async fn update_pet(body: Json<Pet>, _key: ApiKey) -> Result<Json<Pet>, ErrorResponse> {
   Ok(body)
 }
 
 #[api_operation(
-  tag = "pet",
+  tags = ["pet"],
   summary = "Add a new pet to the store",
   description = r###"Add a new pet to the store
   Plop"###,
-  error_code = 405
+  error_codes = [405]
 )]
 pub(crate) async fn add_pet(body: Json<Pet>, _key: ApiKey) -> Result<CreatedJson<Pet>, ErrorResponse> {
   Ok(CreatedJson(body.0))
@@ -27,14 +27,14 @@ pub(crate) async fn add_pet(body: Json<Pet>, _key: ApiKey) -> Result<CreatedJson
 
 /// Find pet by ID
 /// Returns a single pet
-#[api_operation(tag = "pet", security_scope(name = "api_key", scope = "read:pets"))]
+#[api_operation(tags = ["pet"], security_scopes = [security_scopes(name = "api_key", scopes = ["read:pets"])]]
 pub(crate) async fn get_pet(_pet_id: Path<Uuid>, _key: Option<ApiKey>) -> Result<Option<Json<Pet>>, Error> // default undocumented error
 {
   Ok(None)
 }
 
 /// Delete pet by ID
-#[api_operation(tag = "pet", security_scope(name = "api_key", scope = "write:pets"))]
+#[api_operation(tags = ["pet"], security_scopes = [security_scopes(name = "api_key", scopes = ["write:pets"])]]
 pub(crate) async fn delete_pet(_pet_id: Path<Uuid>, _key: Option<ApiKey>) -> Result<NoContent, Error> // default undocumented error
 {
   Ok(NoContent)
@@ -42,7 +42,7 @@ pub(crate) async fn delete_pet(_pet_id: Path<Uuid>, _key: Option<ApiKey>) -> Res
 
 /// Find pet by status
 /// Returns a single pet
-#[api_operation(tag = "pet", security_scope(name = "api_key", scope = "read:pets"))]
+#[api_operation(tags = ["pet"], security_scopes = [security_scopes(name = "api_key", scopes = ["read:pets"])]]
 pub(crate) async fn find_by_status(
   _status: Query<QueryStatus>,
   _key: ApiKey,
@@ -53,14 +53,14 @@ pub(crate) async fn find_by_status(
 /// Find pet by tags
 /// Returns a single pet
 #[deprecated]
-#[api_operation(tag = "pet", security_scope(name = "api_key", scope = "read:pets"))]
+#[api_operation(tags = ["pet"], security_scopes = [security_scopes(name = "api_key", scopes = ["read:pets"])]]
 pub(crate) async fn find_by_tags(_tags: QsQuery<QueryTag>, _key: ApiKey) -> Result<Option<Json<Pet>>, ErrorResponse> {
   todo!()
 }
 
 /// Updates a pet in the store with form data
 #[api_operation(
-  tag = "pet",
+  tags = ["pet"],
   security_scope(name = "api_key", scope = "write:pets", scope = "read:pets")
 )]
 pub(crate) async fn update_pet_with_form(

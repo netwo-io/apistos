@@ -4,7 +4,7 @@ use darling::FromMeta;
 use proc_macro_error2::{OptionExt, abort};
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{ToTokens, quote};
-use syn::{Attribute, Data, DataEnum, Error};
+use syn::{Attribute, Data, DataEnum, Error, LitStr};
 
 use crate::callback_attr::{CallbackAttr, CallbackAttrInternal};
 
@@ -106,8 +106,8 @@ fn parse_openapi_derive_enum_webhook_attrs(_enum: &DataEnum, struct_attrs: Optio
 #[derive(FromMeta, Clone)]
 struct WebhookAttrInternal {
   name: Option<String>,
-  #[darling(default, multiple, rename = "tag")]
-  tags: Vec<String>,
+  #[darling(default)]
+  tags: Vec<LitStr>,
   #[darling(flatten)]
   attr: CallbackAttrInternal,
 }
@@ -116,8 +116,8 @@ struct WebhookAttrInternal {
 struct WebhookAttrEnumInternal {
   #[darling(default)]
   skip: bool,
-  #[darling(default, multiple, rename = "tag")]
-  tags: Vec<String>,
+  #[darling(default)]
+  tags: Vec<LitStr>,
   name: Option<String>,
   #[darling(flatten, default)]
   attr: CallbackAttrInternal,
@@ -128,7 +128,7 @@ pub(crate) struct WebhookAttr(BTreeMap<String, CallbackAttr>);
 
 impl WebhookAttrInternal {
   pub(crate) fn into_webhook_attr(self, default_name: String) -> Result<WebhookAttr, Error> {
-    if self.attr.responses.is_empty() {
+    if self.attr.responses.responses.is_empty() {
       return Err(Error::new(
         Span::call_site(),
         "Webhook should define at least one response",
@@ -136,7 +136,7 @@ impl WebhookAttrInternal {
     }
 
     let mut callback_attr: CallbackAttr = self.attr.try_into()?;
-    callback_attr.tags = self.tags;
+    callback_attr.tags = self.tags.iter().map(|t| t.value()).collect();
     Ok(WebhookAttr(BTreeMap::from_iter(vec![(
       self.name.unwrap_or(default_name),
       callback_attr,
@@ -155,15 +155,15 @@ impl WebhookAttrEnumInternal {
     }
 
     if let Some(struct_attrs) = struct_attrs {
-      if self.attr.responses.is_empty() {
-        self.attr.responses = struct_attrs.responses.clone();
+      if self.attr.responses.responses.is_empty() {
+        self.attr.responses.responses = struct_attrs.responses.clone();
       }
-      if self.attr.components.is_empty() {
-        self.attr.components = struct_attrs.components.clone();
+      if self.attr.components.components.is_empty() {
+        self.attr.components.components = struct_attrs.components.clone();
       }
     }
 
-    if self.attr.responses.is_empty() {
+    if self.attr.responses.responses.is_empty() {
       return Err(Error::new(
         Span::call_site(),
         "Webhook should define at least one response.",
@@ -174,7 +174,7 @@ impl WebhookAttrEnumInternal {
     if self.tags.is_empty() {
       callback_attr.tags = struct_attrs.map(|t| t.tags.clone()).unwrap_or_default();
     } else {
-      callback_attr.tags = self.tags;
+      callback_attr.tags = self.tags.iter().map(|t| t.value()).collect();
     }
     Ok(WebhookAttr(BTreeMap::from_iter(vec![(
       self.name.unwrap_or(default_name),

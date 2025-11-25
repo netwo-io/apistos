@@ -11,7 +11,7 @@ use apistos_models::OpenApi;
 
 #[actix_web::test]
 async fn actix_nested_service_config_configure_oas_3_1() {
-  #[api_operation(tag = "pet")]
+  #[api_operation(tags = ["pet"])]
   pub(crate) async fn test(_params: Path<(u32, String)>) -> Result<Json<()>, Error> {
     Ok(Json(()))
   }
@@ -50,7 +50,7 @@ async fn actix_nested_service_config_configure_oas_3_1() {
 
 #[actix_web::test]
 async fn actix_nested_service_config_configure_oas_3_0() {
-  #[api_operation(tag = "pet")]
+  #[api_operation(tags = ["pet"])]
   pub(crate) async fn test(_params: Path<(u32, String)>) -> Result<Json<()>, Error> {
     Ok(Json(()))
   }

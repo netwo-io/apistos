@@ -19,7 +19,7 @@ use std::fmt::{Display, Formatter};
 #[actix_web::test]
 async fn tags() {
   #[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
-  #[openapi_error(status(code = 405, description = "Invalid input"))]
+  #[openapi_error(status = [status(code = 405, description = "Invalid input")])]
   pub(crate) enum ErrorResponse {
     MethodNotAllowed(String),
   }
@@ -43,12 +43,12 @@ async fn tags() {
     id_string: String,
   }
 
-  #[api_operation(tag = "pet")]
+  #[api_operation(tags = ["pet"])]
   pub(crate) async fn test(_params: Path<(u32, String)>) -> Result<Json<Test>, ErrorResponse> {
     panic!()
   }
 
-  #[api_operation(tag = "pet")]
+  #[api_operation(tags = ["pet"])]
   pub(crate) async fn test2(_params: Path<u32>) -> Result<Json<Test>, ErrorResponse> {
     panic!()
   }

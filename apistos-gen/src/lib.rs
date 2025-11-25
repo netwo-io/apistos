@@ -303,10 +303,10 @@ pub fn api_component(_attr: TokenStream, item: TokenStream) -> TokenStream {
 ///   - `description = "..."` an optional description
 ///   - `security_type(...)` a **required** parameter with one of
 ///     - `oauth2(flows(...))` with
-///       - `implicit(...)` with `authorization_url = "..."` a **required** parameter, `refresh_url = "..."` an optional parameter and `scopes(scope = "...", description = "...")` a list of scopes
-///       - `password(...)` with `token_url = "..."` a **required** parameter, `refresh_url = "..."` an optional parameter and `scopes(scope = "...", description = "...")` a list of scopes
-///       - `client_credentials(...)` with `token_url = "..."` a **required** parameter, `refresh_url = "..."` an optional parameter and `scopes(scope = "...", description = "...")` a list of scopes
-///       - `authorization_code(...)` with `token_url = "..."` a **required** parameter, `refresh_url = "..."` an optional parameter and `scopes(scope = "...", description = "...")` a list of scopes
+///       - `implicit(...)` with `authorization_url = "..."` a **required** parameter, `refresh_url = "..."` an optional parameter and `scopes = [scopes(scope = "...", description = "..."), ...]` a list of scopes
+///       - `password(...)` with `token_url = "..."` a **required** parameter, `refresh_url = "..."` an optional parameter and `scopes = [scopes(scope = "...", description = "..."), ...]` a list of scopes
+///       - `client_credentials(...)` with `token_url = "..."` a **required** parameter, `refresh_url = "..."` an optional parameter and `scopes = [scopes(scope = "...", description = "..."), ...]` a list of scopes
+///       - `authorization_code(...)` with `token_url = "..."` a **required** parameter, `refresh_url = "..."` an optional parameter and `scopes = [scopes(scope = "...", description = "..."), ...]` a list of scopes
 ///     - `api_key(...)` with
 ///       - `name = "..."` a **required** parameter
 ///       - `api_key_in = "..."` a **required** parameter being one of `query`, `header` or `cookie`
@@ -314,8 +314,6 @@ pub fn api_component(_attr: TokenStream, item: TokenStream) -> TokenStream {
 ///       - `scheme = "..."` a **required** parameter
 ///       - `bearer_format = "..."` a **required** parameter
 ///     - `open_id_connect(open_id_connect_url = "...")`
-///
-/// _To define multiple elements of a list, repeat the property multiple times_
 ///
 /// # Examples:
 ///
@@ -327,8 +325,10 @@ pub fn api_component(_attr: TokenStream, item: TokenStream) -> TokenStream {
 /// #[openapi_security(scheme(security_type(oauth2(flows(implicit(
 ///   authorization_url = "https://authorize.com",
 ///   refresh_url = "https://refresh.com",
-///   scopes(scope = "all:read", description = "Read all the things"),
-///   scopes(scope = "all:write", description = "Write all the things")
+///   scopes = [
+///     scopes(scope = "all:read", description = "Read all the things"),
+///     scopes(scope = "all:write", description = "Write all the things")
+///   ]
 /// ))))))]
 /// pub struct ApiKey;
 /// ```
@@ -658,10 +658,12 @@ pub fn api_cookie(_attr: TokenStream, item: TokenStream) -> TokenStream {
 ///
 /// #[derive(Clone, ApiErrorComponent)]
 /// #[openapi_error(
-///   status(code = 403),
-///   status(code = 404),
-///   status(code = 405, description = "Invalid input"),
-///   status(code = 409)
+///   status = [
+///     status(code = 403),
+///     status(code = 404),
+///     status(code = 405, description = "Invalid input"),
+///     status(code = 409)
+///   ]
 /// )]
 /// pub enum ErrorResponse {
 ///   MethodNotAllowed(String),
@@ -671,12 +673,11 @@ pub fn api_cookie(_attr: TokenStream, item: TokenStream) -> TokenStream {
 /// }
 /// ```
 ///
-/// # `#[openapi_error(...)]` options:
-/// - `status(...)` a list of possible error status with
-///   - `code = 000` a **required** http status code
-///   - `description = "..."` an optional description, default is the canonical reason of the given status code
-///
-/// _To define multiple elements of a list, repeat the property multiple times_
+/// # `#[openapi_error(status = [...])]` options:
+/// - `status = [...]` a list of possible error status with
+///   - `status(...)` a status definition
+///     - `code = 000` a **required** http status code
+///     - `description = "..."` an optional description, default is the canonical reason of the given status code
 #[proc_macro_error]
 #[proc_macro_derive(ApiErrorComponent, attributes(openapi_error))]
 pub fn derive_api_error(input: TokenStream) -> TokenStream {
@@ -690,7 +691,7 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
   } = input;
 
   let openapi_error_attributes = parse_openapi_error_attrs(&attrs).expect_or_abort(
-    "expected #[openapi_error(...)] attribute to be present when used with ApiErrorComponent derive trait",
+    "expected #[openapi_error(status = [...])] attribute to be present when used with ApiErrorComponent derive trait",
   );
 
   let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
@@ -719,13 +720,13 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
 /// }
 ///
 /// #[derive(Clone, ApiWebhookComponent)]
-/// #[openapi_webhook(name = "TestWebhook", component(component = "actix_web::web::Json<Test>"), response(code = 200))]
+/// #[openapi_webhook(name = "TestWebhook", components = [component(name = "actix_web::web::Json<Test>")], responses = [response(code = 200)])]
 /// pub struct WebhookStruct {}
 ///
 /// // Or
 /// #[derive(Clone, ApiWebhookComponent)]
 /// pub enum WebhookEnum {
-///   #[openapi_webhook(name = "TestWebhook", component(component = "actix_web::web::Json<Test>", description = "A super description"), response(code = 200))]
+///   #[openapi_webhook(name = "TestWebhook", components = [component(name = "actix_web::web::Json<Test>", description = "A super description")], responses = [response(code = 200)])]
 ///   VisibleWebhook,
 ///   #[openapi_webhook(skip)]
 ///   SkippedWebhook
@@ -733,7 +734,7 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
 ///
 /// // Or
 /// #[derive(Clone, ApiWebhookComponent)]
-/// #[openapi_webhook(component(component = "actix_web::web::Json<Test>"), response(code = 200))]
+/// #[openapi_webhook(components = [component(name = "actix_web::web::Json<Test>")], responses = [response(code = 200)])]
 /// pub enum WebhookEnumWithDefault {
 ///   VisibleWebhook,
 ///   #[openapi_webhook(skip)]
@@ -743,24 +744,24 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
 /// ```
 ///
 /// # `#[api_webhook(...)]` options:
-/// - `tag = "..."` an optional list of tags for the webhook
+/// - `tags = ["..."]` an optional list of tags for the webhook
 /// - `skip` allow to skip an enum variant (for enum only)
 /// - `name = "..."` an optional name for the webhook. Default to the Struct or Variant name
 /// - `deprecated` a bool indicating the operation is deprecated. Deprecation can also be declared
 ///  with rust `#[deprecated]` decorator.
 /// - `summary = "..."` an optional summary
 /// - `description = "..."` an optional description
-/// - `component(...)` an optional list of components attached to this webhook operation (parameters, body...)
-///     - `component = "..."` the type of this component
-///     - `description = "..."` an optional description attached to this component (parameters description, body description, response description, ...). If used
-///        on a header, override the previously set header's description
-/// - `response(...)` an optional list of responses attached to this webhook operation
-///   - `code = "..."` Http response code
-///   - `component(...)` an option component attached to the given webhook response.
-///       - `component = "..."` the component type must derive [ApiComponent] and [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
-///       - `description = "..."` an optional description attached to this component. If used on a header, overrides the previously set header's description
-///
-/// _To define multiple elements of a list, repeat the property multiple times_
+/// - `components = ["..."]` an optional list of components attached to this webhook operation (parameters, body...) with
+///   - `component(...)` a component definition
+///       - `name = "..."` the type of this component
+///       - `description = "..."` an optional description attached to this component (parameters description, body description, response description, ...). If used
+///          on a header, override the previously set header's description
+/// - `responses = ["..."]` an optional list of responses attached to this webhook operation with
+///   - `response(...)` a response definition
+///     - `code = "..."` Http response code
+///     - `component(...)` an optional component attached to the given webhook response.
+///         - `name = "..."` the component type must derive [ApiComponent] and [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
+///         - `description = "..."` an optional description attached to this component. If used on a header, overrides the previously set header's description
 #[proc_macro_error]
 #[proc_macro_derive(ApiWebhookComponent, attributes(openapi_webhook))]
 pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
@@ -809,7 +810,7 @@ pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
 ///
 /// #[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
 /// #[openapi_error(
-///   status(code = 405, description = "Invalid input"),
+///   status = [status(code = 405, description = "Invalid input")],
 /// )]
 /// pub enum ErrorResponse {
 ///   MethodNotAllowed(String),
@@ -828,11 +829,11 @@ pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
 /// }
 ///
 /// #[api_operation(
-///   tag = "pet",
+///   tags = ["pet"],
 ///   summary = "Add a new pet to the store",
 ///   description = r###"Add a new pet to the store
 ///     Plop"###,
-///   error_code = 405
+///   error_codes = [405]
 /// )]
 /// pub(crate) async fn test(
 ///   body: Json<Test>,
@@ -844,7 +845,7 @@ pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
 /// # `#[api_operation(...)]` options:
 ///   - `skip` a bool allowing to skip documentation for the decorated handler. No component
 ///  strictly associated with this operation will be documented in the resulting openapi definition.
-///   - `skip_args = "..."` an optional list of arguments to skip. `Apistos` will not try to generate the
+///   - `skip_args = ["..."]` an optional list of arguments to skip. `Apistos` will not try to generate the
 ///  documentation for those args which prevent errors linked to missing `ApiComponent` implementation.
 ///   - `deprecated` a bool indicating the operation is deprecated. Deprecation can also be declared
 ///  with rust `#[deprecated]` decorator.
@@ -852,22 +853,23 @@ pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
 ///   - `summary = "..."` an optional summary
 ///   - `description = "..."` an optional description
 ///   - `success_description` = "..." an optional description for a success response
-///   - `parameter_description(...)` an optional key = value list of descriptions for parameters. (If used on a header, overrides the previously
+///   - `parameter_descriptions(...)` an optional key = value list of descriptions for parameters. (If used on a header, overrides the previously
 /// set header's description)
 ///   - `tag = "..."` an optional list of tags associated with this operation (define tag multiple times to add to the list)
-///   - `security_scope(...)` an optional list representing which security scopes apply for a given operation with
-///       - `name = "..."` a mandatory name referencing one of the security definitions
-///       - `scope(...)` a list of scopes applying to this operation
-///   - `error_code = 00` an optional list of error codes to document only theses
+///   - `security_scopes = [...]` an optional list representing which security scopes apply for a given operation with
+///       - security_scopes(...) a struct containing
+///         - `name = "..."` a mandatory name referencing one of the security definitions
+///         - `scope = [...]` a list of scopes applying to this operation
+///   - `error_codes = [00]` an optional list of error codes to document only theses
 ///   - `consumes = "..."` allow to override body content type
 ///   - `produces = "..."` allow to override response content type
-///   - `callbacks(...)` an optional list of callbacks attached to this operation
-///       - `name = "..."` a mandatory name for a set of callbacks
-///       - `callback(...)` a list of callback operation
-///         - `path = "..."` URL to use for the callback operation
-///         - `[verb] = ...` any of the http verbs with an associated function. The given function should be available in scope and be annotated with `api_operation`
-///
-/// _To define multiple elements of a list, repeat the property multiple times_
+///   - `callbacks = [...]` an optional list of callbacks attached to this operation with
+///       - `callbacks(...)` a struct containing
+///           - `name = "..."` a mandatory name for a set of callbacks
+///           - `callbacks = [...]` an list of callbacks operation with
+///             - `callback(...)` a list of callback operation
+///               - `path = "..."` URL to use for the callback operation
+///               - `[verb] = ...` any of the http verbs with an associated function. The given function should be available in scope and be annotated with `api_operation`
 ///
 /// If `summary` or `description` are not provided, a default value will be extracted from the comments. The first line will be used as summary while the rest will be part of the description.
 ///
@@ -891,9 +893,11 @@ pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
 ///
 /// #[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
 /// #[openapi_error(
-///   status(code = 405, description = "Invalid input"),
-///   status(code = 401),
-///   status(code = 403),
+///   status = [
+///     status(code = 405, description = "Invalid input"),
+///     status(code = 401),
+///     status(code = 403),
+///   ]
 /// )]
 /// pub enum ErrorResponse {
 ///   MethodNotAllowed(String),
@@ -914,13 +918,12 @@ pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
 /// }
 ///
 /// #[api_operation(
-///   tag = "pet",
+///   tags = ["pet"],
 ///   summary = "Add a new pet to the store",
 ///   description = r###"Add a new pet to the store
 ///     Plop"###,
-///   parameter_description(body = "A super description"),
-///   error_code = "401",
-///   error_code = "405"
+///   parameter_descriptions(body = "A super description"),
+///   error_codes = [401, 405]
 /// )]
 /// pub(crate) async fn test(
 ///   body: Json<Test>,
@@ -949,7 +952,7 @@ pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
 ///
 /// #[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
 /// #[openapi_error(
-///   status(code = 405, description = "Invalid input"),
+///   status = [status(code = 405, description = "Invalid input")],
 /// )]
 /// pub enum ErrorResponse {
 ///   MethodNotAllowed(String),
@@ -971,8 +974,8 @@ pub fn derive_api_webhook(input: TokenStream) -> TokenStream {
 /// /// Add a new pet to the store
 /// /// Plop
 /// #[api_operation(
-///   tag = "pet",
-///   parameter_description(body = "A super description")
+///   tags = ["pet"],
+///   parameter_descriptions(body = "A super description")
 /// )]
 /// pub(crate) async fn test(
 ///   body: Json<Test>,
@@ -1092,7 +1095,7 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
 ///
 /// #[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
 /// #[openapi_error(
-///   status(code = 405, description = "Invalid input"),
+///   status = [status(code = 405, description = "Invalid input")],
 /// )]
 /// pub enum ErrorResponse {
 ///   MethodNotAllowed(String),
@@ -1111,7 +1114,7 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
 /// }
 ///
 /// #[api_callback(
-///   response(code = 200, component(component = "TestCallbackResult"))
+///   responses = [response(code = 200, component(name = "TestCallbackResult"))]
 /// )]
 /// pub(crate) async fn callback_test(
 ///   body: Json<Test>,
@@ -1120,7 +1123,7 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
 /// }
 ///
 /// #[api_operation(
-///   callbacks(name = "onData", callback(path = "{$request.body.test}/data", post = callback_test))
+///   callbacks = [callbacks(name = "onData", callbacks = [callback(path = "{$request.body.test}/data", post = callback_test)])]
 /// )]
 /// pub(crate) async fn test(
 ///   body: Json<Test>,
@@ -1134,17 +1137,17 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
 ///  with rust `#[deprecated]` decorator.
 ///   - `summary = "..."` an optional summary
 ///   - `description = "..."` an optional description
-///   - `component(...)` an optional list of components attached to this callback operation (parameters, body...)
-///     - `component = "..."` a type for this component
-///     - `description = "..."` an optional description attached to this component (parameters description, body description, response description, ...). If used
-///        on a header, override the previously set header's description
-///   - `response(...)` an optional list of responses attached to this callback operation
+///   - `components = ["..."]` an optional list of components attached to this webhook operation (parameters, body...) with
+///     - `component(...)` a component definition
+///       - `name = "..."` the type of this component
+///       - `description = "..."` an optional description attached to this component (parameters description, body description, response description, ...). If used
+///          on a header, override the previously set header's description
+/// - `responses = ["..."]` an optional list of responses attached to this callback operation with
+///   - `response(...)` a response definition
 ///     - `code = "..."` Http response code
-///     - `component(...)` an option component attached to the given callback response.
-///       - `component = "..."` the component type must derive [ApiComponent] and [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
-///       - `description = "..."` an optional description attached to this component. If used on a header, overrides the previously set header's description
-///
-/// _To define multiple elements of a list, repeat the property multiple times_
+///     - `component(...)` an optional component attached to the given callback response.
+///         - `name = "..."` the component type must derive [ApiComponent] and [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
+///         - `description = "..."` an optional description attached to this component. If used on a header, overrides the previously set header's description
 ///
 /// If `summary` or `description` are not provided, a default value will be extracted from the comments. The first line will be used as summary while the rest will be part of the description.
 #[proc_macro_error]
@@ -1205,23 +1208,24 @@ pub fn api_callback(attr: TokenStream, item: TokenStream) -> TokenStream {
 ///   - `operation_id = "..."` an optional operation id for this operation. Default is the handler's fn name.
 ///   - `summary = "..."` an optional summary
 ///   - `description = "..."` an optional description
-///   - `tag = "..."` an optional list of tags associated with this operation (define tag multiple times to add to the list)
-///   - `security_scope(...)` an optional list representing which security scopes apply for a given operation with
-///       - `name = "..."` a mandatory name referencing one of the security definitions
-///       - `scope(...)` a list of scopes applying to this operation
-///   - `error_code = 00` an optional list of error codes to document only theses
+///   - `tags = ["..."]` an optional list of tags associated with this operation (define tag multiple times to add to the list)
+///   - `security_scopes = [...]` an optional list representing which security scopes apply for a given operation with
+///       - security_scopes(...) a struct containing
+///         - `name = "..."` a mandatory name referencing one of the security definitions
+///         - `scope = [...]` a list of scopes applying to this operation
+///   - `error_codes = [00]` an optional list of error codes to document only theses
 ///   - `consumes = "..."` allow to override body content type
 ///   - `produces = "..."` allow to override response content type
-///   - `callbacks(...)` an optional list of callbacks attached to this operation
-///       - `name = "..."` a mandatory name for a set of callbacks
-///       - `callback(...)` a list of callback operation
-///         - `path = "..."` URL to use for the callback operation
-///         - `[verb] = ...` any of the http verbs with an associated function. The given function should be available in scope and be annotated with `api_operation`
+///   - `callbacks = [...]` an optional list of callbacks attached to this operation with
+///       - `callbacks(...)` a struct containing
+///           - `name = "..."` a mandatory name for a set of callbacks
+///           - `callbacks = [...]` an list of callbacks operation with
+///             - `callback(...)` a list of callback operation
+///               - `path = "..."` URL to use for the callback operation
+///               - `[verb] = ...` any of the http verbs with an associated function. The given function should be available in scope and be annotated with `api_operation`
 /// - `guard = "function_name"`: Registers function as guard using `actix_web::guard::fn_guard`.
 /// - `wrap = "Middleware"`: Registers a resource middleware.
 /// - `key = "value"` any [`api_operation`](https://docs.rs/apistos/latest/apistos/attr.api_operation.html) option
-///
-/// _To define multiple elements of a list, repeat the property multiple times_
 ///
 /// # Examples
 /// ```
@@ -1363,8 +1367,12 @@ pub fn routes(_: TokenStream, item: TokenStream) -> TokenStream {
     .into_iter()
     .filter_map(|(operation_type, attr)| operation_type.map(|ot| (ot, attr)))
     .map(|(operation_type, attr)| {
-      ActixOperationAttrInternal::from_meta(&attr.meta)
-        .map(|actix_operation_attr| (operation_type, actix_operation_attr.into()))
+      ActixOperationAttrInternal::from_meta(&attr.meta).and_then(|actix_operation_attr| {
+        actix_operation_attr
+          .try_into()
+          .map_err(Into::into)
+          .map(|op| (operation_type, op))
+      })
     })
     .collect::<Result<Vec<_>, _>>();
   let operations: Vec<(OperationType, ActixOperationAttr)> = match operations {

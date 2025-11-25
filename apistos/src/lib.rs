@@ -45,10 +45,12 @@
 //!
 //! #[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
 //! #[openapi_error(
-//!   status(code = 403),
-//!   status(code = 404),
-//!   status(code = 405, description = "Invalid input"),
-//!   status(code = 409)
+//!   status = [
+//!     status(code = 403),
+//!     status(code = 404),
+//!     status(code = 405, description = "Invalid input"),
+//!     status(code = 409)
+//!   ]
 //! )]
 //! pub enum ErrorResponse {
 //!   MethodNotAllowed(String),
@@ -70,11 +72,11 @@
 //! }
 //!
 //! #[api_operation(
-//!   tag = "pet",
+//!   tags = ["pet"],
 //!   summary = "Add a new pet to the store",
 //!   description = r###"Add a new pet to the store
 //!     Plop"###,
-//!   error_code = 405
+//!   error_codes = [405]
 //! )]
 //! pub(crate) async fn test(
 //!   body: Json<Test>,

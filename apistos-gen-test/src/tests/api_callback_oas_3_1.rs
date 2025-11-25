@@ -33,7 +33,7 @@ mod test_models {
   }
 
   #[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
-  #[openapi_error(status(code = 405, description = "Invalid input"))]
+  #[openapi_error(status = [status(code = 405, description = "Invalid input")])]
   pub(crate) enum ErrorResponse {
     MethodNotAllowed(String),
   }
@@ -93,7 +93,7 @@ fn api_callback() {
   /// Add a new pet to the store
   /// Add a new pet to the store
   /// Plop
-  #[api_operation(tag = "pet", callbacks(name = "onData", callback(path = "{$request.body.test}/data", post = test_callback)))]
+  #[api_operation(tags = ["pet"], callbacks = [callbacks(name = "onData", callbacks = [callbacks(path = "{$request.body.test}/data", post = test_callback)])])]
   pub(crate) async fn test(
     _body: Json<test_models::Test>,
   ) -> Result<Json<test_models::TestResult>, test_models::ErrorResponse> {
@@ -110,8 +110,8 @@ fn api_callback() {
   /// Add a new pet to the store
   /// Plop
   #[api_callback(
-    component(component = "Header<OrganizationSlug>", description = "A super description"),
-    response(code = 200, component(component = "TestCallbackResult"))
+    components = [component(name = "Header<OrganizationSlug>", description = "A super description")],
+    responses = [response(code = 200, component(name = "TestCallbackResult"))]
   )]
   pub(crate) async fn test_callback(
     _body: Json<test_models::Test>,

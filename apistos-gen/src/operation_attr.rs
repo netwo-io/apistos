@@ -1,4 +1,5 @@
 use crate::OPENAPI_CALLBACK_STRUCT_PREFIX;
+use crate::internal::utils::{from_list_inner, from_meta_inner_flat};
 use darling::FromMeta;
 use darling::ast::NestedMeta;
 use proc_macro_error2::abort;
@@ -8,10 +9,11 @@ use std::collections::{BTreeMap, HashMap};
 use std::convert::Infallible;
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
+use syn::{LitInt, LitStr, Meta};
 
 pub(crate) fn parse_openapi_operation_attrs(attrs: &[NestedMeta]) -> OperationAttr {
-  match OperationAttrInternal::from_list(attrs) {
-    Ok(operation) => operation.into(),
+  match OperationAttrInternal::from_list(attrs).and_then(|op| op.try_into().map_err(Into::into)) {
+    Ok(operation) => operation,
     Err(e) => abort!(e.span(), "Unable to parse #[api_operation] attribute: {:?}", e),
   }
 }
@@ -27,19 +29,59 @@ pub(crate) struct OperationAttrInternal {
   description: Option<String>,
   success_description: Option<String>,
   #[darling(default)]
-  parameter_description: HashMap<String, String>,
-  #[darling(multiple, rename = "tag")]
-  tags: Vec<String>,
-  #[darling(multiple, rename = "security_scope")]
-  scopes: Vec<SecurityScopes>,
-  #[darling(multiple, rename = "error_code")]
-  error_codes: Vec<u16>,
+  parameter_descriptions: HashMap<String, String>,
+  #[darling(default)]
+  tags: Vec<LitStr>,
+  #[darling(default)]
+  security_scopes: SecurityScopesWrapper,
+  #[darling(default)]
+  error_codes: Vec<LitInt>,
   consumes: Option<String>,
   produces: Option<String>,
-  #[darling(multiple)]
-  skip_args: Vec<Ident>,
-  #[darling(multiple)]
+  #[darling(default)]
+  skip_args: Vec<LitStr>,
+  #[darling(default)]
+  callbacks: CallbacksWrapper,
+}
+
+// This struct is essentially flatten when parsed by darling due to its from_meta implementation
+#[derive(Clone, Default)]
+pub(crate) struct SecurityScopesWrapper {
+  security_scopes: Vec<SecurityScopes>,
+}
+
+impl FromMeta for SecurityScopesWrapper {
+  fn from_list(items: &[NestedMeta]) -> darling::Result<Self> {
+    Ok(Self {
+      security_scopes: from_list_inner::<SecurityScopes>(items, "security_scopes", "security_scopes")?,
+    })
+  }
+
+  fn from_meta(item: &Meta) -> darling::Result<Self> {
+    Ok(Self {
+      security_scopes: from_meta_inner_flat::<SecurityScopes>(item, "security_scopes")?,
+    })
+  }
+}
+
+// This struct is essentially flatten when parsed by darling due to its from_meta implementation
+#[derive(Clone, Default)]
+pub(crate) struct CallbacksWrapper {
   callbacks: Vec<NamedOperationCallbackInternal>,
+}
+
+impl FromMeta for CallbacksWrapper {
+  fn from_list(items: &[NestedMeta]) -> darling::Result<Self> {
+    Ok(Self {
+      callbacks: from_list_inner::<NamedOperationCallbackInternal>(items, "callbacks", "callbacks")?,
+    })
+  }
+
+  fn from_meta(item: &Meta) -> darling::Result<Self> {
+    Ok(Self {
+      callbacks: from_meta_inner_flat::<NamedOperationCallbackInternal>(item, "callbacks")?,
+    })
+  }
 }
 
 #[cfg(feature = "actix-web-macros")]
@@ -52,9 +94,9 @@ impl ToTokens for OperationAttrInternal {
       summary,
       description,
       success_description,
-      parameter_description,
+      parameter_descriptions: parameter_description,
       tags,
-      scopes,
+      security_scopes,
       error_codes,
       consumes,
       produces,
@@ -81,11 +123,12 @@ impl ToTokens for OperationAttrInternal {
       for (k, v) in parameter_description {
         tokens.extend(quote!(#k = #v, ));
       }
-      quote!(parameter_description(#tokens),)
+      quote!(parameter_descriptions(#tokens),)
     };
     let consumes = consumes.clone().map(|v| quote!(consumes = #v, )).unwrap_or_default();
     let produces = produces.clone().map(|v| quote!(produces = #v, )).unwrap_or_default();
-    let error_codes: Vec<String> = error_codes.iter().map(ToString::to_string).collect();
+    let security_scopes = &security_scopes.security_scopes;
+    let callbacks = &callbacks.callbacks;
 
     tokens.extend(quote!(
       skip = #skip,
@@ -95,13 +138,13 @@ impl ToTokens for OperationAttrInternal {
       #description
       #success_description
       #parameter_description
-      #(tag = #tags,)*
-      #(#scopes,)*
-      #(error_code = #error_codes,)*
+      tags = [#(#tags,)*],
+      security_scopes = [#(#security_scopes,)*],
+      error_codes = [#(#error_codes,)*],
       #consumes
       #produces
-      #(skip_args = #skip_args,)*
-      #(#callbacks,)*
+      skip_args = [#(#skip_args,)*],
+      callbacks = [#(#callbacks,)*],
     ))
   }
 }
@@ -109,15 +152,35 @@ impl ToTokens for OperationAttrInternal {
 #[derive(FromMeta, Clone)]
 struct NamedOperationCallbackInternal {
   name: String,
-  #[darling(multiple)]
-  callback: Vec<OperationCallbackInternal>,
+  #[darling(default)]
+  callbacks: OperationCallbackInternalWrapper,
+}
+
+#[derive(Clone, Default)]
+struct OperationCallbackInternalWrapper {
+  callbacks: Vec<OperationCallbackInternal>,
+}
+
+impl FromMeta for OperationCallbackInternalWrapper {
+  fn from_list(items: &[NestedMeta]) -> darling::Result<Self> {
+    Ok(Self {
+      callbacks: from_list_inner::<OperationCallbackInternal>(items, "callbacks", "callbacks")?,
+    })
+  }
+
+  fn from_meta(item: &Meta) -> darling::Result<Self> {
+    Ok(Self {
+      callbacks: from_meta_inner_flat::<OperationCallbackInternal>(item, "callbacks")?,
+    })
+  }
 }
 
 #[cfg(feature = "actix-web-macros")]
 impl ToTokens for NamedOperationCallbackInternal {
   fn to_tokens(&self, tokens: &mut TokenStream) {
-    let NamedOperationCallbackInternal { name, callback } = self;
-    tokens.extend(quote!(callbacks(name = #name, #(#callback,)*)))
+    let NamedOperationCallbackInternal { name, callbacks } = self;
+    let callbacks = &callbacks.callbacks;
+    tokens.extend(quote!(callbacks(name = #name, callbacks = [#(#callbacks,)*])))
   }
 }
 
@@ -174,15 +237,14 @@ impl ToTokens for OperationCallbackInternal {
 #[derive(FromMeta, Clone)]
 struct SecurityScopes {
   name: String,
-  #[darling(multiple, rename = "scope")]
-  scopes: Vec<String>,
+  scopes: Vec<LitStr>,
 }
 
 #[cfg(feature = "actix-web-macros")]
 impl ToTokens for SecurityScopes {
   fn to_tokens(&self, tokens: &mut TokenStream) {
     let SecurityScopes { name, scopes } = self;
-    tokens.extend(quote!(security_scope(name = #name, #(scope = #scopes, )*)))
+    tokens.extend(quote!(security_scopes(name = #name, scopes = [#(#scopes,)*])))
   }
 }
 
@@ -199,7 +261,7 @@ impl From<NamedOperationCallbackInternal> for OperationCallbacks {
     };
 
     let mut callbacks = BTreeMap::default();
-    for callback in value.callback {
+    for callback in value.callbacks.callbacks {
       let mut operations = vec![];
       callback
         .get
@@ -262,9 +324,11 @@ pub(crate) struct OperationAttr {
   pub(crate) skip_args: Vec<Ident>,
 }
 
-impl From<OperationAttrInternal> for OperationAttr {
-  fn from(value: OperationAttrInternal) -> Self {
-    Self {
+impl TryFrom<OperationAttrInternal> for OperationAttr {
+  type Error = syn::Error;
+
+  fn try_from(value: OperationAttrInternal) -> Result<Self, Self::Error> {
+    Ok(Self {
       skip: value.skip,
       deprecated: value.deprecated,
       operation_id: value.operation_id,
@@ -272,22 +336,31 @@ impl From<OperationAttrInternal> for OperationAttr {
       description: value.description.map(|d| d.replace('\n', "\\\n")),
       success_description: value.success_description.map(|d| d.trim().to_string()),
       parameter_description: value
-        .parameter_description
+        .parameter_descriptions
         .into_iter()
         .map(|(k, v)| (k, v.trim().to_string()))
         .collect(),
-      tags: value.tags,
-      callbacks: value.callbacks.into_iter().map(Into::into).collect(),
+      tags: value.tags.iter().map(|t| t.value()).collect(),
+      callbacks: value.callbacks.callbacks.into_iter().map(Into::into).collect(),
       scopes: value
-        .scopes
+        .security_scopes
+        .security_scopes
         .into_iter()
-        .map(|s| (s.name, s.scopes))
+        .map(|s| (s.name, s.scopes.iter().map(|s| s.value()).collect()))
         .collect::<BTreeMap<_, _>>(),
-      error_codes: value.error_codes,
+      error_codes: value
+        .error_codes
+        .iter()
+        .map(|r| r.base10_parse::<u16>())
+        .collect::<Result<Vec<u16>, syn::Error>>()?,
       consumes: value.consumes,
       produces: value.produces,
-      skip_args: value.skip_args,
-    }
+      skip_args: value
+        .skip_args
+        .iter()
+        .map(|lit| Ident::from_string(&lit.value()))
+        .collect::<Result<_, _>>()?,
+    })
   }
 }
 

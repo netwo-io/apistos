@@ -4,8 +4,8 @@ use darling::ast::NestedMeta;
 use proc_macro_error2::abort;
 
 pub(crate) fn parse_actix_openapi_operation_attrs(attrs: &[NestedMeta], macro_identifier: &str) -> ActixOperationAttr {
-  match ActixOperationAttrInternal::from_list(attrs) {
-    Ok(operation) => operation.into(),
+  match ActixOperationAttrInternal::from_list(attrs).and_then(|op| op.try_into().map_err(Into::into)) {
+    Ok(operation) => operation,
     Err(e) => abort!(e.span(), "Unable to parse #[{macro_identifier}] attribute: {:?}", e),
   }
 }
@@ -20,15 +20,17 @@ pub(crate) struct ActixOperationAttrInternal {
   pub(crate) operation: OperationAttrInternal,
 }
 
-impl From<ActixOperationAttrInternal> for ActixOperationAttr {
-  fn from(value: ActixOperationAttrInternal) -> Self {
-    Self {
+impl TryFrom<ActixOperationAttrInternal> for ActixOperationAttr {
+  type Error = syn::Error;
+
+  fn try_from(value: ActixOperationAttrInternal) -> Result<Self, Self::Error> {
+    Ok(Self {
       path: value.path,
       name: value.name,
       guard: value.guard,
       wrap: value.wrap,
-      operation: value.operation.into(),
-    }
+      operation: value.operation.try_into()?,
+    })
   }
 }
 

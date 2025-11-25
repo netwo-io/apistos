@@ -4,7 +4,7 @@ use crate::operation_attr::OperationType;
 use darling::FromMeta;
 use proc_macro_error2::abort;
 use quote::quote;
-use syn::{Attribute, MetaList, Path};
+use syn::{Attribute, Meta, MetaList, Path};
 
 pub(crate) fn method_from_attr_path(path: &Path) -> Option<OperationType> {
   if path.is_ident("get") {
@@ -52,7 +52,7 @@ pub(crate) fn modify_attribute_with_scope(attr: &Attribute, scope_path: &str) ->
         let guard = guard.map(|g| quote!(guard = #g, )).unwrap_or_default();
         let wrap = wrap.map(|w| quote!(wrap = #w, )).unwrap_or_default();
         Attribute {
-          meta: syn::Meta::List(MetaList {
+          meta: Meta::List(MetaList {
             tokens: quote!( path = #modified_path, #(#methods, )* #name #guard #wrap ),
             ..attr_meta_list.clone()
           }),
@@ -81,7 +81,7 @@ pub(crate) fn modify_attribute_with_scope(attr: &Attribute, scope_path: &str) ->
         let guard = guard.map(|g| quote!(guard = #g, )).unwrap_or_default();
         let wrap = wrap.map(|w| quote!(wrap = #w, )).unwrap_or_default();
         Attribute {
-          meta: syn::Meta::List(MetaList {
+          meta: Meta::List(MetaList {
             tokens: quote!( path = #modified_path, #operation #name #guard #wrap ),
             ..attr_meta_list.clone()
           }),

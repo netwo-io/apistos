@@ -3,6 +3,7 @@ use actix_web::web::Query;
 use actix_web_lab::extract::Query as LabQuery;
 use apistos_core::ApiComponent;
 use apistos_gen::ApiComponent;
+use apistos_models::OpenApiVersion;
 use apistos_models::schemars::JsonSchema;
 #[cfg(all(feature = "lab_query", feature = "garde"))]
 use garde_actix_web::web::LabQuery as GardeLabQuery;
@@ -306,6 +307,5 @@ use serde_json as _;
 
 #[cfg(not(feature = "lab_query"))]
 use actix_web_lab as _;
-use apistos_models::OpenApiVersion;
 #[cfg(not(feature = "garde"))]
 use garde_actix_web as _;

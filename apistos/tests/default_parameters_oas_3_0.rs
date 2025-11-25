@@ -20,7 +20,7 @@ use std::fmt::{Display, Formatter};
 #[actix_web::test]
 async fn default_parameters() {
   #[derive(Serialize, Deserialize, Debug, Clone, ApiErrorComponent)]
-  #[openapi_error(status(code = 405, description = "Invalid input"))]
+  #[openapi_error(status = [status(code = 405, description = "Invalid input")])]
   pub(crate) enum ErrorResponse {
     MethodNotAllowed(String),
   }
@@ -71,7 +71,7 @@ async fn default_parameters() {
   )]
   struct SomeHeader(String);
 
-  #[api_operation(tag = "pet")]
+  #[api_operation(tags = ["pet"])]
   pub(crate) async fn test(_params: Path<(u32, String)>) -> Result<Json<Test>, ErrorResponse> {
     panic!()
   }

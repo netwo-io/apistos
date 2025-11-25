@@ -6,8 +6,8 @@ use proc_macro2::TokenStream;
 use quote::{ToTokens, quote};
 
 pub(crate) fn parse_actix_route_attrs(attrs: &[NestedMeta]) -> ActixRouteAttr {
-  match ActixRouteAttrInternal::from_list(attrs) {
-    Ok(operation) => operation.into(),
+  match ActixRouteAttrInternal::from_list(attrs).and_then(|op| op.try_into().map_err(Into::into)) {
+    Ok(operation) => operation,
     Err(e) => abort!(e.span(), "Unable to parse #[route] attribute: {:?}", e),
   }
 }
@@ -36,22 +36,26 @@ impl ToTokens for ActixRouteMethodAttrInternal {
   }
 }
 
-impl From<ActixRouteAttrInternal> for ActixRouteAttr {
-  fn from(value: ActixRouteAttrInternal) -> Self {
-    Self {
+impl TryFrom<ActixRouteAttrInternal> for ActixRouteAttr {
+  type Error = syn::Error;
+
+  fn try_from(value: ActixRouteAttrInternal) -> Result<Self, Self::Error> {
+    Ok(Self {
       path: value.path,
       methods: value
         .methods
         .into_iter()
-        .map(|m| ActixRouteMethodAttr {
-          method: m.method,
-          operation_attr: m.operation.into(),
+        .map(|m| {
+          m.operation.try_into().map(|operation_attr| ActixRouteMethodAttr {
+            method: m.method,
+            operation_attr,
+          })
         })
-        .collect(),
+        .collect::<Result<Vec<ActixRouteMethodAttr>, syn::Error>>()?,
       name: value.name,
       guard: value.guard,
       wrap: value.wrap,
-    }
+    })
   }
 }
 

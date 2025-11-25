@@ -1,9 +1,10 @@
+use crate::internal::utils::{from_list_inner, from_meta_inner_flat};
 use darling::FromMeta;
 use darling::ast::NestedMeta;
 use proc_macro_error2::abort;
 use proc_macro2::{Span, TokenStream};
 use quote::{ToTokens, quote};
-use syn::Type;
+use syn::{Meta, Type};
 
 pub(crate) fn parse_openapi_callback_attrs(attrs: &[NestedMeta]) -> CallbackAttr {
   match CallbackAttrInternal::from_list(attrs) {
@@ -21,10 +22,48 @@ pub(crate) struct CallbackAttrInternal {
   pub(crate) deprecated: Option<bool>,
   pub(crate) summary: Option<String>,
   pub(crate) description: Option<String>,
-  #[darling(default, multiple, rename = "component")]
+  #[darling(default)]
+  pub(crate) components: CallbackComponentDefinitionWrapper,
+  #[darling(default)]
+  pub(crate) responses: CallbackResponseDefinitionWrapper,
+}
+
+#[derive(Clone, Default)]
+pub(crate) struct CallbackComponentDefinitionWrapper {
   pub(crate) components: Vec<CallbackComponentDefinition>,
-  #[darling(multiple, rename = "response")]
+}
+
+impl FromMeta for CallbackComponentDefinitionWrapper {
+  fn from_meta(item: &Meta) -> darling::Result<Self> {
+    Ok(Self {
+      components: from_meta_inner_flat::<CallbackComponentDefinition>(item, "component")?,
+    })
+  }
+
+  fn from_list(items: &[NestedMeta]) -> darling::Result<Self> {
+    Ok(Self {
+      components: from_list_inner::<CallbackComponentDefinition>(items, "component", "component")?,
+    })
+  }
+}
+
+#[derive(Clone, Default)]
+pub(crate) struct CallbackResponseDefinitionWrapper {
   pub(crate) responses: Vec<CallbackResponseDefinition>,
+}
+
+impl FromMeta for CallbackResponseDefinitionWrapper {
+  fn from_meta(item: &Meta) -> darling::Result<Self> {
+    Ok(Self {
+      responses: from_meta_inner_flat::<CallbackResponseDefinition>(item, "response")?,
+    })
+  }
+
+  fn from_list(items: &[NestedMeta]) -> darling::Result<Self> {
+    Ok(Self {
+      responses: from_list_inner::<CallbackResponseDefinition>(items, "response", "response")?,
+    })
+  }
 }
 
 #[derive(FromMeta, Clone)]
@@ -36,7 +75,7 @@ pub(crate) struct CallbackResponseDefinition {
 
 #[derive(FromMeta, Clone)]
 pub(crate) struct CallbackComponentDefinition {
-  #[darling(rename = "component")]
+  #[darling(rename = "name")]
   pub(crate) _type: Type,
   #[darling(default)]
   pub(crate) description: Option<String>,
@@ -56,7 +95,7 @@ impl TryFrom<CallbackAttrInternal> for CallbackAttr {
   type Error = syn::Error;
 
   fn try_from(value: CallbackAttrInternal) -> Result<Self, Self::Error> {
-    if value.responses.is_empty() {
+    if value.responses.responses.is_empty() {
       return Err(syn::Error::new(
         Span::call_site(),
         "Callback should define at least one response",
@@ -67,9 +106,9 @@ impl TryFrom<CallbackAttrInternal> for CallbackAttr {
       deprecated: value.deprecated,
       summary: value.summary,
       description: value.description,
-      components: value.components,
+      components: value.components.components,
       tags: vec![],
-      responses: value.responses,
+      responses: value.responses.responses,
     })
   }
 }
