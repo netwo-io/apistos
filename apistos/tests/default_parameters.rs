@@ -73,8 +73,14 @@ async fn default_parameters() {
     panic!()
   }
 
+  #[api_operation(tag = "pet")]
+  pub(crate) async fn other_test(_params: Path<(u32, String)>) -> Result<Json<Test>, ErrorResponse> {
+    panic!()
+  }
+
   let openapi_path = "/test.json";
-  let operation_path = "/test/{plop_id}/{clap_name}/";
+  let operation_path_1 = "/test/{plop_id}/{clap_name}/";
+  let operation_path_2 = "/other/{plop_id}/{clap_name}/";
 
   let info = Info {
     title: "A well documented API".to_string(),
@@ -112,7 +118,8 @@ async fn default_parameters() {
   };
   let app = App::new()
     .document(spec)
-    .service(scope(operation_path).service(resource("").route(get().to(test))))
+    .service(scope(operation_path_1).service(resource("").route(get().to(test))))
+    .service(scope(operation_path_2).service(resource("").route(get().to(other_test))))
     .build(openapi_path);
   let app = init_service(app).await;
 
@@ -121,38 +128,39 @@ async fn default_parameters() {
   assert!(resp.status().is_success());
 
   let body: OpenApi = try_read_body_json(resp).await.expect("Unable to read body");
-  let parameters: Vec<ReferenceOr<Parameter>> = body
-    .paths
-    .paths
-    .get(&operation_path.to_string())
-    .cloned()
-    .unwrap_or_default()
-    .operations
-    .get(&OperationType::Get)
-    .cloned()
-    .unwrap_or_default()
-    .parameters;
+  for operation_path in [operation_path_1, operation_path_2] {
+    let parameters: Vec<ReferenceOr<Parameter>> = body
+      .paths
+      .paths
+      .get(&operation_path.to_string())
+      .cloned()
+      .unwrap_or_default()
+      .operations
+      .get(&OperationType::Get)
+      .cloned()
+      .unwrap_or_default()
+      .parameters;
+    assert_eq!(parameters.len(), 5);
 
-  assert_eq!(parameters.len(), 5);
+    let parameters_name = parameters
+      .iter()
+      .map(|p| match p {
+        ReferenceOr::Object(obj) => obj.name.clone(),
+        ReferenceOr::Reference { _ref } => _ref.split('/').next_back().unwrap_or_default().to_string(),
+      })
+      .collect::<Vec<String>>();
 
-  let parameters_name = parameters
-    .iter()
-    .map(|p| match p {
-      ReferenceOr::Object(obj) => obj.name.clone(),
-      ReferenceOr::Reference { _ref } => _ref.split('/').last().unwrap_or_default().to_string(),
-    })
-    .collect::<Vec<String>>();
-
-  assert_eq!(
-    parameters_name,
-    vec![
-      "plop_id".to_string(),
-      "clap_name".to_string(),
-      "X-Env".to_string(),
-      "X-Env-Complex".to_string(),
-      "X-SomeParam".to_string()
-    ]
-  );
+    assert_eq!(
+      parameters_name,
+      vec![
+        "plop_id".to_string(),
+        "clap_name".to_string(),
+        "X-Env".to_string(),
+        "X-Env-Complex".to_string(),
+        "X-SomeParam".to_string()
+      ]
+    );
+  }
 
   let parameter_components = body.components.clone().map(|c| c.parameters).unwrap_or_default();
   assert_eq!(parameter_components.len(), 3);

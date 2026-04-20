@@ -1,5 +1,5 @@
 [workspace]
-resolver = "2"
+resolver = "3"
 members = [
     "apistos",
     "apistos-core",
@@ -26,7 +26,8 @@ version = "0.6.0"
 
 [workspace.dependencies]
 actix-service = "2"
-actix-web = "4"
+actix-http = "3.11.0"
+actix-web = "4.12"
 actix-web-grants = "4"
 actix-web-lab = "0.24"
 assert-json-diff = "2.0.2"

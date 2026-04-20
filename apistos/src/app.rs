@@ -321,19 +321,39 @@ where
         .flat_map(|p| p.components.clone())
         .collect();
 
-      let mut parameter_refs = self
+      let default_parameter_refs: Vec<(Parameter, ReferenceOr<Parameter>)> = self
         .default_parameters
         .iter()
         .flat_map(|p| &p.parameters)
-        .map(|p| ReferenceOr::Reference {
-          _ref: format!("#/components/parameters/{}", p.name),
+        .map(|p| {
+          (
+            p.clone(),
+            ReferenceOr::Reference {
+              _ref: format!("#/components/parameters/{}", p.name),
+            },
+          )
         })
         .collect();
 
       paths
         .values_mut()
         .flat_map(|pi| pi.operations.values_mut())
-        .for_each(|op| op.parameters.append(&mut parameter_refs));
+        .for_each(|op| {
+          let missing_default_parameters: Vec<ReferenceOr<Parameter>> = default_parameter_refs
+            .iter()
+            .filter_map(|(default_parameter, parameter_ref)| {
+              let already_defined = op.parameters.iter().any(|parameter| match parameter {
+                ReferenceOr::Object(parameter) => {
+                  parameter.name == default_parameter.name && parameter._in == default_parameter._in
+                }
+                ReferenceOr::Reference { _ref } => _ref.split('/').next_back() == Some(default_parameter.name.as_str()),
+              });
+
+              (!already_defined).then(|| parameter_ref.clone())
+            })
+            .collect();
+          op.parameters.extend(missing_default_parameters);
+        });
 
       if let Some(c) = components.as_mut() {
         c.parameters.append(&mut parameter_components);
