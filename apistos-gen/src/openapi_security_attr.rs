@@ -93,10 +93,7 @@ pub(crate) enum SecurityType {
 impl ToTokens for SecurityType {
   fn to_tokens(&self, tokens: &mut TokenStream) {
     let scheme_tokens = match self {
-      SecurityType::OAuth2(v) => {
-        let v = *v.clone();
-        quote!(OAuth2(#v))
-      }
+      SecurityType::OAuth2(v) => quote!(OAuth2(Box::new(#v))),
       SecurityType::ApiKey(v) => quote!(ApiKey(#v)),
       SecurityType::Http(v) => quote!(Http(#v)),
       SecurityType::OpenIdConnect(v) => quote!(OpenIdConnect(#v)),

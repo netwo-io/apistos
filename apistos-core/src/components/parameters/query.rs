@@ -178,8 +178,8 @@ fn parameters_from_hashmap(schema: Option<ReferenceOr<Schema>>, style: Option<Pa
         parameters = vec![Parameter {
           name: "params".to_string(),
           _in: ParameterIn::Query,
-          definition: Some(ParameterDefinition::Schema(ReferenceOr::Object(Schema::Object(
-            SchemaObject::default(),
+          definition: Some(ParameterDefinition::Schema(Box::new(ReferenceOr::Object(
+            Schema::Object(SchemaObject::default()),
           )))),
           ..Default::default()
         }];
@@ -189,14 +189,14 @@ fn parameters_from_hashmap(schema: Option<ReferenceOr<Schema>>, style: Option<Pa
           name: "params".to_string(),
           _in: ParameterIn::Query,
           style,
-          definition: Some(ParameterDefinition::Schema(ReferenceOr::Object(Schema::Object(
-            SchemaObject {
+          definition: Some(ParameterDefinition::Schema(Box::new(ReferenceOr::Object(
+            Schema::Object(SchemaObject {
               object: Some(Box::new(ObjectValidation {
                 additional_properties: Some(Box::new(schema)),
                 ..Default::default()
               })),
               ..Default::default()
-            },
+            }),
           )))),
           ..Default::default()
         }];
@@ -207,8 +207,8 @@ fn parameters_from_hashmap(schema: Option<ReferenceOr<Schema>>, style: Option<Pa
       name: "params".to_string(),
       _in: ParameterIn::Query,
       style,
-      definition: Some(ParameterDefinition::Schema(ReferenceOr::Object(Schema::Object(
-        SchemaObject::default(),
+      definition: Some(ParameterDefinition::Schema(Box::new(ReferenceOr::Object(
+        Schema::Object(SchemaObject::default()),
       )))),
       ..Default::default()
     }];
@@ -239,7 +239,7 @@ fn parameter_for_obj(
       Parameter {
         name,
         _in: ParameterIn::Query,
-        definition: Some(ParameterDefinition::Schema(schema.into())),
+        definition: Some(ParameterDefinition::Schema(Box::new(schema.into()))),
         required,
         description,
         style: style.clone(),
@@ -324,8 +324,8 @@ mod test {
         name: "id_number".to_string(),
         _in: ParameterIn::Query,
         required: Some(true),
-        definition: Some(ParameterDefinition::Schema(ReferenceOr::Object(Schema::Object(
-          SchemaObject {
+        definition: Some(ParameterDefinition::Schema(Box::new(ReferenceOr::Object(
+          Schema::Object(SchemaObject {
             instance_type: Some(SingleOrVec::Single(Box::new(InstanceType::Integer))),
             format: Some("uint32".to_string()),
             number: Some(Box::new(NumberValidation {
@@ -333,7 +333,7 @@ mod test {
               ..Default::default()
             })),
             ..Default::default()
-          }
+          })
         )))),
         ..Default::default()
       }
@@ -350,11 +350,11 @@ mod test {
         name: "id_string".to_string(),
         _in: ParameterIn::Query,
         required: Some(true),
-        definition: Some(ParameterDefinition::Schema(ReferenceOr::Object(Schema::Object(
-          SchemaObject {
+        definition: Some(ParameterDefinition::Schema(Box::new(ReferenceOr::Object(
+          Schema::Object(SchemaObject {
             instance_type: Some(SingleOrVec::Single(Box::new(InstanceType::String))),
             ..Default::default()
-          }
+          })
         )))),
         ..Default::default()
       }
@@ -378,8 +378,8 @@ mod test {
         name: "id_number".to_string(),
         _in: ParameterIn::Query,
         required: Some(true),
-        definition: Some(ParameterDefinition::Schema(ReferenceOr::Object(Schema::Object(
-          SchemaObject {
+        definition: Some(ParameterDefinition::Schema(Box::new(ReferenceOr::Object(
+          Schema::Object(SchemaObject {
             instance_type: Some(SingleOrVec::Single(Box::new(InstanceType::Integer))),
             format: Some("uint32".to_string()),
             number: Some(Box::new(NumberValidation {
@@ -387,7 +387,7 @@ mod test {
               ..Default::default()
             })),
             ..Default::default()
-          }
+          })
         )))),
         ..Default::default()
       }
@@ -404,11 +404,11 @@ mod test {
         name: "id_string".to_string(),
         _in: ParameterIn::Query,
         required: Some(true),
-        definition: Some(ParameterDefinition::Schema(ReferenceOr::Object(Schema::Object(
-          SchemaObject {
+        definition: Some(ParameterDefinition::Schema(Box::new(ReferenceOr::Object(
+          Schema::Object(SchemaObject {
             instance_type: Some(SingleOrVec::Single(Box::new(InstanceType::String))),
             ..Default::default()
-          }
+          })
         )))),
         ..Default::default()
       }
@@ -434,8 +434,8 @@ mod test {
         required: Some(true),
         style: Some(ParameterStyle::Form),
         explode: Some(true),
-        definition: Some(ParameterDefinition::Schema(ReferenceOr::Object(Schema::Object(
-          SchemaObject {
+        definition: Some(ParameterDefinition::Schema(Box::new(ReferenceOr::Object(
+          Schema::Object(SchemaObject {
             instance_type: Some(SingleOrVec::Single(Box::new(InstanceType::Integer))),
             format: Some("uint32".to_string()),
             number: Some(Box::new(NumberValidation {
@@ -443,7 +443,7 @@ mod test {
               ..Default::default()
             })),
             ..Default::default()
-          }
+          })
         )))),
         ..Default::default()
       }
@@ -462,11 +462,11 @@ mod test {
         required: Some(true),
         style: Some(ParameterStyle::Form),
         explode: Some(true),
-        definition: Some(ParameterDefinition::Schema(ReferenceOr::Object(Schema::Object(
-          SchemaObject {
+        definition: Some(ParameterDefinition::Schema(Box::new(ReferenceOr::Object(
+          Schema::Object(SchemaObject {
             instance_type: Some(SingleOrVec::Single(Box::new(InstanceType::String))),
             ..Default::default()
-          }
+          })
         )))),
         ..Default::default()
       }

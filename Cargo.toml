@@ -1,5 +1,5 @@
 [workspace]
-resolver = "3"
+resolver = "2"
 members = [
     "apistos",
     "apistos-core",
@@ -26,7 +26,7 @@ version = "0.6.0"
 
 [workspace.dependencies]
 actix-service = "2"
-actix-http = "3.11.0"
+actix-http = "3"
 actix-web = "4.12"
 actix-web-grants = "4"
 actix-web-lab = "0.24"
@@ -127,7 +127,7 @@ manual_let_else = "warn"
 manual_ok_or = "warn"
 many_single_char_names = "warn"
 match_bool = "warn"
-match_on_vec_items = "warn"
+indexing_slicing = "warn"
 match_wild_err_arm = "warn"
 match_wildcard_for_single_variants = "warn"
 maybe_infinite_iter = "warn"

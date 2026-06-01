@@ -103,9 +103,13 @@ async fn path_parameter_replacement() {
   assert_eq!(first_parameter.name, "plop_id");
   let first_parameter_schema = first_parameter
     .definition
-    .and_then(|p| match p {
-      ParameterDefinition::Schema(ReferenceOr::Object(sch)) => Some(sch.into_object().clone()),
-      _ => None,
+    .and_then(|p| {
+      if let ParameterDefinition::Schema(schema) = p {
+        if let ReferenceOr::Object(sch) = *schema {
+          return Some(sch.into_object().clone());
+        }
+      }
+      None
     })
     .unwrap_or_default();
   assert_eq!(
@@ -117,9 +121,13 @@ async fn path_parameter_replacement() {
   assert_eq!(last_parameter.name, "clap_name");
   let last_parameter_schema = last_parameter
     .definition
-    .and_then(|p| match p {
-      ParameterDefinition::Schema(ReferenceOr::Object(sch)) => Some(sch.into_object().clone()),
-      _ => None,
+    .and_then(|p| {
+      if let ParameterDefinition::Schema(schema) = p {
+        if let ReferenceOr::Object(sch) = *schema {
+          return Some(sch.into_object().clone());
+        }
+      }
+      None
     })
     .unwrap_or_default();
   assert_eq!(

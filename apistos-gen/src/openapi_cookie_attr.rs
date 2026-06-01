@@ -81,6 +81,7 @@ impl ToTokens for OpenapiCookieAttributeExtended {
             definition: <Self as apistos::ApiComponent>::schema()
               .map(|(_, schema)| schema)
               .or_else(Self::raw_schema)
+              .map(Box::new)
               .map(apistos::paths::ParameterDefinition::Schema),
             ..Default::default()
           }

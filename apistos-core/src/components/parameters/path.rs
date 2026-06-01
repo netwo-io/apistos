@@ -217,7 +217,7 @@ fn gen_path_parameter_for_object(schema: &Schema, obj: &ObjectValidation, requir
       .map(|(name, schema)| Parameter {
         name,
         _in: ParameterIn::Path,
-        definition: Some(ParameterDefinition::Schema(schema.into())),
+        definition: Some(ParameterDefinition::Schema(Box::new(schema.into()))),
         required: Some(required),
         ..Default::default()
       })
@@ -229,7 +229,7 @@ fn gen_simple_path_parameter(component: ReferenceOr<Schema>, required: bool) -> 
   Parameter {
     name: "".to_string(), // this name is overridden later because it is contained in the path
     _in: ParameterIn::Path,
-    definition: Some(ParameterDefinition::Schema(component)),
+    definition: Some(ParameterDefinition::Schema(Box::new(component))),
     required: Some(required),
     ..Default::default()
   }
