@@ -1,7 +1,6 @@
 use crate::internal::components::Components;
 use crate::internal::operation::Operation;
 use crate::operation_attr::OperationAttr;
-use proc_macro_error::{abort, emit_error};
 use proc_macro2::{Span, TokenStream as TokenStream2};
 use quote::quote;
 
@@ -125,13 +124,18 @@ pub(crate) fn gen_item_ast(
   openapi_struct: &Ident,
   ty_generics: &TypeGenerics,
   generics_call: &TokenStream2,
-) -> (proc_macro2::TokenStream, proc_macro2::TokenStream) {
+) -> syn::Result<(
+  proc_macro2::TokenStream,
+  proc_macro2::TokenStream,
+  proc_macro2::TokenStream,
+)> {
+  let mut diagnostics = quote!();
+
   // Remove async prefix if any. This macro generates an impl Future
   if item_ast.sig.asyncness.is_some() {
     item_ast.sig.asyncness = None;
   } else {
-    emit_error!(default_span, "Operation must be an async function.");
-    return (quote!(), quote!());
+    diagnostics.extend(syn::Error::new(default_span, "Operation must be an async function.").to_compile_error());
   }
 
   let mut is_impl_trait = false;
@@ -153,7 +157,7 @@ pub(crate) fn gen_item_ast(
               impl std::future::Future<Output=apistos::actix::ResponderWrapper<#_type>>
             )) {
               Ok(parsed) => parsed,
-              Err(e) => abort!("parsing impl trait: {:?}", e),
+              Err(e) => return Err(e),
             },
           );
         }
@@ -161,7 +165,7 @@ pub(crate) fn gen_item_ast(
         // Any handler that's not returning an impl trait should return an `impl Future`
         *_type = Box::new(match syn::parse2(quote!(impl std::future::Future<Output=#_type>)) {
           Ok(parsed) => parsed,
-          Err(e) => abort!("parsing impl trait: {:?}", e),
+          Err(e) => return Err(e),
         });
       }
 
@@ -173,7 +177,7 @@ pub(crate) fn gen_item_ast(
         };
         *_type = Box::new(match syn::parse2(quote!(#_type + apistos::PathItemDefinition)) {
           Ok(parsed) => parsed,
-          Err(e) => abort!("parsing impl trait: {:?}", e),
+          Err(e) => return Err(e),
         });
 
         if !is_responder {
@@ -208,7 +212,7 @@ pub(crate) fn gen_item_ast(
         }
     )) {
       Ok(parsed) => parsed,
-      Err(e) => abort!("parsing wrapped block: {:?}", e),
+      Err(e) => return Err(e),
     },
   );
 
@@ -217,7 +221,7 @@ pub(crate) fn gen_item_ast(
   } else {
     quote! { #responder_wrapper }
   };
-  (responder_wrapper, quote!(#item_ast))
+  Ok((diagnostics, responder_wrapper, quote!(#item_ast)))
 }
 
 fn extract_fn_arguments_types(item_ast: &ItemFn, skipped_args: &[Ident]) -> Vec<Type> {

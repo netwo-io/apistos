@@ -1,13 +1,12 @@
 use darling::FromMeta;
 use darling::ast::NestedMeta;
-use proc_macro_error::abort;
 use proc_macro2::Ident;
 use std::collections::BTreeMap;
 
-pub(crate) fn parse_openapi_operation_attrs(attrs: &[NestedMeta]) -> OperationAttr {
+pub(crate) fn parse_openapi_operation_attrs(attrs: &[NestedMeta]) -> darling::Result<OperationAttr> {
   match OperationAttrInternal::from_list(attrs) {
-    Ok(operation) => operation.into(),
-    Err(e) => abort!(e.span(), "Unable to parse #[api_operation] attribute: {:?}", e),
+    Ok(operation) => Ok(operation.into()),
+    Err(e) => Err(e),
   }
 }
 

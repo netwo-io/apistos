@@ -14,7 +14,6 @@ use convert_case::{Case, Casing};
 use darling::Error;
 use darling::ast::NestedMeta;
 use proc_macro::TokenStream;
-use proc_macro_error::{OptionExt, abort, proc_macro_error};
 use proc_macro2::Span;
 use quote::{format_ident, quote};
 use syn::{DeriveInput, GenericParam, Ident, ItemFn};
@@ -27,6 +26,17 @@ mod openapi_security_attr;
 mod operation_attr;
 
 const OPENAPI_STRUCT_PREFIX: &str = "__openapi_";
+
+fn compile_error(error: syn::Error) -> TokenStream {
+  TokenStream::from(error.to_compile_error())
+}
+
+fn missing_attribute_error(attribute: &str, derive_trait: &str) -> syn::Error {
+  syn::Error::new(
+    Span::call_site(),
+    format!("expected #[{attribute}(...)] attribute to be present when used with {derive_trait} derive trait"),
+  )
+}
 
 /// Generates a custom OpenAPI type.
 ///
@@ -51,7 +61,6 @@ const OPENAPI_STRUCT_PREFIX: &str = "__openapi_";
 ///   }
 /// }
 /// ```
-#[proc_macro_error]
 #[proc_macro_derive(ApiType)]
 pub fn derive_api_type(input: TokenStream) -> TokenStream {
   let input = syn::parse_macro_input!(input as DeriveInput);
@@ -128,7 +137,6 @@ pub fn derive_api_type(input: TokenStream) -> TokenStream {
 ///
 /// Because this macro requires [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html), all attributes supported by [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html) are forwarded to
 /// this implementation.
-#[proc_macro_error]
 #[proc_macro_derive(ApiComponent)]
 pub fn derive_api_component(input: TokenStream) -> TokenStream {
   let input = syn::parse_macro_input!(input as DeriveInput);
@@ -226,7 +234,6 @@ pub fn derive_api_component(input: TokenStream) -> TokenStream {
 /// #[openapi_security(scheme(security_type(open_id_connect(open_id_connect_url = "https://connect.com"))))]
 /// pub struct ApiKey;
 /// ```
-#[proc_macro_error]
 #[proc_macro_derive(ApiSecurity, attributes(openapi_security))]
 pub fn derive_api_security(input: TokenStream) -> TokenStream {
   let input = syn::parse_macro_input!(input as DeriveInput);
@@ -239,9 +246,11 @@ pub fn derive_api_security(input: TokenStream) -> TokenStream {
   } = input;
 
   let security_name: String = ident.to_string().to_case(Case::Snake);
-  let openapi_security_attributes = parse_openapi_security_attrs(&attrs, security_name).expect_or_abort(
-    "expected #[openapi_security(...)] attribute to be present when used with ApiSecurity derive trait",
-  );
+  let openapi_security_attributes = match parse_openapi_security_attrs(&attrs, security_name) {
+    Ok(Some(openapi_security_attributes)) => openapi_security_attributes,
+    Ok(None) => return compile_error(missing_attribute_error("openapi_security", "ApiSecurity")),
+    Err(e) => return TokenStream::from(e.write_errors()),
+  };
   let security_name = &openapi_security_attributes.name;
 
   let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
@@ -296,7 +305,6 @@ pub fn derive_api_security(input: TokenStream) -> TokenStream {
 ///
 /// Because this macro requires [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html), all attributes supported by [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html) are forwarded to
 /// this implementation.
-#[proc_macro_error]
 #[proc_macro_derive(ApiHeader, attributes(openapi_header))]
 pub fn derive_api_header(input: TokenStream) -> TokenStream {
   let input = syn::parse_macro_input!(input as DeriveInput);
@@ -310,8 +318,11 @@ pub fn derive_api_header(input: TokenStream) -> TokenStream {
 
   let deprecated = extract_deprecated_from_attr(&attrs);
 
-  let openapi_header_attributes = parse_openapi_header_attrs(&attrs, deprecated)
-    .expect_or_abort("expected #[openapi_header(...)] attribute to be present when used with ApiHeader derive trait");
+  let openapi_header_attributes = match parse_openapi_header_attrs(&attrs, deprecated) {
+    Ok(Some(openapi_header_attributes)) => openapi_header_attributes,
+    Ok(None) => return compile_error(missing_attribute_error("openapi_header", "ApiHeader")),
+    Err(e) => return TokenStream::from(e.write_errors()),
+  };
 
   let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
   let schema_impl = Schemas {
@@ -359,7 +370,6 @@ pub fn derive_api_header(input: TokenStream) -> TokenStream {
 ///
 /// Because this macro requires [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html), all attributes supported by [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html) are forwarded to
 /// this implementation.
-#[proc_macro_error]
 #[proc_macro_derive(ApiCookie, attributes(openapi_cookie))]
 pub fn derive_api_cookie(input: TokenStream) -> TokenStream {
   let input = syn::parse_macro_input!(input as DeriveInput);
@@ -373,8 +383,11 @@ pub fn derive_api_cookie(input: TokenStream) -> TokenStream {
 
   let deprecated = extract_deprecated_from_attr(&attrs);
 
-  let openapi_cookie_attributes = parse_openapi_cookie_attrs(&attrs, deprecated)
-    .expect_or_abort("expected #[openapi_cookie(...)] attribute to be present when used with ApiCookie derive trait");
+  let openapi_cookie_attributes = match parse_openapi_cookie_attrs(&attrs, deprecated) {
+    Ok(Some(openapi_cookie_attributes)) => openapi_cookie_attributes,
+    Ok(None) => return compile_error(missing_attribute_error("openapi_cookie", "ApiCookie")),
+    Err(e) => return TokenStream::from(e.write_errors()),
+  };
 
   let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
   quote!(
@@ -415,7 +428,6 @@ pub fn derive_api_cookie(input: TokenStream) -> TokenStream {
 ///   - `description = "..."` an optional description, default is the canonical reason of the given status code
 ///
 /// _To define multiple elements of a list, repeat the property multiple times_
-#[proc_macro_error]
 #[proc_macro_derive(ApiErrorComponent, attributes(openapi_error))]
 pub fn derive_api_error(input: TokenStream) -> TokenStream {
   let input = syn::parse_macro_input!(input as DeriveInput);
@@ -427,9 +439,11 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
     vis: _vis,
   } = input;
 
-  let openapi_error_attributes = parse_openapi_error_attrs(&attrs).expect_or_abort(
-    "expected #[openapi_error(...)] attribute to be present when used with ApiErrorComponent derive trait",
-  );
+  let openapi_error_attributes = match parse_openapi_error_attrs(&attrs) {
+    Ok(Some(openapi_error_attributes)) => openapi_error_attributes,
+    Ok(None) => return compile_error(missing_attribute_error("openapi_error", "ApiErrorComponent")),
+    Err(e) => return TokenStream::from(e.write_errors()),
+  };
 
   let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
   quote!(
@@ -619,7 +633,6 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
 ///   Ok(CreatedJson(body.0))
 /// }
 /// ```
-#[proc_macro_error]
 #[proc_macro_attribute]
 pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
   let attr_args = match NestedMeta::parse_meta_list(attr.into()) {
@@ -629,12 +642,15 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
     }
   };
 
-  let operation_attribute = parse_openapi_operation_attrs(&attr_args);
+  let operation_attribute = match parse_openapi_operation_attrs(&attr_args) {
+    Ok(operation_attribute) => operation_attribute,
+    Err(e) => return TokenStream::from(e.write_errors()),
+  };
 
   let default_span = Span::call_site();
   let item_ast = match syn::parse::<ItemFn>(item) {
     Ok(v) => v,
-    Err(e) => abort!(e.span(), format!("{e}")),
+    Err(e) => return compile_error(e),
   };
 
   let s_name = format!("{OPENAPI_STRUCT_PREFIX}{}", item_ast.sig.ident);
@@ -670,11 +686,14 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
     quote!(struct #openapi_struct;)
   };
 
-  let (responder_wrapper, generated_item_ast) =
-    gen_item_ast(default_span, item_ast, &openapi_struct, &ty_generics, &generics_call);
+  let (diagnostics, responder_wrapper, generated_item_ast) =
+    match gen_item_ast(default_span, item_ast, &openapi_struct, &ty_generics, &generics_call) {
+      Ok(generated_item) => generated_item,
+      Err(e) => return compile_error(e),
+    };
   let generated_item_fn = match syn::parse::<ItemFn>(generated_item_ast.clone().into()) {
     Ok(v) => v,
-    Err(e) => abort!(e.span(), format!("{e}")),
+    Err(e) => return compile_error(e),
   };
   let open_api_def = gen_open_api_impl(
     &generated_item_fn,
@@ -688,6 +707,8 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
   );
 
   quote!(
+    #diagnostics
+
     #open_api_def
 
     #generated_item_ast

@@ -1,14 +1,13 @@
 use crate::internal::schemas::Schemas;
 use darling::FromMeta;
-use proc_macro_error::abort;
-use proc_macro2::{Span, TokenStream};
+use proc_macro2::TokenStream;
 use quote::{ToTokens, quote};
 use syn::Attribute;
 
 pub(crate) fn parse_openapi_cookie_attrs(
   attrs: &[Attribute],
   deprecated: Option<bool>,
-) -> Option<OpenapiCookieAttributeExtended> {
+) -> darling::Result<Option<OpenapiCookieAttributeExtended>> {
   let cookie_attribute = attrs
     .iter()
     .filter(|attribute| attribute.path().is_ident("openapi_cookie"))
@@ -17,18 +16,18 @@ pub(crate) fn parse_openapi_cookie_attrs(
 
   match cookie_attribute {
     Ok(cookie_attributes) if cookie_attributes.len() > 1 => {
-      abort!(Span::call_site(), "Expected only one #[openapi_cookie] attribute")
+      Err(darling::Error::custom("Expected only one #[openapi_cookie] attribute"))
     }
     Ok(cookie_attributes) => {
       let cookie_attribute = cookie_attributes.first().cloned();
-      cookie_attribute.map(|attr| OpenapiCookieAttributeExtended {
+      Ok(cookie_attribute.map(|attr| OpenapiCookieAttributeExtended {
         name: attr.name,
         description: attr.description,
         required: attr.required,
         deprecated: attr.deprecated.or(deprecated),
-      })
+      }))
     }
-    Err(e) => abort!(e.span(), "Unable to parse #[openapi_cookie] attribute: {:?}", e),
+    Err(e) => Err(e),
   }
 }
 
