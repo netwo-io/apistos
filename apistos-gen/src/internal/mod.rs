@@ -152,21 +152,13 @@ pub(crate) fn gen_item_ast(
         if string_type == "impl Responder" {
           is_responder = true;
 
-          *_type = Box::new(
-            match syn::parse2(quote!(
-              impl std::future::Future<Output=apistos::actix::ResponderWrapper<#_type>>
-            )) {
-              Ok(parsed) => parsed,
-              Err(e) => return Err(e),
-            },
-          );
+          *_type = Box::new(syn::parse2(quote!(
+            impl std::future::Future<Output=apistos::actix::ResponderWrapper<#_type>>
+          ))?);
         }
       } else {
         // Any handler that's not returning an impl trait should return an `impl Future`
-        *_type = Box::new(match syn::parse2(quote!(impl std::future::Future<Output=#_type>)) {
-          Ok(parsed) => parsed,
-          Err(e) => return Err(e),
-        });
+        *_type = Box::new(syn::parse2(quote!(impl std::future::Future<Output=#_type>))?);
       }
 
       // should be an impl trait here for sure because if it was not initially
@@ -175,10 +167,7 @@ pub(crate) fn gen_item_ast(
           dyn_token: Some(Token![dyn](default_span)),
           bounds: imp.bounds.clone(),
         };
-        *_type = Box::new(match syn::parse2(quote!(#_type + apistos::PathItemDefinition)) {
-          Ok(parsed) => parsed,
-          Err(e) => return Err(e),
-        });
+        *_type = Box::new(syn::parse2(quote!(#_type + apistos::PathItemDefinition))?);
 
         if !is_responder {
           responder_wrapper =
@@ -201,20 +190,15 @@ pub(crate) fn gen_item_ast(
     quote!((move || async move #block)())
   };
 
-  item_ast.block = Box::new(
-    match syn::parse2(quote!(
-        {
-            let inner = #inner_handler;
-            apistos::actix::ResponseWrapper {
-                inner,
-                path_item: #openapi_struct #generics_call,
-            }
-        }
-    )) {
-      Ok(parsed) => parsed,
-      Err(e) => return Err(e),
-    },
-  );
+  item_ast.block = Box::new(syn::parse2(quote!(
+      {
+          let inner = #inner_handler;
+          apistos::actix::ResponseWrapper {
+              inner,
+              path_item: #openapi_struct #generics_call,
+          }
+      }
+  ))?);
 
   let responder_wrapper = if is_responder {
     quote! { apistos::actix::ResponderWrapper::<actix_web::HttpResponse> }

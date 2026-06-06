@@ -44,7 +44,7 @@ impl ToTokens for OpenapiHeaderAttribute {
     if RESERVED_HEADERS.contains(&name) {
       let error = syn::Error::new(
         proc_macro2::Span::call_site(),
-        format!("Header name can't be any of {:?} (reserved headers)", RESERVED_HEADERS),
+        format!("Header name can't be any of {RESERVED_HEADERS:?} (reserved headers)"),
       )
       .to_compile_error();
       tokens.extend(error);

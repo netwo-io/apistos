@@ -27,7 +27,7 @@ mod operation_attr;
 
 const OPENAPI_STRUCT_PREFIX: &str = "__openapi_";
 
-fn compile_error(error: syn::Error) -> TokenStream {
+fn compile_error(error: &syn::Error) -> TokenStream {
   TokenStream::from(error.to_compile_error())
 }
 
@@ -40,9 +40,9 @@ fn missing_attribute_error(attribute: &str, derive_trait: &str) -> syn::Error {
 
 /// Generates a custom OpenAPI type.
 ///
-/// This `#[derive]` macro should be used in combination with [TypedSchema](trait.TypedSchema.html).
+/// This `#[derive]` macro should be used in combination with [`TypedSchema`](trait.TypedSchema.html).
 ///
-/// When deriving [ApiType], [ApiComponent] and [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html) are automatically implemented and thus
+/// When deriving [`ApiType`], [`ApiComponent`] and [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html) are automatically implemented and thus
 /// should not be derived.
 ///
 /// ```rust
@@ -118,7 +118,7 @@ pub fn derive_api_type(input: TokenStream) -> TokenStream {
 
 /// Generates a reusable OpenAPI schema.
 ///
-/// This `#[derive]` macro should be used in combination with [api_operation](attr.api_operation.html).
+/// This `#[derive]` macro should be used in combination with [`api_operation`](attr.api_operation.html).
 ///
 /// This macro requires your type to derive [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
 ///
@@ -161,7 +161,7 @@ pub fn derive_api_component(input: TokenStream) -> TokenStream {
 
 /// Generates a reusable OpenAPI security scheme.
 ///
-/// This `#[derive]` macro should be used in combination with [api_operation](attr.api_operation.html).
+/// This `#[derive]` macro should be used in combination with [`api_operation`](attr.api_operation.html).
 /// The macro requires one and only one `openapi_security`.
 ///
 /// ```rust
@@ -208,7 +208,7 @@ pub fn derive_api_component(input: TokenStream) -> TokenStream {
 /// pub struct ApiKey;
 /// ```
 ///
-/// ## **api_key**
+/// ## **`api_key`**
 /// ```rust
 /// use apistos::ApiSecurity;
 ///
@@ -226,7 +226,7 @@ pub fn derive_api_component(input: TokenStream) -> TokenStream {
 /// pub struct ApiKey;
 /// ```
 ///
-/// ## **open_id_connect**
+/// ## **`open_id_connect`**
 /// ```rust
 /// use apistos::ApiSecurity;
 ///
@@ -248,7 +248,7 @@ pub fn derive_api_security(input: TokenStream) -> TokenStream {
   let security_name: String = ident.to_string().to_case(Case::Snake);
   let openapi_security_attributes = match parse_openapi_security_attrs(&attrs, security_name) {
     Ok(Some(openapi_security_attributes)) => openapi_security_attributes,
-    Ok(None) => return compile_error(missing_attribute_error("openapi_security", "ApiSecurity")),
+    Ok(None) => return compile_error(&missing_attribute_error("openapi_security", "ApiSecurity")),
     Err(e) => return TokenStream::from(e.write_errors()),
   };
   let security_name = &openapi_security_attributes.name;
@@ -279,7 +279,7 @@ pub fn derive_api_security(input: TokenStream) -> TokenStream {
 
 /// Generates a reusable OpenAPI header schema.
 ///
-/// This `#[derive]` macro should be used in combination with [api_operation](attr.api_operation.html).
+/// This `#[derive]` macro should be used in combination with [`api_operation`](attr.api_operation.html).
 /// The macro requires one and only one `openapi_header`.
 ///
 /// This macro requires your type to derive [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
@@ -320,7 +320,7 @@ pub fn derive_api_header(input: TokenStream) -> TokenStream {
 
   let openapi_header_attributes = match parse_openapi_header_attrs(&attrs, deprecated) {
     Ok(Some(openapi_header_attributes)) => openapi_header_attributes,
-    Ok(None) => return compile_error(missing_attribute_error("openapi_header", "ApiHeader")),
+    Ok(None) => return compile_error(&missing_attribute_error("openapi_header", "ApiHeader")),
     Err(e) => return TokenStream::from(e.write_errors()),
   };
 
@@ -344,7 +344,7 @@ pub fn derive_api_header(input: TokenStream) -> TokenStream {
 
 /// Generates a reusable OpenAPI parameter schema in cookie.
 ///
-/// This `#[derive]` macro should be used in combination with [api_operation](attr.api_operation.html).
+/// This `#[derive]` macro should be used in combination with [`api_operation`](attr.api_operation.html).
 /// The macro requires one and only one `openapi_cookie`.
 ///
 /// This macro requires your type to derive [JsonSchema](https://docs.rs/schemars/latest/schemars/trait.JsonSchema.html).
@@ -385,7 +385,7 @@ pub fn derive_api_cookie(input: TokenStream) -> TokenStream {
 
   let openapi_cookie_attributes = match parse_openapi_cookie_attrs(&attrs, deprecated) {
     Ok(Some(openapi_cookie_attributes)) => openapi_cookie_attributes,
-    Ok(None) => return compile_error(missing_attribute_error("openapi_cookie", "ApiCookie")),
+    Ok(None) => return compile_error(&missing_attribute_error("openapi_cookie", "ApiCookie")),
     Err(e) => return TokenStream::from(e.write_errors()),
   };
 
@@ -401,7 +401,7 @@ pub fn derive_api_cookie(input: TokenStream) -> TokenStream {
 
 /// Generates a reusable OpenAPI error schema.
 ///
-/// This `#[derive]` macro should be used in combination with [api_operation](attr.api_operation.html).
+/// This `#[derive]` macro should be used in combination with [`api_operation`](attr.api_operation.html).
 /// The macro only supports one `openapi_error`.
 ///
 /// ```rust
@@ -441,7 +441,7 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
 
   let openapi_error_attributes = match parse_openapi_error_attrs(&attrs) {
     Ok(Some(openapi_error_attributes)) => openapi_error_attributes,
-    Ok(None) => return compile_error(missing_attribute_error("openapi_error", "ApiErrorComponent")),
+    Ok(None) => return compile_error(&missing_attribute_error("openapi_error", "ApiErrorComponent")),
     Err(e) => return TokenStream::from(e.write_errors()),
   };
 
@@ -455,7 +455,7 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
   .into()
 }
 
-/// Operation attribute macro implementing [PathItemDefinition](path_item_definition/trait.PathItemDefinition.html) for the decorated handler function.
+/// Operation attribute macro implementing [`PathItemDefinition`](path_item_definition/trait.PathItemDefinition.html) for the decorated handler function.
 ///
 /// ```rust
 /// use std::fmt::Display;
@@ -514,11 +514,11 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
 ///
 /// # `#[api_operation(...)]` options:
 ///   - `skip` a bool allowing to skip documentation for the decorated handler. No component
-///  strictly associated to this operation will be document in the resulting openapi definition.
+///     strictly associated to this operation will be document in the resulting openapi definition.
 ///   - `skip_args = "..."` an optional list of arguments to skip. `Apistos` will not try to generate the
-///  documentation for those args which prevent errors linked to missing `ApiComponent` implementation.
+///     documentation for those args which prevent errors linked to missing `ApiComponent` implementation.
 ///   - `deprecated` a bool indicating the operation is deprecated. Deprecation can also be declared
-///  with rust `#[deprecated]` decorator.
+///     with rust `#[deprecated]` decorator.
 ///   - `operation_id = "..."` an optional operation id for this operation. Default is the handler's fn name.
 ///   - `summary = "..."` an optional summary
 ///   - `description = "..."` an optional description
@@ -650,7 +650,7 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
   let default_span = Span::call_site();
   let item_ast = match syn::parse::<ItemFn>(item) {
     Ok(v) => v,
-    Err(e) => return compile_error(e),
+    Err(e) => return compile_error(&e),
   };
 
   let s_name = format!("{OPENAPI_STRUCT_PREFIX}{}", item_ast.sig.ident);
@@ -689,11 +689,11 @@ pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
   let (diagnostics, responder_wrapper, generated_item_ast) =
     match gen_item_ast(default_span, item_ast, &openapi_struct, &ty_generics, &generics_call) {
       Ok(generated_item) => generated_item,
-      Err(e) => return compile_error(e),
+      Err(e) => return compile_error(&e),
     };
   let generated_item_fn = match syn::parse::<ItemFn>(generated_item_ast.clone().into()) {
     Ok(v) => v,
-    Err(e) => return compile_error(e),
+    Err(e) => return compile_error(&e),
   };
   let open_api_def = gen_open_api_impl(
     &generated_item_fn,
