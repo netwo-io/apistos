@@ -1,6 +1,5 @@
 use darling::FromMeta;
-use proc_macro_error::abort;
-use proc_macro2::{Span, TokenStream};
+use proc_macro2::TokenStream;
 use quote::{ToTokens, quote};
 use syn::Attribute;
 
@@ -9,7 +8,7 @@ pub(crate) const RESERVED_HEADERS: &[&str] = &["Accept", "Content-Type", "Author
 pub(crate) fn parse_openapi_header_attrs(
   attrs: &[Attribute],
   deprecated: Option<bool>,
-) -> Option<OpenapiHeaderAttribute> {
+) -> darling::Result<Option<OpenapiHeaderAttribute>> {
   let header_attribute = attrs
     .iter()
     .filter(|attribute| attribute.path().is_ident("openapi_header"))
@@ -18,16 +17,16 @@ pub(crate) fn parse_openapi_header_attrs(
 
   match header_attribute {
     Ok(header_attributes) if header_attributes.len() > 1 => {
-      abort!(Span::call_site(), "Expected only one #[openapi_header] attribute")
+      Err(darling::Error::custom("Expected only one #[openapi_header] attribute"))
     }
     Ok(header_attributes) => {
       let mut header_attribute = header_attributes.first().cloned();
       if let Some(header_attribute) = &mut header_attribute {
         header_attribute.deprecated = header_attribute.deprecated.or(deprecated)
       }
-      header_attribute
+      Ok(header_attribute)
     }
-    Err(e) => abort!(e.span(), "Unable to parse #[openapi_header] attribute: {:?}", e),
+    Err(e) => Err(e),
   }
 }
 
@@ -43,10 +42,13 @@ impl ToTokens for OpenapiHeaderAttribute {
   fn to_tokens(&self, tokens: &mut TokenStream) {
     let name = self.name.as_str();
     if RESERVED_HEADERS.contains(&name) {
-      abort!(
-        Span::call_site(),
-        format!("Header name can't be any of {:?} (reserved headers)", RESERVED_HEADERS)
-      );
+      let error = syn::Error::new(
+        proc_macro2::Span::call_site(),
+        format!("Header name can't be any of {RESERVED_HEADERS:?} (reserved headers)"),
+      )
+      .to_compile_error();
+      tokens.extend(error);
+      return;
     }
     let description = match &self.description {
       None => quote!(None),

@@ -47,7 +47,7 @@ pub trait ApiComponent {
         Self::content_type(),
         MediaType {
           schema: Some(ReferenceOr::Reference {
-            _ref: format!("#/components/schemas/{}", name),
+            _ref: format!("#/components/schemas/{name}"),
           }),
           ..Default::default()
         },
@@ -125,7 +125,7 @@ where
     T::schema().map(|(name, schema)| {
       let _ref = match schema {
         ReferenceOr::Reference { _ref } => _ref,
-        ReferenceOr::Object(_) => format!("#/components/schemas/{}", name),
+        ReferenceOr::Object(_) => format!("#/components/schemas/{name}"),
       };
 
       (
@@ -252,7 +252,7 @@ where
           })),
           ..Default::default()
         }));
-        let schema_name = format!("Either{}Or{}", schema_name1, schema_name2);
+        let schema_name = format!("Either{schema_name1}Or{schema_name2}");
         Some((schema_name, schema))
       }
       (Some(schema1), None) => Some(schema1),
@@ -350,7 +350,7 @@ where
         r @ ReferenceOr::Reference { .. } => r,
         ReferenceOr::Object(schema_obj) => {
           let _ref = ReferenceOr::Reference {
-            _ref: format!("#/components/schemas/{}", name),
+            _ref: format!("#/components/schemas/{name}"),
           };
           match schema_obj {
             Schema::Object(obj) => {

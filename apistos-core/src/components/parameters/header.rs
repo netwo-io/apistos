@@ -48,6 +48,7 @@ where
       definition: T::schema()
         .map(|(_, schema)| schema)
         .or_else(Self::raw_schema)
+        .map(Box::new)
         .map(ParameterDefinition::Schema),
       ..Default::default()
     }]
@@ -86,6 +87,7 @@ where
       definition: T::schema()
         .map(|(_, schema)| schema)
         .or_else(Self::raw_schema)
+        .map(Box::new)
         .map(ParameterDefinition::Schema),
       ..Default::default()
     }]

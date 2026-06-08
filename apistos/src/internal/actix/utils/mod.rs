@@ -31,14 +31,14 @@ impl OperationUpdater for Operation {
       if let Some(n) = param_names.pop() {
         if let Some((name, pattern)) = n.split_once(':') {
           param.name = name.to_string();
-          param.definition = Some(ParameterDefinition::Schema(ReferenceOr::Object(Schema::Object(
-            SchemaObject {
+          param.definition = Some(ParameterDefinition::Schema(Box::new(ReferenceOr::Object(
+            Schema::Object(SchemaObject {
               string: Some(Box::new(StringValidation {
                 pattern: Some(pattern.to_string()),
                 ..Default::default()
               })),
               ..Default::default()
-            },
+            }),
           ))))
         } else {
           param.name = n;
@@ -138,7 +138,7 @@ mod test {
     if let Some(p) = first_parameter {
       let def = p.definition.clone().expect("missing parameter definition");
       match def {
-        ParameterDefinition::Schema(sch) => match sch {
+        ParameterDefinition::Schema(sch) => match *sch {
           ReferenceOr::Object(obj) => match obj {
             Schema::Bool(_) => panic!("expected schema object"),
             Schema::Object(obj) => {

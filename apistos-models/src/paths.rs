@@ -180,7 +180,7 @@ pub struct Parameter {
 #[serde(rename_all = "lowercase")]
 pub enum ParameterDefinition {
   /// The schema defining the type used for the parameter.
-  Schema(ReferenceOr<Schema>),
+  Schema(Box<ReferenceOr<Schema>>),
   /// A map containing the representations for the parameter. The key is the media type and the value describes it. The map MUST only contain one entry.
   Content(BTreeMap<String, MediaType>),
 }

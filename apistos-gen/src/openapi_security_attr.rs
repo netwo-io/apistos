@@ -1,11 +1,13 @@
 use crate::internal::security::models::{ApiKey, Http, OAuth2, OpenIdConnect};
 use darling::FromMeta;
-use proc_macro_error::abort;
-use proc_macro2::{Span, TokenStream};
+use proc_macro2::TokenStream;
 use quote::{ToTokens, quote};
 use syn::Attribute;
 
-pub(crate) fn parse_openapi_security_attrs(attrs: &[Attribute], struct_name: String) -> Option<SecurityDeclaration> {
+pub(crate) fn parse_openapi_security_attrs(
+  attrs: &[Attribute],
+  struct_name: String,
+) -> darling::Result<Option<SecurityDeclaration>> {
   let security_declarations_res = attrs
     .iter()
     .filter(|attribute| attribute.path().is_ident("openapi_security"))
@@ -13,17 +15,17 @@ pub(crate) fn parse_openapi_security_attrs(attrs: &[Attribute], struct_name: Str
     .collect::<darling::Result<Vec<SecurityDeclarationInternal>>>();
 
   match security_declarations_res {
-    Ok(security_declarations) if security_declarations.len() > 1 => {
-      abort!(Span::call_site(), "Expected only one #[openapi_security] attribute")
-    }
+    Ok(security_declarations) if security_declarations.len() > 1 => Err(darling::Error::custom(
+      "Expected only one #[openapi_security] attribute",
+    )),
     Ok(security_declarations) => {
       let security_declaration = security_declarations.first().cloned();
-      security_declaration.map(|s| SecurityDeclaration {
+      Ok(security_declaration.map(|s| SecurityDeclaration {
         name: s.name.unwrap_or(struct_name),
         scheme: s.scheme,
-      })
+      }))
     }
-    Err(e) => abort!(e.span(), "Unable to parse #[openapi_security] attribute: {:?}", e),
+    Err(e) => Err(e),
   }
 }
 
@@ -93,10 +95,7 @@ pub(crate) enum SecurityType {
 impl ToTokens for SecurityType {
   fn to_tokens(&self, tokens: &mut TokenStream) {
     let scheme_tokens = match self {
-      SecurityType::OAuth2(v) => {
-        let v = *v.clone();
-        quote!(OAuth2(#v))
-      }
+      SecurityType::OAuth2(v) => quote!(OAuth2(Box::new(#v))),
       SecurityType::ApiKey(v) => quote!(ApiKey(#v)),
       SecurityType::Http(v) => quote!(Http(#v)),
       SecurityType::OpenIdConnect(v) => quote!(OpenIdConnect(#v)),

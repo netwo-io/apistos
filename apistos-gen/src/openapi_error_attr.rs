@@ -1,11 +1,10 @@
 use actix_web::http::StatusCode;
 use darling::FromMeta;
-use proc_macro_error::abort;
 use proc_macro2::{Span, TokenStream};
 use quote::{ToTokens, quote};
 use syn::Attribute;
 
-pub(crate) fn parse_openapi_error_attrs(attrs: &[Attribute]) -> Option<OpenapiErrorAttribute> {
+pub(crate) fn parse_openapi_error_attrs(attrs: &[Attribute]) -> darling::Result<Option<OpenapiErrorAttribute>> {
   let error_attribute = attrs
     .iter()
     .filter(|attribute| attribute.path().is_ident("openapi_error"))
@@ -14,10 +13,10 @@ pub(crate) fn parse_openapi_error_attrs(attrs: &[Attribute]) -> Option<OpenapiEr
 
   match error_attribute {
     Ok(error_attributes) if error_attributes.len() > 1 => {
-      abort!(Span::call_site(), "Expected only one #[openapi_error] attribute")
+      Err(darling::Error::custom("Expected only one #[openapi_error] attribute"))
     }
-    Ok(error_attributes) => error_attributes.first().cloned(),
-    Err(e) => abort!(e.span(), "Unable to parse #[openapi_error] attribute: {:?}", e),
+    Ok(error_attributes) => Ok(error_attributes.first().cloned()),
+    Err(e) => Err(e),
   }
 }
 
@@ -60,7 +59,10 @@ impl ToTokens for ErrorDefinition {
     let code = self.code;
     let default_description = match StatusCode::from_u16(code) {
       Ok(status_code) => status_code.canonical_reason().unwrap_or_default(),
-      Err(e) => abort!(Span::call_site(), format!("{e}")),
+      Err(e) => {
+        tokens.extend(syn::Error::new(Span::call_site(), format!("{e}")).to_compile_error());
+        return;
+      }
     };
     let description = self.description.as_deref().unwrap_or(default_description);
     tokens.extend(quote! {

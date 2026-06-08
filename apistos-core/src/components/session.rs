@@ -33,7 +33,7 @@ impl ApiComponent for actix_session::Session {
       name: "id".to_string(), // from default actix-session's CookieConfiguration
       _in: ParameterIn::Cookie,
       required: Some(true),
-      definition: Self::raw_schema().map(ParameterDefinition::Schema),
+      definition: Self::raw_schema().map(Box::new).map(ParameterDefinition::Schema),
       ..Default::default()
     }]
   }

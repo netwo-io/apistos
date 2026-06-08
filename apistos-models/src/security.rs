@@ -40,7 +40,7 @@ pub enum SecurityType {
   ApiKey(ApiKey),
   Http(Http),
   #[serde(rename = "oauth2")]
-  OAuth2(OAuth2),
+  OAuth2(Box<OAuth2>),
   OpenIdConnect(OpenIdConnect),
 }
 
