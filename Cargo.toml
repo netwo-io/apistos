@@ -20,7 +20,7 @@ edition = "2024"
 repository = "https://github.com/netwo-io/apistos"
 documentation = "https://docs.rs/apistos/"
 license = "MIT OR Apache-2.0"
-rust-version = "1.85.0"
+rust-version = "1.88.0"
 publish = true
 version = "0.6.0"
 
