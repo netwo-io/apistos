@@ -27,8 +27,19 @@ This crate is exposed through Apistos `swagger-ui` feature.
 #schemars = "0.8"
 # sadly we currently rely on a fork to fix multiple flatten for enums, related PR can be found here: https://github.com/GREsau/schemars/pull/264
 schemars = { package = "apistos-schemars", version = "0.8" }
-apistos = { version = "0.5", feature = ["swagger-ui"] }
+apistos = { version = "0.5", features = ["swagger-ui"] }
 ```
+
+### Usage
+To use this feature replace your
+```
+.build("/openapi.json")
+```
+with
+```
+.build_with("/openapi.json", BuildConfig::default().with(SwaggerUIConfig::new(&"/swagger-ui")))
+```
+This then serves your api using swagger-ui at /swagger-ui on your server
 
 ### About us
 
