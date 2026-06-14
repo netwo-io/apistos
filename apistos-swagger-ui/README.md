@@ -30,6 +30,17 @@ schemars = { package = "apistos-schemars", version = "0.8" }
 apistos = { version = "0.5", features = ["swagger-ui"] }
 ```
 
+### Usage
+To use this feature replace your
+```
+.build("/openapi.json")
+```
+with
+```
+.build_with("/openapi.json", BuildConfig::default().with(SwaggerUIConfig::new(&"/swagger-ui")))
+```
+This then serves your api using swagger-ui at /swagger-ui on your server
+
 ### About us
 
 apistos is provided by [Netwo](https://www.netwo.io).
