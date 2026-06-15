@@ -36,11 +36,11 @@ impl ToTokens for Security<'_> {
       let mut securities = vec![];
       let needed_scopes: std::collections::BTreeMap<String, Vec<String>> = #scopes
       #(
-        if !<#args>::required() {
-          needs_empty_security = true;
-        }
         let mut security_requirements = vec![];
         if let Some(security_requirement_name) = <#args>::security_requirement_name() {
+          if !<#args>::required() {
+            needs_empty_security = true;
+          }
           let scopes: Vec<String> = needed_scopes.get(&security_requirement_name).cloned().unwrap_or_default();
           security_requirements.push(apistos::security::SecurityRequirement {
             requirements: std::collections::BTreeMap::from_iter(vec![(security_requirement_name, scopes)]),
