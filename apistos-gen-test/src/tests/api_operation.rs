@@ -1679,3 +1679,115 @@ fn api_operation_actix_web_grant() {
     })
   );
 }
+
+#[test]
+#[allow(dead_code)]
+fn api_operation_no_security() {
+  /// Add a new pet to the store
+  /// Plop
+  #[api_operation(no_security)]
+  pub(crate) async fn test(
+    _body: Json<test_models::Test>,
+  ) -> Result<Json<test_models::TestResult>, test_models::ErrorResponse> {
+    Ok(Json(test_models::TestResult { id: 0 }))
+  }
+
+  let operation = __openapi_test::operation();
+  let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
+
+  assert_json_eq!(
+    operation,
+    json!({
+      "deprecated": false,
+      "description": "Plop",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Test"
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TestResult"
+              }
+            }
+          },
+          "description": ""
+        },
+        "405": {
+          "description": "Invalid input"
+        }
+      },
+      "security": [],
+      "summary": "Add a new pet to the store"
+    })
+  );
+}
+
+#[test]
+#[allow(dead_code)]
+fn api_operation_no_security_with_optional_key() {
+  /// Add a new pet to the store
+  /// Plop
+  #[api_operation(no_security)]
+  pub(crate) async fn test(
+    _body: Json<test_models::Test>,
+    _key: Option<test_models::ApiKey>,
+  ) -> Result<Json<test_models::TestResult>, test_models::MultipleErrorResponse> {
+    Ok(Json(test_models::TestResult { id: 0 }))
+  }
+
+  let operation = __openapi_test::operation();
+  let operation = serde_json::to_value(operation).expect("Unable to serialize as Json");
+
+  assert_json_eq!(
+    operation,
+    json!({
+      "deprecated": false,
+      "description": "Plop",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Test"
+            }
+          }
+        },
+        "required": true
+      },
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TestResult"
+              }
+            }
+          },
+          "description": ""
+        },
+        "401": {
+          "description": "Unauthorized"
+        },
+        "403": {
+          "description": "Forbidden"
+        },
+        "404": {
+          "description": "Not Found"
+        },
+        "405": {
+          "description": "Method Not Allowed"
+        }
+      },
+      "security": [],
+      "summary": "Add a new pet to the store"
+    })
+  );
+}

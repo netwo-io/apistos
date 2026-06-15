@@ -634,6 +634,15 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
 ///   Ok(CreatedJson(body.0))
 /// }
 /// ```
+///
+/// ```compile_fail
+/// use apistos::api_operation;
+///
+/// #[api_operation(no_security, security_scope(name = "api_key", scope = "read"))]
+/// pub(crate) async fn test() -> String {
+///   "test".to_string()
+/// }
+/// ```
 #[proc_macro_attribute]
 pub fn api_operation(attr: TokenStream, item: TokenStream) -> TokenStream {
   let attr_args = match NestedMeta::parse_meta_list(attr.into()) {
