@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use apistos_models::security::{SecurityRequirement, SecurityScheme};
+use apistos_models::security::SecurityScheme;
 use schemars::schema::Schema;
 
 use apistos_core::ApiComponent;
