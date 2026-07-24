@@ -8,7 +8,6 @@ use actix_web::Error;
 use actix_web::body::MessageBody;
 use actix_web::dev::{HttpServiceFactory, ServiceRequest, ServiceResponse};
 use actix_web::web::{get, resource};
-use apistos_core::ApiComponent;
 use apistos_models::OpenApi;
 use apistos_models::components::Components;
 use apistos_models::paths::{OperationType, Parameter};
@@ -99,7 +98,12 @@ impl<T> OpenApiWrapper<T> for actix_web::App<T> {
     let security_requirement_names = spec
       .securities
       .iter()
-      .filter_map(|securities| securities.first_key_value().map(|(key, _)| key.clone()))
+      .filter_map(|securities| securities.first_key_value().map(|(key, _)| key.clone()));
+
+    let empty_security_requirements = security_requirement_names
+      .map(|name| SecurityRequirement {
+        requirements: BTreeMap::from([(name, vec![])]),
+      })
       .collect::<Vec<_>>();
 
     let initial_security_schemes: BTreeMap<_, _> = spec
@@ -126,12 +130,7 @@ impl<T> OpenApiWrapper<T> for actix_web::App<T> {
           ..Default::default()
         })
       },
-      security: security_requirement_names
-        .into_iter()
-        .map(|name| SecurityRequirement {
-          requirements: BTreeMap::from([(name, vec![])]),
-        })
-        .collect(),
+      security: empty_security_requirements,
       ..Default::default()
     };
     if !spec.tags.is_empty() {
