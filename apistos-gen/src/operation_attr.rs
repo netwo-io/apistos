@@ -5,7 +5,14 @@ use std::collections::BTreeMap;
 
 pub(crate) fn parse_openapi_operation_attrs(attrs: &[NestedMeta]) -> darling::Result<OperationAttr> {
   match OperationAttrInternal::from_list(attrs) {
-    Ok(operation) => Ok(operation.into()),
+    Ok(operation) => {
+      if operation.no_security && !operation.scopes.is_empty() {
+        return Err(darling::Error::custom(
+          "`no_security` and `security_scope` cannot be used together",
+        ));
+      }
+      Ok(operation.into())
+    }
     Err(e) => Err(e),
   }
 }
@@ -21,6 +28,8 @@ struct OperationAttrInternal {
   description: Option<String>,
   #[darling(multiple, rename = "tag")]
   tags: Vec<String>,
+  #[darling(default)]
+  no_security: bool,
   #[darling(multiple, rename = "security_scope")]
   scopes: Vec<SecurityScopes>,
   #[darling(multiple, rename = "error_code")]
@@ -45,6 +54,7 @@ pub(crate) struct OperationAttr {
   pub(crate) summary: Option<String>,
   pub(crate) description: Option<String>,
   pub(crate) tags: Vec<String>,
+  pub(crate) no_security: bool,
   pub(crate) scopes: BTreeMap<String, Vec<String>>,
   pub(crate) error_codes: Vec<u16>,
   pub(crate) consumes: Option<String>,
@@ -61,6 +71,7 @@ impl From<OperationAttrInternal> for OperationAttr {
       summary: value.summary,
       description: value.description.map(|d| d.replace('\n', "\\\n")),
       tags: value.tags,
+      no_security: value.no_security,
       scopes: value
         .scopes
         .into_iter()

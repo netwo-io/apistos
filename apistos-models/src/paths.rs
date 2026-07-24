@@ -99,8 +99,8 @@ pub struct Operation {
   #[serde(skip_serializing_if = "Option::is_none")]
   pub deprecated: Option<bool>,
   /// A declaration of which security mechanisms can be used for this operation. The list of values includes alternative security requirement objects that can be used. Only one of the security requirement objects need to be satisfied to authorize a request. To make security optional, an empty security requirement (`{}`) can be included in the array. This definition overrides any declared top-level [`security`](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#oasSecurity). To remove a top-level security declaration, an empty array can be used.
-  #[serde(skip_serializing_if = "Vec::is_empty", default)]
-  pub security: Vec<SecurityRequirement>,
+  #[serde(skip_serializing_if = "Option::is_none", default)]
+  pub security: Option<Vec<SecurityRequirement>>,
   /// An alternative `server` array to service this operation. If an alternative `server` object is specified at the Path Item Object or Root level, it will be overridden by this value.
   #[serde(skip_serializing_if = "Vec::is_empty", default)]
   pub servers: Vec<Server>,

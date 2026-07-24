@@ -8,9 +8,12 @@ use actix_web::Error;
 use actix_web::body::MessageBody;
 use actix_web::dev::{HttpServiceFactory, ServiceRequest, ServiceResponse};
 use actix_web::web::{get, resource};
+use apistos_core::ApiComponent;
 use apistos_models::OpenApi;
+use apistos_models::components::Components;
 use apistos_models::paths::{OperationType, Parameter};
 use apistos_models::reference_or::ReferenceOr;
+use apistos_models::security::SecurityRequirement;
 use apistos_plugins::ui::{UIPluginConfig, UIPluginWrapper};
 use indexmap::IndexMap;
 use once_cell::sync::Lazy;
@@ -93,8 +96,42 @@ impl<T> OpenApiWrapper<T> for actix_web::App<T> {
   type Wrapper = App<T>;
 
   fn document(self, spec: Spec) -> Self::Wrapper {
+    let security_requirement_names = spec
+      .securities
+      .iter()
+      .filter_map(|securities| securities.first_key_value().map(|(key, _)| key.clone()))
+      .collect::<Vec<_>>();
+
+    let initial_security_schemes: BTreeMap<_, _> = spec
+      .securities
+      .into_iter()
+      .map(|security| {
+        security
+          .into_iter()
+          .map(|(k, v)| (k, ReferenceOr::Object(v)))
+          .collect::<BTreeMap<_, _>>()
+      })
+      .fold(BTreeMap::new(), |mut a, b| {
+        a.extend(b);
+        a
+      });
+
     let mut open_api_spec = OpenApi {
       info: spec.info,
+      components: if initial_security_schemes.is_empty() {
+        None
+      } else {
+        Some(Components {
+          security_schemes: initial_security_schemes,
+          ..Default::default()
+        })
+      },
+      security: security_requirement_names
+        .into_iter()
+        .map(|name| SecurityRequirement {
+          requirements: BTreeMap::from([(name, vec![])]),
+        })
+        .collect(),
       ..Default::default()
     };
     if !spec.tags.is_empty() {

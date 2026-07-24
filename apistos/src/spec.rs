@@ -1,3 +1,6 @@
+use std::collections::BTreeMap;
+
+use apistos_models::security::{SecurityRequirement, SecurityScheme};
 use schemars::schema::Schema;
 
 use apistos_core::ApiComponent;
@@ -47,4 +50,6 @@ pub struct Spec {
   pub servers: Vec<Server>,
   /// Default parameters to be added to each operation. This only serves for documentation purpose.
   pub default_parameters: Vec<DefaultParameters>,
+  /// Global security
+  pub securities: Vec<BTreeMap<String, SecurityScheme>>,
 }

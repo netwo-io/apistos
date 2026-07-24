@@ -523,6 +523,7 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
 ///   - `summary = "..."` an optional summary
 ///   - `description = "..."` an optional description
 ///   - `tag = "..."` an optional list of tags associated with this operation (define tag multiple times to add to the list)
+///   - `no_security` a bool allowing to override any top-level security declaration for this operation, resulting in an empty security requirement
 ///   - `security_scope(...)` an optional list representing which security scopes apply for a given operation with
 ///       - `name = "..."` a mandatory name referencing one of the security definitions
 ///       - `scope(...)` a list of scopes applying to this operation
@@ -631,6 +632,15 @@ pub fn derive_api_error(input: TokenStream) -> TokenStream {
 ///   body: Json<Test>,
 /// ) -> Result<CreatedJson<Test>, ErrorResponse> {
 ///   Ok(CreatedJson(body.0))
+/// }
+/// ```
+///
+/// ```compile_fail
+/// use apistos::api_operation;
+///
+/// #[api_operation(no_security, security_scope(name = "api_key", scope = "read"))]
+/// pub(crate) async fn test() -> String {
+///   "test".to_string()
 /// }
 /// ```
 #[proc_macro_attribute]

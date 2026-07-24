@@ -12,6 +12,7 @@ pub(crate) struct Operation<'a> {
   pub(crate) summary: Option<&'a String>,
   pub(crate) description: Option<&'a str>,
   pub(crate) tags: &'a [String],
+  pub(crate) no_security: bool,
   pub(crate) scopes: BTreeMap<String, Vec<String>>,
   pub(crate) error_codes: &'a [u16],
   pub(crate) consumes: Option<&'a String>,
@@ -31,6 +32,11 @@ impl ToTokens for Operation<'_> {
       .deprecated
       .map(|deprecated| quote!(Some(#deprecated)))
       .unwrap_or_else(|| quote!(None));
+    let no_security = if self.no_security {
+      quote!(true)
+    } else {
+      quote!(false)
+    };
     let summary = match self.summary {
       None => quote!(),
       Some(s) => {
@@ -136,8 +142,10 @@ impl ToTokens for Operation<'_> {
         let securities = {
           #security
         };
-        if !securities.is_empty() {
-          operation_builder.security = securities;
+        if #no_security {
+          operation_builder.security = Some(vec![]);
+        } else if !securities.is_empty() {
+          operation_builder.security = Some(securities);
         }
 
         operation_builder.operation_id = #operation_id;
