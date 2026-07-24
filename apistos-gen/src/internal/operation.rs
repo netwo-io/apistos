@@ -32,11 +32,7 @@ impl ToTokens for Operation<'_> {
       .deprecated
       .map(|deprecated| quote!(Some(#deprecated)))
       .unwrap_or_else(|| quote!(None));
-    let no_security = if self.no_security {
-      quote!(true)
-    } else {
-      quote!(false)
-    };
+    let no_security = if self.no_security { quote!(true) } else { quote!(false) };
     let summary = match self.summary {
       None => quote!(),
       Some(s) => {
