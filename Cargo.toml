@@ -189,3 +189,11 @@ verbose_file_reads = "warn"
 wildcard_dependencies = "warn"
 wildcard_imports = "warn"
 zero_sized_map_values = "warn"
+
+# TEMPORARY - do not merge.
+# garde-actix-web 0.12.0 as published still depends on garde ^0.22, which would
+# link a second, incompatible copy of garde alongside the 0.23 used here.
+# Points at the branch from netwo-io/garde-actix-web#23 until that lands and is
+# released; this section must be removed before merge.
+[patch.crates-io]
+garde-actix-web = { git = "https://github.com/AzHicham/garde-actix-web", branch = "chore/garde-0.23" }
