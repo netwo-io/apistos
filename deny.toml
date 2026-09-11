@@ -22,7 +22,8 @@ yanked = "deny"
 # A list of advisory IDs to ignore. Note that ignored advisories will still
 # output a note when they are encountered.
 ignore = [
-    'RUSTSEC-2026-0173' # Waiting for shuttle-codegen to ditch proc-macro-error2
+    'RUSTSEC-2026-0173', # Waiting for shuttle-codegen to ditch proc-macro-error2
+    "RUSTSEC-2026-0258", # Remove when Actix migrates to h2 0.4+.
 ]
 # Threshold for security vulnerabilities, any vulnerability with a CVSS score
 # lower than the range specified will be ignored. Note that ignored advisories
