@@ -55,7 +55,7 @@ garde-actix-web = "0.13"
 chrono = "0.4"
 garde = { version = "0.23", features = ["derive", "serde"] }
 rust_decimal = "1"
-serde_qs = "0.14"
+serde_qs = "1"
 shuttle-runtime = { version = "0.53", default-features = false }
 uuid = { version = "1", features = ["serde", "v4"] }
 url = "2"
